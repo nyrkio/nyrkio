@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "nyrkio"
+version = "0.1.0"
+description = "A performance change detection service"
+authors = ["Matt Fleming <matt@nyrk.io>", "Henrik Ingo <henrik@nyrk.io>"]
+packages = [{include = "."}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+fastapi = "^0.104.1"
+httpx = "^0.25.2"
+python-jose = "^3.3.0"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

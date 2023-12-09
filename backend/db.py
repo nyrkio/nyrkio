@@ -1,5 +1,8 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
+from typing import Union
+from pydantic import BaseModel
+
 fake_users_db = {
     "johndoe": {
         "username": "johndoe",
@@ -10,6 +13,14 @@ fake_users_db = {
         "is_admin": False,
     }
 }
+
+class User(BaseModel):
+    username: str
+    email: Union[str, None] = None
+    full_name: Union[str, None] = None
+    disabled: Union[bool, None] = None
+    is_admin: Union[bool, None] = None
+
 
 
 class UserInDB(User):

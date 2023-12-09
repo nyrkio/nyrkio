@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from typing import Annotated
+from typing_extensions import Annotated
 
 from fastapi import APIRouter, Depends
 
