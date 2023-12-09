@@ -3,7 +3,7 @@ name = "nyrkio"
 version = "0.1.0"
 description = "A performance change detection service"
 authors = ["Matt Fleming <matt@nyrk.io>", "Henrik Ingo <henrik@nyrk.io>"]
-packages = [{include = "."}]
+packages = [{include = "backend"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
