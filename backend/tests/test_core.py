@@ -1,10 +1,13 @@
-from backend.core import PerformanceTestResult, PerformanceTestResultSeries, PerformanceTestResultExistsError
+from backend.core import (PerformanceTestResult,
+                          PerformanceTestResultSeries,
+                          PerformanceTestResultExistsError,
+                          ResultMetric)
 
 import pytest
 
 def test_add_result():
     """Add a performance test result to a series"""
-    series = PerformanceTestResultSeries()
+    series = PerformanceTestResultSeries("benchmark1")
 
     metrics = {"metric1": 1.0, "metric2": 2.0}
     attr = {"attr1": "value1", "attr2": "value2"}
@@ -15,7 +18,7 @@ def test_add_result():
 
 def test_adding_existing_result_fails():
     """Adding an existing result fails"""
-    series = PerformanceTestResultSeries()
+    series = PerformanceTestResultSeries("benchmark1")
 
     metrics = {"metric1": 1.0, "metric2": 2.0}
     attr = {"attr1": "value1", "attr2": "value2"}
@@ -27,10 +30,10 @@ def test_adding_existing_result_fails():
 
 def test_calculate_changes_in_series():
     """Calculate changes in a series"""
-    series = PerformanceTestResultSeries()
+    series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = {"metric1": 1.0, "metric2": 2.0}
     attr = {"attr1": "value1", "attr2": "value2"}
+    metrics = [ResultMetric("metric1", "µs", 1.0)]
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
@@ -38,13 +41,14 @@ def test_calculate_changes_in_series():
 
     # Identical metrics should not result in any changes
     changes = series.calculate_changes()
-
-    assert len(changes) == 0
+    assert not changes["metric1"]
 
     # Create a new series with a change in metric1
-    series = PerformanceTestResultSeries()
-    metrics = [{"metric1": 1.0, "metric2": 2.0}, {"metric1": 2.0, "metric2": 2.0}]
-    series.add_result(PerformanceTestResult(1, metrics[0], attr))
-    series.add_result(PerformanceTestResult(2, metrics[1], attr))
+    series = PerformanceTestResultSeries("benchmark2")
+    series.add_result(PerformanceTestResult(1, metrics, attr))
+    series.add_result(PerformanceTestResult(2, metrics, attr))
+    metrics = [ResultMetric("metric1", "µs", 2.0)]
+    series.add_result(PerformanceTestResult(3, metrics, attr))
+
     changes = series.calculate_changes()
-    assert len(changes) == 1
+    assert changes["metric1"]

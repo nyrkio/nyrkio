@@ -1,11 +1,14 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
+from collections import defaultdict
+from typing import List
+
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
 that a performance engineer can understand it without having to read the code.
 Though we use specific technologies internally (e.g. change point detection,
 databases, etc), we try to avoid mentioning them here to keep the core logic
-pure and free from technical details.
+pure and free from technical details. This is all about the domain model.
 
 
 
@@ -27,25 +30,33 @@ during a test run, e.g. the number of requests per second. Attributes provide
 additional information about the test run, e.g. the version of the software or
 the git commit hash.
 
-A test result series can be analyzed to find changes in performance by identifying
-individual test results where some metric changed in a statistically significant
-way from previous test results. A performance change can represent either a
-regression or an improvement.
+A test result series must have a name. A test result series can be analyzed to
+find changes in performance by identifying individual test results where some
+metric changed in a statistically significant way from previous test results. A
+performance change can represent either a regression or an improvement.
 
 Notifications can be sent when a performance change is detected.
 
 """
 
+class ResultMetric:
+    def __init__(self, name, unit, value):
+        self.name = name
+        self.unit = unit
+        self.value = value
+
+
 class PerformanceTestResult:
-    def __init__(self, timestamp, metrics, attributes):
+    def __init__(self, timestamp, metrics: List[ResultMetric], attributes):
         self.timestamp = timestamp
         self.metrics = metrics
         self.attributes = attributes
 
 
 class PerformanceTestResultSeries:
-    def __init__(self):
+    def __init__(self, name):
         self.results = []
+        self.name = name
 
     def add_result(self, result: PerformanceTestResult):
         if result in self.results:
@@ -54,7 +65,29 @@ class PerformanceTestResultSeries:
         self.results.append(result)
 
     def calculate_changes(self):
-        return []
+        from .hunter.hunter.series import Series
+        from .hunter.hunter.series import Metric
+
+        timestamps = [r.timestamp for r in self.results]
+
+        metric_units = {}
+        for r in self.results:
+            for m in r.metrics:
+                metric_units[m.name] = m.unit
+
+        metric_data = defaultdict(list)
+        for r in self.results:
+            for m in r.metrics:
+                metric_data[m.name].append(m.value)
+
+        attributes = defaultdict(list)
+        for r in self.results:
+            for (k, v) in r.attributes.items():
+                attributes[k].append(v)
+
+        series = Series(self.name, None, timestamps, metric_units,
+                        metric_data, attributes)
+        return series.analyze().change_points
 
 
 class PerformanceTestResultExistsError(Exception):
