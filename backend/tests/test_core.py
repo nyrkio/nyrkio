@@ -1,4 +1,4 @@
-from backend.main import PerformanceTestResult, PerformanceTestResultSeries, PerformanceTestResultExistsError
+from backend.core import PerformanceTestResult, PerformanceTestResultSeries, PerformanceTestResultExistsError
 
 import pytest
 
