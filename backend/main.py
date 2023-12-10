@@ -1,20 +1,5 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from fastapi import FastAPI
-
-from . import api, auth
-
-app = FastAPI()
-
-app.include_router(api.router)
-app.include_router(auth.token_router)
-app.include_router(auth.user_router)
-
-
-@app.get("/")
-async def root():
-    return {}
-
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
 that a performance engineer can understand it without having to read the code.
@@ -67,6 +52,9 @@ class PerformanceTestResultSeries:
             raise PerformanceTestResultExistsError()
 
         self.results.append(result)
+
+    def calculate_changes(self):
+        return []
 
 
 class PerformanceTestResultExistsError(Exception):
