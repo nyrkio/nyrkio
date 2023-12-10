@@ -6,12 +6,14 @@ authors = ["Matt Fleming <matt@nyrk.io>", "Henrik Ingo <henrik@nyrk.io>"]
 packages = [{include = "backend"}]
 
 [tool.poetry.dependencies]
-python = "^3.8"
+# Match hunter submodule
+python = ">=3.8,<3.13"
 fastapi = "^0.104.1"
 httpx = "^0.25.2"
 python-jose = "^3.3.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
+hunter = { path = "./backend/hunter", develop = true }
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
