@@ -14,7 +14,7 @@ pure and free from technical details. This is all about the domain model.
 
 Nyrkiö detects performance changes in test results.
 
-Multiple performance test results (frequently referred to as just "test results"
+Multiple performance test results (referred to as just "test results"
 throughout the code) can be added together to form a test result series.
 
 Test results must have a unique timestamp -- you cannot add a test result with
@@ -38,6 +38,7 @@ performance change can represent either a regression or an improvement.
 Notifications can be sent when a performance change is detected.
 
 """
+
 
 class ResultMetric:
     def __init__(self, name, unit, value):
@@ -64,9 +65,16 @@ class PerformanceTestResultSeries:
 
         self.results.append(result)
 
+    def delete_result(self, timestamp):
+        """
+        Delete a result from the series
+
+        If the result does not exist, do nothing.
+        """
+        self.results = [r for r in self.results if r.timestamp != timestamp]
+
     def calculate_changes(self):
         from ..hunter.hunter.series import Series
-        from ..hunter.hunter.series import Metric
 
         timestamps = [r.timestamp for r in self.results]
 
