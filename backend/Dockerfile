@@ -10,7 +10,7 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
     POETRY_VERSION=1.7.1
 
 # set work directory
-WORKDIR /usr/src/app
+WORKDIR /usr/src/backend
 
 ###########
 # BUILDER #
@@ -57,4 +57,4 @@ COPY --chown=app:app . ./
 # change to the app user
 USER app
 
-CMD ["/usr/src/app/entrypoint.sh"]
+CMD ["/usr/src/backend/entrypoint.sh"]

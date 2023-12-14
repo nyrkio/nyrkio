@@ -4,8 +4,7 @@ from typing_extensions import Annotated
 
 from fastapi import FastAPI, APIRouter, Depends
 
-from ..auth import auth
-from ..auth.auth import oauth2_scheme
+from backend.auth import auth
 
 app = FastAPI()
 
@@ -16,7 +15,7 @@ app.include_router(auth.user_router)
 api_router = APIRouter(prefix="/api/v0")
 
 @api_router.get("/results")
-async def results(token: Annotated[str, Depends(oauth2_scheme)]):
+async def results(token: Annotated[str, Depends(auth.oauth2_scheme)]):
     return {}
 
 # Must come at the end, once we've setup all the routes

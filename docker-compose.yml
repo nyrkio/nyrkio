@@ -3,3 +3,14 @@ version: "3.8"
 services:
   backend:
     build: backend
+    environment:
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    hostname: api.nyrkio.local
+  nginx:
+    build: backend/nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
