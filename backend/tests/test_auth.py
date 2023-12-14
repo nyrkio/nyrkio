@@ -3,6 +3,7 @@ def test_unauthenticated_users_cannot_access_protected_routes(client):
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
 
+
 def test_authenticated_users_can_access_protected_routes(client):
     response = client.post(
         "/token", data={"username": "johndoe", "password": "secret"}
@@ -17,4 +18,5 @@ def test_authenticated_users_can_access_protected_routes(client):
         "email": "johndoe@example.com",
     }
 
-    assert all(item in response.json().items() for item in expected_fields.items())
+    assert all(item in response.json().items()
+               for item in expected_fields.items())

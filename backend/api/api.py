@@ -15,7 +15,6 @@ app.include_router(auth.user_router)
 
 api_router = APIRouter(prefix="/api/v0")
 
-
 @api_router.get("/results")
 async def results(token: Annotated[str, Depends(oauth2_scheme)]):
     return {}

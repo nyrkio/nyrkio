@@ -13,6 +13,7 @@ def test_results(client):
     assert response.status_code == 200
     assert response.json() == {}
 
+
 def test_results_methods(client):
     """Ensure that only the GET HTTP method works with /results"""
     response = client.get("/api/v0/results")
@@ -39,3 +40,57 @@ def test_results_methods(client):
     response = client.delete("/api/v0/results", headers=headers)
     assert response.status_code == 405
     assert response.json() == {"detail": "Method Not Allowed"}
+
+
+def test_get_non_existing_result(client):
+    """Ensure that we get a 404 when trying to get a non-existing result"""
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Not authenticated"}
+
+    response = client.post(
+        "/token", data={"username": "johndoe", "password": "secret"}
+    )
+    token = response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+    response = client.get("/api/v0/result/benchmark1", headers=headers)
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Not Found"}
+
+
+def test_add_result(client):
+    response = client.post(
+        "/token", data={"username": "johndoe", "password": "secret"}
+    )
+    assert response.status_code == 200
+    token = response.json()["access_token"]
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Add a result
+    data = {"timestamp": 1,
+            "metrics": {
+                "metric1": 1.0,
+                "metric2": 2.0
+            },
+            "attributes": {
+                "attr1": "value1",
+                "attr2": "value2"
+            }}
+    response = client.post("/api/v0/result/benchmark1",
+                           headers=headers, json=data)
+    assert response.status_code == 200
+
+    # Read back the result
+    response = client.get("/api/v0/results", headers=headers)
+    assert response.status_code == 200
+    assert "benchmark1" in response.json()
+
+    response = client.get("/api/v0/result/benchmark1", headers=headers)
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0]["timestamp"] == 1
+    assert json[0]["metrics"]["metric1"] == 1.0
+    assert json[0]["metrics"]["metric2"] == 2.0
+    assert json[0]["attributes"]["attr1"] == "value1"
+    assert json[0]["attributes"]["attr2"] == "value2"
