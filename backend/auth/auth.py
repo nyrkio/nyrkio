@@ -10,7 +10,7 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from .db import fake_users_db, get_user, User
+from ..db.db import fake_users_db, get_user, User
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 

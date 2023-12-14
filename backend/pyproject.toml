@@ -3,7 +3,12 @@ name = "nyrkio"
 version = "0.1.0"
 description = "A performance change detection service"
 authors = ["Matt Fleming <matt@nyrk.io>", "Henrik Ingo <henrik@nyrk.io>"]
-packages = [{include = "backend"}]
+packages = [
+    {include = "api"},
+    {include = "auth"},
+    {include = "core"},
+    {include = "db"},
+]
 
 [tool.poetry.dependencies]
 # Match hunter submodule
@@ -13,7 +18,8 @@ httpx = "^0.25.2"
 python-jose = "^3.3.0"
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
-hunter = { path = "./backend/hunter", develop = true }
+hunter = { path = "./hunter", develop = true }
+uvicorn = "^0.24.0.post1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

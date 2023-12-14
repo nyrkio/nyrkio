@@ -65,8 +65,8 @@ class PerformanceTestResultSeries:
         self.results.append(result)
 
     def calculate_changes(self):
-        from .hunter.hunter.series import Series
-        from .hunter.hunter.series import Metric
+        from ..hunter.hunter.series import Series
+        from ..hunter.hunter.series import Metric
 
         timestamps = [r.timestamp for r in self.results]
 

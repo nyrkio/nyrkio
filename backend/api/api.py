@@ -4,9 +4,8 @@ from typing_extensions import Annotated
 
 from fastapi import FastAPI, APIRouter, Depends
 
-from .auth import oauth2_scheme
-
-from . import auth
+from ..auth import auth
+from ..auth.auth import oauth2_scheme
 
 app = FastAPI()
 

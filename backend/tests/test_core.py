@@ -1,7 +1,7 @@
-from backend.core import (PerformanceTestResult,
-                          PerformanceTestResultSeries,
-                          PerformanceTestResultExistsError,
-                          ResultMetric)
+from backend.core.core import (PerformanceTestResult,
+                               PerformanceTestResultSeries,
+                               PerformanceTestResultExistsError,
+                               ResultMetric)
 
 import pytest
 
