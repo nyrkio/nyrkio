@@ -22,6 +22,7 @@ from passlib.context import CryptContext
 from backend.db.db import User, db, get_user_db
 from backend.auth.github import github_oauth
 
+
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
     yield UserManager(user_db)
 
@@ -29,6 +30,7 @@ async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
 SECRET = os.environ.get("SECRET_KEY", None)
+
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
@@ -52,6 +54,7 @@ auth_router.include_router(
 
 current_active_user = fastapi_users.current_user(active=True)
 
+
 @auth_router.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
@@ -64,6 +67,7 @@ async def do_on_startup():
             User,
         ],
     )
+
 
 class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     reset_password_token_secret = SECRET
@@ -81,4 +85,3 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         self, user: User, token: str, request: Optional[Request] = None
     ):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
-

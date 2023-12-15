@@ -1,7 +1,9 @@
-from backend.core.core import (PerformanceTestResult,
-                               PerformanceTestResultSeries,
-                               PerformanceTestResultExistsError,
-                               ResultMetric)
+from backend.core.core import (
+    PerformanceTestResult,
+    PerformanceTestResultSeries,
+    PerformanceTestResultExistsError,
+    ResultMetric,
+)
 
 import pytest
 
@@ -98,8 +100,7 @@ def test_calculate_changes_with_multiple_metrics():
     series = PerformanceTestResultSeries("benchmark1")
 
     attr = {"attr1": "value1", "attr2": "value2"}
-    metrics = [ResultMetric("metric1", "µs", 1.0),
-               ResultMetric("metric2", "µs", 1.0)]
+    metrics = [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 1.0)]
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
@@ -114,8 +115,7 @@ def test_calculate_changes_with_multiple_metrics():
     series = PerformanceTestResultSeries("benchmark2")
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
-    metrics = [ResultMetric("metric1", "µs", 2.0),
-               ResultMetric("metric2", "µs", 2.0)]
+    metrics = [ResultMetric("metric1", "µs", 2.0), ResultMetric("metric2", "µs", 2.0)]
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
     changes = series.calculate_changes()

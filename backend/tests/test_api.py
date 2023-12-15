@@ -4,9 +4,7 @@ def test_results(client):
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
 
-    response = client.post(
-        "/token", data={"username": "johndoe", "password": "secret"}
-    )
+    response = client.post("/token", data={"username": "johndoe", "password": "secret"})
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/api/v0/results", headers=headers)
@@ -20,9 +18,7 @@ def test_results_methods(client):
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
 
-    response = client.post(
-        "/token", data={"username": "johndoe", "password": "secret"}
-    )
+    response = client.post("/token", data={"username": "johndoe", "password": "secret"})
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/api/v0/results", headers=headers)
@@ -48,9 +44,7 @@ def test_get_non_existing_result(client):
     assert response.status_code == 401
     assert response.json() == {"detail": "Not authenticated"}
 
-    response = client.post(
-        "/token", data={"username": "johndoe", "password": "secret"}
-    )
+    response = client.post("/token", data={"username": "johndoe", "password": "secret"})
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/api/v0/result/benchmark1", headers=headers)
@@ -59,25 +53,18 @@ def test_get_non_existing_result(client):
 
 
 def test_add_result(client):
-    response = client.post(
-        "/token", data={"username": "johndoe", "password": "secret"}
-    )
+    response = client.post("/token", data={"username": "johndoe", "password": "secret"})
     assert response.status_code == 200
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 
     # Add a result
-    data = {"timestamp": 1,
-            "metrics": {
-                "metric1": 1.0,
-                "metric2": 2.0
-            },
-            "attributes": {
-                "attr1": "value1",
-                "attr2": "value2"
-            }}
-    response = client.post("/api/v0/result/benchmark1",
-                           headers=headers, json=data)
+    data = {
+        "timestamp": 1,
+        "metrics": {"metric1": 1.0, "metric2": 2.0},
+        "attributes": {"attr1": "value1", "attr2": "value2"},
+    }
+    response = client.post("/api/v0/result/benchmark1", headers=headers, json=data)
     assert response.status_code == 200
 
     # Read back the result

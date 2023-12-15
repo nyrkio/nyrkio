@@ -90,11 +90,12 @@ class PerformanceTestResultSeries:
 
         attributes = defaultdict(list)
         for r in self.results:
-            for (k, v) in r.attributes.items():
+            for k, v in r.attributes.items():
                 attributes[k].append(v)
 
-        series = Series(self.name, None, timestamps, metric_units,
-                        metric_data, attributes)
+        series = Series(
+            self.name, None, timestamps, metric_units, metric_data, attributes
+        )
         return series.analyze().change_points
 
 

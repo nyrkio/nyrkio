@@ -5,9 +5,7 @@ def test_unauthenticated_users_cannot_access_protected_routes(client):
 
 
 def test_authenticated_users_can_access_protected_routes(client):
-    response = client.post(
-        "/token", data={"username": "johndoe", "password": "secret"}
-    )
+    response = client.post("/token", data={"username": "johndoe", "password": "secret"})
     token = response.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
     response = client.get("/users/me", headers=headers)
@@ -18,5 +16,4 @@ def test_authenticated_users_can_access_protected_routes(client):
         "email": "johndoe@example.com",
     }
 
-    assert all(item in response.json().items()
-               for item in expected_fields.items())
+    assert all(item in response.json().items() for item in expected_fields.items())

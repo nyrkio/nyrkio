@@ -23,6 +23,7 @@ flake8 = "^6.1.0"
 fastapi-users = {extras = ["beanie", "oauth"], version = "^12.1.2"}
 # Pinned because of the issue in https://github.com/pyca/bcrypt/issues/684
 bcrypt = "4.0.1"
+ruff = "^0.1.8"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"

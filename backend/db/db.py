@@ -1,8 +1,7 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 import os
-from typing import Union, List
-from pydantic import BaseModel
+from typing import List
 
 import motor.motor_asyncio
 from beanie import Document, PydanticObjectId
@@ -46,6 +45,7 @@ class DBStore(object):
 
     This is a singleton class, so there can only be one instance of it.
     """
+
     _instance = None
 
     def __new__(cls):
@@ -56,14 +56,13 @@ class DBStore(object):
     def __init__(self):
         self.db = fake_users_db
 
+
 DB_USER = os.environ.get("DB_USER", None)
 DB_PASSWORD = os.environ.get("DB_PASSWORD", None)
 DB_NAME = os.environ.get("DB_NAME", None)
 DB_URL = f"mongodb+srv://{DB_USER}:{DB_PASSWORD}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
 
-client = motor.motor_asyncio.AsyncIOMotorClient(
-    DB_URL, uuidRepresentation="standard"
-)
+client = motor.motor_asyncio.AsyncIOMotorClient(DB_URL, uuidRepresentation="standard")
 db = client[DB_NAME]
 
 
@@ -77,6 +76,7 @@ class User(BeanieBaseUser, Document):
 
 async def get_user_db():
     yield BeanieUserDatabase(User, OAuthAccount)
+
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):
     pass
