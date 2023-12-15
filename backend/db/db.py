@@ -62,6 +62,11 @@ DB_PASSWORD = os.environ.get("DB_PASSWORD", None)
 DB_NAME = os.environ.get("DB_NAME", None)
 DB_URL = f"mongodb+srv://{DB_USER}:{DB_PASSWORD}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
 
+# Fail early and hard if we don't have the required environment variables
+assert DB_USER is not None
+assert DB_PASSWORD is not None
+assert DB_NAME is not None
+
 client = motor.motor_asyncio.AsyncIOMotorClient(DB_URL, uuidRepresentation="standard")
 db = client[DB_NAME]
 
