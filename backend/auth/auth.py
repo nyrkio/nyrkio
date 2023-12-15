@@ -33,7 +33,9 @@ SECRET = os.environ.get("SECRET_KEY", None)
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=3600)
+    # Expires after a month
+    expiration_secs = 3600 * 24 * 30
+    return JWTStrategy(secret=SECRET, lifetime_seconds=expiration_secs)
 
 
 auth_backend = AuthenticationBackend(
