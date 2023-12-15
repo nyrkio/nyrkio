@@ -4,12 +4,13 @@ from typing_extensions import Annotated
 
 from fastapi import FastAPI, APIRouter, Depends
 
-from backend.auth import auth
+from backend.auth import auth, github
 
 app = FastAPI()
 
 app.include_router(auth.token_router)
 app.include_router(auth.user_router)
+app.include_router(github.github_router)
 
 
 api_router = APIRouter(prefix="/api/v0")
