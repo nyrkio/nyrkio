@@ -1,16 +1,23 @@
 import logging
+import os
+
 from fastapi import Depends, APIRouter, HTTPException, status
 from httpx import AsyncClient
 
 from backend.auth.auth import get_current_active_user
-from backend.db.db import User
+from backend.db.db import User, DBStore
 
 CLIENT_ID = "Iv1.829e5507d1b06795"
-CLIENT_SECRET = "b33fa30dd894ecb1e8fd229c7653861370713bff"
+CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", None)
 
 github_router = APIRouter()
 @github_router.get("/github")
 async def github_login(code):
+    if not CLIENT_SECRET:
+        logging.error("Github client secret not set")
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="Unable to authenticate with Github")
+
     logging.error(f"Received code {code}")
     async with AsyncClient() as client:
         response = await client.post("https://github.com/login/oauth/access_token",
@@ -34,15 +41,13 @@ async def github_login(code):
                                     headers={"Authorization": f"Bearer {access_token}"})
         response.raise_for_status()
         json = response.json()
-        logging.error(json)
-        username = json["login"]
-        email = json["email"]
-        full_name = json["name"]
 
-        # Create a new User object
-        user = User(username=username, email=email, full_name=full_name)
-        # Store the user in the database
-        db_add_or_update_user(user)
+    username = json["login"]
+    email = json["email"]
+    full_name = json["name"]
 
+    user = User(username=username, email=email, full_name=full_name)
+    store = DBStore()
+    store.add_user(user)
 
-    return {}
+    return {"access_token": access_token, "token_type": "bearer"}
