@@ -1,14 +1,11 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from datetime import datetime, timedelta
 import os
-from typing import Union, Optional
-from typing_extensions import Annotated
+from typing import Optional
 import uuid
 
 from beanie import PydanticObjectId, init_beanie
-from fastapi import Depends, APIRouter, HTTPException, status, Request
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, APIRouter, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from fastapi_users.authentication import (
@@ -16,8 +13,6 @@ from fastapi_users.authentication import (
     BearerTransport,
     JWTStrategy,
 )
-from jose import JWTError, jwt
-from passlib.context import CryptContext
 
 from backend.db.db import User, db, get_user_db
 from backend.auth.github import github_oauth
