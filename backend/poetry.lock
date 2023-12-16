@@ -743,6 +743,35 @@ files = [
 ]
 
 [[package]]
+name = "mongomock"
+version = "4.1.2"
+description = "Fake pymongo stub for testing simple MongoDB-dependent code"
+optional = false
+python-versions = "*"
+files = [
+    {file = "mongomock-4.1.2-py2.py3-none-any.whl", hash = "sha256:08a24938a05c80c69b6b8b19a09888d38d8c6e7328547f94d46cadb7f47209f2"},
+    {file = "mongomock-4.1.2.tar.gz", hash = "sha256:f06cd62afb8ae3ef63ba31349abd220a657ef0dd4f0243a29587c5213f931b7d"},
+]
+
+[package.dependencies]
+packaging = "*"
+sentinels = "*"
+
+[[package]]
+name = "mongomock-motor"
+version = "0.0.25"
+description = "Library for mocking AsyncIOMotorClient built on top of mongomock."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "mongomock_motor-0.0.25-py3-none-any.whl", hash = "sha256:76f244a5ed9f3bbd5375c64141588b3ac8fe0a3547662ae1e261dad611fe929a"},
+    {file = "mongomock_motor-0.0.25.tar.gz", hash = "sha256:8202ec8071984494d04f412d0e1f9ef87c3a066e10ed2ad4e8d71073b6950adf"},
+]
+
+[package.dependencies]
+mongomock = ">=3.23.0,<5.0.0"
+
+[[package]]
 name = "more-itertools"
 version = "8.14.0"
 description = "More routines for operating on iterables, beyond itertools"
@@ -1551,6 +1580,16 @@ doc = ["matplotlib (>2)", "numpydoc", "pydata-sphinx-theme (==0.9.0)", "sphinx (
 test = ["asv", "gmpy2", "mpmath", "pytest", "pytest-cov", "pytest-xdist", "scikit-umfpack", "threadpoolctl"]
 
 [[package]]
+name = "sentinels"
+version = "1.0.0"
+description = "Various objects to denote special meanings in python"
+optional = false
+python-versions = "*"
+files = [
+    {file = "sentinels-1.0.0.tar.gz", hash = "sha256:7be0704d7fe1925e397e92d18669ace2f619c92b5d4eb21a89f31e026f9ff4b1"},
+]
+
+[[package]]
 name = "signal-processing-algorithms"
 version = "1.3.4"
 description = "Signal Processing Algorithms from MongoDB"
@@ -1790,4 +1829,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = ">=3.8.1,<3.13"
-content-hash = "db2c51bc6e05ac51f0ca42561c91e799006cbc00542d556ab753bf2d84941123"
+content-hash = "ca93cd14b8ecefd05c384fd1bcf82989599b322af9b2b30ca271d0319d0442b4"

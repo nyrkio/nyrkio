@@ -4,7 +4,8 @@ import os
 from typing import List
 
 import motor.motor_asyncio
-from beanie import Document, PydanticObjectId
+from mongomock_motor import AsyncMongoMockClient
+from beanie import Document, PydanticObjectId, init_beanie
 from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
 from fastapi_users import schemas
 from pydantic import Field
@@ -53,22 +54,26 @@ class DBStore(object):
             cls._instance = super(DBStore, cls).__new__(cls)
         return cls._instance
 
+    async def startup(self):
+        await init_beanie(database=self.db, document_models=[User])
+
+
+class MongoDBStore(DBStore):
+    """
+    A MongoDB-backed DBStore.
+    """
+
     def __init__(self):
-        self.db = fake_users_db
+        super(MongoDBStore, self).__init__()
+        self.db_user = os.environ.get("DB_USER", None)
+        self.db_password = os.environ.get("DB_PASSWORD", None)
+        self.db_name = os.environ.get("DB_NAME", None)
 
-
-DB_USER = os.environ.get("DB_USER", None)
-DB_PASSWORD = os.environ.get("DB_PASSWORD", None)
-DB_NAME = os.environ.get("DB_NAME", None)
-DB_URL = f"mongodb+srv://{DB_USER}:{DB_PASSWORD}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
-
-# Fail early and hard if we don't have the required environment variables
-assert DB_USER is not None
-assert DB_PASSWORD is not None
-assert DB_NAME is not None
-
-client = motor.motor_asyncio.AsyncIOMotorClient(DB_URL, uuidRepresentation="standard")
-db = client[DB_NAME]
+        url = f"mongodb+srv://{self.db_user}:{self.db_password}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            url, uuidRepresentation="standard"
+        )
+        self.db = client[self.db_name]
 
 
 class OAuthAccount(BaseOAuthAccount):
@@ -93,3 +98,26 @@ class UserCreate(schemas.BaseUserCreate):
 
 class UserUpdate(schemas.BaseUserUpdate):
     pass
+
+
+class TestDBStore(DBStore):
+    """
+    A test DBStore that doesn't persist data between tests.
+    """
+
+    def __init__(self):
+        super(TestDBStore, self).__init__()
+        client = AsyncMongoMockClient()
+        self.db = client.get_database("test")
+
+
+# Will be patched by conftest.py if we're running tests
+TESTING = False
+
+
+async def do_on_startup():
+    if TESTING:
+        store = TestDBStore()
+    else:
+        store = MongoDBStore()
+    await store.startup()

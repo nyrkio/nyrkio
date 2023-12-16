@@ -4,7 +4,7 @@ import os
 from typing import Optional
 import uuid
 
-from beanie import PydanticObjectId, init_beanie
+from beanie import PydanticObjectId
 from fastapi import Depends, APIRouter, Request
 from fastapi_users import BaseUserManager, FastAPIUsers
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
@@ -14,7 +14,7 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 
-from backend.db.db import User, db, get_user_db
+from backend.db.db import User, get_user_db
 from backend.auth.github import github_oauth
 
 
@@ -55,15 +55,6 @@ current_active_user = fastapi_users.current_user(active=True)
 @auth_router.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
-
-
-async def do_on_startup():
-    await init_beanie(
-        database=db,
-        document_models=[
-            User,
-        ],
-    )
 
 
 class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):

@@ -25,6 +25,6 @@ app.include_router(api_router)
 
 @app.on_event("startup")
 async def do_db():
-    from backend.auth.auth import do_on_startup
+    from backend.db.db import do_on_startup
 
     await do_on_startup()
