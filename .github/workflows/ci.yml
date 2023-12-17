@@ -69,3 +69,12 @@ jobs:
       # And finally run tests. I'm using pytest and all my pytest config is in my `pyproject.toml`
       # so this line is super-simple. But it could be as complex as you need.
       - run: cd backend && poetry run pytest tests
+
+  docker-ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+      - name: docker compose build
+        run: touch .env.backend && docker compose build
