@@ -47,6 +47,8 @@ class AuthenticatedTestClient(TestClient):
 def client():
     with AuthenticatedTestClient(app) as client:
         yield client
+        # Delete all results after each test
+        client.delete("/api/v0/results")
 
 
 @pytest.fixture
