@@ -1,5 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
+from abc import abstractmethod, ABC
 import os
 from typing import List
 
@@ -22,6 +23,52 @@ fake_users_db = {
 }
 
 
+class ConnectionStrategy(ABC):
+    @abstractmethod
+    def connect(self):
+        pass
+
+    def init_db(self):
+        pass
+
+
+class MongoDBStrategy(ConnectionStrategy):
+    """
+    Connect to a production MongoDB.
+    """
+
+    def connect(self):
+        db_user = os.environ.get("DB_USER", None)
+        db_password = os.environ.get("DB_PASSWORD", None)
+        db_name = os.environ.get("DB_NAME", None)
+
+        url = f"mongodb+srv://{db_user}:{db_password}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
+        client = motor.motor_asyncio.AsyncIOMotorClient(
+            url, uuidRepresentation="standard"
+        )
+        return client[db_name]
+
+
+class TestDBStrategy(ConnectionStrategy):
+    """
+    Connect to a test DB for unit testing and add some test users.
+    """
+
+    def connect(self):
+        client = AsyncMongoMockClient()
+        return client.get_database("test")
+
+    async def init_db(self):
+        # Add test users
+        from backend.auth.auth import UserManager
+
+        user = UserCreate(
+            email="john@foo.com", password="foo", is_active=True, is_verified=True
+        )
+        manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+        await manager.create(user)
+
+
 class DBStore(object):
     """
     A simple in-memory database for storing users.
@@ -36,26 +83,13 @@ class DBStore(object):
             cls._instance = super(DBStore, cls).__new__(cls)
         return cls._instance
 
+    def setup(self, connection_strategy: ConnectionStrategy):
+        self.strategy = connection_strategy
+        self.db = self.strategy.connect()
+
     async def startup(self):
         await init_beanie(database=self.db, document_models=[User])
-
-
-class MongoDBStore(DBStore):
-    """
-    A MongoDB-backed DBStore.
-    """
-
-    def __init__(self):
-        super(MongoDBStore, self).__init__()
-        self.db_user = os.environ.get("DB_USER", None)
-        self.db_password = os.environ.get("DB_PASSWORD", None)
-        self.db_name = os.environ.get("DB_NAME", None)
-
-        url = f"mongodb+srv://{self.db_user}:{self.db_password}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
-        client = motor.motor_asyncio.AsyncIOMotorClient(
-            url, uuidRepresentation="standard"
-        )
-        self.db = client[self.db_name]
+        await self.strategy.init_db()
 
 
 class OAuthAccount(BaseOAuthAccount):
@@ -82,37 +116,12 @@ class UserUpdate(schemas.BaseUserUpdate):
     pass
 
 
-class TestDBStore(DBStore):
-    """
-    A test DBStore that doesn't persist data between tests.
-    """
-
-    def __init__(self):
-        super(TestDBStore, self).__init__()
-        client = AsyncMongoMockClient()
-        self.db = client.get_database("test")
-
-    async def startup(self):
-        # Call super method to initialize Beanie
-        await super(TestDBStore, self).startup()
-        # Add test users
-        from backend.auth.auth import UserManager
-
-        user = UserCreate(
-            email="john@foo.com", password="foo", is_active=True, is_verified=True
-        )
-        manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
-        await manager.create(user)
-
-
 # Will be patched by conftest.py if we're running tests
-TESTING = os.environ.get("NYRKIO_TESTING", False)
+_TESTING = False
 
 
 async def do_on_startup():
-    TESTING = True
-    if TESTING:
-        store = TestDBStore()
-    else:
-        store = MongoDBStore()
+    store = DBStore()
+    strategy = TestDBStrategy() if _TESTING else MongoDBStrategy()
+    store.setup(strategy)
     await store.startup()

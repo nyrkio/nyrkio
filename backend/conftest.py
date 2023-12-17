@@ -7,6 +7,13 @@ from backend.api.api import app
 os.environ["NYRKIO_TESTING"] = "True"
 
 
+# https://docs.pytest.org/en/latest/example/simple.html#detect-if-running-from-within-a-pytest-run
+def pytest_configure(config):
+    from backend.db import db
+
+    db._TESTING = True
+
+
 class AuthenticatedTestClient(TestClient):
     """
     A simple wrapper around starlette.testclient that provides login helpers.
