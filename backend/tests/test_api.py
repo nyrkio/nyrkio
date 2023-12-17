@@ -42,11 +42,11 @@ def test_add_result(client):
     client.login()
 
     # Add a result
-    data = {
+    data = [{
         "timestamp": 1,
         "metrics": {"metric1": 1.0, "metric2": 2.0},
         "attributes": {"attr1": "value1", "attr2": "value2"},
-    }
+    }]
     response = client.post("/api/v0/result/benchmark1", json=data)
     assert response.status_code == 200
 
@@ -59,5 +59,33 @@ def test_add_result(client):
     assert response.status_code == 200
     json = response.json()
     assert len(json) == 1
-    result = json[0]
-    assert result == data
+    assert json[0] == data[0]
+
+def test_add_multiple_test_results_at_once(client):
+    """Upload multiple results in one POST request"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": {"metric1": 2.0, "metric2": 3.0},
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+    response = client.post("/api/v0/result/benchmark2", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+    assert "benchmark1" in response.json()
+
+    response = client.get("/api/v0/result/benchmark2")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 2
+    assert data[0] in json
+    assert data[1] in json

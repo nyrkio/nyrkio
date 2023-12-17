@@ -1,13 +1,13 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from collections import defaultdict
-from typing import Dict, Optional
+from typing import Dict, List, Optional, Any
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.db.db import User
+from backend.db.db import DBStore, User
 
 app = FastAPI()
 
@@ -37,12 +37,15 @@ class TestResult(BaseModel):
     metrics: Optional[Dict]
     attributes: Optional[Dict]
 
+class TestResults(RootModel[Any]):
+    root: List[TestResult]
+
 
 @api_router.post("/result/{test_name}")
 async def add_result(
-    test_name: str, data: TestResult, user: User = Depends(auth.current_active_user)
+    test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
 ):
-    temp_db[test_name].append(data)
+    temp_db[test_name] += data.root
     return {}
 
 
