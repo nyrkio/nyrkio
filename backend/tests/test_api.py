@@ -59,8 +59,5 @@ def test_add_result(client):
     assert response.status_code == 200
     json = response.json()
     assert len(json) == 1
-    assert json[0]["timestamp"] == 1
-    assert json[0]["metrics"]["metric1"] == 1.0
-    assert json[0]["metrics"]["metric2"] == 2.0
-    assert json[0]["attributes"]["attr1"] == "value1"
-    assert json[0]["attributes"]["attr2"] == "value2"
+    result = json[0]
+    assert result == data
