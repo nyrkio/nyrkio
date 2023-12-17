@@ -19,7 +19,6 @@ passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.6"
 hunter = { path = "./hunter", develop = true }
 uvicorn = "^0.24.0.post1"
-flake8 = "^6.1.0"
 fastapi-users = {extras = ["beanie", "oauth"], version = "^12.1.2"}
 # Pinned because of the issue in https://github.com/pyca/bcrypt/issues/684
 bcrypt = "4.0.1"
