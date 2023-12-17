@@ -7,7 +7,7 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.db.db import DBStore, User
+from backend.db.db import User
 
 app = FastAPI()
 
