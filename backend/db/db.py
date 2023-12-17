@@ -22,24 +22,6 @@ fake_users_db = {
 }
 
 
-# class User(BaseModel):
-#     username: str
-#     email: Union[str, None] = None
-#     full_name: Union[str, None] = None
-#     disabled: Union[bool, None] = None
-#     is_admin: Union[bool, None] = None
-
-
-# class UserInDB(User):
-#     hashed_password: str
-
-
-# def get_user(db, username: str):
-#     if username in db:
-#         user_dict = db[username]
-#         return UserInDB(**user_dict)
-
-
 class DBStore(object):
     """
     A simple in-memory database for storing users.
@@ -110,12 +92,25 @@ class TestDBStore(DBStore):
         client = AsyncMongoMockClient()
         self.db = client.get_database("test")
 
+    async def startup(self):
+        # Call super method to initialize Beanie
+        await super(TestDBStore, self).startup()
+        # Add test users
+        from backend.auth.auth import UserManager
+
+        user = UserCreate(
+            email="john@foo.com", password="foo", is_active=True, is_verified=True
+        )
+        manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+        await manager.create(user)
+
 
 # Will be patched by conftest.py if we're running tests
-TESTING = False
+TESTING = os.environ.get("NYRKIO_TESTING", False)
 
 
 async def do_on_startup():
+    TESTING = True
     if TESTING:
         store = TestDBStore()
     else:

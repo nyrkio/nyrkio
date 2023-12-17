@@ -24,7 +24,7 @@ async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 
-SECRET = os.environ.get("SECRET_KEY", None)
+SECRET = os.environ.get("SECRET_KEY", "fooba")
 
 
 def get_jwt_strategy() -> JWTStrategy:
@@ -48,6 +48,9 @@ auth_router.include_router(
     tags=["auth"],
 )
 
+auth_router.include_router(
+    fastapi_users.get_auth_router(auth_backend, SECRET), prefix="/jwt", tags=["auth"]
+)
 
 current_active_user = fastapi_users.current_user(active=True)
 
