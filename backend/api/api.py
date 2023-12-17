@@ -25,6 +25,12 @@ async def results(user: User = Depends(auth.current_active_user)):
     return temp_db
 
 
+@api_router.delete("/results")
+async def delete_results(user: User = Depends(auth.current_active_user)):
+    temp_db.clear()
+    return {}
+
+
 @api_router.get("/result/{test_name}")
 async def get_result(test_name: str, user: User = Depends(auth.current_active_user)):
     if test_name not in temp_db:
