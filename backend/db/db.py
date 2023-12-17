@@ -69,6 +69,10 @@ class TestDBStrategy(ConnectionStrategy):
         await manager.create(user)
 
 
+class DBStoreAlreadyInitialized(Exception):
+    pass
+
+
 class DBStore(object):
     """
     A simple in-memory database for storing users.
@@ -83,13 +87,24 @@ class DBStore(object):
             cls._instance = super(DBStore, cls).__new__(cls)
         return cls._instance
 
+    def __init__(self):
+        self.strategy = None
+        self.started = False
+
     def setup(self, connection_strategy: ConnectionStrategy):
+        if self.strategy:
+            raise DBStoreAlreadyInitialized()
+
         self.strategy = connection_strategy
         self.db = self.strategy.connect()
 
     async def startup(self):
+        if self.started:
+            raise DBStoreAlreadyInitialized()
+
         await init_beanie(database=self.db, document_models=[User])
         await self.strategy.init_db()
+        self.started = True
 
 
 class OAuthAccount(BaseOAuthAccount):
