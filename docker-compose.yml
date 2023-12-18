@@ -11,7 +11,9 @@ services:
       - "8000:8000"
     hostname: api.nyrkio.local
   nginx:
-    build: backend/nginx
+    build:
+      context: ./
+      dockerfile: ./nginx/Dockerfile
     ports:
       - "80:80"
     depends_on:
