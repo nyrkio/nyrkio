@@ -4,7 +4,7 @@ import pytest
 from backend.db.db import (
     DBStore,
     DBStoreAlreadyInitialized,
-    TestDBStrategy,
+    MockDBStrategy,
     User,
 )
 
@@ -19,10 +19,10 @@ def test_singleton_dbstore():
 def test_dbstore_already_initialized():
     """Exceptions should be raised if we re-init a DBStore"""
     store = DBStore()
-    store.setup(TestDBStrategy())
+    store.setup(MockDBStrategy())
 
     with pytest.raises(DBStoreAlreadyInitialized):
-        store.setup(TestDBStrategy())
+        store.setup(MockDBStrategy())
 
     asyncio.run(store.startup())
     with pytest.raises(DBStoreAlreadyInitialized):
@@ -32,7 +32,7 @@ def test_dbstore_already_initialized():
 def test_add_single_result():
     """Add a single test result"""
     store = DBStore()
-    strategy = TestDBStrategy()
+    strategy = MockDBStrategy()
     store.setup(strategy)
     asyncio.run(store.startup())
 

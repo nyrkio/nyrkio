@@ -73,7 +73,7 @@ class MongoDBStrategy(ConnectionStrategy):
         return client[db_name]
 
 
-class TestDBStrategy(ConnectionStrategy):
+class MockDBStrategy(ConnectionStrategy):
     """
     Connect to a test DB for unit testing and add some test users.
     """
@@ -204,6 +204,6 @@ _TESTING = False
 
 async def do_on_startup():
     store = DBStore()
-    strategy = TestDBStrategy() if _TESTING else MongoDBStrategy()
+    strategy = MockDBStrategy() if _TESTING else MongoDBStrategy()
     store.setup(strategy)
     await store.startup()
