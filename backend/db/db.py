@@ -52,7 +52,7 @@ class ConnectionStrategy(ABC):
     def connect(self):
         pass
 
-    def init_db(self):
+    async def init_db(self):
         pass
 
 
@@ -191,9 +191,10 @@ class DBStore(object):
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
 
+        # TODO(matt) We should read results in batches, not all at once
         results = await test_results.find(
             {"user_id": user.id, "test_name": test_name}, exclude_projection
-        ).to_list()
+        ).to_list(None)
 
         return results
 
