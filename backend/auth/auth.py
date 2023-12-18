@@ -43,7 +43,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](get_user_manager, [auth_backend])
 
 auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
-    fastapi_users.get_oauth_router(github_oauth, auth_backend, SECRET),
+    fastapi_users.get_oauth_router(github_oauth, auth_backend, SECRET, redirect_url="http://localhost/api/v0/auth/github/callback"),
     prefix="/github",
     tags=["auth"],
 )
