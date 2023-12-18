@@ -1,13 +1,12 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from collections import defaultdict
 from typing import Dict, List, Optional, Any
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.db.db import User
+from backend.db.db import User, DBStore
 
 app = FastAPI()
 
@@ -17,25 +16,31 @@ app.include_router(auth.auth_router)
 api_router = APIRouter(prefix="/api/v0")
 
 
-temp_db = defaultdict(list)
-
-
 @api_router.get("/results")
-async def results(user: User = Depends(auth.current_active_user)):
-    return temp_db
+async def results(user: User = Depends(auth.current_active_user)) -> List[Dict]:
+    store = DBStore()
+    results = await store.get_test_names(user)
+    return [{"test_name": name} for name in results]
 
 
 @api_router.delete("/results")
-async def delete_results(user: User = Depends(auth.current_active_user)):
-    temp_db.clear()
-    return {}
+async def delete_results(user: User = Depends(auth.current_active_user)) -> List:
+    store = DBStore()
+    await store.delete_all_results(user)
+    return []
 
 
 @api_router.get("/result/{test_name}")
-async def get_result(test_name: str, user: User = Depends(auth.current_active_user)):
-    if test_name not in temp_db:
+async def get_result(
+    test_name: str, user: User = Depends(auth.current_active_user)
+) -> List[Dict]:
+    store = DBStore()
+    test_names = await store.get_test_names(user)
+
+    if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
-    return temp_db[test_name]
+
+    return await store.get_results(user, test_name)
 
 
 class TestResult(BaseModel):
@@ -52,7 +57,8 @@ class TestResults(RootModel[Any]):
 async def add_result(
     test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
 ):
-    temp_db[test_name] += data.root
+    store = DBStore()
+    await store.add_results(user, test_name, data.root)
     return {}
 
 

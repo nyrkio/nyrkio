@@ -7,7 +7,7 @@ def test_results(client):
     client.login()
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert response.json() == {}
+    assert response.json() == []
 
 
 def test_results_methods(client):
@@ -15,7 +15,7 @@ def test_results_methods(client):
     client.login()
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert response.json() == {}
+    assert response.json() == []
 
     response = client.put("/api/v0/results")
     assert response.status_code == 405
@@ -27,7 +27,7 @@ def test_results_methods(client):
 
     response = client.delete("/api/v0/results")
     assert response.status_code == 200
-    assert response.json() == {}
+    assert response.json() == []
 
 
 def test_get_non_existing_result(client):
@@ -55,7 +55,7 @@ def test_add_result(client):
     # Read back the result
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert "benchmark1" in response.json()
+    assert "benchmark1" == response.json()[0]["test_name"]
 
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
@@ -84,7 +84,7 @@ def test_add_multiple_test_results_at_once(client):
 
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert "benchmark1" in response.json()
+    assert "benchmark1" == response.json()[0]["test_name"]
 
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
@@ -92,6 +92,32 @@ def test_add_multiple_test_results_at_once(client):
     assert len(json) == 2
     assert data[0] in json
     assert data[1] in json
+
+
+def test_add_multiple_tests(client):
+    """Add multiple tests and ensure that they are returned"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.post("/api/v0/result/benchmark2", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+
+    test_names = [result["test_name"] for result in response.json()]
+    for name in ("benchmark1", "benchmark2"):
+        assert name in test_names
 
 
 def test_delete_results(client):
@@ -117,7 +143,7 @@ def test_delete_results(client):
     # Read back the result
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert "benchmark1" in response.json()
+    assert "benchmark1" in response.json()[0]["test_name"]
 
     # Delete all results
     response = client.delete("/api/v0/results")
@@ -126,4 +152,4 @@ def test_delete_results(client):
     # Read back the result
     response = client.get("/api/v0/results")
     assert response.status_code == 200
-    assert response.json() == {}
+    assert response.json() == []
