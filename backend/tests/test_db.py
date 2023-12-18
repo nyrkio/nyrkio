@@ -5,6 +5,7 @@ from backend.db.db import (
     DBStore,
     DBStoreAlreadyInitialized,
     TestDBStrategy,
+    User,
 )
 
 
@@ -26,3 +27,18 @@ def test_dbstore_already_initialized():
     asyncio.run(store.startup())
     with pytest.raises(DBStoreAlreadyInitialized):
         asyncio.run(store.startup())
+
+
+def test_add_single_result():
+    """Add a single test result"""
+    store = DBStore()
+    strategy = TestDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    results = [{"foo": "bar"}]
+    asyncio.run(store.add_results(user, "benchmark1", results))
+    response = asyncio.run(store.get_results(user, "benchmark1"))
+
+    assert results == response

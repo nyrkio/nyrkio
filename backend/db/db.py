@@ -2,7 +2,7 @@
 
 from abc import abstractmethod, ABC
 import os
-from typing import List
+from typing import Dict, List
 
 import motor.motor_asyncio
 from mongomock_motor import AsyncMongoMockClient
@@ -21,6 +21,30 @@ fake_users_db = {
         "is_admin": False,
     }
 }
+
+
+class OAuthAccount(BaseOAuthAccount):
+    pass
+
+
+class User(BeanieBaseUser, Document):
+    oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
+
+
+async def get_user_db():
+    yield BeanieUserDatabase(User, OAuthAccount)
+
+
+class UserRead(schemas.BaseUser[PydanticObjectId]):
+    pass
+
+
+class UserCreate(schemas.BaseUserCreate):
+    pass
+
+
+class UserUpdate(schemas.BaseUserUpdate):
+    pass
 
 
 class ConnectionStrategy(ABC):
@@ -54,6 +78,9 @@ class TestDBStrategy(ConnectionStrategy):
     Connect to a test DB for unit testing and add some test users.
     """
 
+    def __init__(self):
+        self.user = None
+
     def connect(self):
         client = AsyncMongoMockClient()
         return client.get_database("test")
@@ -63,10 +90,14 @@ class TestDBStrategy(ConnectionStrategy):
         from backend.auth.auth import UserManager
 
         user = UserCreate(
-            email="john@foo.com", password="foo", is_active=True, is_verified=True
+            id=1, email="john@foo.com", password="foo", is_active=True, is_verified=True
         )
         manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
-        await manager.create(user)
+        self.user = await manager.create(user)
+
+    def get_test_user(self):
+        assert self.user, "init_db() must be called first"
+        return self.user
 
 
 class DBStoreAlreadyInitialized(Exception):
@@ -78,9 +109,19 @@ class DBStore(object):
     A simple in-memory database for storing users.
 
     This is a singleton class, so there can only be one instance of it.
+
+    This class is responsible for translating back and forth between documents
+    using the MongoDB schema and the JSON data we return to HTTP clients. For
+    example, we add the user ID to all documents along with the version of the
+    document schema, and we don't want to leak these details when returning
+    results in get_results(). See sanitize_results() for more info.
     """
 
     _instance = None
+
+    # A list of keys that we don't want to return to the client but that are a
+    # necessary part of the document schema.
+    _internal_keys = ("_id", "user_id", "version", "test_name")
 
     def __new__(cls):
         if cls._instance is None:
@@ -106,29 +147,55 @@ class DBStore(object):
         await self.strategy.init_db()
         self.started = True
 
+    async def add_results(self, user: User, test_name: str, results: List[Dict]):
+        """
+        Create the representation of test results for storing in the DB, e.g. add
+        metadata like user id and version of the schema.
+        """
+        new_list = []
+        for result in results:
+            # TODO(matt) Fix this
+            d = dict(result)
+            d.update({"user_id": user.id, "test_name": test_name})
+            new_list.append(d)
 
-class OAuthAccount(BaseOAuthAccount):
-    pass
+        test_results = self.db.test_results
+        await test_results.insert_many(new_list)
 
+    async def get_results(self, user: User, test_name: str) -> List[Dict]:
+        """
+        Retrieve test results for a given user and test name.
 
-class User(BeanieBaseUser, Document):
-    oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
+        If no results are found, return an empty list.
+        """
+        test_results = self.db.test_results
 
+        # Strip out the internal keys
+        exclude_projection = {key: 0 for key in self._internal_keys}
 
-async def get_user_db():
-    yield BeanieUserDatabase(User, OAuthAccount)
+        results = await test_results.find(
+            {"user_id": user.id, "test_name": test_name}, exclude_projection
+        ).to_list()
 
+        return results
 
-class UserRead(schemas.BaseUser[PydanticObjectId]):
-    pass
+    async def get_test_names(self, user: User) -> List[str]:
+        """
+        Get a list of all test names for a given user.
 
+        Returns an empty list if no results are found.
+        """
+        test_results = self.db.test_results
+        return await test_results.distinct("test_name", {"user_id": user.id})
 
-class UserCreate(schemas.BaseUserCreate):
-    pass
+    async def delete_all_results(self, user: User):
+        """
+        Delete all results for a given user.
 
-
-class UserUpdate(schemas.BaseUserUpdate):
-    pass
+        If no results are found, do nothing.
+        """
+        test_results = self.db.test_results
+        await test_results.delete_many({"user_id": user.id})
 
 
 # Will be patched by conftest.py if we're running tests
