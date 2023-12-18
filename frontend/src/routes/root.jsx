@@ -1,87 +1,10 @@
 import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
-import "./App.css";
+import { Outlet, Link, useLoaderData } from "react-router-dom";
 
-function NoMatch() {
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>404: Page Not Found</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
-    </div>
-  );
+export async function loader() {
+  const contacts = { user: "test" };
+  return { contacts };
 }
-
-async function loginUser(credentials) {
-  return fetch("http://localhost:8000/auth/jwt/login", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-    },
-    body: JSON.stringify(credentials),
-  }).then((data) => data.json());
-}
-
-const Login = () => {
-  const [username, setUsername] = useState();
-  const [password, setPassword] = useState();
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = await loginUser({
-      username,
-      password,
-    });
-    console.log(token);
-    setToken(token);
-  };
-
-  const githubSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Github submit");
-    const data = await fetch("http://localhost/api/v0/auth/github/authorize")
-      .then((response) => response.json())
-      .then((url) => url["authorization_url"])
-      .then((url) => {
-        console.log(url);
-        window.location.href = url;
-      })
-      .catch((error) => console.log(error));
-  };
-
-  return (
-    <div className="row mt-5">
-      <div className="col-sm-6 offset-sm-3">
-        <form onSubmit={githubSubmit}>
-          <div className="mb-3">
-            <label htmlFor="exampleInputEmail1" className="form-label">
-              Email address
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="exampleInputEmail1"
-              onChange={(e) => setUsername(e.target.value)}
-            />
-            <div className="mb-3">
-              <label htmlFor="exampleInputPassword1" className="form-label">
-                Password
-              </label>
-              <input
-                type="password"
-                className="form-control"
-                id="exampleInputPassword1"
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
-          </div>
-          <button type="submit" className="btn btn-success">
-            Submit
-          </button>
-        </form>
-      </div>
-    </div>
-  );
-};
 
 const LoginButton = () => {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -92,12 +15,15 @@ const LoginButton = () => {
   if (!loggedIn) {
     return (
       <>
-        <Link to="/login" className="btn me-2">
-          Log In
+        <Link to="/login" className="btn btn-success">
+          New login button
         </Link>
-        <a href="/foobar" className="btn btn-success" type="submit">
-          Sign Up
+        <a href="/login" className="btn me-2">
+          Log In
         </a>
+        <button className="btn btn-success" type="submit">
+          Sign Up
+        </button>
       </>
     );
   } else {
@@ -172,7 +98,7 @@ const NavHeader = () => {
 const Banner = () => {
   return (
     <div className="container-fluid border p-5 text-center">
-      <h1>Detect every performance change.</h1>
+      <h1>Detect every performance change, sometimes.</h1>
       <h5>
         The performance measurement tool that harnesses the power of change
         point detection
@@ -257,34 +183,22 @@ const SignUpButton = () => {
   }
 };
 
-const Root = () => {
+function Root() {
+  const [count, setCount] = useState(0);
+  const { contacts } = useLoaderData();
+
   return (
     <>
+      <NavHeader />
       <Banner />
       <div className="container mt-5">
-        <FeatureHighlight />
-        <SignUpButton />
+        {/* <FeatureHighlight /> */}
+        {/* <SignUpButton /> */}
+        {/* <Coffee>Make the background white</Coffee> */}
+        <Outlet />
       </div>
-    </>
-  );
-};
-
-function App() {
-  const [count, setCount] = useState(0);
-  const [token, setToken] = useState();
-
-  return (
-    <>
-      <Router>
-        <NavHeader />
-        <Routes>
-          <Route path="/" element={<Root />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="*" element={<NoMatch />} />
-        </Routes>
-      </Router>
     </>
   );
 }
 
-export default App;
+export default Root;
