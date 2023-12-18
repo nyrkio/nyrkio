@@ -52,7 +52,7 @@ class ConnectionStrategy(ABC):
     def connect(self):
         pass
 
-    def init_db(self):
+    async def init_db(self):
         pass
 
 
@@ -191,9 +191,10 @@ class DBStore(object):
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
 
+        # TODO(matt) We should read results in batches, not all at once
         results = await test_results.find(
             {"user_id": user.id, "test_name": test_name}, exclude_projection
-        ).to_list()
+        ).to_list(None)
 
         return results
 
@@ -214,6 +215,17 @@ class DBStore(object):
         """
         test_results = self.db.test_results
         await test_results.delete_many({"user_id": user.id})
+
+    async def delete_result(self, user: User, test_name: str, timestamp: int):
+        """
+        Delete a single result for a given user, test name, and timestamp.
+
+        If no matching results are found, do nothing.
+        """
+        test_results = self.db.test_results
+        await test_results.delete_one(
+            {"user_id": user.id, "test_name": test_name, "timestamp": timestamp}
+        )
 
 
 # Will be patched by conftest.py if we're running tests

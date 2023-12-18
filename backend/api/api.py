@@ -43,6 +43,20 @@ async def get_result(
     return await store.get_results(user, test_name)
 
 
+@api_router.delete("/result/{test_name}")
+async def delete_result(
+    test_name: str, timestamp: int, user: User = Depends(auth.current_active_user)
+) -> List[Dict]:
+    store = DBStore()
+    test_names = await store.get_test_names(user)
+
+    if not list(filter(lambda name: name == test_name, test_names)):
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    await store.delete_result(user, test_name, timestamp)
+    return []
+
+
 class TestResult(BaseModel):
     timestamp: int
     metrics: Optional[Dict]
