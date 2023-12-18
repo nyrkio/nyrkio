@@ -216,6 +216,17 @@ class DBStore(object):
         test_results = self.db.test_results
         await test_results.delete_many({"user_id": user.id})
 
+    async def delete_result(self, user: User, test_name: str, timestamp: int):
+        """
+        Delete a single result for a given user, test name, and timestamp.
+
+        If no matching results are found, do nothing.
+        """
+        test_results = self.db.test_results
+        await test_results.delete_one(
+            {"user_id": user.id, "test_name": test_name, "timestamp": timestamp}
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

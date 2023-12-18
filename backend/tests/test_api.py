@@ -120,7 +120,7 @@ def test_add_multiple_tests(client):
         assert name in test_names
 
 
-def test_delete_results(client):
+def test_delete_all_user_results(client):
     """Test that we can delete all a user's results"""
     client.login()
 
@@ -153,3 +153,41 @@ def test_delete_results(client):
     response = client.get("/api/v0/results")
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_delete_single_result(client):
+    """Delete a single test result"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": {"metric1": 2.0, "metric2": 3.0},
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    # Read back the result
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+    assert "benchmark1" in response.json()[0]["test_name"]
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == data
+
+    # Delete a single result by timestamp
+    response = client.delete("/api/v0/result/benchmark1?timestamp=1")
+    assert response.status_code == 200
+
+    # Read back the result and check timestamp2 is still there
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == [data[1]]
