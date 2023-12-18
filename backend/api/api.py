@@ -78,7 +78,6 @@ app.include_router(api_router, prefix="/api/v0")
 app.include_router(auth.auth_router, prefix="/api/v0")
 
 
-
 @app.on_event("startup")
 async def do_db():
     from backend.db.db import do_on_startup

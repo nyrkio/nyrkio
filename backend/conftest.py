@@ -25,7 +25,8 @@ class AuthenticatedTestClient(TestClient):
 
     def login(self):
         response = self.post(
-            "/api/v0/auth/jwt/login", data={"username": "john@foo.com", "password": "foo"}
+            "/api/v0/auth/jwt/login",
+            data={"username": "john@foo.com", "password": "foo"},
         )
         assert response.status_code == 200
         token = response.json()["access_token"]
