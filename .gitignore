@@ -5,3 +5,7 @@
 /backend/nykrio.egg-info/
 
 **/__pycache__
+
+.vscode
+
+.env.backend
