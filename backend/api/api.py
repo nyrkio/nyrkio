@@ -15,6 +15,7 @@ app.include_router(auth.auth_router)
 
 api_router = APIRouter(prefix="/api/v0")
 
+
 @api_router.get("/results")
 async def results(user: User = Depends(auth.current_active_user)) -> List[Dict]:
     store = DBStore()

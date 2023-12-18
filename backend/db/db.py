@@ -119,6 +119,11 @@ class DBStore(object):
 
     _instance = None
 
+    # The version of the schema for test results. This version is independent of the
+    # version of the API or Nyrkiö release. It is only incremented when the schema
+    # for test results changes.
+    _VERSION = 1
+
     # A list of keys that we don't want to return to the client but that are a
     # necessary part of the document schema.
     _internal_keys = ("_id", "user_id", "version", "test_name")
@@ -147,18 +152,31 @@ class DBStore(object):
         await self.strategy.init_db()
         self.started = True
 
+    @staticmethod
+    def create_doc_with_metadata(doc: Dict, user: User, test_name: str) -> Dict:
+        """
+        Return a new document with added metadata, e.g. the version of the schema and the user ID.
+
+        This is used when storing documents in the DB.
+
+          user_id -> The ID of the user who created the document
+          version -> The version of the schema for the document
+          test_name -> The name of the test
+        """
+        d = dict(doc)
+        d["user_id"] = user.id
+        d["version"] = DBStore._VERSION
+        d["test_name"] = test_name
+        return d
+
     async def add_results(self, user: User, test_name: str, results: List[Dict]):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
         """
-        new_list = []
-        for result in results:
-            # TODO(matt) Fix this
-            d = dict(result)
-            d.update({"user_id": user.id, "test_name": test_name})
-            new_list.append(d)
-
+        new_list = [
+            DBStore.create_doc_with_metadata(r, user, test_name) for r in results
+        ]
         test_results = self.db.test_results
         await test_results.insert_many(new_list)
 

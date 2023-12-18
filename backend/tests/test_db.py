@@ -5,7 +5,6 @@ from backend.db.db import (
     DBStore,
     DBStoreAlreadyInitialized,
     MockDBStrategy,
-    User,
 )
 
 
@@ -42,3 +41,25 @@ def test_add_single_result():
     response = asyncio.run(store.get_results(user, "benchmark1"))
 
     assert results == response
+
+
+def test_create_doc_with_metadata():
+    """Ensure that we create a doc with the correct metadata"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    test_result = {"foo": "bar"}
+    doc = store.create_doc_with_metadata(test_result, user, test_name)
+
+    assert doc["user_id"] == user.id
+    assert doc["version"] == DBStore._VERSION
+    assert doc["test_name"] == test_name
+
+    # Ensure that we don't modify the original dict
+    assert "user_id" not in test_result
+    assert "version" not in test_result
+    assert "test_name" not in test_result
