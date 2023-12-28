@@ -10,6 +10,7 @@ from backend.db.db import User, DBStore
 
 app = FastAPI()
 
+
 api_router = APIRouter()
 
 
