@@ -1,0 +1,15 @@
+FROM node:bookworm as build
+
+WORKDIR /app
+COPY frontend/package*.json ./
+RUN ls -al /app/package.json
+RUN npm install
+COPY frontend/. ./
+RUN npm run build
+
+# production env
+FROM nginx:1.25
+COPY --from=build /app/dist /usr/share/nginx/html
+EXPOSE 80
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx/nginx.conf /etc/nginx/conf.d

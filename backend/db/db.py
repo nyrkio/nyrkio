@@ -62,11 +62,8 @@ class MongoDBStrategy(ConnectionStrategy):
     """
 
     def connect(self):
-        db_user = os.environ.get("DB_USER", None)
-        db_password = os.environ.get("DB_PASSWORD", None)
         db_name = os.environ.get("DB_NAME", None)
-
-        url = f"mongodb+srv://{db_user}:{db_password}@prod0.dn3tizr.mongodb.net/?retryWrites=true&w=majority"
+        url = os.environ.get("DB_URL", None)
         client = motor.motor_asyncio.AsyncIOMotorClient(
             url, uuidRepresentation="standard"
         )

@@ -10,10 +10,8 @@ from backend.db.db import User, DBStore
 
 app = FastAPI()
 
-app.include_router(auth.auth_router)
 
-
-api_router = APIRouter(prefix="/api/v0")
+api_router = APIRouter()
 
 
 @api_router.get("/results")
@@ -77,7 +75,8 @@ async def add_result(
 
 
 # Must come at the end, once we've setup all the routes
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api/v0")
+app.include_router(auth.auth_router, prefix="/api/v0")
 
 
 @app.on_event("startup")

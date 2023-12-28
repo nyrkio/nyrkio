@@ -1,32 +1,163 @@
-import { useState } from "react";
+import { createContext, useState } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  useNavigate,
+} from "react-router-dom";
 import "./App.css";
 
-const LoginButton = () => {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const handleLogoutClick = () => {
-    // console.log(loggedIn);
-    loggedIn ? setLoggedIn(false) : setLoggedIn(true);
+const LoggedInContext = createContext(false);
+
+function NoMatch() {
+  return (
+    <div style={{ padding: 20 }}>
+      <h2>404: Page Not Found</h2>
+      <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
+    </div>
+  );
+}
+
+async function loginUser(credentials) {
+  return fetch("http://localhost:8000/auth/jwt/login", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
+    body: JSON.stringify(credentials),
+  }).then((data) => data.json());
+}
+
+const Login = ({ loggedIn, setLoggedIn }) => {
+  const [username, setUsername] = useState();
+  const [password, setPassword] = useState();
+
+  const githubSubmit = async (e) => {
+    // e.preventDefault();
+    // console.log("Github submit");
+    // const data = await fetch("http://localhost/api/v0/auth/github/authorize")
+    //   .then((response) => response.json())
+    //   .then((url) => url["authorization_url"])
+    //   .then((url) => {
+    //     console.log(url);
+    //     window.location.href = url;
+    //     setLoggedIn(true);
+    //     localStorage.setItem("loggedIn", "true");
+    //   })
+    //   .catch((error) => console.log(error));
   };
-  if (!loggedIn) {
-    return (
-      <>
-        <a href="/login" className="btn me-2">
-          Log In
-        </a>
-        <button className="btn btn-success" type="submit">
+
+  const navigate = useNavigate();
+  const authSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Auth submit: " + username + " " + password);
+    let credentialsData = new URLSearchParams();
+    credentialsData.append("username", username);
+    credentialsData.append("password", password);
+
+    const data = await fetch("http://localhost/api/v0/auth/jwt/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: credentialsData,
+    })
+      .then((response) => response.json())
+      .then((body) => {
+        setLoggedIn(true);
+        localStorage.setItem("loggedIn", "true");
+        try {
+          navigate("/");
+        } catch (error) {
+          console.log(error);
+        }
+      })
+      .catch((error) => console.log(error));
+  };
+
+  return (
+    <div className="row mt-5">
+      <div className="col-sm-3 offset-sm-4">
+        <form onSubmit={authSubmit}>
+          <div className="mb-3">
+            <label htmlFor="exampleInputEmail1" className="form-label">
+              Username
+            </label>
+            <input
+              type="text"
+              className="form-control"
+              id="exampleInputEmail1"
+              onChange={(e) => setUsername(e.target.value)}
+            />
+            <div className="mb-3">
+              <label htmlFor="exampleInputPassword1" className="form-label">
+                Password
+              </label>
+              <input
+                type="password"
+                className="form-control"
+                id="exampleInputPassword1"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="text-center mt-2">
+            <button type="submit" className="btn btn-success">
+              Submit
+            </button>
+          </div>
+        </form>
+        {/* <div className="text-center mt-5">
+          <button className="btn btn-success" onClick={githubSubmit}>
+            Log in with GitHub
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-github"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
+            </svg>
+          </button>
+        </div> */}
+      </div>
+    </div>
+  );
+};
+
+const LogOut = ({ setLoggedIn }) => {
+  const handleLogoutClick = () => {
+    console.log("Setting logged in to false");
+    setLoggedIn(false);
+    localStorage.setItem("loggedIn", "false");
+  };
+  return (
+    <>
+      <button className="btn btn-success" onClick={handleLogoutClick}>
+        Log Out
+      </button>
+    </>
+  );
+};
+const LoginButton = ({ loggedIn, setLoggedIn }) => {
+  return (
+    <>
+      <Link
+        to="/login"
+        className="btn btn-success"
+        loggedIn={loggedIn}
+        setLoggedIn={setLoggedIn}
+      >
+        Log In
+      </Link>
+      {/* <a href="/foobar" className="btn btn-success" type="submit">
           Sign Up
-        </button>
-      </>
-    );
-  } else {
-    return (
-      <>
-        <button className="btn btn-success" onClick={handleLogoutClick}>
-          Log Out
-        </button>
-      </>
-    );
-  }
+        </a> */}
+    </>
+  );
 };
 
 const NavigationItems = () => {
@@ -76,12 +207,12 @@ const NavigationItems = () => {
   );
 };
 
-const NavHeader = () => {
+const NavHeader = ({ loggedIn, setLoggedIn }) => {
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid">
         <NavigationItems />
-        <LoginButton />
+        {loggedIn ? <LogOut setLoggedIn={setLoggedIn} /> : <LoginButton />}
       </div>
     </nav>
   );
@@ -175,17 +306,81 @@ const SignUpButton = () => {
   }
 };
 
+const Root = ({ loggedIn }) => {
+  return (
+    <>
+      <Banner />
+      <div className="container mt-5">
+        {loggedIn ? (
+          <Dashboard />
+        ) : (
+          <>
+            <FeatureHighlight />
+            <SignUpButton />
+          </>
+        )}
+      </div>
+    </>
+  );
+};
+
+const Dashboard = () => {
+  const verifyAuthButton = () => {
+    console.log("Dashboard button clicked");
+    const data = fetch("http://localhost/api/v0/auth/authenticated-route")
+      .then((response) => response.json())
+      .then((url) => {
+        console.log(url);
+      })
+      .catch((error) => console.log(error));
+  };
+
+  const verifyAPI = () => {
+    console.log("Hitting API For test results");
+    const data = fetch("http://localhost/api/v0/results")
+      .then((response) => response.json())
+      .then((data) => {
+        console.log(data);
+      })
+      .catch((error) => console.log(error));
+  };
+  return (
+    <>
+      <h1>Dashboard</h1>
+      <button className="btn btn-success" onClick={verifyAuthButton}>
+        Verify auth
+      </button>
+      <button className="btn btn-success" onClick={verifyAPI}>
+        Verify API
+      </button>
+    </>
+  );
+};
+
 function App() {
   const [count, setCount] = useState(0);
+  const [token, setToken] = useState();
+  console.log("Resetting");
+  const [loggedIn, setLoggedIn] = useState(() => {
+    const saved = localStorage.getItem("loggedIn");
+    const initialValue = JSON.parse(saved);
+    console.log("Reading " + saved);
+    return initialValue || false;
+  });
 
   return (
     <>
-      <NavHeader />
-      <Banner />
-      <div className="container mt-5">
-        <FeatureHighlight />
-        <SignUpButton />
-      </div>
+      <Router>
+        <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+        <Routes>
+          <Route path="/" element={<Root loggedIn={loggedIn} />} />
+          <Route
+            path="/login"
+            element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
+          />
+          <Route path="*" element={<NoMatch />} />
+        </Routes>
+      </Router>
     </>
   );
 }

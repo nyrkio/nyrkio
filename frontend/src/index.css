@@ -58,3 +58,11 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+#error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
