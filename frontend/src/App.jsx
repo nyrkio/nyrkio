@@ -67,6 +67,7 @@ const Login = ({ loggedIn, setLoggedIn }) => {
       .then((body) => {
         setLoggedIn(true);
         localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("token", body["access_token"]);
         try {
           navigate("/");
         } catch (error) {
@@ -327,7 +328,12 @@ const Root = ({ loggedIn }) => {
 const Dashboard = () => {
   const verifyAuthButton = () => {
     console.log("Dashboard button clicked");
-    const data = fetch("http://localhost/api/v0/auth/authenticated-route")
+    const data = fetch("http://localhost/api/v0/auth/authenticated-route", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
       .then((response) => response.json())
       .then((url) => {
         console.log(url);
@@ -337,7 +343,12 @@ const Dashboard = () => {
 
   const verifyAPI = () => {
     console.log("Hitting API For test results");
-    const data = fetch("http://localhost/api/v0/results")
+    const data = fetch("http://localhost/api/v0/results", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    })
       .then((response) => response.json())
       .then((data) => {
         console.log(data);
