@@ -57,7 +57,7 @@ async def delete_result(
 
 class TestResult(BaseModel):
     timestamp: int
-    metrics: Optional[Dict]
+    metrics: Optional[List[Dict]]
     attributes: Optional[Dict]
 
 

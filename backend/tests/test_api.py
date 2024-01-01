@@ -45,7 +45,7 @@ def test_add_result(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         }
     ]
@@ -70,12 +70,12 @@ def test_add_multiple_test_results_at_once(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
         {
             "timestamp": 2,
-            "metrics": {"metric1": 2.0, "metric2": 3.0},
+            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
     ]
@@ -101,7 +101,7 @@ def test_add_multiple_tests(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         }
     ]
@@ -128,12 +128,12 @@ def test_delete_all_user_results(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
         {
             "timestamp": 2,
-            "metrics": {"metric1": 2.0, "metric2": 3.0},
+            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
     ]
@@ -162,12 +162,12 @@ def test_delete_single_result(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": {"metric1": 1.0, "metric2": 2.0},
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
         {
             "timestamp": 2,
-            "metrics": {"metric1": 2.0, "metric2": 3.0},
+            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
     ]
