@@ -1,4 +1,4 @@
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import {
   BrowserRouter as Router,
   Routes,
@@ -6,6 +6,10 @@ import {
   Link,
   useNavigate,
 } from "react-router-dom";
+import { Line } from "react-chartjs-2";
+import { Chart as ChartJS } from "chart.js/auto";
+import { Chart } from "react-chartjs-2";
+import { format } from "date-fns";
 import "./App.css";
 
 const LoggedInContext = createContext(false);
@@ -310,12 +314,12 @@ const SignUpButton = () => {
 const Root = ({ loggedIn }) => {
   return (
     <>
-      <Banner />
-      <div className="container mt-5">
+      <div className="container mt-5 text-center">
         {loggedIn ? (
           <Dashboard />
         ) : (
           <>
+            <Banner />
             <FeatureHighlight />
             <SignUpButton />
           </>
@@ -326,24 +330,10 @@ const Root = ({ loggedIn }) => {
 };
 
 const Dashboard = () => {
-  const verifyAuthButton = () => {
-    console.log("Dashboard button clicked");
-    const data = fetch("http://localhost/api/v0/auth/authenticated-route", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    })
-      .then((response) => response.json())
-      .then((url) => {
-        console.log(url);
-      })
-      .catch((error) => console.log(error));
-  };
-
-  const verifyAPI = () => {
-    console.log("Hitting API For test results");
-    const data = fetch("http://localhost/api/v0/results", {
+  const [loading, setLoading] = useState(false);
+  const [displayData, setDisplayData] = useState([]);
+  const fetchData = () => {
+    return fetch("http://localhost/api/v0/results", {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -351,19 +341,108 @@ const Dashboard = () => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
+        const d = data.map((element) => {
+          const test_name = element.test_name;
+          const results = fetch("http://localhost/api/v0/result/" + test_name, {
+            headers: {
+              "Content-type": "application/json",
+              Authorization: "Bearer " + localStorage.getItem("token"),
+            },
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              data.sort((a, b) => {
+                return a.timestamp - b.timestamp;
+              });
+              setDisplayData(data);
+            });
+        });
       })
       .catch((error) => console.log(error));
   };
+
+  const parseData = (data, metricName) => {
+    console.log(data);
+    const value_map = data.map(
+      (result) =>
+        result.metrics
+          .filter((metric) => metric.name === metricName)
+          .map((metric) => metric.value)[0]
+    );
+    console.log(value_map);
+    return value_map;
+  };
+
+  const parseTimestamps = (data) => {
+    const timestamp_map = data.map((result) => {
+      const utcSeconds = result.timestamp;
+      var d = new Date(0);
+      d.setUTCSeconds(utcSeconds);
+      return format(d, "yyyy-MM-dd HH:mm");
+    });
+    return timestamp_map;
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData().finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  console.log("Display data");
+  console.log(displayData);
+
+  const timestamps = parseTimestamps(displayData);
+  var metricMap = [];
+  displayData.map((result) => {
+    result.metrics.map((metric) => {
+      metricMap.push(metric.name);
+    });
+  });
+
+  // Only want unique names
+  var unique = metricMap.filter(
+    (value, index, self) => self.indexOf(value) === index
+  );
+  console.log("unique: " + unique);
+
+  const drawLineChart = (metricName) => {
+    return (
+      <Line
+        datasetIdKey="foo"
+        data={{
+          labels: timestamps,
+          datasets: [
+            {
+              id: 1,
+              label: metricName,
+              data: parseData(displayData, metricName),
+              pointRadius: 0,
+            },
+          ],
+        }}
+        options={{
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <h1>Dashboard</h1>
-      <button className="btn btn-success" onClick={verifyAuthButton}>
-        Verify auth
-      </button>
-      <button className="btn btn-success" onClick={verifyAPI}>
-        Verify API
-      </button>
+      {loading ? (
+        <div>Loading</div>
+      ) : (
+        <div className="container">{unique.map(drawLineChart)}</div>
+      )}
     </>
   );
 };
