@@ -313,12 +313,12 @@ const SignUpButton = () => {
 const Root = ({ loggedIn }) => {
   return (
     <>
-      <Banner />
-      <div className="container mt-5">
+      <div className="container mt-5 text-center">
         {loggedIn ? (
           <Dashboard />
         ) : (
           <>
+            <Banner />
             <FeatureHighlight />
             <SignUpButton />
           </>
@@ -329,25 +329,9 @@ const Root = ({ loggedIn }) => {
 };
 
 const Dashboard = () => {
-  const verifyAuthButton = () => {
-    console.log("Dashboard button clicked");
-    const data = fetch("http://localhost/api/v0/auth/authenticated-route", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    })
-      .then((response) => response.json())
-      .then((url) => {
-        console.log(url);
-      })
-      .catch((error) => console.log(error));
-  };
-
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const fetchData = () => {
-    console.log("Hitting API For test results");
     return fetch("http://localhost/api/v0/results", {
       headers: {
         "Content-type": "application/json",
@@ -366,16 +350,10 @@ const Dashboard = () => {
           })
             .then((response) => response.json())
             .then((data) => {
-              console.log("Showing displayDAta");
-              console.log(data);
-              // setDisplayData([1, 2, 3, 4, 5]);
-
               data.sort((a, b) => {
                 return a.timestamp - b.timestamp;
               });
               setDisplayData(data);
-              console.log("Show display again");
-              console.log(displayData.length);
             });
         });
       })
@@ -400,10 +378,6 @@ const Dashboard = () => {
     return timestamp_map;
   };
 
-  const verifyAPI = () => {
-    // setDisplayData(true);
-  };
-
   useEffect(() => {
     setLoading(true);
     fetchData().finally(() => {
@@ -421,41 +395,39 @@ const Dashboard = () => {
       metricMap.push(metric.name);
     });
   });
+
   // Only want unique names
   var unique = metricMap.filter(
     (value, index, self) => self.indexOf(value) === index
   );
   console.log("unique: " + unique);
 
+  const drawLineChart = (metricName) => {
+    return (
+      <Line
+        datasetIdKey="foo"
+        data={{
+          labels: timestamps,
+          datasets: [
+            {
+              id: 1,
+              label: metricName,
+              data: parseData(displayData, metricName),
+              pointRadius: 0,
+            },
+          ],
+        }}
+      />
+    );
+  };
+
   return (
     <>
       <h1>Dashboard</h1>
-      <button className="btn btn-success" onClick={verifyAuthButton}>
-        Verify auth
-      </button>
-      <button className="btn btn-success" onClick={verifyAPI}>
-        Verify API
-      </button>
       {loading ? (
         <div>Loading</div>
       ) : (
-        unique.map((metricName) => {
-          return (
-            <Line
-              datasetIdKey="foo"
-              data={{
-                labels: timestamps,
-                datasets: [
-                  {
-                    id: 1,
-                    label: metricName,
-                    data: parseData(displayData, metricName),
-                  },
-                ],
-              }}
-            />
-          );
-        })
+        <div className="container">{unique.map(drawLineChart)}</div>
       )}
     </>
   );
