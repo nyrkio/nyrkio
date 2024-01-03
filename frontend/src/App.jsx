@@ -417,6 +417,15 @@ const Dashboard = () => {
             },
           ],
         }}
+        options={{
+          scales: {
+            x: {
+              grid: {
+                display: false,
+              },
+            },
+          },
+        }}
       />
     );
   };
