@@ -9,6 +9,7 @@ import {
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
 import { Chart } from "react-chartjs-2";
+import { format } from "date-fns";
 import "./App.css";
 
 const LoggedInContext = createContext(false);
@@ -373,8 +374,12 @@ const Dashboard = () => {
   };
 
   const parseTimestamps = (data) => {
-    const timestamp_map = data.map((result) => result.timestamp);
-    console.log(timestamp_map);
+    const timestamp_map = data.map((result) => {
+      const utcSeconds = result.timestamp;
+      var d = new Date(0);
+      d.setUTCSeconds(utcSeconds);
+      return format(d, "yyyy-MM-dd HH:mm");
+    });
     return timestamp_map;
   };
 
