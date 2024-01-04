@@ -191,3 +191,47 @@ def test_delete_single_result(client):
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
     assert response.json() == [data[1]]
+
+
+def test_change_points(client):
+    """Run change point detection on a series"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3

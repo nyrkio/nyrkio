@@ -46,7 +46,8 @@ def test_calculate_changes_in_series():
 
     # Identical metrics should not result in any changes
     changes = series.calculate_changes()
-    assert not changes["metric1"]
+    assert "benchmark1" in changes
+    assert "metric1" not in changes["benchmark1"]
 
     # Create a new series with a change in metric1
     series = PerformanceTestResultSeries("benchmark2")
@@ -56,7 +57,9 @@ def test_calculate_changes_in_series():
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
     changes = series.calculate_changes()
-    assert changes["metric1"]
+    assert "benchmark2" in changes
+    for ch in changes["benchmark2"][0]["changes"]:
+        assert ch["metric"] == "metric1"
 
 
 def test_deleting_result_from_series():
@@ -97,7 +100,8 @@ def test_deleting_non_existing_result_from_series():
 
 def test_calculate_changes_with_multiple_metrics():
     """Calculate changes in a series with multiple metrics"""
-    series = PerformanceTestResultSeries("benchmark1")
+    testname = "benchmark1"
+    series = PerformanceTestResultSeries(testname)
 
     attr = {"attr1": "value1", "attr2": "value2"}
     metrics = [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 1.0)]
@@ -108,16 +112,19 @@ def test_calculate_changes_with_multiple_metrics():
 
     # Identical metrics should not result in any changes
     changes = series.calculate_changes()
-    assert not changes["metric1"]
-    assert not changes["metric2"]
+    assert testname in changes
+    assert "metric1" not in changes[testname]
+    assert "metric2" not in changes[testname]
 
     # Create a new series with a change in metric1 and metric2
-    series = PerformanceTestResultSeries("benchmark2")
+    testname = "benchmark2"
+    series = PerformanceTestResultSeries(testname)
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
     metrics = [ResultMetric("metric1", "µs", 2.0), ResultMetric("metric2", "µs", 2.0)]
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
     changes = series.calculate_changes()
-    assert changes["metric1"]
-    assert changes["metric2"]
+    assert testname in changes
+    for ch in changes[testname][0]["changes"]:
+        assert ch["metric"] in ["metric1", "metric2"]

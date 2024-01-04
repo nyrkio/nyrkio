@@ -1,7 +1,10 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from collections import defaultdict
+import json
 from typing import List
+
+from hunter.report import Report, ReportType
 
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
@@ -96,7 +99,11 @@ class PerformanceTestResultSeries:
         series = Series(
             self.name, None, timestamps, metric_units, metric_data, attributes
         )
-        return series.analyze().change_points
+
+        change_points = series.analyze().change_points_by_time
+        report = Report(series, change_points)
+        produced_report = report.produce_report(self.name, ReportType.JSON)
+        return json.loads(produced_report)
 
 
 class PerformanceTestResultExistsError(Exception):

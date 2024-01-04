@@ -1,6 +1,11 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from typing import Dict, List, Optional, Any
+from backend.core.core import (
+    PerformanceTestResult,
+    PerformanceTestResultSeries,
+    ResultMetric,
+)
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
@@ -72,6 +77,27 @@ async def add_result(
     store = DBStore()
     await store.add_results(user, test_name, data.root)
     return {}
+
+
+@api_router.get("/result/{test_name}/changes")
+async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+    store = DBStore()
+    results = await store.get_results(user, test_name)
+    series = PerformanceTestResultSeries(test_name)
+
+    # TODO(matt) - iterating like this is silly, we should just be able to pass
+    # the results in batch.
+    for r in results:
+        metrics = [
+            ResultMetric(name=r["name"], unit=r["unit"], value=r["value"])
+            for r in r["metrics"]
+        ]
+        result = PerformanceTestResult(
+            timestamp=r["timestamp"], metrics=metrics, attributes=r["attributes"]
+        )
+        series.add_result(result)
+
+    return series.calculate_changes()
 
 
 # Must come at the end, once we've setup all the routes
