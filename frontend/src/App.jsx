@@ -332,6 +332,7 @@ const Root = ({ loggedIn }) => {
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
+  const [changePointData, setChangePointData] = useState([]);
   const fetchData = async () => {
     const response = await fetch("http://localhost/api/v0/results", {
       headers: {
@@ -355,6 +356,18 @@ const Dashboard = () => {
         return a.timestamp - b.timestamp;
       });
       setDisplayData(resultData);
+
+      const changes = await fetch(
+        "http://localhost/api/v0/result/" + test_name + "/changes",
+        {
+          headers: {
+            "Content-type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      const changeData = await changes.json();
+      setChangePointData(changeData);
     };
     const data = await response.json();
     const d = data.map(doMap);
@@ -372,9 +385,9 @@ const Dashboard = () => {
     return value_map;
   };
 
-  const parseTimestamps = (data) => {
-    const timestamp_map = data.map((result) => {
-      const utcSeconds = result.timestamp;
+  const parseTimestamps = (timestamps) => {
+    const timestamp_map = timestamps.map((t) => {
+      const utcSeconds = t;
       var d = new Date(0);
       d.setUTCSeconds(utcSeconds);
       return format(d, "yyyy-MM-dd HH:mm");
@@ -392,7 +405,10 @@ const Dashboard = () => {
   console.log("Display data");
   console.log(displayData);
 
-  const timestamps = parseTimestamps(displayData);
+  const timestamps = displayData.map((result) => {
+    return result.timestamp;
+  });
+
   var metricMap = [];
   displayData.map((result) => {
     result.metrics.map((metric) => {
@@ -400,24 +416,47 @@ const Dashboard = () => {
     });
   });
 
-  // Only want unique names
+  // Only want unique metric names
   var unique = metricMap.filter(
     (value, index, self) => self.indexOf(value) === index
   );
   console.log("unique: " + unique);
+
+  // {'testName':
+  //    [{
+  //      'time': 123,
+  //      'changes': [{'forward_change_percent': 900, 'metric': 'metric1'}]
+  //    }]
+  // }
+  var changePointIndexes = [];
+  const changePointTimes = [];
+  Object.entries(changePointData).forEach(([key, value]) => {
+    value.forEach((changePoint) => {
+      changePointTimes.push(changePoint["time"]);
+    });
+  });
+
+  timestamps.map((timestamp, index) => {
+    if (changePointTimes.includes(timestamp)) {
+      changePointIndexes.push(index);
+    }
+  });
 
   const drawLineChart = (metricName) => {
     return (
       <Line
         datasetIdKey="foo"
         data={{
-          labels: timestamps,
+          labels: parseTimestamps(timestamps),
           datasets: [
             {
               id: 1,
               label: metricName,
               data: parseData(displayData, metricName),
-              pointRadius: 0,
+              pointRadius: (context) => {
+                const c = changePointIndexes;
+                return c.includes(context.dataIndex) ? 8 : 0;
+              },
             },
           ],
         }}
