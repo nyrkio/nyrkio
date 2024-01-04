@@ -7,6 +7,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Line } from "react-chartjs-2";
+// DO NOT REMOVE
+// necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";
 import { Chart } from "react-chartjs-2";
 import { format } from "date-fns";
@@ -333,6 +335,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
+  const [testName, setTestName] = useState("");
   const fetchData = async () => {
     const response = await fetch("http://localhost/api/v0/results", {
       headers: {
@@ -342,6 +345,7 @@ const Dashboard = () => {
     });
     const doMap = async (element) => {
       const test_name = element.test_name;
+      setTestName(test_name);
       const results = await fetch(
         "http://localhost/api/v0/result/" + test_name,
         {
@@ -444,32 +448,37 @@ const Dashboard = () => {
 
   const drawLineChart = (metricName) => {
     return (
-      <Line
-        datasetIdKey="foo"
-        data={{
-          labels: parseTimestamps(timestamps),
-          datasets: [
-            {
-              id: 1,
-              label: metricName,
-              data: parseData(displayData, metricName),
-              pointRadius: (context) => {
-                const c = changePointIndexes;
-                return c.includes(context.dataIndex) ? 8 : 0;
+      <>
+        <h6 className="text-center">
+          {testName}: {metricName}
+        </h6>
+        <Line
+          datasetIdKey="foo"
+          data={{
+            labels: parseTimestamps(timestamps),
+            datasets: [
+              {
+                id: 1,
+                label: metricName,
+                data: parseData(displayData, metricName),
+                pointRadius: (context) => {
+                  const c = changePointIndexes;
+                  return c.includes(context.dataIndex) ? 8 : 0;
+                },
+              },
+            ],
+          }}
+          options={{
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
               },
             },
-          ],
-        }}
-        options={{
-          scales: {
-            x: {
-              grid: {
-                display: false,
-              },
-            },
-          },
-        }}
-      />
+          }}
+        />
+      </>
     );
   };
 
