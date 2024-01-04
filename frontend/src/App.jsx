@@ -476,6 +476,11 @@ const Dashboard = () => {
                 },
               },
             },
+            plugins: {
+              legend: {
+                display: false,
+              },
+            },
           }}
         />
       </>
