@@ -332,33 +332,32 @@ const Root = ({ loggedIn }) => {
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
-  const fetchData = () => {
-    return fetch("http://localhost/api/v0/results", {
+  const fetchData = async () => {
+    const response = await fetch("http://localhost/api/v0/results", {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        const d = data.map((element) => {
-          const test_name = element.test_name;
-          const results = fetch("http://localhost/api/v0/result/" + test_name, {
-            headers: {
-              "Content-type": "application/json",
-              Authorization: "Bearer " + localStorage.getItem("token"),
-            },
-          })
-            .then((response) => response.json())
-            .then((data) => {
-              data.sort((a, b) => {
-                return a.timestamp - b.timestamp;
-              });
-              setDisplayData(data);
-            });
-        });
-      })
-      .catch((error) => console.log(error));
+    });
+    const doMap = async (element) => {
+      const test_name = element.test_name;
+      const results = await fetch(
+        "http://localhost/api/v0/result/" + test_name,
+        {
+          headers: {
+            "Content-type": "application/json",
+            Authorization: "Bearer " + localStorage.getItem("token"),
+          },
+        }
+      );
+      const resultData = await results.json();
+      resultData.sort((a, b) => {
+        return a.timestamp - b.timestamp;
+      });
+      setDisplayData(resultData);
+    };
+    const data = await response.json();
+    const d = data.map(doMap);
   };
 
   const parseData = (data, metricName) => {
