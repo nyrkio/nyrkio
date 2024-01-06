@@ -486,6 +486,10 @@ const Dashboard = () => {
               legend: {
                 display: false,
               },
+              interaction: {
+                intersect: false,
+                mode: "index",
+              },
               tooltip: {
                 callbacks: {
                   displayColors: false,
@@ -494,6 +498,7 @@ const Dashboard = () => {
                     return labelArray;
                   },
                 },
+                intersect: false,
               },
             },
           }}
