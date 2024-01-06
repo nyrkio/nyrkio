@@ -416,14 +416,18 @@ const Dashboard = () => {
   var metricMap = [];
   displayData.map((result) => {
     result.metrics.map((metric) => {
-      metricMap.push(metric.name);
+      metricMap.push({ name: metric.name, unit: metric.unit });
     });
   });
 
   // Only want unique metric names
-  var unique = metricMap.filter(
-    (value, index, self) => self.indexOf(value) === index
-  );
+  var unique = metricMap.reduce((a, b) => {
+    if (a.findIndex((x) => x.name === b.name) === -1) {
+      return a.concat([b]);
+    } else {
+      return a;
+    }
+  }, []);
   console.log("unique: " + unique);
 
   // {'testName':
@@ -446,7 +450,9 @@ const Dashboard = () => {
     }
   });
 
-  const drawLineChart = (metricName) => {
+  const drawLineChart = (metric) => {
+    const metricName = metric["name"];
+    const metricUnit = metric["unit"];
     return (
       <>
         <h6 className="text-center">
@@ -479,6 +485,15 @@ const Dashboard = () => {
             plugins: {
               legend: {
                 display: false,
+              },
+              tooltip: {
+                callbacks: {
+                  displayColors: false,
+                  label: (context) => {
+                    var labelArray = ["value: " + context.raw + metricUnit];
+                    return labelArray;
+                  },
+                },
               },
             },
           }}
