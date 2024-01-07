@@ -491,8 +491,8 @@ const Dashboard = () => {
                 mode: "index",
               },
               tooltip: {
+                displayColors: false,
                 callbacks: {
-                  displayColors: false,
                   label: (context) => {
                     var labelArray = ["value: " + context.raw + metricUnit];
 
