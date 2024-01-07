@@ -1,3 +1,5 @@
 [submodule "backend/hunter"]
 	path = backend/hunter
-	url = https://github.com/datastax-labs/hunter
+	url = git@github.com:nyrkio/hunter.git
+	update = rebase
+	branch = master
