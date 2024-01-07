@@ -438,7 +438,7 @@ const Dashboard = () => {
   // }
   var changePointIndexes = [];
   const changePointTimes = [];
-  Object.entries(changePointData).forEach(([key, value]) => {
+  Object.entries(changePointData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
       changePointTimes.push(changePoint["time"]);
     });
@@ -495,6 +495,35 @@ const Dashboard = () => {
                   displayColors: false,
                   label: (context) => {
                     var labelArray = ["value: " + context.raw + metricUnit];
+
+                    // Search in changePointData for this timestamp
+                    const timestamp = timestamps[context.dataIndex];
+                    Object.entries(changePointData).forEach(
+                      ([testName, value]) => {
+                        value.forEach((changePoint) => {
+                          if (changePoint["time"] === timestamp) {
+                            labelArray.push("");
+
+                            // Add all change point attributes to the label
+                            changePoint["changes"].forEach((change) => {
+                              Object.entries(change).map(([key, value]) => {
+                                if (key === "metric") {
+                                  return;
+                                }
+
+                                var label = key + ": " + value;
+                                if (key.includes("percent")) {
+                                  label = label + "%";
+                                }
+
+                                labelArray.push(label);
+                              });
+                            });
+                          }
+                        });
+                      }
+                    );
+
                     return labelArray;
                   },
                 },
