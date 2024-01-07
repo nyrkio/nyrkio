@@ -7,6 +7,8 @@ import {
   useNavigate,
 } from "react-router-dom";
 import { Line } from "react-chartjs-2";
+// DO NOT REMOVE
+// necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";
 import { Chart } from "react-chartjs-2";
 import { format } from "date-fns";
@@ -333,6 +335,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
+  const [testName, setTestName] = useState("");
   const fetchData = async () => {
     const response = await fetch("http://localhost/api/v0/results", {
       headers: {
@@ -342,6 +345,7 @@ const Dashboard = () => {
     });
     const doMap = async (element) => {
       const test_name = element.test_name;
+      setTestName(test_name);
       const results = await fetch(
         "http://localhost/api/v0/result/" + test_name,
         {
@@ -412,14 +416,18 @@ const Dashboard = () => {
   var metricMap = [];
   displayData.map((result) => {
     result.metrics.map((metric) => {
-      metricMap.push(metric.name);
+      metricMap.push({ name: metric.name, unit: metric.unit });
     });
   });
 
   // Only want unique metric names
-  var unique = metricMap.filter(
-    (value, index, self) => self.indexOf(value) === index
-  );
+  var unique = metricMap.reduce((a, b) => {
+    if (a.findIndex((x) => x.name === b.name) === -1) {
+      return a.concat([b]);
+    } else {
+      return a;
+    }
+  }, []);
   console.log("unique: " + unique);
 
   // {'testName':
@@ -430,7 +438,7 @@ const Dashboard = () => {
   // }
   var changePointIndexes = [];
   const changePointTimes = [];
-  Object.entries(changePointData).forEach(([key, value]) => {
+  Object.entries(changePointData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
       changePointTimes.push(changePoint["time"]);
     });
@@ -442,34 +450,89 @@ const Dashboard = () => {
     }
   });
 
-  const drawLineChart = (metricName) => {
+  const drawLineChart = (metric) => {
+    const metricName = metric["name"];
+    const metricUnit = metric["unit"];
     return (
-      <Line
-        datasetIdKey="foo"
-        data={{
-          labels: parseTimestamps(timestamps),
-          datasets: [
-            {
-              id: 1,
-              label: metricName,
-              data: parseData(displayData, metricName),
-              pointRadius: (context) => {
-                const c = changePointIndexes;
-                return c.includes(context.dataIndex) ? 8 : 0;
+      <>
+        <h6 className="text-center">
+          {testName}: {metricName}
+        </h6>
+        <Line
+          datasetIdKey="foo"
+          data={{
+            labels: parseTimestamps(timestamps),
+            datasets: [
+              {
+                id: 1,
+                label: metricName,
+                data: parseData(displayData, metricName),
+                pointRadius: (context) => {
+                  const c = changePointIndexes;
+                  return c.includes(context.dataIndex) ? 8 : 0;
+                },
+              },
+            ],
+          }}
+          options={{
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
               },
             },
-          ],
-        }}
-        options={{
-          scales: {
-            x: {
-              grid: {
+            plugins: {
+              legend: {
                 display: false,
               },
+              interaction: {
+                intersect: false,
+                mode: "index",
+              },
+              tooltip: {
+                displayColors: false,
+                callbacks: {
+                  label: (context) => {
+                    var labelArray = ["value: " + context.raw + metricUnit];
+
+                    // Search in changePointData for this timestamp
+                    const timestamp = timestamps[context.dataIndex];
+                    Object.entries(changePointData).forEach(
+                      ([testName, value]) => {
+                        value.forEach((changePoint) => {
+                          if (changePoint["time"] === timestamp) {
+                            labelArray.push("");
+
+                            // Add all change point attributes to the label
+                            changePoint["changes"].forEach((change) => {
+                              Object.entries(change).map(([key, value]) => {
+                                if (key === "metric") {
+                                  return;
+                                }
+
+                                var label = key + ": " + value;
+                                if (key.includes("percent")) {
+                                  label = label + "%";
+                                }
+
+                                labelArray.push(label);
+                              });
+                            });
+                          }
+                        });
+                      }
+                    );
+
+                    return labelArray;
+                  },
+                },
+                intersect: false,
+              },
             },
-          },
-        }}
-      />
+          }}
+        />
+      </>
     );
   };
 
