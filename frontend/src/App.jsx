@@ -12,6 +12,9 @@ import { Line } from "react-chartjs-2";
 import { Chart as ChartJS } from "chart.js/auto";
 import { Chart } from "react-chartjs-2";
 import { format } from "date-fns";
+import { AgGridReact } from "ag-grid-react"; // React Grid Logic
+import "ag-grid-community/styles/ag-grid.css"; // Core CSS
+import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import "./App.css";
 
 const LoggedInContext = createContext(false);
@@ -331,6 +334,47 @@ const Root = ({ loggedIn }) => {
   );
 };
 
+const parseTimestamp = (t) => {
+  const utcSeconds = t;
+  var d = new Date(0);
+  d.setUTCSeconds(utcSeconds);
+  return format(d, "yyyy-MM-dd HH:mm");
+};
+
+const ChangePointSummaryTable = ({ changeData }) => {
+  var rowData = [];
+
+  Object.entries(changeData).forEach(([testName, value]) => {
+    value.forEach((changePoint) => {
+      console.log(changePoint);
+      const changes = changePoint["changes"];
+      console.log(changes);
+      changes.map((change) => {
+        rowData.push({
+          date: parseTimestamp(changePoint["time"]),
+          commit: changePoint["commit"],
+          metric: change["metric"],
+          change: change["forward_change_percent"] + "%",
+        });
+      });
+    });
+  });
+
+  const colDefs = [
+    { field: "date" },
+    { field: "commit" },
+    { field: "metric" },
+    { field: "change" },
+  ];
+  return (
+    <>
+      <div className="ag-theme-quartz" style={{ height: 500, width: 900 }}>
+        <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} />
+      </div>
+    </>
+  );
+};
+
 const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
@@ -387,16 +431,6 @@ const Dashboard = () => {
     );
     console.log(value_map);
     return value_map;
-  };
-
-  const parseTimestamps = (timestamps) => {
-    const timestamp_map = timestamps.map((t) => {
-      const utcSeconds = t;
-      var d = new Date(0);
-      d.setUTCSeconds(utcSeconds);
-      return format(d, "yyyy-MM-dd HH:mm");
-    });
-    return timestamp_map;
   };
 
   useEffect(() => {
@@ -461,7 +495,7 @@ const Dashboard = () => {
         <Line
           datasetIdKey="foo"
           data={{
-            labels: parseTimestamps(timestamps),
+            labels: timestamps.map(parseTimestamp),
             datasets: [
               {
                 id: 1,
@@ -542,7 +576,14 @@ const Dashboard = () => {
       {loading ? (
         <div>Loading</div>
       ) : (
-        <div className="container">{unique.map(drawLineChart)}</div>
+        <>
+          <div className="container">
+            <div className="row justify-content-center">
+              <ChangePointSummaryTable changeData={changePointData} />
+            </div>
+            <div className="row">{unique.map(drawLineChart)}</div>
+          </div>
+        </>
       )}
     </>
   );
