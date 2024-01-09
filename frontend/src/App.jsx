@@ -366,6 +366,7 @@ const ChangePointSummaryTable = ({ changeData }) => {
     { field: "metric" },
     { field: "change" },
   ];
+
   return (
     <>
       <div className="ag-theme-quartz" style={{ height: 500, width: 900 }}>
@@ -476,15 +477,24 @@ const Dashboard = () => {
   // tests in the future.
   Object.entries(changePointData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
-      changePointTimes.push(changePoint["time"]);
+      const metrics = changePoint["changes"].map((change) => {
+        return change["metric"];
+      });
+      console.log(metrics);
+      const t = changePoint["time"];
+      changePointTimes.push({ t, metrics });
     });
   });
 
   var changePointIndexes = [];
   timestamps.map((timestamp, index) => {
-    if (changePointTimes.includes(timestamp)) {
-      changePointIndexes.push(index);
-    }
+    changePointTimes.map((change) => {
+      const { t, metrics } = change;
+      if (t !== timestamp) {
+        return;
+      }
+      changePointIndexes.push({ index, metrics });
+    });
   });
 
   const drawLineChart = (metric) => {
@@ -506,7 +516,13 @@ const Dashboard = () => {
                 data: parseData(displayData, metricName),
                 pointRadius: (context) => {
                   const c = changePointIndexes;
-                  return c.includes(context.dataIndex) ? 8 : 0;
+                  const entry = changePointIndexes.find((element) => {
+                    return (
+                      element.metrics.includes(metricName) &&
+                      element.index === context.dataIndex
+                    );
+                  });
+                  return entry ? 8 : 0;
                 },
               },
             ],
@@ -533,7 +549,7 @@ const Dashboard = () => {
                   label: (context) => {
                     var labelArray = ["value: " + context.raw + metricUnit];
 
-                    // Search in changePointData for this timestamp
+                    // Search in changePointData for this timestamp and metric
                     const timestamp = timestamps[context.dataIndex];
                     Object.entries(changePointData).forEach(
                       ([testName, value]) => {
@@ -543,6 +559,10 @@ const Dashboard = () => {
 
                             // Add all change point attributes to the label
                             changePoint["changes"].forEach((change) => {
+                              if (change["metric"] !== metricName) {
+                                return;
+                              }
+
                               Object.entries(change).map(([key, value]) => {
                                 if (key === "metric") {
                                   return;
