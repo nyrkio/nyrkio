@@ -470,14 +470,17 @@ const Dashboard = () => {
   //      'changes': [{'forward_change_percent': 900, 'metric': 'metric1'}]
   //    }]
   // }
-  var changePointIndexes = [];
   const changePointTimes = [];
+
+  // TODO(mfleming) Assumes a single testName but must handle multiple
+  // tests in the future.
   Object.entries(changePointData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
       changePointTimes.push(changePoint["time"]);
     });
   });
 
+  var changePointIndexes = [];
   timestamps.map((timestamp, index) => {
     if (changePointTimes.includes(timestamp)) {
       changePointIndexes.push(index);
