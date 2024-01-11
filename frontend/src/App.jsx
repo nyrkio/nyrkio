@@ -352,7 +352,7 @@ const ChangePointSummaryTable = ({ changeData }) => {
       changes.map((change) => {
         rowData.push({
           date: parseTimestamp(changePoint["time"]),
-          commit: changePoint["commit"],
+          commit: changePoint["git_commit"],
           metric: change["metric"],
           change: change["forward_change_percent"] + "%",
         });
@@ -362,9 +362,9 @@ const ChangePointSummaryTable = ({ changeData }) => {
 
   const colDefs = [
     { field: "date" },
-    { field: "commit" },
     { field: "metric" },
     { field: "change" },
+    { field: "commit" },
   ];
 
   return (
