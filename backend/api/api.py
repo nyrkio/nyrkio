@@ -97,7 +97,7 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
         )
         series.add_result(result)
 
-    return series.calculate_changes()
+    return await series.calculate_changes()
 
 
 # Must come at the end, once we've setup all the routes

@@ -341,6 +341,11 @@ const parseTimestamp = (t) => {
   return format(d, "yyyy-MM-dd HH:mm");
 };
 
+const formatCommit = (commit, commit_msg) => {
+  // Limit the git commit sha to 12 characters to improve readability
+  return commit.substring(0, 12) + ' ("' + commit_msg + '")';
+};
+
 const ChangePointSummaryTable = ({ changeData }) => {
   var rowData = [];
 
@@ -350,9 +355,12 @@ const ChangePointSummaryTable = ({ changeData }) => {
       const changes = changePoint["changes"];
       console.log(changes);
       changes.map((change) => {
+        const commit = changePoint["attributes"]["git_commit"][0];
+        const commit_msg = changePoint["attributes"]["commit_msg"][0];
+        const repo = changePoint["attributes"]["git_repo"][0];
         rowData.push({
           date: parseTimestamp(changePoint["time"]),
-          commit: changePoint["commit"],
+          commit: { commit, commit_msg, repo },
           metric: change["metric"],
           change: change["forward_change_percent"] + "%",
         });
@@ -362,9 +370,21 @@ const ChangePointSummaryTable = ({ changeData }) => {
 
   const colDefs = [
     { field: "date" },
-    { field: "commit" },
     { field: "metric" },
     { field: "change" },
+    {
+      field: "commit",
+      cellRenderer: (params) => {
+        const { commit, commit_msg, repo } = params.value;
+        const url = repo + "/commit/" + commit;
+        const text = formatCommit(commit, commit_msg);
+        return (
+          <a href={url} target="_blank">
+            {text}
+          </a>
+        );
+      },
+    },
   ];
 
   return (

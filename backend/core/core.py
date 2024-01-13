@@ -3,8 +3,11 @@
 from collections import defaultdict
 import json
 from typing import List
+import httpx
+import logging
 
 from hunter.report import Report, ReportType
+from hunter.series import Series
 
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
@@ -76,9 +79,7 @@ class PerformanceTestResultSeries:
         """
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
-    def calculate_changes(self):
-        from ..hunter.hunter.series import Series
-
+    async def calculate_changes(self):
         timestamps = [r.timestamp for r in self.results]
 
         metric_units = {}
@@ -101,10 +102,60 @@ class PerformanceTestResultSeries:
         )
 
         change_points = series.analyze().change_points_by_time
-        report = Report(series, change_points)
-        produced_report = report.produce_report(self.name, ReportType.JSON)
+        report = GitHubReport(series, change_points)
+        produced_report = await report.produce_report(self.name, ReportType.JSON)
         return json.loads(produced_report)
 
 
 class PerformanceTestResultExistsError(Exception):
     pass
+
+
+class GitHubReport(Report):
+    def __init__(self, series: Series, change_points: List):
+        super().__init__(series, change_points)
+
+    @staticmethod
+    async def add_github_commit_msg(attributes):
+        """
+        Annotate attributes with GitHub commit messages.
+
+        If attributes contains a 'git_commit' key and the 'git_repo' indicates a
+        GitHub repository, add a 'commit_msg' key with the first line of the commit
+        message.
+        """
+        if "git_commit" not in attributes:
+            return
+
+        # TODO(mfleming): Handle multiple git repos
+        attr_repo = attributes["git_repo"][0]
+        gh_url = "https://github.com"
+        if not attr_repo.startswith(gh_url):
+            return
+
+        async with httpx.AsyncClient() as client:
+            repo = attr_repo[len(gh_url) + 1 :]
+            commit = attributes["git_commit"][0]
+            response = await client.get(
+                f"https://api.github.com/repos/{repo}/commits/{commit}"
+            )
+            if response.status_code == 200:
+                # Only save the first line of the message
+                commit_msg = response.json()["commit"]["message"].split("\n")[0]
+                attributes["commit_msg"] = [commit_msg]
+                logging.error(
+                    "Adding commit message {} to {}".format(commit_msg, commit)
+                )
+            else:
+                logging.error(
+                    f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
+                )
+
+    async def produce_report(self, test_name: str, report_type: ReportType):
+        change_points = self._Report__change_points
+        logging.error(change_points)
+        for cp in change_points:
+            await GitHubReport.add_github_commit_msg(cp.attributes)
+
+        report = super().produce_report(test_name, report_type)
+        return report
