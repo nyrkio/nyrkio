@@ -5,6 +5,8 @@ from backend.core.core import (
     ResultMetric,
 )
 
+from backend.core.core import GitHubReport
+
 import pytest
 
 
@@ -33,7 +35,8 @@ def test_adding_existing_result_fails():
         series.add_result(result)
 
 
-def test_calculate_changes_in_series():
+@pytest.mark.anyio
+async def test_calculate_changes_in_series():
     """Calculate changes in a series"""
     series = PerformanceTestResultSeries("benchmark1")
 
@@ -45,7 +48,7 @@ def test_calculate_changes_in_series():
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
     # Identical metrics should not result in any changes
-    changes = series.calculate_changes()
+    changes = await series.calculate_changes()
     assert "benchmark1" in changes
     assert "metric1" not in changes["benchmark1"]
 
@@ -56,7 +59,7 @@ def test_calculate_changes_in_series():
     metrics = [ResultMetric("metric1", "µs", 2.0)]
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
-    changes = series.calculate_changes()
+    changes = await series.calculate_changes()
     assert "benchmark2" in changes
     for ch in changes["benchmark2"][0]["changes"]:
         assert ch["metric"] == "metric1"
@@ -98,7 +101,8 @@ def test_deleting_non_existing_result_from_series():
     assert len(empty_series.results) == 0
 
 
-def test_calculate_changes_with_multiple_metrics():
+@pytest.mark.anyio
+async def test_calculate_changes_with_multiple_metrics():
     """Calculate changes in a series with multiple metrics"""
     testname = "benchmark1"
     series = PerformanceTestResultSeries(testname)
@@ -111,7 +115,7 @@ def test_calculate_changes_with_multiple_metrics():
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
     # Identical metrics should not result in any changes
-    changes = series.calculate_changes()
+    changes = await series.calculate_changes()
     assert testname in changes
     assert "metric1" not in changes[testname]
     assert "metric2" not in changes[testname]
@@ -124,7 +128,19 @@ def test_calculate_changes_with_multiple_metrics():
     metrics = [ResultMetric("metric1", "µs", 2.0), ResultMetric("metric2", "µs", 2.0)]
     series.add_result(PerformanceTestResult(3, metrics, attr))
 
-    changes = series.calculate_changes()
+    changes = await series.calculate_changes()
     assert testname in changes
     for ch in changes[testname][0]["changes"]:
         assert ch["metric"] in ["metric1", "metric2"]
+
+
+@pytest.mark.anyio
+async def test_github_message(client):
+    """Test github message"""
+    attr = {
+        "git_repo": ["https://github.com/torvalds/linux"],
+        "git_commit": ["0dd3ee31125508cd67f7e7172247f05b7fd1753a"],
+        "branch": ["master"],
+    }
+    await GitHubReport.add_github_commit_msg(attr)
+    assert attr["commit_msg"] == ["Linux 6.7"]
