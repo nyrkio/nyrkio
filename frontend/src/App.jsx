@@ -5,6 +5,7 @@ import {
   Route,
   Link,
   useNavigate,
+  useLocation,
 } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 // DO NOT REMOVE
@@ -396,50 +397,36 @@ const ChangePointSummaryTable = ({ changeData }) => {
   );
 };
 
-const Dashboard = () => {
+const SingleResult = () => {
+  const location = useLocation();
+  const testName = location.state.testName;
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
-  const [testName, setTestName] = useState("");
   const fetchData = async () => {
-    const response = await fetch("http://localhost/api/v0/results", {
+    const results = await fetch("http://localhost/api/v0/result/" + testName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    const doMap = async (element) => {
-      const test_name = element.test_name;
-      setTestName(test_name);
-      const results = await fetch(
-        "http://localhost/api/v0/result/" + test_name,
-        {
-          headers: {
-            "Content-type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        }
-      );
-      const resultData = await results.json();
-      resultData.sort((a, b) => {
-        return a.timestamp - b.timestamp;
-      });
-      setDisplayData(resultData);
+    const resultData = await results.json();
+    resultData.sort((a, b) => {
+      return a.timestamp - b.timestamp;
+    });
+    setDisplayData(resultData);
 
-      const changes = await fetch(
-        "http://localhost/api/v0/result/" + test_name + "/changes",
-        {
-          headers: {
-            "Content-type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("token"),
-          },
-        }
-      );
-      const changeData = await changes.json();
-      setChangePointData(changeData);
-    };
-    const data = await response.json();
-    const d = data.map(doMap);
+    const changes = await fetch(
+      "http://localhost/api/v0/result/" + testName + "/changes",
+      {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      }
+    );
+    const changeData = await changes.json();
+    setChangePointData(changeData);
   };
 
   const parseData = (data, metricName) => {
@@ -615,7 +602,6 @@ const Dashboard = () => {
 
   return (
     <>
-      <h1>Dashboard</h1>
       {loading ? (
         <div>Loading</div>
       ) : (
@@ -627,6 +613,63 @@ const Dashboard = () => {
             <div className="row">{unique.map(drawLineChart)}</div>
           </div>
         </>
+      )}
+    </>
+  );
+};
+
+const Dashboard = () => {
+  const [loading, setLoading] = useState(false);
+  const [testNames, setTestNames] = useState([]);
+
+  const fetchData = async () => {
+    const response = await fetch("http://localhost/api/v0/results", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    const resultData = await response.json();
+    resultData.map((element) => {
+      const test_name = element.test_name;
+      console.log(test_name);
+      setTestNames((prevState) => [...prevState, test_name]);
+    });
+  };
+  useEffect(() => {
+    setLoading(true);
+    fetchData().finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  return (
+    <>
+      {loading ? (
+        <div>Loading</div>
+      ) : (
+        <div className="container">
+          <div className="card">
+            <div className="card-header">Please select a test</div>
+            <div className="card-body">
+              <ul className="list-group list-group-flush">
+                {testNames.map((name, i) => {
+                  return (
+                    <li className="list-group-item">
+                      <Link
+                        to="/result"
+                        testName={name}
+                        state={{ testName: name }}
+                      >
+                        {name}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
@@ -653,6 +696,7 @@ function App() {
             path="/login"
             element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
           />
+          <Route path="/result" element={<SingleResult />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </Router>
