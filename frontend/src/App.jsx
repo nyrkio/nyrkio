@@ -606,6 +606,20 @@ const SingleResult = () => {
         <div>Loading</div>
       ) : (
         <>
+          <nav className="navbar navbar-expand-lg">
+            <div className="container-fluid">
+              <nav aria-label="breadcrumb">
+                <ol className="breadcrumb">
+                  <li className="breadcrumb-item">
+                    <Link to="/">Tests</Link>
+                  </li>
+                  <li className="breadcrumb-item active" aria-current="page">
+                    {testName}
+                  </li>
+                </ol>
+              </nav>
+            </div>
+          </nav>
           <div className="container">
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} />
