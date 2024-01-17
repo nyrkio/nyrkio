@@ -11,17 +11,6 @@ from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabas
 from fastapi_users import schemas
 from pydantic import Field
 
-fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
-        "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # noqa: E501
-        "disabled": False,
-        "is_admin": False,
-    }
-}
-
 
 class OAuthAccount(BaseOAuthAccount):
     pass
