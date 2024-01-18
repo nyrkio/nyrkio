@@ -66,7 +66,7 @@ const Login = ({ loggedIn, setLoggedIn }) => {
     credentialsData.append("username", username);
     credentialsData.append("password", password);
 
-    const data = await fetch("http://localhost/api/v0/auth/jwt/login", {
+    const data = await fetch("/api/v0/auth/jwt/login", {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -404,7 +404,7 @@ const SingleResult = () => {
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
   const fetchData = async () => {
-    const results = await fetch("http://localhost/api/v0/result/" + testName, {
+    const results = await fetch("/api/v0/result/" + testName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -416,15 +416,12 @@ const SingleResult = () => {
     });
     setDisplayData(resultData);
 
-    const changes = await fetch(
-      "http://localhost/api/v0/result/" + testName + "/changes",
-      {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      }
-    );
+    const changes = await fetch("/api/v0/result/" + testName + "/changes", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
     const changeData = await changes.json();
     setChangePointData(changeData);
   };
@@ -637,7 +634,7 @@ const Dashboard = () => {
   const [testNames, setTestNames] = useState([]);
 
   const fetchData = async () => {
-    const response = await fetch("http://localhost/api/v0/results", {
+    const response = await fetch("/api/v0/results", {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
