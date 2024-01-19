@@ -26,13 +26,9 @@ const Root = ({ loggedIn }) => {
 };
 
 function App() {
-  const [count, setCount] = useState(0);
-  const [token, setToken] = useState();
-  console.log("Resetting");
   const [loggedIn, setLoggedIn] = useState(() => {
     const saved = localStorage.getItem("loggedIn");
     const initialValue = JSON.parse(saved);
-    console.log("Reading " + saved);
     return initialValue || false;
   });
 
