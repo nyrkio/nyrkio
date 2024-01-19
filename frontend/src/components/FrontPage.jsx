@@ -47,7 +47,6 @@ const SignUpButton = () => {
   const [showForm, setShowForm] = useState(false);
   const handleSignUpClick = () => {
     setShowForm(true);
-    console.log("Sign up clicked");
   };
   if (showForm) {
     return (
@@ -64,7 +63,7 @@ const SignUpButton = () => {
                 id="exampleInputEmail1"
               />
               <div id="emailHelp" className="form-text">
-                We'll never share your email with anyone else.
+                We'll send you an email once your account is ready.
               </div>
             </div>
             <button type="submit" className="btn btn-success">
