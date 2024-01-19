@@ -1,5 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-import { BrowserRouter as Router, Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
