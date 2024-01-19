@@ -109,9 +109,9 @@ export const LogOut = ({ setLoggedIn }) => {
   };
   return (
     <>
-      <button className="btn btn-success" onClick={handleLogoutClick}>
+      <Link to="/" className="btn btn-success" onClick={handleLogoutClick}>
         Log Out
-      </button>
+      </Link>
     </>
   );
 };
