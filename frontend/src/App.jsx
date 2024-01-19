@@ -93,7 +93,7 @@ const Login = ({ loggedIn, setLoggedIn }) => {
         <form onSubmit={authSubmit}>
           <div className="mb-3">
             <label htmlFor="exampleInputEmail1" className="form-label">
-              Username
+              Email address
             </label>
             <input
               type="text"
