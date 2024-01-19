@@ -2,7 +2,7 @@ import { useState } from "react";
 
 const Banner = () => {
   return (
-    <div className="container-fluid border p-5 text-center">
+    <div className="container-fluid p-5 text-center">
       <h1>Detect every performance change.</h1>
       <h5>
         The performance measurement tool that harnesses the power of change
