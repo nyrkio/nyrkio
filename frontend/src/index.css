@@ -11,15 +11,40 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --nyrkio-dark-red: #a34111;
+  --nyrkio-bright-red: #dc3d06;
+  --nyrkio-tattoo-red: #973212;
+  --nyrkio-dark-gray: #a99883;
+  --nyrkio-dark-gray2: #897963;
+  --nyrkio-light-gray: #d1c1a8;
+  --nyrkio-light-gray2: #f1e8d8;
+  --nyrkio-light-gray3: #fff6e6;
+
+  --nyrkio-bear-brown: #351406;
+  --nyrkio-horn-dark-brown: #50320d;
+  --nyrkio-arrow-brown: #7c5a32;
+  --nyrkio-horn-light-brown: #b28b56;
+  --nyrkio-skin-light-brown: #d2a376;
+
+  --nyrkio-text: var(--bs-dark);
+  --nyrkio-text-light: var(--bs-gray-600);
 }
 
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--nyrkio-bright-red);
   text-decoration: inherit;
 }
+
+@media (prefers-color-scheme: light) {
+  a:hover {
+    color: var(--nyrkio-bright-red);
+  }
+}
+
 a:hover {
-  color: #535bf2;
+  color: var(--nyrkio-bright-red);
 }
 
 h1 {
@@ -51,9 +76,6 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
-  a:hover {
-    color: #747bff;
-  }
   button {
     background-color: #f9f9f9;
   }
@@ -65,4 +87,42 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.navbar-top {
+  border-bottom: 1px solid var(--nyrkio-dark-gray);
+}
+
+.nav-link {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--nyrkio-bright-red);
+  text-decoration: none;
+  transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out;
+}
+
+.btn-success {
+  color: #fff;
+  background-color: var(--nyrkio-bright-red);
+  border-color: var(--nyrkio-bright-red);
+}
+
+.btn-check:focus + .btn-success,
+.btn-success:focus {
+  color: #fff;
+  background-color: #a34111;
+  border-color: #a34111
+  box-shadow: 0 0 0 0.25rem rgba(60, 153, 110, 0.5);
+}
+
+.btn-success:hover {
+  color: #fff;
+  background-color: var(--nyrkio-bright-red);
+  border-color: var(--nyrkio-bright-red)
+}
+
+.btn-check:active+.btn-success, .btn-check:checked+.btn-success, .btn-success.active, .btn-success:active, .show>.btn-success.dropdown-toggle {
+  color: #fff;
+  background-color: var(--nyrkio-bright-red);
+  border-color: var(--nyrkio-bright-right);
 }

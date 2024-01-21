@@ -1,4 +1,5 @@
 import { LogOut, LoginButton } from "./Login.jsx";
+import { UserMenu } from "./UserMenu.jsx";
 
 const NavigationItems = () => {
   return (
@@ -49,10 +50,16 @@ const NavigationItems = () => {
 
 export const NavHeader = ({ loggedIn, setLoggedIn }) => {
   return (
-    <nav className="navbar navbar-expand-lg">
+    <nav className="navbar navbar-expand-lg navbar-top">
       <div className="container-fluid">
         <NavigationItems />
-        {loggedIn ? <LogOut setLoggedIn={setLoggedIn} /> : <LoginButton />}
+        {loggedIn ? (
+          <>
+            <UserMenu setLoggedIn={setLoggedIn} />
+          </>
+        ) : (
+          <LoginButton />
+        )}
       </div>
     </nav>
   );
