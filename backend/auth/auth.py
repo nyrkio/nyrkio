@@ -8,7 +8,7 @@ import uuid
 from beanie import PydanticObjectId
 from fastapi import Depends, APIRouter, Request, HTTPException, status
 from fastapi.responses import RedirectResponse
-from fastapi_users import BaseUserManager, FastAPIUsers, models
+from fastapi_users import BaseUserManager, FastAPIUsers, models, exceptions, schemas
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -23,8 +23,9 @@ from fastapi_users.router.common import ErrorCode
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
 
-from backend.db.db import User, get_user_db
+from backend.db.db import User, get_user_db, UserRead, UserCreate
 from backend.auth.github import github_oauth
+from backend.auth.email import send_email, read_template_file
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
@@ -36,6 +37,7 @@ COOKIE_NAME = "auth_cookie"
 cookie_transport = CookieTransport(cookie_name=COOKIE_NAME)
 
 SECRET = os.environ.get("SECRET_KEY", "fooba")
+SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 
 
 def get_jwt_strategy() -> JWTStrategy:
@@ -77,6 +79,21 @@ auth_router.include_router(
     fastapi_users.get_auth_router(jwt_backend, SECRET), prefix="/jwt", tags=["auth"]
 )
 
+auth_router.include_router(
+    fastapi_users.get_register_router(UserRead, UserCreate),
+    tags=["auth"],
+)
+
+auth_router.include_router(
+    fastapi_users.get_verify_router(UserRead),
+    tags=["auth"],
+)
+
+auth_router.include_router(
+    fastapi_users.get_reset_password_router(),
+    tags=["auth"],
+)
+
 current_active_user = fastapi_users.current_user(active=True)
 
 
@@ -88,6 +105,30 @@ async def authenticated_route(user: User = Depends(current_active_user)):
 oauth2_authorize_callback = OAuth2AuthorizeCallback(
     github_oauth, redirect_url=REDIRECT_URI
 )
+
+
+@auth_router.get("/verify-email/{token}")
+async def verify_email(
+    token: str,
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+):
+    try:
+        user = await user_manager.verify(token, None)
+        schema = schemas.model_validate(UserRead, user)
+        if user.is_verified:
+            return RedirectResponse("/login")
+        return schema
+
+    except (exceptions.InvalidVerifyToken, exceptions.UserNotExists):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_BAD_TOKEN,
+        )
+    except exceptions.UserAlreadyVerified:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
+        )
 
 
 @auth_router.get("/github/mycallback")
@@ -159,3 +200,6 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         self, user: User, token: str, request: Optional[Request] = None
     ):
         print(f"Verification requested for user {user.id}. Verification token: {token}")
+        verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
+        msg = read_template_file("verify-email.html", verify_url=verify_url)
+        await send_email(user.email, token, "Verify your email", msg)
