@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { SignUpButton } from "./SignUp";
 
 const Banner = () => {
   return (
@@ -42,48 +43,6 @@ const FeatureHighlight = () => {
       </div>
     </div>
   );
-};
-const SignUpButton = () => {
-  const [showForm, setShowForm] = useState(false);
-  const handleSignUpClick = () => {
-    setShowForm(true);
-  };
-  if (showForm) {
-    return (
-      <div className="row mt-5">
-        <div className="col-sm-6 offset-sm-3">
-          <form>
-            <div className="mb-3">
-              <label htmlFor="exampleInputEmail1" className="form-label">
-                Email address
-              </label>
-              <input
-                type="email"
-                className="form-control"
-                id="exampleInputEmail1"
-              />
-              <div id="emailHelp" className="form-text">
-                We'll send you an email once your account is ready.
-              </div>
-            </div>
-            <button type="submit" className="btn btn-success">
-              Submit
-            </button>
-          </form>
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <div className="row mt-5">
-        <div className="d-flex justify-content-center">
-          <button className="btn btn-success" onClick={handleSignUpClick}>
-            Sign Up
-          </button>
-        </div>
-      </div>
-    );
-  }
 };
 
 export const FrontPage = () => {
