@@ -131,6 +131,10 @@ const ChangePointSummaryTable = ({ changeData }) => {
     });
   });
 
+  if (rowData.length === 0) {
+    return <></>;
+  }
+
   const colDefs = [
     { field: "date" },
     { field: "metric" },
