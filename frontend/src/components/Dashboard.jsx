@@ -1,11 +1,5 @@
 import { createContext, useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Link,
-  useLocation,
-} from "react-router-dom";
+import { BrowserRouter as Router, Link, useParams } from "react-router-dom";
 import { Line } from "react-chartjs-2";
 // DO NOT REMOVE
 // necessary to avoid "category is not a registered scale" error.
@@ -55,7 +49,7 @@ export const Dashboard = () => {
                   return (
                     <li className="list-group-item">
                       <Link
-                        to="/result"
+                        to={`/result/${name}`}
                         testName={name}
                         state={{ testName: name }}
                       >
@@ -147,8 +141,7 @@ const ChangePointSummaryTable = ({ changeData }) => {
 };
 
 export const SingleResult = () => {
-  const location = useLocation();
-  const testName = location.state.testName;
+  const { testName } = useParams();
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
