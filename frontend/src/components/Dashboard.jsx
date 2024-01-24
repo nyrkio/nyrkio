@@ -10,6 +10,25 @@ import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 
+const nyrkio_dark_red = "#a34111";
+const nyrkio_bright_red = "#dc3d06";
+const nyrkio_tattoo_red = "#973212";
+const nyrkio_dark_gray = "#a99883";
+const nyrkio_light_gray = "#d1c1a8";
+const nyrkio_light_gray2 = "#f1e8d8";
+const nyrkio_light_gray3 = "#fff6e6";
+const nyrkio_light_gray4 = "#fff9f1";
+const nyrkio_light_gray5 = "#fffdf9";
+
+const nyrkio_bear_brown = "#351406";
+const nyrkio_horn_dark_brown = "#50320d";
+const nyrkio_arrow_brown = "#7c5a32";
+const nyrkio_horn_light_brown = "#b28b56";
+const nyrkio_skin_light_brown = "#d2a376";
+
+const nyrkio_text = "#344767";
+const nyrkio_text_light = "#6c757d";
+
 export const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [testNames, setTestNames] = useState([]);
@@ -105,6 +124,10 @@ const ChangePointSummaryTable = ({ changeData }) => {
       });
     });
   });
+
+  if (rowData.length === 0) {
+    return <></>;
+  }
 
   const colDefs = [
     { field: "date" },
@@ -246,6 +269,13 @@ export const SingleResult = () => {
   const drawLineChart = (metric) => {
     const metricName = metric["name"];
     const metricUnit = metric["unit"];
+
+    const isChangePoint = (index) => {
+      return changePointIndexes.find((element) => {
+        return element.metrics.includes(metricName) && element.index === index;
+      });
+    };
+
     return (
       <>
         <h6 className="text-center">
@@ -260,15 +290,30 @@ export const SingleResult = () => {
                 id: 1,
                 label: metricName,
                 data: parseData(displayData, metricName),
+                fill: true,
+                borderColor: nyrkio_horn_light_brown,
+                borderWidth: 2,
+                maxBarThickness: 6,
+                backgroundColor: ({ chart: { ctx } }) => {
+                  const gradient = ctx.createLinearGradient(0, 230, 0, 50);
+                  gradient.addColorStop(1, "rgba(88.6, 19.6,0,0.1)");
+                  gradient.addColorStop(0.2, "rgba(72,72,176,0.0)");
+                  gradient.addColorStop(0, "rgba(203,12,159,0)");
+
+                  return gradient;
+                },
+                pointBorderColor: (context) => {
+                  return isChangePoint(context.dataIndex)
+                    ? nyrkio_bright_red
+                    : nyrkio_tattoo_red;
+                },
+                pointBackgroundColor: (context) => {
+                  return isChangePoint(context.dataIndex)
+                    ? nyrkio_bright_red
+                    : nyrkio_tattoo_red;
+                },
                 pointRadius: (context) => {
-                  const c = changePointIndexes;
-                  const entry = changePointIndexes.find((element) => {
-                    return (
-                      element.metrics.includes(metricName) &&
-                      element.index === context.dataIndex
-                    );
-                  });
-                  return entry ? 8 : 0;
+                  return isChangePoint(context.dataIndex) ? 8 : 3;
                 },
               },
             ],
