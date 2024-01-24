@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
 from backend.core.core import (
     PerformanceTestResult,
     PerformanceTestResultSeries,
@@ -48,7 +48,9 @@ async def get_result(
 
 @api_router.delete("/result/{test_name}")
 async def delete_result(
-    test_name: str, timestamp: int, user: User = Depends(auth.current_active_user)
+    test_name: str,
+    timestamp: Union[int, None] = None,
+    user: User = Depends(auth.current_active_user),
 ) -> List[Dict]:
     store = DBStore()
     test_names = await store.get_test_names(user)
