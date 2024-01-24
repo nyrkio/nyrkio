@@ -42,7 +42,7 @@ function App() {
             path="/login"
             element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
           />
-          <Route path="/result" element={<SingleResult />} />
+          <Route path="/result/:testName" element={<SingleResult />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
       </Router>
