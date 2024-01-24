@@ -95,7 +95,12 @@ const ChangePointSummaryTable = ({ changeData }) => {
       console.log(changes);
       changes.map((change) => {
         const commit = changePoint["attributes"]["git_commit"][0];
-        const commit_msg = changePoint["attributes"]["commit_msg"][0];
+
+        let commit_msg = "";
+        if (changePoint["attributes"].hasOwnProperty("commit_msg")) {
+          commit_msg = changePoint["attributes"]["commit_msg"][0];
+        }
+
         const repo = changePoint["attributes"]["git_repo"][0];
         rowData.push({
           date: parseTimestamp(changePoint["time"]),
@@ -115,6 +120,12 @@ const ChangePointSummaryTable = ({ changeData }) => {
       field: "commit",
       cellRenderer: (params) => {
         const { commit, commit_msg, repo } = params.value;
+
+        // If we failed to lookup the commit message, display the commit sha
+        if (commit_msg === "") {
+          return commit;
+        }
+
         const url = repo + "/commit/" + commit;
         const text = formatCommit(commit, commit_msg);
         return (
