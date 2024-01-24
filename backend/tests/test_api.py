@@ -170,6 +170,11 @@ def test_delete_single_result(client):
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {"attr1": "value1", "attr2": "value2"},
         },
+        {
+            "timestamp": 3,
+            "metrics": [{"metric1": 3.0, "metric2": 4.0}],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
     ]
     test_name = "benchmark1"
     response = client.post(f"/api/v0/result/{test_name}", json=data)
@@ -191,11 +196,15 @@ def test_delete_single_result(client):
     # Read back the result and check timestamp2 is still there
     response = client.get(f"/api/v0/result/{test_name}")
     assert response.status_code == 200
-    assert response.json() == [data[1]]
+    assert response.json() == [data[1], data[2]]
 
     # Delete the remaining result
     response = client.delete(f"/api/v0/result/{test_name}")
     assert response.status_code == 200
+
+    # Check that the result is gone
+    response = client.get(f"/api/v0/result/{test_name}")
+    assert response.status_code == 404
 
 
 def test_change_points(client):

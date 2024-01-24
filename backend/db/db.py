@@ -209,9 +209,12 @@ class DBStore(object):
         If no matching results are found, do nothing.
         """
         test_results = self.db.test_results
-        await test_results.delete_one(
-            {"user_id": user.id, "test_name": test_name, "timestamp": timestamp}
-        )
+        if timestamp:
+            await test_results.delete_one(
+                {"user_id": user.id, "test_name": test_name, "timestamp": timestamp}
+            )
+        else:
+            await test_results.delete_many({"user_id": user.id, "test_name": test_name})
 
 
 # Will be patched by conftest.py if we're running tests
