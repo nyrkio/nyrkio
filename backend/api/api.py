@@ -13,7 +13,7 @@ from pydantic import BaseModel, RootModel
 from backend.auth import auth
 from backend.db.db import User, DBStore
 
-app = FastAPI()
+app = FastAPI(openapi_url="/openapi.json")
 
 
 api_router = APIRouter()
