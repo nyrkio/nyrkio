@@ -1,3 +1,7 @@
+import tigerbeetle from "../static/tigerbeetle-change-points.png";
+import grafanaDashboard from "../static/Grafana_dashboard.png";
+import image1 from "../static/50776727286_cdd63903f4_w.jpg";
+
 export const ProductPage = () => {
   return (
     <>
@@ -52,10 +56,7 @@ export const ProductPage = () => {
           </div>
 
           <div className="col mt-4">
-            <img
-              style={{ height: "300px" }}
-              src={"./src/static/Grafana_dashboard.png"}
-            />
+            <img style={{ height: "300px" }} src={grafanaDashboard} />
             <center>
               <a href="https://en.wikipedia.org/wiki/Grafana#/media/File:Grafana_dashboard.png">
                 Image Credit: LinuxScreenshots @ Flickr
@@ -85,7 +86,7 @@ export const ProductPage = () => {
         </div>
         <div className="row col-md-10 offset-md-1">
           <div className="col">
-            <img src={"./src/static/50776727286_cdd63903f4_w.jpg"} />
+            <img src={image1} />
             <center>
               <a href="https://www.flickr.com/photos/nenadstojkovic/50776727286/in/photolist-2kmXZZh-2mH2tsd-pNfG3r-9uaRmj-2m2cAtk-9o1FrD-2jJWW3T-2m4h9Tb-2joPwMv-p8adfb-pYmu5c-r5npnH-8jZGvy-pYrWxE-2m4GHWZ-CWBUK-pMyb4h-p89RRf-pYmd5g-2jJzX3w-pMY8PF-pYm1VH-2iocoyX-p8Eqfz-SRBJEv-p86duC-cp4eam-2joSi9a-8jZGjw-q5oEHM-q5n1fM-9GRwgf-5aMM2S-7Jw8UW-2UNrAs-6z4cGN-q5dA7i-p8CoLr-aLDiFR-4ZvDHZ-9anpxd-9STgSK-9dFg7Z-66XZaq-aYmSAK-2muF9rF-2kQVQ5M-4aCLL-2kQVVoF-2kQVqYP">
                 Image Credit: Nenad Stojkovic @ Flickr
@@ -184,7 +185,7 @@ export const ProductPage = () => {
                 border: "#efefeb 10px solid",
                 borderRadius: "5px",
               }}
-              src={"./src/static/tigerbeetle-change-points.png"}
+              src={tigerbeetle}
             />
           </center>
         </div>
