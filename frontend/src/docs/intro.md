@@ -53,17 +53,17 @@ Here's an example payload for a performance test named `benchmark1`.
 
 ```bash
 curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" -X POST https://nyrk.io/api/v0/result/benchmark1 \
-    -d '[{"timestmap": 1706220908, \
-          "metrics": [ \
-            {"name": "p50", "unit": "us", "value": 56 },  \
-            {"name": "p90", "unit": "us", "value": 125 }, \
-            {"name": "p99", "unit": "us", "value": 280 },  \
-          ], \
-          "attributes": { \
-            "git_repo": ["https://github.com/nyrkio/nyrkio"], \
-            "branch": ["main"], \
-          } \
-    }]'
+           -d '[{"timestamp": 1706220908,
+             "metrics": [
+               {"name": "p50", "unit": "us", "value": 56 },
+               {"name": "p90", "unit": "us", "value": 125 },
+               {"name": "p99", "unit": "us", "value": 280 }
+             ],
+             "attributes": {
+               "git_repo": ["https://github.com/nyrkio/nyrkio"],
+               "branch": ["main"],
+             }
+       }]'
 ```
 
 ## View the charts in the dashboard
