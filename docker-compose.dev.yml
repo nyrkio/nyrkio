@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  backend:
+    build: backend
+    env_file:
+      - .env.backend
+    environment:
+      - API_PORT=8000
+    ports:
+      - "8000:8000"
+    hostname: api.nyrkio.local
+  nginx:
+    build:
+      context: ./
+      dockerfile: ./nginx/Dockerfile.dev
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
