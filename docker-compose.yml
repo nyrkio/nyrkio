@@ -16,5 +16,19 @@ services:
       dockerfile: ./nginx/Dockerfile
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
+      - certbot
+    volumes:
+      - ./certbot/conf:/etc/nginx/ssl:ro
+      - ./certbot/www:/var/www/certbot:ro
+    restart: always
+  certbot:
+    env_file:
+      - .env.backend
+    image: certbot/certbot:latest
+    volumes:
+      - ./certbot/conf/:/etc/letsencrypt/:rw
+      - ./certbot/www/:/var/www/certbot/:rw
+    command: certonly --force-renewal --webroot --webroot-path=/var/www/certbot --email admin@nyrk.io --agree-tos --no-eff-email -d staging.nyrk.io
