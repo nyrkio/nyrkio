@@ -15,7 +15,9 @@ export const SidePanel = () => {
       <Link to="/docs" className="nav-link">
         Getting started
       </Link>
-      <Link className="nav-link">API</Link>
+      <div className="nav-link">
+        <a href="/openapi">API</a>
+      </div>
     </div>
   );
 };
