@@ -131,7 +131,7 @@ async def verify_email(
         )
 
 
-@auth_router.get("/github/mycallback")
+@auth_router.get("/github/mycallback", include_in_schema=False)
 async def github_callback(
     request: Request,
     access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
