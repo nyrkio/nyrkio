@@ -6,12 +6,12 @@ import { Dashboard, SingleResult } from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { Docs } from "./components/Docs.jsx";
+import { ProductPage } from "./components/ProductPage.jsx";
 
 function NoMatch() {
   return (
-    <div style={{ padding: 20 }}>
+    <div className="container text-center justify-content-center p-5">
       <h2>404: Page Not Found</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adip.</p>
     </div>
   );
 }
@@ -39,6 +39,7 @@ function App() {
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         <Routes>
           <Route path="/" element={<Root loggedIn={loggedIn} />} />
+          <Route path="/product" element={<ProductPage />} />
           <Route
             path="/login"
             element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
