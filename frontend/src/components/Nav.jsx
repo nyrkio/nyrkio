@@ -42,6 +42,11 @@ const NavigationItems = () => {
               Research
             </a>
           </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/docs/getting-started">
+              Docs
+            </a>
+          </li>
         </ul>
       </div>
     </>

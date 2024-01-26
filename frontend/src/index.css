@@ -126,3 +126,12 @@ button:focus-visible {
   background-color: var(--nyrkio-bright-red);
   border-color: var(--nyrkio-bright-right);
 }
+
+table {
+  margin-bottom: 20px;
+}
+
+th, td {
+  border: 1px solid;
+  padding: 5px;
+}
