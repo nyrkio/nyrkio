@@ -7,6 +7,7 @@ import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { Docs } from "./components/Docs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
+import { PricingPage } from "./components/PricingPage.jsx";
 
 function NoMatch() {
   return (
@@ -40,6 +41,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Root loggedIn={loggedIn} />} />
           <Route path="/product" element={<ProductPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route
             path="/login"
             element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
