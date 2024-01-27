@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { SignUpButton } from "./SignUp";
 
 const Banner = () => {
   return (
@@ -50,7 +49,11 @@ export const FrontPage = () => {
     <>
       <Banner />
       <FeatureHighlight />
-      <SignUpButton />
+      <button className="btn btn-success">
+        <a className="btn-link" href="/signup">
+          Sign up
+        </a>
+      </button>
     </>
   );
 };

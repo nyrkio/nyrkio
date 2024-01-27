@@ -127,6 +127,16 @@ button:focus-visible {
   border-color: var(--nyrkio-bright-right);
 }
 
+.btn-outline-success, .btn-outline-success:hover {
+  color: var(--nyrkio-bright-red);
+  border-color: var(--nyrkio-bright-red);
+  background-color: white;
+}
+
+.border-success {
+  border-color: var(--nyrkio-bright-red)!important;
+}
+
 table {
   margin-bottom: 20px;
 }
@@ -134,4 +144,9 @@ table {
 th, td {
   border: 1px solid;
   padding: 5px;
+}
+
+.btn-link, .btn-link:hover {
+  color: white;
+  text-decoration: none;
 }
