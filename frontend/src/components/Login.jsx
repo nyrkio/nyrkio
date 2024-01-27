@@ -50,38 +50,42 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   };
 
   return (
-    <div className="row mt-5">
-      <div className="col-sm-3 offset-sm-4">
-        <form onSubmit={authSubmit}>
-          <div className="mb-3">
-            <label htmlFor="exampleInputEmail1" className="form-label">
-              Email address
-            </label>
-            <input
-              type="text"
-              className="form-control"
-              id="exampleInputEmail1"
-              onChange={(e) => setUsername(e.target.value)}
-            />
+    <div className="container">
+      <div className="row mt-5 justify-content-center">
+        <div className="col-md-4">
+          <form onSubmit={authSubmit}>
             <div className="mb-3">
-              <label htmlFor="exampleInputPassword1" className="form-label">
-                Password
+              <label htmlFor="exampleInputEmail1" className="form-label">
+                Email address
               </label>
               <input
-                type="password"
+                type="text"
                 className="form-control"
-                id="exampleInputPassword1"
-                onChange={(e) => setPassword(e.target.value)}
+                id="exampleInputEmail1"
+                onChange={(e) => setUsername(e.target.value)}
               />
+              <div className="mb-3">
+                <label htmlFor="exampleInputPassword1" className="form-label">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  className="form-control"
+                  id="exampleInputPassword1"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+              </div>
             </div>
-          </div>
-          <div className="text-center mt-2">
-            <button type="submit" className="btn btn-success">
-              Submit
-            </button>
-          </div>
-        </form>
-        {/* <div className="text-center mt-5">
+            <div className="form-text">
+              Don't have an account? Sign up <a href="/signup">here</a>
+            </div>
+            <div className="text-center mt-2">
+              <button type="submit" className="btn btn-success">
+                Submit
+              </button>
+            </div>
+          </form>
+          {/* <div className="text-center mt-5">
           <button className="btn btn-success" onClick={githubSubmit}>
             Log in with GitHub
             <svg
@@ -96,6 +100,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </svg>
           </button>
         </div> */}
+        </div>
       </div>
     </div>
   );
