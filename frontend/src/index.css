@@ -93,7 +93,7 @@ button:focus-visible {
   border-bottom: 1px solid var(--nyrkio-dark-gray);
 }
 
-.nav-link {
+.navbar-light .navbar-nav .nav-link {
   display: block;
   padding: 0.5rem 1rem;
   color: var(--nyrkio-bright-red);
