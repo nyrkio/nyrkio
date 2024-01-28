@@ -56,7 +56,9 @@ export const PricingPage = () => {
                   <li>Support for teams</li>
                 </ul>
                 <button type="button" className="w-100 btn btn-lg btn-success">
-                  Get started
+                  <a className="btn-link" href="mailto:founders@nyrk.io">
+                    Contact us
+                  </a>
                 </button>
               </div>
             </div>
