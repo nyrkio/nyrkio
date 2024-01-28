@@ -146,6 +146,11 @@ th, td {
   padding: 5px;
 }
 
+table.pricing-table th, td {
+  border: 0px;
+  padding: 5px;
+}
+
 .btn-link, .btn-link:hover {
   color: white;
   text-decoration: none;
