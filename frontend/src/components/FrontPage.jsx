@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
   return (
@@ -44,6 +45,17 @@ const FeatureHighlight = () => {
   );
 };
 
+const LearnMore = () => {
+  return (
+    <div className="container p-5">
+      <div className="row">
+        <h3>Want to learn more?</h3>
+        <Link to="/product">Read about the product here</Link>
+      </div>
+    </div>
+  );
+};
+
 export const FrontPage = () => {
   return (
     <>
@@ -54,6 +66,7 @@ export const FrontPage = () => {
           Sign up
         </a>
       </button>
+      <LearnMore />
     </>
   );
 };
