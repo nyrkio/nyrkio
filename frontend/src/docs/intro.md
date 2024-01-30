@@ -62,9 +62,16 @@ curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $T
              "attributes": {
                "git_repo": ["https://github.com/nyrkio/nyrkio"],
                "branch": ["main"],
+               "git_commit": ["6995e2de6891c724bfeb2db33d7b87775f913ad1"],
              }
        }]'
 ```
+
+There are a few things to keep in mind when working with test result data.
+
+- `timestamp` should be the time of the _git commit_ that was tested, not the timestamp of the test execution. Using the git commit timestamp allows you to accurately pinpoint which commit (or sequence of commits) introduced a change in performance.
+- The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "instructions", "request/s", etc.
+- The `git_commit` attribute is special. If you include it in your performance test results and the `git_repo` attribute points to a git repository on GitHub then Nyrkiö will link to the url for that commit whenever it's part of a change point.
 
 ## View the charts in the dashboard
 

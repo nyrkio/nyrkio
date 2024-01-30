@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 
 const Banner = () => {
   return (
     <div className="container-fluid p-5 text-center">
-      <h1>Detect every performance change.</h1>
+      <h1>For Faster Software.</h1>
       <h5>
-        The performance measurement tool that harnesses the power of change
-        point detection
+        Nyrkiö is the performance analysis tool that harnesses the power of
+        change point detection
       </h5>
     </div>
   );
@@ -14,7 +15,7 @@ const Banner = () => {
 
 const FeatureHighlight = () => {
   return (
-    <div className="row">
+    <div className="row p-5">
       <div className="col-sm-4">
         <h3>Shift left</h3>
         <p>
@@ -44,6 +45,17 @@ const FeatureHighlight = () => {
   );
 };
 
+const LearnMore = () => {
+  return (
+    <div className="container p-5">
+      <div className="row">
+        <h3>Want to learn more?</h3>
+        <Link to="/product">Read about the product here</Link>
+      </div>
+    </div>
+  );
+};
+
 export const FrontPage = () => {
   return (
     <>
@@ -54,6 +66,7 @@ export const FrontPage = () => {
           Sign up
         </a>
       </button>
+      <LearnMore />
     </>
   );
 };
