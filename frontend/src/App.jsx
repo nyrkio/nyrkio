@@ -20,13 +20,7 @@ function NoMatch() {
 }
 
 const Root = ({ loggedIn }) => {
-  return (
-    <>
-      <div className="container mt-5 text-center">
-        {loggedIn ? <Dashboard /> : <FrontPage />}
-      </div>
-    </>
-  );
+  return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
 };
 
 function App() {
@@ -42,6 +36,10 @@ function App() {
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         <Routes>
           <Route path="/" element={<Root loggedIn={loggedIn} />} />
+          <Route
+            path="/tests/:prefix"
+            element={<Dashboard loggedIn={loggedIn} />}
+          />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/signup" element={<SignUpPage />} />
