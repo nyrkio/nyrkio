@@ -276,6 +276,16 @@ export const SingleResult = () => {
       });
     };
 
+    const pointRadius = (index) => {
+      if (isChangePoint(index)) {
+        return 8;
+      }
+
+      // If we have a lot of data points, don't show the points because the
+      // chart lines become way too busy.
+      return timestamps.length > 100 ? 0 : 3;
+    };
+
     return (
       <>
         <h6 className="text-center">
@@ -313,7 +323,7 @@ export const SingleResult = () => {
                     : nyrkio_tattoo_red;
                 },
                 pointRadius: (context) => {
-                  return isChangePoint(context.dataIndex) ? 8 : 3;
+                  return pointRadius(context.dataIndex);
                 },
               },
             ],

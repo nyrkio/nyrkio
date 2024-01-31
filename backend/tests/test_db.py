@@ -63,3 +63,23 @@ def test_create_doc_with_metadata():
     assert "user_id" not in test_result
     assert "version" not in test_result
     assert "test_name" not in test_result
+
+
+def test_default_data_for_new_user():
+    """Ensure that we add default data for a new user"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+
+    # Ensure that the user has some test results
+    test_names = asyncio.run(store.get_test_names(user))
+    assert len(test_names) > 0
+    assert "default_benchmark" in test_names
+
+    # Lookup the data for benchmark1
+    results = asyncio.run(store.get_results(user, "default_benchmark"))
+    assert len(results) == 1
+    assert results[0]["foo"] == "bar"

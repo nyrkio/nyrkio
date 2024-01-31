@@ -249,3 +249,14 @@ def test_change_points(client):
     for ch in data["benchmark1"][0]["changes"]:
         assert ch["metric"] == "metric2"
     assert data["benchmark1"][0]["time"] == 3
+
+
+def test_register_new_user(unauthenticated_client):
+    """Register a new user"""
+    data = {
+        "email": "foo@bar.com",
+        "password": "foobar",
+    }
+    response = unauthenticated_client.post("/api/v0/auth/register", json=data)
+    assert response.status_code == 201
+    assert response.json()["is_active"]

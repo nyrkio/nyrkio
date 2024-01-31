@@ -23,7 +23,7 @@ from fastapi_users.router.common import ErrorCode
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
 
-from backend.db.db import User, get_user_db, UserRead, UserCreate
+from backend.db.db import User, get_user_db, UserRead, UserCreate, DBStore
 from backend.auth.github import github_oauth
 from backend.auth.email import send_email, read_template_file
 
@@ -190,6 +190,8 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} has registered.")
+        store = DBStore()
+        await store.add_default_data(user)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
