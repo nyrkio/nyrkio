@@ -31,6 +31,13 @@ class AuthenticatedTestClient(TestClient):
         assert response.status_code == 200
         token = response.json()["access_token"]
         self.headers = {"Authorization": f"Bearer {token}"}
+
+        # Delete default data. Tests that need this test data should
+        # use the unauthenticated_client fixture.
+        response = self.delete("/api/v0/result/default_benchmark")
+        status = response.status_code
+        assert status == 200 or status == 404
+
         return response
 
     def get_headers(self):

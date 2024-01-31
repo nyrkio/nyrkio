@@ -66,14 +66,23 @@ class MockDBStrategy(ConnectionStrategy):
 
     def __init__(self):
         self.user = None
+        self.connection = None
 
     def connect(self):
         client = AsyncMongoMockClient()
-        return client.get_database("test")
+        self.connection = client.get_database("test")
+        return self.connection
 
     async def init_db(self):
         # Add test users
         from backend.auth.auth import UserManager
+
+        # Add some default data
+        await self.connection.default_data.insert_many(
+            [
+                {"test_name": "default_benchmark", "foo": "bar"},
+            ]
+        )
 
         user = UserCreate(
             id=1, email="john@foo.com", password="foo", is_active=True, is_verified=True
@@ -215,6 +224,25 @@ class DBStore(object):
             )
         else:
             await test_results.delete_many({"user_id": user.id, "test_name": test_name})
+
+    async def add_default_data(self, user: User):
+        """
+        Add default data for a new user.
+        """
+        cursor = self.db.default_data.find()
+        default_results = []
+        for cursor in await cursor.to_list(None):
+            d = dict(cursor)
+            del d["_id"]
+            default_results.append(d)
+
+        if not default_results:
+            return
+
+        # TODO(Matt) We assume that all default data has the same test name
+        # but this won't be true when we add more tests
+        test_name = default_results[0]["test_name"]
+        await self.add_results(user, test_name, default_results)
 
 
 # Will be patched by conftest.py if we're running tests
