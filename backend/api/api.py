@@ -81,10 +81,7 @@ async def add_result(
     return {}
 
 
-@api_router.get("/result/{test_name}/changes")
-async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
-    store = DBStore()
-    results = await store.get_results(user, test_name)
+async def calc_changes(test_name, results):
     series = PerformanceTestResultSeries(test_name)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
@@ -100,6 +97,32 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
         series.add_result(result)
 
     return await series.calculate_changes()
+
+
+@api_router.get("/result/{test_name}/changes")
+async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+    store = DBStore()
+    results = await store.get_results(user, test_name)
+    return await calc_changes(test_name, results)
+
+
+@api_router.get("/default/results")
+async def default_results() -> List[str]:
+    store = DBStore()
+    return await store.get_default_test_names()
+
+
+@api_router.get("/default/result/{test_name}")
+async def default_result(test_name: str) -> List[Dict]:
+    store = DBStore()
+    return await store.get_default_data(test_name)
+
+
+@api_router.get("/default/result/{test_name}/changes")
+async def default_changes(test_name: str):
+    store = DBStore()
+    results = await store.get_default_data(test_name)
+    return await calc_changes(test_name, results)
 
 
 # Must come at the end, once we've setup all the routes

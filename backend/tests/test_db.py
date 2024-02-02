@@ -83,3 +83,33 @@ def test_default_data_for_new_user():
     results = asyncio.run(store.get_results(user, "default_benchmark"))
     assert len(results) == 1
     assert results[0]["foo"] == "bar"
+
+
+def test_get_default_data():
+    """Ensure that we can get the default data"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    results = asyncio.run(store.get_default_test_names())
+    assert len(results) > 0
+    assert "default_benchmark" in results
+
+    # Ensure that the user has some test results
+    results = asyncio.run(store.get_default_data("default_benchmark"))
+    assert len(results) > 0
+    assert {"foo": "bar"} in results
+    assert results[0]["foo"] == "bar"
+
+
+def test_get_default_data_with_invalid_test_name():
+    """Ensure that we can't get any data if we supply an invalid testname"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    # Ensure that an invalid test name returns no results
+    results = asyncio.run(store.get_default_data("invalid_test_name"))
+    assert len(results) == 0

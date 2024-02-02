@@ -260,3 +260,37 @@ def test_register_new_user(unauthenticated_client):
     response = unauthenticated_client.post("/api/v0/auth/register", json=data)
     assert response.status_code == 201
     assert response.json()["is_active"]
+
+
+def test_unauth_user_get_default_data_test_names(unauthenticated_client):
+    """Ensure that unauthenticated users can get the default data"""
+    response = unauthenticated_client.get("/api/v0/default/results")
+    assert response.status_code == 200
+    assert "default_benchmark" in response.json()
+    assert len(response.json()) == 1
+
+
+def test_auth_user_get_default_data_test_names(client):
+    """Ensure that authenticated users can get the default data"""
+    client.login()
+    response = client.get("/api/v0/default/results")
+    assert response.status_code == 200
+    assert "default_benchmark" in response.json()
+    assert len(response.json()) == 1
+
+
+def test_unauth_get_default_data_test_results(unauthenticated_client):
+    """Ensure that users can get the default data"""
+    response = unauthenticated_client.get("/api/v0/default/result/default_benchmark")
+    assert response.status_code == 200
+    assert response.json() == [{"foo": "bar"}]
+    assert len(response.json()) == 1
+
+
+def test_auth_user_get_default_data_test_results(client):
+    """Ensure that authenticated users can get the default data"""
+    client.login()
+    response = client.get("/api/v0/default/result/default_benchmark")
+    assert response.status_code == 200
+    assert response.json() == [{"foo": "bar"}]
+    assert len(response.json()) == 1

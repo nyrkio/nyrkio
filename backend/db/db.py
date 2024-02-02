@@ -244,6 +244,27 @@ class DBStore(object):
         test_name = default_results[0]["test_name"]
         await self.add_results(user, test_name, default_results)
 
+    async def get_default_test_names(self):
+        """
+        Get a list of all test names for the default data.
+
+        Returns an empty list if no results are found.
+        """
+        default_data = self.db.default_data
+        return await default_data.distinct("test_name")
+
+    async def get_default_data(self, test_name):
+        """
+        Get the default data for a new user.
+        """
+        # Strip out the internal keys
+        exclude_projection = {key: 0 for key in self._internal_keys}
+
+        # TODO(matt) We should read results in batches, not all at once
+        default_data = self.db.default_data
+        cursor = default_data.find({"test_name": test_name}, exclude_projection)
+        return await cursor.to_list(None)
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
