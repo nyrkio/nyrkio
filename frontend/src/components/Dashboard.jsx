@@ -29,9 +29,53 @@ const nyrkio_skin_light_brown = "#d2a376";
 const nyrkio_text = "#344767";
 const nyrkio_text_light = "#6c757d";
 
+const Breadcrumb = ({ testName }) => {
+  const createItems = () => {
+    if (testName === undefined) {
+      return <></>;
+    }
+
+    return testName.split(".").map((name, i) => {
+      // Check if we're the last component
+      if (i === testName.split(".").length - 1) {
+        return (
+          <li className="breadcrumb-item active" aria-current="page">
+            {name}
+          </li>
+        );
+      }
+
+      var prefix = testName
+        .split(".")
+        .slice(0, i + 1)
+        .join(".");
+      return (
+        <li className="breadcrumb-item">
+          <Link to={`/tests/${prefix}`}>{name}</Link>
+        </li>
+      );
+    });
+  };
+  return (
+    <nav className="navbar navbar-expand-lg">
+      <div className="container-fluid">
+        <nav aria-label="breadcrumb">
+          <ol className="breadcrumb">
+            <li className="breadcrumb-item">
+              <Link to="/">Tests</Link>
+            </li>
+            {createItems()}
+          </ol>
+        </nav>
+      </div>
+    </nav>
+  );
+};
+
 export const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [testNames, setTestNames] = useState([]);
+  var { prefix } = useParams();
 
   const fetchData = async () => {
     const response = await fetch("/api/v0/results", {
@@ -43,10 +87,10 @@ export const Dashboard = () => {
     const resultData = await response.json();
     resultData.map((element) => {
       const test_name = element.test_name;
-      console.log(test_name);
       setTestNames((prevState) => [...prevState, test_name]);
     });
   };
+
   useEffect(() => {
     setLoading(true);
     fetchData().finally(() => {
@@ -54,34 +98,81 @@ export const Dashboard = () => {
     });
   }, []);
 
+  if (loading) {
+    return <div>Loading</div>;
+  }
+
+  var shortNames = [];
+  // Initial condition on page load
+  if (prefix === undefined) {
+    shortNames = testNames
+      .map((name) => name.split(".")[0])
+      .filter((v, i, a) => a.indexOf(v) === i);
+  } else {
+    // remove prefix from name
+    shortNames = testNames
+      .filter((name) => {
+        // Prefix must be an exact match
+        return (
+          name.startsWith(prefix) &&
+          name.length > prefix.length &&
+          name.substring(prefix.length, prefix.length + 1) === "."
+        );
+      })
+      .map((name) => {
+        var shortName = name.replace(prefix + ".", "");
+        return shortName.split(".")[0];
+      })
+      .filter((v, i, a) => a.indexOf(v) === i);
+  }
+
+  const createTestList = () => {
+    return shortNames.map((name) => {
+      var longName = prefix + "." + name;
+      if (testNames.includes(longName) || testNames.includes(name)) {
+        if (!testNames.includes(longName)) longName = name;
+        return (
+          <li className="list-group-item">
+            <Link to={`/result/${longName}`} state={{ testName: longName }}>
+              {name}
+            </Link>
+          </li>
+        );
+      } else {
+        var p = name;
+        if (prefix !== undefined) p = prefix + "." + name;
+        return (
+          <li className="list-group-item">
+            <Link to={`/tests/${p}`} state={{ testName: name }}>
+              {name}
+            </Link>
+          </li>
+        );
+      }
+    });
+  };
+
   return (
     <>
-      {loading ? (
-        <div>Loading</div>
-      ) : (
-        <div className="container">
-          <div className="card">
-            <div className="card-header">Please select a test</div>
-            <div className="card-body">
-              <ul className="list-group list-group-flush">
-                {testNames.map((name, i) => {
-                  return (
-                    <li className="list-group-item">
-                      <Link
-                        to={`/result/${name}`}
-                        testName={name}
-                        state={{ testName: name }}
-                      >
-                        {name}
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+      <Breadcrumb testName={prefix} />
+      <div className="container mt-5 text-center">
+        {loading ? (
+          <div>Loading</div>
+        ) : (
+          <>
+            <div className="container col-10">
+              <div className="card">
+                <div className="card-header">Please select a test</div>
+                <div className="card-body">
+                  <ul className="list-group list-group-flush">
+                    {createTestList()}
+                  </ul>
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          </>
+        )}
+      </div>
     </>
   );
 };
@@ -400,20 +491,7 @@ export const SingleResult = () => {
         <div>Loading</div>
       ) : (
         <>
-          <nav className="navbar navbar-expand-lg">
-            <div className="container-fluid">
-              <nav aria-label="breadcrumb">
-                <ol className="breadcrumb">
-                  <li className="breadcrumb-item">
-                    <Link to="/">Tests</Link>
-                  </li>
-                  <li className="breadcrumb-item active" aria-current="page">
-                    {testName}
-                  </li>
-                </ol>
-              </nav>
-            </div>
-          </nav>
+          <Breadcrumb testName={testName} />
           <div className="container">
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} />
