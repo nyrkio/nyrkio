@@ -13,6 +13,7 @@ The frontend is implemented using React and the backend is built on top of FastA
 If you want to hack on the frontend you can run `npm` directly from inside of the `frontend` directory.
 
 ```console
+npm install
 npm run dev
 ```
 
