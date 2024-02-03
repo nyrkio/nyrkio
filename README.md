@@ -6,7 +6,9 @@
 
 ## Contributing
 
-We welcome all contributions! The frontend is implemented using React and the backend is built on top of FastAPI and Pydantic.
+We welcome all contributions!
+
+The frontend is implemented using React and the backend is built on top of FastAPI and Pydantic.
 
 If you want to hack on the frontend you can run `npm` directly from inside of the `frontend` directory.
 
@@ -16,7 +18,35 @@ npm run dev
 
 You can run a more realistic environment using the `docker-compose.dev.yml` file which will start services for the proxy (`nginx`), the frontend (`React`Single-page app) and the backend (`FastAPI` app).
 
+
 ```console
+PACMAN=apt
+#PACMAN=yum
+#PACMAN=brew
+
+git clone git@github.com:nyrkio/nyrkio.git
+cd nyrkio
+git submodule init
+git submodule update
+
+cat <<<END  > .env.backend
+#DB_URL=mongodb://localhost:27017/nyrkiodb
+DB_URL=mongodb+srv://nyrkio:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+DB_NAME=nyrkiodb
+POSTMARK_API_KEY=
+GITHUB_CLIENT_SECRET=
+SECRET_KEY=
+
+#HUNTER_CONFIG=
+#GRAFANA_USER=
+#GRAFANA_PASSWORD=
+END
+
+sudo $PACMAN install docker.io docker-compose-v2
+sudo usermod -a -G docker $USER
+newgrp docker
+
+
 docker compose -f docker-compose.dev.yml up --build
 ```
 
