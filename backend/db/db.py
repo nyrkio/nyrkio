@@ -265,6 +265,59 @@ class DBStore(object):
         cursor = default_data.find({"test_name": test_name}, exclude_projection)
         return await cursor.to_list(None)
 
+    #
+    # Change detection can be disabled for metrics on a per-user, per-test basis.
+    # This is useful when certain metrics are too noisy to be useful and users just
+    # want to outright not used them.
+    #
+    # A metric is "disabled" by adding a document to the "metrics" collection. It can
+    # be re-enabled by removing the document.
+    #
+    async def disable_changes(self, user: User, test_name: str, metrics: List[str]):
+        """
+        Disable changes for a given user, test, metric combination.
+        """
+        for metric in metrics:
+            await self.db.metrics.insert_one(
+                {
+                    "user_id": user.id,
+                    "test_name": test_name,
+                    "metric_name": metric,
+                    "is_disabled": True,
+                }
+            )
+
+    async def enable_changes(self, user: User, test_name: str, metrics: List[str]):
+        """
+        Enable changes for a given user, test, metric combination.
+        """
+        if not metrics:
+            # Enable all metrics
+            await self.db.metrics.delete_many(
+                {"user_id": user.id, "test_name": test_name, "is_disabled": True}
+            )
+        else:
+            for metric in metrics:
+                await self.db.metrics.delete_one(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "metric_name": metric,
+                        "is_disabled": True,
+                    }
+                )
+
+    async def get_disabled_metrics(self, user: User, test_name: str) -> List[str]:
+        """
+        Get a list of disabled metrics for a given user and test name.
+
+        Returns an empty list if no results are found.
+        """
+        metrics = self.db.metrics
+        return await metrics.distinct(
+            "metric_name", {"user_id": user.id, "test_name": test_name}
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

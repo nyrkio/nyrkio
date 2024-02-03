@@ -294,3 +294,217 @@ def test_auth_user_get_default_data_test_results(client):
     assert response.status_code == 200
     assert response.json() == [{"foo": "bar"}]
     assert len(response.json()) == 1
+
+
+def test_disable_change_detection_for_metric(client):
+    """Ensure that we can disable change detection for individual metrics"""
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    client.login()
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/changes/disable", json=["metric", "metric2"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert not data["benchmark1"]
+
+
+def test_disable_and_reenable_changes_for_metrics(client):
+    """Ensure that we can disable and then re-enable change detection for metrics"""
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    client.login()
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/changes/disable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert not data["benchmark1"]
+
+    # Re-enable change detection for metric2
+    response = client.post("/api/v0/result/benchmark1/changes/enable", json=["metric2"])
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
+
+
+def test_disable_change_for_empty_metrics_fails(client):
+    """Ensure that we can't disable change detection for empty metrics"""
+    client.login()
+    response = client.post("/api/v0/result/benchmark1/changes/disable", json=[])
+    assert response.status_code == 400
+    assert response.json() == {"detail": "No metrics to disable change detection for"}
+
+
+def test_enable_change_for_empty_metrics_succeeds(client):
+    """Ensure that we can enable change detection for empty metrics"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/changes/disable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    # Validate that change detection is disabled for metric2
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert not data["benchmark1"]
+
+    # enable change detection for all metrics
+    response = client.post("/api/v0/result/benchmark1/changes/enable", json=[])
+    assert response.status_code == 200
+
+    # Validate that change detection is enabled for all metrics
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
