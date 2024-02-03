@@ -4,10 +4,10 @@ import { Link } from "react-router-dom";
 const Banner = () => {
   return (
     <div className="container-fluid p-5 text-center">
-      <h1>Detect every performance change.</h1>
+      <h1>For Faster Software.</h1>
       <h5>
-        The performance measurement tool that harnesses the power of change
-        point detection
+        Nyrkiö is the performance analysis tool that harnesses the power of
+        change point detection
       </h5>
     </div>
   );
