@@ -35,7 +35,7 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   }
 
   const colDefs = [
-    { field: "date" },
+    { field: "date", sort: "desc" },
     { field: "metric" },
     { field: "change" },
     {
