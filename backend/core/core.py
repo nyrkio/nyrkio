@@ -7,7 +7,7 @@ import httpx
 import logging
 
 from hunter.report import Report, ReportType
-from hunter.series import Series
+from hunter.series import Series, AnalysisOptions
 
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
@@ -101,7 +101,11 @@ class PerformanceTestResultSeries:
             self.name, None, timestamps, metric_units, metric_data, attributes
         )
 
-        change_points = series.analyze().change_points_by_time
+        options = AnalysisOptions()
+        options.min_magnitude = 0.1
+        options.max_pvalue = 0.04
+
+        change_points = series.analyze(options).change_points_by_time
         report = GitHubReport(series, change_points)
         produced_report = await report.produce_report(self.name, ReportType.JSON)
         return json.loads(produced_report)
