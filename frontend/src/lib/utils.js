@@ -9,5 +9,9 @@ export const parseTimestamp = (t) => {
 
 export const formatCommit = (commit, commit_msg) => {
   // Limit the git commit sha to 12 characters to improve readability
-  return commit.substring(0, 12) + ' ("' + commit_msg + '")';
+  var commitString = commit.substring(0, 12);
+  if (commit_msg !== "") {
+    commitString += ' ("' + commit_msg + '")';
+  }
+  return commitString;
 };

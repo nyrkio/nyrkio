@@ -43,11 +43,6 @@ export const ChangePointSummaryTable = ({ changeData }) => {
       cellRenderer: (params) => {
         const { commit, commit_msg, repo } = params.value;
 
-        // If we failed to lookup the commit message, display the commit sha
-        if (commit_msg === "") {
-          return commit;
-        }
-
         const url = repo + "/commit/" + commit;
         const text = formatCommit(commit, commit_msg);
         return (
