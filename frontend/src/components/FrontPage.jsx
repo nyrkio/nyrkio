@@ -173,8 +173,8 @@ export const FrontPage = () => {
       <div className="padding-block "></div>
       <FeatureBanner1 />
       <div className="padding-block-sm "></div>
-      <SampleData />
-      <div className="padding-block "></div>
+      {/* <SampleData /> */}
+      {/* <div className="padding-block "></div> */}
       <FeatureBanner2 />
       <LearnMore />
       <></>
