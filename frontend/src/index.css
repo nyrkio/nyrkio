@@ -155,3 +155,18 @@ table.pricing-table th, table.pricing-table td {
   color: white;
   text-decoration: none;
 }
+
+.padding-block {
+  border: 2px;
+  padding: 50px;
+}
+
+.padding-block-sm {
+  border: 2px;
+  padding: 30px;
+}
+
+.bg-nyrkio-dark-red {
+  color: white;
+  background-color: var(--nyrkio-dark-gray )!important
+}

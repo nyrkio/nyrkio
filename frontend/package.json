@@ -3,6 +3,12 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "proxy": "http://localhost:80",
+  "devServer": {
+    "proxy": {
+      "*": "http://[::1]:80"
+    }
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

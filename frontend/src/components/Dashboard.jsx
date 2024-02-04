@@ -1,33 +1,8 @@
 import { createContext, useEffect, useState } from "react";
 import { BrowserRouter as Router, Link, useParams } from "react-router-dom";
-import { Line } from "react-chartjs-2";
-// DO NOT REMOVE
-// necessary to avoid "category is not a registered scale" error.
-import { Chart as ChartJS } from "chart.js/auto";
-import { Chart } from "react-chartjs-2";
-import { format } from "date-fns";
-import { AgGridReact } from "ag-grid-react"; // React Grid Logic
-import "ag-grid-community/styles/ag-grid.css"; // Core CSS
-import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
-
-const nyrkio_dark_red = "#a34111";
-const nyrkio_bright_red = "#dc3d06";
-const nyrkio_tattoo_red = "#973212";
-const nyrkio_dark_gray = "#a99883";
-const nyrkio_light_gray = "#d1c1a8";
-const nyrkio_light_gray2 = "#f1e8d8";
-const nyrkio_light_gray3 = "#fff6e6";
-const nyrkio_light_gray4 = "#fff9f1";
-const nyrkio_light_gray5 = "#fffdf9";
-
-const nyrkio_bear_brown = "#351406";
-const nyrkio_horn_dark_brown = "#50320d";
-const nyrkio_arrow_brown = "#7c5a32";
-const nyrkio_horn_light_brown = "#b28b56";
-const nyrkio_skin_light_brown = "#d2a376";
-
-const nyrkio_text = "#344767";
-const nyrkio_text_light = "#6c757d";
+import { PropTypes } from "prop-types";
+import { DrawLineChart } from "./DrawLineChart";
+import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 
 const Breadcrumb = ({ testName }) => {
   const createItems = () => {
@@ -177,85 +152,7 @@ export const Dashboard = () => {
   );
 };
 
-const parseTimestamp = (t) => {
-  const utcSeconds = t;
-  var d = new Date(0);
-  d.setUTCSeconds(utcSeconds);
-  return format(d, "yyyy-MM-dd HH:mm");
-};
-
-const formatCommit = (commit, commit_msg) => {
-  // Limit the git commit sha to 12 characters to improve readability
-  return commit.substring(0, 12) + ' ("' + commit_msg + '")';
-};
-
-const ChangePointSummaryTable = ({ changeData }) => {
-  var rowData = [];
-
-  Object.entries(changeData).forEach(([testName, value]) => {
-    value.forEach((changePoint) => {
-      console.log(changePoint);
-      const changes = changePoint["changes"];
-      console.log(changes);
-      changes.map((change) => {
-        const commit = changePoint["attributes"]["git_commit"][0];
-
-        let commit_msg = "";
-        if (changePoint["attributes"].hasOwnProperty("commit_msg")) {
-          commit_msg = changePoint["attributes"]["commit_msg"][0];
-        }
-
-        const repo = changePoint["attributes"]["git_repo"][0];
-        rowData.push({
-          date: parseTimestamp(changePoint["time"]),
-          commit: { commit, commit_msg, repo },
-          metric: change["metric"],
-          change: change["forward_change_percent"] + "%",
-        });
-      });
-    });
-  });
-
-  if (rowData.length === 0) {
-    return <></>;
-  }
-
-  const colDefs = [
-    { field: "date" },
-    { field: "metric" },
-    { field: "change" },
-    {
-      field: "commit",
-      cellRenderer: (params) => {
-        const { commit, commit_msg, repo } = params.value;
-
-        // If we failed to lookup the commit message, display the commit sha
-        if (commit_msg === "") {
-          return commit;
-        }
-
-        const url = repo + "/commit/" + commit;
-        const text = formatCommit(commit, commit_msg);
-        return (
-          <a href={url} target="_blank">
-            {text}
-          </a>
-        );
-      },
-    },
-  ];
-
-  return (
-    <>
-      <div className="ag-theme-quartz" style={{ height: 500, width: 900 }}>
-        <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} />
-      </div>
-    </>
-  );
-};
-
-export const SingleResult = () => {
-  const { testName } = useParams();
+export const SingleResultWithTestname = ({ testName }) => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
@@ -280,18 +177,6 @@ export const SingleResult = () => {
     });
     const changeData = await changes.json();
     setChangePointData(changeData);
-  };
-
-  const parseData = (data, metricName) => {
-    console.log(data);
-    const value_map = data.map(
-      (result) =>
-        result.metrics
-          .filter((metric) => metric.name === metricName)
-          .map((metric) => metric.value)[0]
-    );
-    console.log(value_map);
-    return value_map;
   };
 
   useEffect(() => {
@@ -325,166 +210,6 @@ export const SingleResult = () => {
   }, []);
   console.log("unique: " + unique);
 
-  // {'testName':
-  //    [{
-  //      'time': 123,
-  //      'changes': [{'forward_change_percent': 900, 'metric': 'metric1'}]
-  //    }]
-  // }
-  const changePointTimes = [];
-
-  // TODO(mfleming) Assumes a single testName but must handle multiple
-  // tests in the future.
-  Object.entries(changePointData).forEach(([testName, value]) => {
-    value.forEach((changePoint) => {
-      const metrics = changePoint["changes"].map((change) => {
-        return change["metric"];
-      });
-      console.log(metrics);
-      const t = changePoint["time"];
-      changePointTimes.push({ t, metrics });
-    });
-  });
-
-  var changePointIndexes = [];
-  timestamps.map((timestamp, index) => {
-    changePointTimes.map((change) => {
-      const { t, metrics } = change;
-      if (t !== timestamp) {
-        return;
-      }
-      changePointIndexes.push({ index, metrics });
-    });
-  });
-
-  const drawLineChart = (metric) => {
-    const metricName = metric["name"];
-    const metricUnit = metric["unit"];
-
-    const isChangePoint = (index) => {
-      return changePointIndexes.find((element) => {
-        return element.metrics.includes(metricName) && element.index === index;
-      });
-    };
-
-    const pointRadius = (index) => {
-      if (isChangePoint(index)) {
-        return 8;
-      }
-
-      // If we have a lot of data points, don't show the points because the
-      // chart lines become way too busy.
-      return timestamps.length > 100 ? 0 : 3;
-    };
-
-    return (
-      <>
-        <h6 className="text-center">
-          {testName}: {metricName}
-        </h6>
-        <Line
-          datasetIdKey="foo"
-          data={{
-            labels: timestamps.map(parseTimestamp),
-            datasets: [
-              {
-                id: 1,
-                label: metricName,
-                data: parseData(displayData, metricName),
-                fill: true,
-                borderColor: nyrkio_horn_light_brown,
-                borderWidth: 2,
-                maxBarThickness: 6,
-                backgroundColor: ({ chart: { ctx } }) => {
-                  const gradient = ctx.createLinearGradient(0, 230, 0, 50);
-                  gradient.addColorStop(1, "rgba(88.6, 19.6,0,0.1)");
-                  gradient.addColorStop(0.2, "rgba(72,72,176,0.0)");
-                  gradient.addColorStop(0, "rgba(203,12,159,0)");
-
-                  return gradient;
-                },
-                pointBorderColor: (context) => {
-                  return isChangePoint(context.dataIndex)
-                    ? nyrkio_bright_red
-                    : nyrkio_tattoo_red;
-                },
-                pointBackgroundColor: (context) => {
-                  return isChangePoint(context.dataIndex)
-                    ? nyrkio_bright_red
-                    : nyrkio_tattoo_red;
-                },
-                pointRadius: (context) => {
-                  return pointRadius(context.dataIndex);
-                },
-              },
-            ],
-          }}
-          options={{
-            scales: {
-              x: {
-                grid: {
-                  display: false,
-                },
-              },
-            },
-            plugins: {
-              legend: {
-                display: false,
-              },
-              interaction: {
-                intersect: false,
-                mode: "index",
-              },
-              tooltip: {
-                displayColors: false,
-                callbacks: {
-                  label: (context) => {
-                    var labelArray = ["value: " + context.raw + metricUnit];
-
-                    // Search in changePointData for this timestamp and metric
-                    const timestamp = timestamps[context.dataIndex];
-                    Object.entries(changePointData).forEach(
-                      ([testName, value]) => {
-                        value.forEach((changePoint) => {
-                          if (changePoint["time"] === timestamp) {
-                            labelArray.push("");
-
-                            // Add all change point attributes to the label
-                            changePoint["changes"].forEach((change) => {
-                              if (change["metric"] !== metricName) {
-                                return;
-                              }
-
-                              Object.entries(change).map(([key, value]) => {
-                                if (key === "metric") {
-                                  return;
-                                }
-
-                                var label = key + ": " + value;
-                                if (key.includes("percent")) {
-                                  label = label + "%";
-                                }
-
-                                labelArray.push(label);
-                              });
-                            });
-                          }
-                        });
-                      }
-                    );
-
-                    return labelArray;
-                  },
-                },
-                intersect: false,
-              },
-            },
-          }}
-        />
-      </>
-    );
-  };
-
   return (
     <>
       {loading ? (
@@ -496,10 +221,31 @@ export const SingleResult = () => {
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} />
             </div>
-            <div className="row">{unique.map(drawLineChart)}</div>
+            <div className="row">
+              {unique.map((metric) => {
+                return (
+                  <DrawLineChart
+                    changePointData={changePointData}
+                    metric={metric}
+                    testName={testName}
+                    timestamps={timestamps}
+                    displayData={displayData}
+                  />
+                );
+              })}
+            </div>
           </div>
         </>
       )}
     </>
   );
+};
+
+SingleResultWithTestname.propTypes = {
+  testName: PropTypes.string.isRequired,
+};
+
+export const SingleResult = () => {
+  const { testName } = useParams();
+  return <SingleResultWithTestname testName={testName} />;
 };

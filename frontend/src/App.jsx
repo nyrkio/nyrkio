@@ -10,6 +10,7 @@ import { ProductPage } from "./components/ProductPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
+import ScrollToTop from "./components/ScrollToTop.jsx";
 
 function NoMatch() {
   return (
@@ -52,6 +53,7 @@ function App() {
           <Route path="/docs/getting-started" element={<Docs />} />
           <Route path="*" element={<NoMatch />} />
         </Routes>
+        <ScrollToTop />
         <Footer />
       </Router>
     </>

@@ -244,6 +244,80 @@ class DBStore(object):
         test_name = default_results[0]["test_name"]
         await self.add_results(user, test_name, default_results)
 
+    async def get_default_test_names(self):
+        """
+        Get a list of all test names for the default data.
+
+        Returns an empty list if no results are found.
+        """
+        default_data = self.db.default_data
+        return await default_data.distinct("test_name")
+
+    async def get_default_data(self, test_name):
+        """
+        Get the default data for a new user.
+        """
+        # Strip out the internal keys
+        exclude_projection = {key: 0 for key in self._internal_keys}
+
+        # TODO(matt) We should read results in batches, not all at once
+        default_data = self.db.default_data
+        cursor = default_data.find({"test_name": test_name}, exclude_projection)
+        return await cursor.to_list(None)
+
+    #
+    # Change detection can be disabled for metrics on a per-user, per-test basis.
+    # This is useful when certain metrics are too noisy to be useful and users just
+    # want to outright not used them.
+    #
+    # A metric is "disabled" by adding a document to the "metrics" collection. It can
+    # be re-enabled by removing the document.
+    #
+    async def disable_changes(self, user: User, test_name: str, metrics: List[str]):
+        """
+        Disable changes for a given user, test, metric combination.
+        """
+        for metric in metrics:
+            await self.db.metrics.insert_one(
+                {
+                    "user_id": user.id,
+                    "test_name": test_name,
+                    "metric_name": metric,
+                    "is_disabled": True,
+                }
+            )
+
+    async def enable_changes(self, user: User, test_name: str, metrics: List[str]):
+        """
+        Enable changes for a given user, test, metric combination.
+        """
+        if not metrics:
+            # Enable all metrics
+            await self.db.metrics.delete_many(
+                {"user_id": user.id, "test_name": test_name, "is_disabled": True}
+            )
+        else:
+            for metric in metrics:
+                await self.db.metrics.delete_one(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "metric_name": metric,
+                        "is_disabled": True,
+                    }
+                )
+
+    async def get_disabled_metrics(self, user: User, test_name: str) -> List[str]:
+        """
+        Get a list of disabled metrics for a given user and test name.
+
+        Returns an empty list if no results are found.
+        """
+        metrics = self.db.metrics
+        return await metrics.distinct(
+            "metric_name", {"user_id": user.id, "test_name": test_name}
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

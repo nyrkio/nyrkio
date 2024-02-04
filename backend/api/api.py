@@ -81,25 +81,80 @@ async def add_result(
     return {}
 
 
-@api_router.get("/result/{test_name}/changes")
-async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
-    store = DBStore()
-    results = await store.get_results(user, test_name)
+async def calc_changes(test_name, results, disabled=None):
     series = PerformanceTestResultSeries(test_name)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.
     for r in results:
-        metrics = [
-            ResultMetric(name=r["name"], unit=r["unit"], value=r["value"])
-            for r in r["metrics"]
-        ]
+        metrics = []
+        for m in r["metrics"]:
+            # Metrics can opt out of change detection
+            if disabled and m["name"] in disabled:
+                continue
+
+            rm = ResultMetric(name=m["name"], unit=m["unit"], value=m["value"])
+            metrics.append(rm)
+
         result = PerformanceTestResult(
             timestamp=r["timestamp"], metrics=metrics, attributes=r["attributes"]
         )
         series.add_result(result)
 
     return await series.calculate_changes()
+
+
+@api_router.get("/result/{test_name}/changes")
+async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+    store = DBStore()
+    results = await store.get_results(user, test_name)
+    disabled = await store.get_disabled_metrics(user, test_name)
+    return await calc_changes(test_name, results, disabled)
+
+
+@api_router.post("/result/{test_name}/changes/enable")
+async def enable_changes(
+    test_name: str,
+    user: User = Depends(auth.current_active_user),
+    metrics: List[str] = [],
+):
+    store = DBStore()
+    await store.enable_changes(user, test_name, metrics)
+    return {}
+
+
+@api_router.post("/result/{test_name}/changes/disable")
+async def disable_changes(
+    test_name: str,
+    user: User = Depends(auth.current_active_user),
+    metrics: List[str] = [],
+):
+    if not metrics:
+        raise HTTPException(
+            status_code=400, detail="No metrics to disable change detection for"
+        )
+    store = DBStore()
+    await store.disable_changes(user, test_name, metrics)
+    return {}
+
+
+@api_router.get("/default/results")
+async def default_results() -> List[str]:
+    store = DBStore()
+    return await store.get_default_test_names()
+
+
+@api_router.get("/default/result/{test_name}")
+async def default_result(test_name: str) -> List[Dict]:
+    store = DBStore()
+    return await store.get_default_data(test_name)
+
+
+@api_router.get("/default/result/{test_name}/changes")
+async def default_changes(test_name: str):
+    store = DBStore()
+    results = await store.get_default_data(test_name)
+    return await calc_changes(test_name, results)
 
 
 # Must come at the end, once we've setup all the routes
