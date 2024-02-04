@@ -67,7 +67,7 @@ const FeatureBanner1 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-light">
       <div className="row justify-content-center">
-        <div className="col-4 col-4-md text-start align-text-bottom align-self-center">
+        <div className="col-md-4 col-sm-12 text-start align-text-bottom align-self-center">
           <p>
             Even the smallest performance changes can have a big impact on your
             users. Nyrkiö uses change point detection to identify every change
@@ -80,10 +80,10 @@ const FeatureBanner1 = () => {
             gain.
           </p>
         </div>
-        <div className="col-4 align-items-end justify-content-end">
+        <div className="col-md-4 col-sm-12 align-items-end justify-content-end">
           <img
             style={{
-              width: "80%",
+              width: "100%",
               border: "#efefeb 10px solid",
               borderRadius: "5px",
             }}
@@ -100,7 +100,7 @@ const FeatureBanner2 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-nyrkio-dark-red bg-dark">
       <div className="row text-end justify-content-center pt-5">
-        <div className="col-4 align-self-center">
+        <div className="col-md-4 col-sm-12 align-self-center">
           <div className="row text-center">
             <h2>Integrate with your CI/CD</h2>
           </div>
@@ -116,7 +116,7 @@ const FeatureBanner2 = () => {
             </p>
           </div>
         </div>
-        <div className="col-5">
+        <div className="col-md-5 col-sm-12">
           <img
             style={{
               width: "100%",
@@ -129,7 +129,7 @@ const FeatureBanner2 = () => {
         </div>
       </div>
       <div className="row text-center justify-content-center py-5">
-        <div className="col-5 align-items-center">
+        <div className="col-md-5 col-sm-12 align-items-center">
           <img
             style={{
               width: "100%",
@@ -140,7 +140,7 @@ const FeatureBanner2 = () => {
             alt="GitHub commit"
           />
         </div>
-        <div className="col-4 text-start align-self-center">
+        <div className="col-md-4 col-sm-12 text-start align-self-center pt-3">
           <h2>Identify the exact commit</h2>
           <p>
             Quickly identity the commit that introduced the performance change
