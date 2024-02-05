@@ -72,7 +72,7 @@ export const ChangePointSummaryTable = ({ changeData }) => {
       <div className="row text-center">
         <h4>Performance Changes</h4>
       </div>
-      <div className="ag-theme-quartz pb-5" style={{ height: 500, width: "90%" }}>
+      <div className="ag-theme-quartz ag-theme-nyrkio pb-5" style={{ height: 500, width: "90%" }}>
         <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} autoSizeStrategy={autoSizeStrategy}/>
       </div>
     </>
