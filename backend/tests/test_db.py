@@ -220,3 +220,71 @@ def test_cannot_add_same_result_twice():
 
     with pytest.raises(DBStoreResultExists):
         asyncio.run(store.add_results(user, test_name, results))
+
+
+def test_user_config():
+    """Ensure that we can store and retrieve user configuration"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    config = {"foo": "bar"}
+    asyncio.run(store.set_user_config(user, config))
+
+    response = asyncio.run(store.get_user_config(user))
+    assert response == config
+
+
+def test_get_user_config_with_no_config():
+    """Ensure that we can get a default config if the user has no config"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    response = asyncio.run(store.get_user_config(user))
+    assert response == {}
+
+
+def test_get_user_config_update_existing():
+    """Ensure that we can update an existing user config"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    config = {"foo": "bar"}
+    asyncio.run(store.set_user_config(user, config))
+
+    response = asyncio.run(store.get_user_config(user))
+    assert response == config
+
+    config = {"foo": "baz"}
+    asyncio.run(store.set_user_config(user, config))
+
+    response = asyncio.run(store.get_user_config(user))
+    assert response == config
+
+
+def test_delete_user_config():
+    """Ensure that we can delete a user config"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    config = {"foo": "bar"}
+    asyncio.run(store.set_user_config(user, config))
+
+    response = asyncio.run(store.get_user_config(user))
+    assert response == config
+
+    asyncio.run(store.delete_user_config(user))
+
+    response = asyncio.run(store.get_user_config(user))
+    assert response == {}

@@ -11,13 +11,21 @@ export const UserMenu = ({ setLoggedIn }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <b class="bi bi-gear"></b>
+        <b className="bi bi-gear"></b>
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
+        <Dropdown.Item href="/user/settings">
+          <Link to="/user/settings">
+            <i className="bi bi-person-circle"></i> User Settings
+          </Link>
+        </Dropdown.Item>
+
+        <Dropdown.Divider />
+
         <Dropdown.Item href="/" onClick={handleLogoutClick}>
           <Link to="/">
-            <i class="bi bi-box-arrow-right"></i> Log Out
+            <i className="bi bi-box-arrow-right"></i> Log Out
           </Link>
         </Dropdown.Item>
       </Dropdown.Menu>
