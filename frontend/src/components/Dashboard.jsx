@@ -4,6 +4,7 @@ import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 
+
 const Breadcrumb = ({ testName }) => {
   const createItems = () => {
     if (testName === undefined) {
@@ -33,8 +34,8 @@ const Breadcrumb = ({ testName }) => {
   };
   return (
     <nav className="navbar navbar-expand-lg">
-      <div className="container-fluid">
-        <nav aria-label="breadcrumb">
+      <div className="container-fluid breadcrumb-wrapper">
+        <nav aria-label="breadcrumb" >
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
               <Link to="/">Tests</Link>
@@ -130,7 +131,7 @@ export const Dashboard = () => {
   return (
     <>
       <Breadcrumb testName={prefix} />
-      <div className="container mt-5 text-center">
+      <div className="container mt-5 text-center benchmark-select">
         {loading ? (
           <div>Loading</div>
         ) : (

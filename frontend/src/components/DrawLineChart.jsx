@@ -24,6 +24,12 @@ const nyrkio_skin_light_brown = "#d2a376";
 const nyrkio_text = "#344767";
 const nyrkio_text_light = "#6c757d";
 
+const nyrkio_chart_line_color = nyrkio_horn_light_brown;
+const nyrkio_chart_cp_color = nyrkio_tattoo_red;
+
+
+
+
 export const DrawLineChart = ({
   metric,
   testName,
@@ -83,16 +89,17 @@ export const DrawLineChart = ({
 
   const pointRadius = (index) => {
     if (isChangePoint(index)) {
-      return 8;
+      return 3;
     }
 
     // If we have a lot of data points, don't show the points because the
     // chart lines become way too busy.
-    return timestamps.length > 100 ? 0 : 3;
+    return timestamps.length > 100 ? 0 : 1;
   };
 
   return (
     <>
+      <div className="chart-wrapper">
       <h6 className="text-center">
         {testName}: {metricName}
       </h6>
@@ -106,26 +113,26 @@ export const DrawLineChart = ({
               label: metricName,
               data: parseData(displayData, metricName),
               fill: true,
-              borderColor: nyrkio_horn_light_brown,
+              borderColor: nyrkio_chart_line_color,
               borderWidth: 2,
               maxBarThickness: 6,
               backgroundColor: ({ chart: { ctx } }) => {
                 const gradient = ctx.createLinearGradient(0, 230, 0, 50);
-                gradient.addColorStop(1, "rgba(88.6, 19.6,0,0.1)");
-                gradient.addColorStop(0.2, "rgba(72,72,176,0.0)");
-                gradient.addColorStop(0, "rgba(203,12,159,0)");
+                gradient.addColorStop(1, "rgba(209,193,168,0.2)");
+                gradient.addColorStop(0.2, "rgba(209,193,168,0.2)");
+                gradient.addColorStop(0, "rgba(255,249,241,0.3)");
 
                 return gradient;
               },
               pointBorderColor: (context) => {
                 return isChangePoint(context.dataIndex)
-                  ? nyrkio_bright_red
-                  : nyrkio_tattoo_red;
+                  ? nyrkio_chart_cp_color
+                  : nyrkio_chart_line_color;
               },
               pointBackgroundColor: (context) => {
                 return isChangePoint(context.dataIndex)
-                  ? nyrkio_bright_red
-                  : nyrkio_tattoo_red;
+                  ? nyrkio_chart_cp_color
+                  : nyrkio_chart_line_color;
               },
               pointRadius: (context) => {
                 return pointRadius(context.dataIndex);
@@ -195,6 +202,7 @@ export const DrawLineChart = ({
           },
         }}
       />
+    </div>
     </>
   );
 };

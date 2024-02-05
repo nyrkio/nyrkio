@@ -2,6 +2,13 @@ import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
+import React, {
+  StrictMode,
+  useCallback,
+  useMemo,
+  useRef,
+  foo,
+} from 'react';
 
 export const ChangePointSummaryTable = ({ changeData }) => {
   var rowData = [];
@@ -31,7 +38,7 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   });
 
   if (rowData.length === 0) {
-    return <></>;
+    return <><span className="no-changepoints">(no changepoints)</span></>;
   }
 
   const colDefs = [
@@ -54,13 +61,19 @@ export const ChangePointSummaryTable = ({ changeData }) => {
     },
   ];
 
+  const autoSizeStrategy = useMemo(() => {
+      return {
+        type: 'fitCellContents',
+      };
+    });
+
   return (
     <>
       <div className="row text-center">
         <h4>Performance Changes</h4>
       </div>
-      <div className="ag-theme-quartz pb-5" style={{ height: 500, width: 900 }}>
-        <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} />
+      <div className="ag-theme-quartz pb-5" style={{ height: 500, width: "90%" }}>
+        <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} autoSizeStrategy={autoSizeStrategy}/>
       </div>
     </>
   );
