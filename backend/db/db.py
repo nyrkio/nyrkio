@@ -177,7 +177,8 @@ class DBStore(object):
 
     async def get_results(self, user: User, test_name: str) -> List[Dict]:
         """
-        Retrieve test results for a given user and test name.
+        Retrieve test results for a given user and test name. The results are
+        guaranteed to be sorted by timestamp in ascending order.
 
         If no results are found, return an empty list.
         """
@@ -187,9 +188,13 @@ class DBStore(object):
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
-        results = await test_results.find(
-            {"user_id": user.id, "test_name": test_name}, exclude_projection
-        ).to_list(None)
+        results = (
+            await test_results.find(
+                {"user_id": user.id, "test_name": test_name}, exclude_projection
+            )
+            .sort("timestamp")
+            .to_list(None)
+        )
 
         return results
 
