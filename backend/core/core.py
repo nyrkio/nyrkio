@@ -111,8 +111,8 @@ class PerformanceTestResultSeries:
         )
 
         options = AnalysisOptions()
-        options.min_magnitude = 0.1
-        options.max_pvalue = 0.04
+        options.min_magnitude = 0.05
+        options.max_pvalue = 0.001
 
         change_points = series.analyze(options).change_points_by_time
         report = GitHubReport(series, change_points)
