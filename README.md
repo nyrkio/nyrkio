@@ -51,6 +51,10 @@ newgrp docker
 docker compose -f docker-compose.dev.yml up --build
 ```
 
+### Contributing Changes
+
+Please open a pull request with your changes against the `main` branch. PRs allow us to run linters and tests against your modifications.
+
 ## References
 
 - [The Use of Change Point Detection to Identify Software Performance Regressions in a Continuous Integration System](https://arxiv.org/pdf/2003.00584)
