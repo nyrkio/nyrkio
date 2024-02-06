@@ -46,7 +46,11 @@ def test_add_result(client):
         {
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         }
     ]
     response = client.post("/api/v0/result/benchmark1", json=data)
@@ -71,12 +75,20 @@ def test_add_multiple_test_results_at_once(client):
         {
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
     response = client.post("/api/v0/result/benchmark1", json=data)
@@ -102,7 +114,11 @@ def test_add_multiple_tests(client):
         {
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         }
     ]
 
@@ -129,12 +145,20 @@ def test_delete_all_user_results(client):
         {
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
     response = client.post("/api/v0/result/benchmark1", json=data)
@@ -163,17 +187,29 @@ def test_delete_single_result(client):
         {
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 3,
             "metrics": [{"metric1": 3.0, "metric2": 4.0}],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
     test_name = "benchmark1"
@@ -218,7 +254,11 @@ def test_change_points(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
@@ -226,7 +266,11 @@ def test_change_points(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 3,
@@ -234,7 +278,11 @@ def test_change_points(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -283,7 +331,9 @@ def test_unauth_get_default_data_test_results(unauthenticated_client):
     """Ensure that users can get the default data"""
     response = unauthenticated_client.get("/api/v0/default/result/default_benchmark")
     assert response.status_code == 200
-    assert response.json() == [{"foo": "bar"}]
+    from backend.db.db import MockDBStrategy
+
+    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
     assert len(response.json()) == 1
 
 
@@ -292,7 +342,9 @@ def test_auth_user_get_default_data_test_results(client):
     client.login()
     response = client.get("/api/v0/default/result/default_benchmark")
     assert response.status_code == 200
-    assert response.json() == [{"foo": "bar"}]
+    from backend.db.db import MockDBStrategy
+
+    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
     assert len(response.json()) == 1
 
 
@@ -306,7 +358,11 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
@@ -315,7 +371,11 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 3,
@@ -324,7 +384,11 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -365,7 +429,11 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
@@ -374,7 +442,11 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 3,
@@ -383,7 +455,11 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -447,7 +523,11 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
@@ -456,7 +536,11 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 3,
@@ -465,7 +549,11 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -520,28 +608,44 @@ def test_changes_data_is_sorted_by_timestamp(client):
             "metrics": [
                 {"name": "metric1", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 1,
             "metrics": [
                 {"name": "metric1", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
             "metrics": [
                 {"name": "metric1", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 4,
             "metrics": [
                 {"name": "metric1", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -573,7 +677,11 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 1,
@@ -581,7 +689,11 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
         {
             "timestamp": 2,
@@ -589,7 +701,11 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 2.0, "unit": "ms"},
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
-            "attributes": {"attr1": "value1", "attr2": "value2"},
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
         },
     ]
 
@@ -603,3 +719,107 @@ def test_results_are_sorted_by_timestamp(client):
     assert len(data) == 3
     for i in range(3):
         assert data[i]["timestamp"] == i + 1
+
+
+def test_user_adds_result_with_invalid_primary_key(client):
+    """Ensure that we can't add a result with an invalid primary key"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["myrepo"],
+                # Missing branch and git_commit keys
+            },
+        }
+    ]
+    response = client.post("/api/v0/result/invalid_test_name", json=data)
+    assert response.status_code == 400
+    assert response.json()["detail"]["reason"] == "Result is missing required keys"
+    assert response.json()["detail"]["data"] == [
+        "attributes.branch",
+        "attributes.git_commit",
+    ]
+
+
+def test_user_cannot_add_same_result_twice(client):
+    """Ensure that we can't add the same result twice"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["myrepo"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        }
+    ]
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 400
+    assert response.json()["detail"]["reason"] == "Result already exists for key"
+    assert response.json()["detail"]["data"] == {
+        "test_name": "benchmark1",
+        "timestamp": 1,
+        "git_repo": ["myrepo"],
+        "branch": ["main"],
+        "git_commit": ["123456"],
+    }
+
+    # Modify the timestamp and try again and make sure it succeeds
+    data[0]["timestamp"] = 2
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    # Now modify the repo and try again and make sure it succeeds
+    data[0]["timestamp"] = 1
+    data[0]["attributes"]["git_repo"] = ["myrepo2"]
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+
+def test_duplicate_result_message_includes_key(client):
+    """Ensure that the error message for adding a duplicate result includes the key"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["myrepo"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        }
+    ]
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 400
+    assert "Result already exists for key" in response.json()["detail"]["reason"]
+    dup_key = response.json()["detail"]["data"]
+    assert dup_key == {
+        "test_name": "benchmark1",
+        "timestamp": 1,
+        "git_repo": ["myrepo"],
+        "branch": ["main"],
+        "git_commit": ["123456"],
+    }
