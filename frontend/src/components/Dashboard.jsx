@@ -165,9 +165,6 @@ export const SingleResultWithTestname = ({ testName }) => {
       },
     });
     const resultData = await results.json();
-    resultData.sort((a, b) => {
-      return a.timestamp - b.timestamp;
-    });
     setDisplayData(resultData);
 
     const changes = await fetch("/api/v0/result/" + testName + "/changes", {

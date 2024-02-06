@@ -508,3 +508,98 @@ def test_enable_change_for_empty_metrics_succeeds(client):
     for ch in data["benchmark1"][0]["changes"]:
         assert ch["metric"] == "metric2"
     assert data["benchmark1"][0]["time"] == 3
+
+
+def test_changes_data_is_sorted_by_timestamp(client):
+    """Ensure that the change points are sorted by timestamp"""
+    client.login()
+
+    json = [
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 4,
+            "metrics": [
+                {"name": "metric1", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=json)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1" in json
+    data = json["benchmark1"]
+    assert len(data) == 1
+    assert data[0]["time"] == 3
+    assert len(data[0]["changes"]) == 1
+    change = data[0]["changes"][0]
+    assert float(change["mean_before"]) == 3.0
+    assert float(change["mean_after"]) == 30.0
+
+
+def test_results_are_sorted_by_timestamp(client):
+    """Ensure that the results are sorted by timestamp"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {"attr1": "value1", "attr2": "value2"},
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert len(data) == 3
+    for i in range(3):
+        assert data[i]["timestamp"] == i + 1
