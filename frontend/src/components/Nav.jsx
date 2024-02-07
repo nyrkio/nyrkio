@@ -37,6 +37,12 @@ const NavigationItems = () => {
               Docs
             </a>
           </li>
+          <li className="nav-item">
+            {/* This should eventually link to a page about the company, and the nyyrikki legend is a subpage of that.*/}
+            <a className="nav-link" href="/legend" title="About Nyrkiö">
+              Legend
+            </a>
+          </li>
         </ul>
       </div>
     </>

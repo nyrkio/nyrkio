@@ -7,6 +7,7 @@ import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { Docs } from "./components/Docs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
+import { LegendPage } from "./components/LegendPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
@@ -43,6 +44,7 @@ function App() {
           />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/pricing" element={<PricingPage />} />
+          <Route path="/legend" element={<LegendPage />} />
           <Route path="/signup" element={<SignUpPage />} />
 
           <Route
