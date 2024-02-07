@@ -136,15 +136,15 @@ async def test_calculate_changes_with_multiple_metrics():
         assert ch["metric"] in ["metric1", "metric2"]
 
 
-@pytest.mark.anyio
-async def test_github_message(client):
+def test_github_message():
     """Test github message"""
     attr = {
         "git_repo": ["https://github.com/torvalds/linux"],
         "git_commit": ["0dd3ee31125508cd67f7e7172247f05b7fd1753a"],
         "branch": ["master"],
     }
-    await GitHubReport.add_github_commit_msg(attr)
+    asyncio.run(GitHubReport.add_github_commit_msg(attr))
+    assert "commit_msg" in attr
     assert attr["commit_msg"] == ["Linux 6.7"]
 
 
@@ -199,3 +199,19 @@ def test_add_results_in_any_order_returns_sorted():
     assert series.results[0].timestamp == 1
     assert series.results[1].timestamp == 2
     assert series.results[2].timestamp == 3
+
+
+def test_github_message_cache():
+    """Ensure we can fetch github msgs from cache"""
+    attr = {
+        "git_repo": ["https://github.com/torvalds/linux"],
+        "git_commit": ["0dd3ee31125508cd67f7e7172247f05b7fd1753a"],
+        "branch": ["master"],
+    }
+
+    # The GitHub API rate limit for unauthenticated users is 60 reqs/hr
+    # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
+    for i in range(1, 120):
+        asyncio.run(GitHubReport.add_github_commit_msg(attr))
+        assert "commit_msg" in attr
+        assert attr["commit_msg"] == ["Linux 6.7"]
