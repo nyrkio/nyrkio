@@ -31,17 +31,18 @@
 
   --nyrkio-text: #344767;
   --nyrkio-text-light: #6c757d;
-  --nyrkio-border: var(--nyrkio-horn-dark-brown)
+  --nyrkio-border: var(--nyrkio-horn-dark-brown);
+  --nyrkio-active: var(--nyrkio-horn-light-brown);
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);
   --bs-link-color: var(--nyrkio-text);
-  --bs-link-hover-color: var(--nyrkio-bright-red);
+  --bs-link-hover-color: var(--nyrkio-active);
   --bs-code-color: #d63384;
   --bs-highlight-bg: #fcf8e3;
-  --bs-breadcrumb-divider: v;
+  --bs-breadcrumb-divider: "/";
   --bs-success: var(--nyrkio-horn-light-brown);
 
 }
@@ -104,18 +105,6 @@ hr {
   opacity: 0.25;
 }
 
-.card {
-  border: none;
-}
-
-div.card div.card-header:first-child,
-div.card div.card-header {
-  color: var(--bs-heading-color);
-  background-color: var(--nyrkio-light-gray5);
-  border-color: none;
-  border-radius: 7px;
-}
-
 h3, .h3, h2, .h2, h1, .h1 {
   margin-top: 0;
   margin-bottom: 0.5rem;
@@ -153,12 +142,12 @@ a {
 
 @media (prefers-color-scheme: light) {
   a:hover {
-    color: var(--nyrkio-bright-red);
+    color: var(--nyrkio-active);
   }
 }
 
 a:hover {
-  color: var(--nyrkio-bright-red);
+  color: var(--nyrkio-active);
 }
 
 h1 {
@@ -204,7 +193,9 @@ button:focus-visible {
 }
 
 .navbar-top {
-  border-bottom: 1px solid var(--nyrkio-border);
+  border-bottom: 1px solid var(--nyrkio-light-gray2);
+  background-color: transparent;
+  margin-bottom: 2em;
 }
 
 .navbar-light .navbar-nav .nav-link {
@@ -216,40 +207,40 @@ button:focus-visible {
 }
 
 .navbar-light .navbar-nav .nav-link:hover {
-  color: var(--nyrkio-bright-red);
+  color: var(--nyrkio-active);
 }
 
 .btn-success {
-  color: #fff;
+  color: var(--nyrkio-light-gray3);
   background-color: var(--nyrkio-tattoo-red);
-  border-color: var(--nyrkio-dark-red);
+  border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
 }
 
 .btn-check:focus + .btn-success,
 .btn-success:focus {
-  color: #fff;
+  color: var(--nyrkio-light-gray3);
   background-color: #a34111;
   border-color: #a34111;
   box-shadow: none;
 }
 
 .btn-success:hover {
-  color: #fff;
-  background-color: var(--nyrkio-bright-red);
-  border-color: var(--nyrkio-bright-red);
+  color: var(--nyrkio-light-gray3);
+  background-color: var(--nyrkio-active);
+  border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
 }
 
 .btn-check:active+.btn-success, .btn-check:checked+.btn-success, .btn-success.active, .btn-success:active, .show>.btn-success.dropdown-toggle {
-  color: #fff;
-  background-color: var(--nyrkio-bright-red);
-  border-color: var(--nyrkio-bright-red);
+  color: var(--nyrkio-light-gray3);
+  background-color: var(--nyrkio-active);
+  border-color: var(--nyrkio-dark-gray);
 }
 
 .btn-outline-success, .btn-outline-success:hover {
-  color: var(--nyrkio-bright-red);
-  border-color: var(--nyrkio-bright-red);
+  color: var(--nyrkio-active);
+  border-color: var(--nyrkio-dark-gray);
   background-color: white;
 }
 
@@ -258,7 +249,7 @@ button:focus-visible {
 }
 
 .border-success {
-  border-color: var(--nyrkio-bright-red)!important;
+  border-color: var(--nyrkio-active)!important;
 }
 
 table {
@@ -276,7 +267,7 @@ table.pricing-table th, table.pricing-table td {
 }
 
 .btn-link, .btn-link:hover {
-  color: white;
+  color: var(--nyrkio-light-gray3);
   text-decoration: none;
 }
 
@@ -307,11 +298,35 @@ div.breadcrumb-wrapper {
 }
 
 ol.breadcrumb {
-  display: inline-block;
+  width: 100%;
   text-align: center;
+  align-items: center;
+  justify-content: center;
+
+}
+.breadcrumb-item + .breadcrumb-item::before {
+  color: var(--nyrkio-bear-brown);
 }
 
 
+.card {
+  border: none;
+}
+
+div.card div.card-header:first-child,
+div.card div.card-header {
+  width: 100%;
+  color: var(--bs-heading-color);
+  background-color: var(--nyrkio-active);
+  border-color: 1px solid var(--nyrkio-border);
+  border-radius: 7px;
+  font-size: 105%;
+}
+
+.list-group .list-group-item {
+  border-bottom: 1px solid var(--nyrkio-light-gray2);
+  width: 100%;
+}
 .list-group .list-group-item:hover {
   background-color: var(--nyrkio-light-gray4);
 }
@@ -335,6 +350,7 @@ ol.breadcrumb {
   --ag-header-background-color: transparent;
   --ag-grid-size: 8px;
   --ag-list-item-height: 42px;
+  --ag-border-color: var(--nyrkio-horn-light-brown);
   /*--ag-tooltip-background-color: ...;
     --ag-disabled-foreground-color: ...;
     --ag-subheader-background-color: ...;
