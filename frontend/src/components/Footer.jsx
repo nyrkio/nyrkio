@@ -26,7 +26,7 @@ export const Footer = () => {
         </symbol>
       </svg>
 
-      <div className="container-fluid border-top pt-5 g-0 px-0">
+      <div className="container-fluid border-top pt-5 g-0 px-0 footer">
         <div className="container">
           <footer className="row justify-content-center align-items-center py-3 my-4 ">
             <div className="row justify-content-center text-center">

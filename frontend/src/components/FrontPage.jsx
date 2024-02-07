@@ -9,7 +9,7 @@ import commit from "../static/commit.png";
 const Banner = () => {
   return (
     <div className="container-fluid p-5 text-center">
-      <h1>For Faster Software.</h1>
+      <h1>For Faster Software</h1>
       <h5>
         Nyrkiö is the performance analysis tool that harnesses the power of
         change point detection
@@ -98,7 +98,7 @@ const FeatureBanner1 = () => {
 
 const FeatureBanner2 = () => {
   return (
-    <div className="container-fluid p-5 text-center bg-nyrkio-dark-red bg-dark">
+    <div className="container-fluid p-5 text-center bg-nyrkio-dark-gray bg-dark">
       <div className="row text-end justify-content-center pt-5">
         <div className="col-md-4 col-sm-12 align-self-center">
           <div className="row text-center">

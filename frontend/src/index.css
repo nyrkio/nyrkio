@@ -1,3 +1,5 @@
+
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
@@ -75,10 +77,10 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
-body.nyyrikki-banner-right ,
-main .nyyrikki-banner-right {
+div.nyyrikki-banner-right ,
+body.nyyrikki-banner-right {
 
-  background-image: url(/static/assets/img/nyyrikki/nyyrikki-low-res-vertical-medium.png);
+  background-image: url(/src/static/nyyrikki/nyyrikki-vertical-banner.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top right;
@@ -89,12 +91,30 @@ main .nyyrikki-banner-right {
 body.nyyrikki-banner-right-bw ,
 main .nyyrikki-banner-right-bw {
 
-  background-image: url(/static/assets/img/nyyrikki/nyyrikki-vertical-medium-outline.png);
+  background-image: url(/src/static/nyyrikki/nyyrikki-vertical-medium-outline.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top right;
   background-size: contain;
   background-opacity: 0.5;
+}
+
+img.nyyrikki-original-art {
+  max-width: 90%;
+  max-height: 110vh;
+}
+
+div.container.nyyrikki-legend .nyyrikki-last-text {
+  margin-bottom: 7em;
+}
+
+.nyyrikki-horn-right {
+  height: 20em;
+  width: 20em;
+  position: absolute;
+  right: 0px;
+  opacity: 0.7;
+
 }
 
 hr {
@@ -121,6 +141,10 @@ h6, .h6, h5, .h5, h4, .h4 {
 }
 h1, .h1 {
   font-size: calc(1.425rem + 2.1vw);
+}
+h1, .h1,
+h4, .h4 {
+  color: var(--nyrkio-tattoo-red);
 }
 
 
@@ -198,6 +222,14 @@ button:focus-visible {
   margin-bottom: 2em;
 }
 
+.border-top
+{
+  border-top: 1px solid darkgreen !important;
+  background-color: var(--nyrkio-arrow-brown);
+  color: black;
+}
+
+.navbar-left.navbar-nav .nav-link,
 .navbar-light .navbar-nav .nav-link {
   display: block;
   padding: 0.5rem 1rem;
@@ -281,10 +313,16 @@ table.pricing-table th, table.pricing-table td {
   padding: 30px;
 }
 
+.bg-nyrkio-dark-gray {
+  color: white;
+  background-color: var(--nyrkio-dark-gray )!important;
+}
+
 .bg-nyrkio-dark-red {
   color: white;
-  background-color: var(--nyrkio-dark-gray )!important
+  background-color: var(--nyrkio-dark-red );
 }
+
 
 div.breadcrumb-wrapper nav {
   text-align: center;
