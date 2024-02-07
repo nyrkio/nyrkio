@@ -1,3 +1,5 @@
+import asyncio
+
 from backend.core.core import (
     PerformanceTestResult,
     PerformanceTestResultSeries,
@@ -144,3 +146,56 @@ async def test_github_message(client):
     }
     await GitHubReport.add_github_commit_msg(attr)
     assert attr["commit_msg"] == ["Linux 6.7"]
+
+
+def test_tigerbeetle_data(shared_datadir):
+    """Test tigerbeetle data"""
+    series = PerformanceTestResultSeries("tigerbeetle")
+
+    json_data = None
+    path = (shared_datadir / "tigerbeetle.json").resolve()
+    with open(path) as f:
+        import json
+
+        json_data = json.load(f)
+
+    for result in json_data:
+        metrics = []
+        for m in result["metrics"]:
+            # Only focus on load_accepted metrics to make the test simpler
+            if m["name"] == "load_accepted":
+                metrics.append(ResultMetric(m["name"], m["unit"], m["value"]))
+
+        series.add_result(
+            PerformanceTestResult(result["timestamp"], metrics, result["attributes"])
+        )
+
+    changes = asyncio.run(series.calculate_changes())
+
+    assert len(changes) == 1
+    assert "tigerbeetle" in changes
+    assert len(changes["tigerbeetle"]) == 2
+
+    expected_commits = (
+        "e88458cb2faf40d97df0f3b5feea66c494063f4c",
+        "7a724369d85c378b9eb311cb41853cef58ecc07e",
+    )
+    for change in changes["tigerbeetle"]:
+        assert change["attributes"]["git_commit"][0] in expected_commits
+        expected_commits = expected_commits[1:]
+
+
+def test_add_results_in_any_order_returns_sorted():
+    """Test that adding results in any order returns sorted results"""
+    series = PerformanceTestResultSeries("benchmark1")
+
+    metrics = {"metric1": 1.0, "metric2": 2.0}
+    attr = {"attr1": "value1", "attr2": "value2"}
+
+    series.add_result(PerformanceTestResult(3, metrics, attr))
+    series.add_result(PerformanceTestResult(1, metrics, attr))
+    series.add_result(PerformanceTestResult(2, metrics, attr))
+
+    assert series.results[0].timestamp == 1
+    assert series.results[1].timestamp == 2
+    assert series.results[2].timestamp == 3

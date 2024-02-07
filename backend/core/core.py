@@ -5,6 +5,7 @@ import json
 from typing import List
 import httpx
 import logging
+from sortedcontainers import SortedList
 
 from hunter.report import Report, ReportType
 from hunter.series import Series, AnalysisOptions
@@ -62,14 +63,22 @@ class PerformanceTestResult:
 
 class PerformanceTestResultSeries:
     def __init__(self, name):
-        self.results = []
+        self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
 
     def add_result(self, result: PerformanceTestResult):
+        """
+        Add a test result to the series.
+
+        Results can be added in any order and will be stored internally
+        sorted by timestamp.
+
+        Adding results with the same timestamp is not allowed.
+        """
         if result in self.results:
             raise PerformanceTestResultExistsError()
 
-        self.results.append(result)
+        self.results.add(result)
 
     def delete_result(self, timestamp):
         """
