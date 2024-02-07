@@ -268,7 +268,7 @@ class DBStore(object):
         # TODO(matt) We should read results in batches, not all at once
         default_data = self.db.default_data
         cursor = default_data.find({"test_name": test_name}, exclude_projection)
-        return await cursor.to_list(None)
+        return await cursor.sort("timestamp").to_list(None)
 
     #
     # Change detection can be disabled for metrics on a per-user, per-test basis.
