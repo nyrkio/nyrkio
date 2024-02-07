@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   backend:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/backend:${IMAGE_TAG}
     build: backend
     env_file:
       - .env.backend
@@ -11,6 +12,7 @@ services:
       - "8000:8000"
     hostname: api.nyrkio.local
   nginx:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/nginx:${IMAGE_TAG}
     build:
       context: ./
       dockerfile: ./nginx/Dockerfile
