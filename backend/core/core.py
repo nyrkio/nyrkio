@@ -10,6 +10,8 @@ from sortedcontainers import SortedList
 from hunter.report import Report, ReportType
 from hunter.series import Series, AnalysisOptions
 
+from backend.core.sieve import sieve_cache
+
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
 that a performance engineer can understand it without having to read the code.
@@ -124,6 +126,42 @@ class PerformanceTestResultExistsError(Exception):
     pass
 
 
+# The assumption is that the first line of a commit message is typically 80
+# characters or less. So storing 16K entries means this cache will use about
+# 1.2MiB of memory. This is an important cache.
+CACHE_SIZE = 16 * 1024
+
+
+@sieve_cache(maxsize=CACHE_SIZE)
+async def cached_get(repo, commit):
+    """
+    Fetch the commit message for a GitHub commit if it hasn't been fetched
+    before and save the first line of the commit message in the cache.
+
+    On cache miss, if the HTTP request fails then nothing is added to the cache.
+    """
+    commit_msg = None
+    client = httpx.AsyncClient()
+    response = await client.get(f"https://api.github.com/repos/{repo}/commits/{commit}")
+    if response.status_code == 200:
+        # Only save the first line of the message
+        commit_msg = response.json()["commit"]["message"].split("\n")[0]
+        logging.error("Adding commit message {} to {}".format(commit_msg, commit))
+    else:
+        logging.error(
+            f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
+        )
+
+        # Check x-ratelimit-used and x-ratelimit-remaining headers
+        remaining = response.headers.get("x-ratelimit-remaining")
+        if remaining and int(remaining) <= 0:
+            used = response.headers.get("x-ratelimit-used")
+            limit = response.headers.get("x-ratelimit-limit")
+            logging.error(f"GitHub API rate limit exceeded: {used}/{limit} reqs used")
+
+    return commit_msg
+
+
 class GitHubReport(Report):
     def __init__(self, series: Series, change_points: List):
         super().__init__(series, change_points)
@@ -146,23 +184,12 @@ class GitHubReport(Report):
         if not attr_repo.startswith(gh_url):
             return
 
-        async with httpx.AsyncClient() as client:
-            repo = attr_repo[len(gh_url) + 1 :]
-            commit = attributes["git_commit"][0]
-            response = await client.get(
-                f"https://api.github.com/repos/{repo}/commits/{commit}"
-            )
-            if response.status_code == 200:
-                # Only save the first line of the message
-                commit_msg = response.json()["commit"]["message"].split("\n")[0]
-                attributes["commit_msg"] = [commit_msg]
-                logging.error(
-                    "Adding commit message {} to {}".format(commit_msg, commit)
-                )
-            else:
-                logging.error(
-                    f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
-                )
+        repo = attr_repo[len(gh_url) + 1 :]
+        commit = attributes["git_commit"][0]
+
+        msg = await cached_get(repo, commit)
+        if msg:
+            attributes["commit_msg"] = [msg]
 
     async def produce_report(self, test_name: str, report_type: ReportType):
         change_points = self._Report__change_points
