@@ -104,6 +104,13 @@ img.nyyrikki-original-art {
   max-height: 110vh;
 }
 
+img.tb-logo {
+max-width: 20em;
+margin-top: 2em;
+margin-bottom:2em;
+}
+
+
 div.container.nyyrikki-legend .nyyrikki-last-text {
   margin-bottom: 7em;
 }
