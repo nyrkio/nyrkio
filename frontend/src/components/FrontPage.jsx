@@ -9,9 +9,10 @@ import commit from "../static/commit.png";
 const Banner = () => {
   return (
     <div className="container-fluid p-5 text-center">
+      <h4>Nyrkiö</h4>
       <h1>For Faster Software</h1>
       <h5>
-        Nyrkiö is the performance analysis tool that harnesses the power of
+        Harness the power of
         change point detection
       </h5>
     </div>
@@ -45,7 +46,7 @@ const FeatureHighlight = () => {
         <p>
           Change point detection is state of the art technology for detecting
           changes in software performance. Used by leading technology companies
-          such all around the world including MongoDB and Netflix.
+          all around the world, including MongoDB and Netflix.
         </p>
       </div>
     </div>
@@ -88,7 +89,7 @@ const FeatureBanner1 = () => {
               borderRadius: "5px",
             }}
             src={tigerbeetle}
-            alt="Tigerbeetle change points"
+            alt="TigerBeetle change points"
           />
         </div>
       </div>

@@ -2,6 +2,7 @@ import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
+import tigerBeetleLogo from "../static/tb-logo-black.png";
 
 export const SampleData = () => {
   const [testNames, setTestNames] = useState([]);
@@ -85,10 +86,13 @@ export const SampleData = () => {
       <div className="row"></div>
       <div className="col">
         <h1>See for yourself!</h1>
+        <p>&nbsp;</p>
         <p>
           Here is the benchmark data from our friends at{" "}
+        </p>
+        <p>
           <a href="https://tigerbeetle.com/" target="_blank" rel="noreferrer">
-            Tigerbeetle.
+          <img src={tigerBeetleLogo} alt="TigerBeetle logo" title="TigerBeetle" className="tb-logo" />
           </a>
         </p>
       </div>
