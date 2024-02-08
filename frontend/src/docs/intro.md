@@ -1,6 +1,6 @@
 # Getting started
 
-This guide will show you how to get started with Nyrkiö. All of the examples of using the API in this doc use `curl` but you can your favourite language and libraries for sending HTTP requests.
+This guide will show you how to get started with Nyrkiö. All of the examples in this doc use `curl` but you can use your favourite language and libraries for sending HTTP requests.
 
 For all of these steps, be sure to change the example email address and password.
 

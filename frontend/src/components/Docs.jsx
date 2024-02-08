@@ -10,14 +10,14 @@ export const SidePanel = () => {
 
   return (
     <div className="navbar-nav navbar-left justify-content-start col-sm-3 pe-3 p-3">
-    {/*<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">*/}
+      {/*<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">*/}
       <h3>Docs</h3>
-      <Link to="/docs" className="nav-link">
+      <Link to="/docs/getting-started" className="nav-link">
         Getting started
       </Link>
-      <Link to="/openapi" className="nav-link">
-        API
-      </Link>
+      <div className="nav-link">
+        <a href="/openapi">API</a>
+      </div>
     </div>
   );
 };
