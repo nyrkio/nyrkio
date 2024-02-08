@@ -34,11 +34,7 @@ jobs:
         run: |
           # Build a docker container and push it to ECR
           echo "${{ secrets.NYRKIO_ENV_PROD }}" > .env.backend
-          # Unfortunately docker compose doesn't take a -t flag, so this is a
-          # two-step process.
           docker compose -f docker-compose.yml build
-          docker tag nyrkio-nginx:latest $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
-          docker tag nyrkio-backend:latest $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
