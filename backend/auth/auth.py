@@ -3,8 +3,10 @@
 import jwt
 import os
 from typing import Optional, Tuple
+import logging
 import uuid
 
+import httpx
 from beanie import PydanticObjectId
 from fastapi import Depends, APIRouter, Request, HTTPException, status
 from fastapi.responses import RedirectResponse
@@ -20,10 +22,12 @@ from fastapi_users.exceptions import UserAlreadyExists
 from fastapi_users.router.oauth import STATE_TOKEN_AUDIENCE
 from fastapi_users.router.common import ErrorCode
 
+from pydantic import BaseModel
+
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
 
-from backend.db.db import User, get_user_db, UserRead, UserCreate, DBStore
+from backend.db.db import User, get_user_db, UserRead, UserCreate, DBStore, UserUpdate
 from backend.auth.github import github_oauth
 from backend.auth.email import send_email, read_template_file
 
@@ -205,3 +209,57 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
         await send_email(user.email, token, "Verify your email", msg)
+
+
+class SlackCode(BaseModel):
+    code: str
+
+
+@auth_router.post("/slack/oauth")
+async def slack_oauth(
+    code: SlackCode,
+    user: User = Depends(current_active_user),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+):
+    store = DBStore()
+
+    logging.error(f"got code {code.code}")
+    # Fetch the access token from slack.com
+    client = httpx.AsyncClient()
+    # redirect_uri = f"https://{SERVER_NAME}/user/settings"
+    redirect_uri = "https://nyrk.io/user/settings"
+    logging.error(f"redirect_uri: {redirect_uri}")
+    response = await client.post(
+        "https://slack.com/api/oauth.v2.access",
+        data={
+            "client_id": os.environ["SLACK_CLIENT_ID"],
+            "client_secret": os.environ["SLACK_CLIENT_SECRET"],
+            "code": code.code,
+            "redirect_uri": redirect_uri,
+        },
+    )
+
+    if response.status_code != 200:
+        logging.error(
+            f"Failed to fetch access token from Slack: {response.status_code}: {response.text}"
+        )
+
+    data = response.json()
+    logging.error(f"Got response from Slack: {data}")
+
+    if not data["ok"]:
+        logging.error(f"Slack returned an error: {data['error']}")
+        raise HTTPException(status_code=500, detail="Slack returned an error")
+
+    config = {
+        "slack": {
+            "team": data["team"]["name"],
+            "channel": data["incoming_webhook"]["channel"],
+        },
+    }
+
+    user.slack = data
+    update = UserUpdate(slack=data)
+    updated_user = await user_manager.update(update, user, safe=True)
+
+    await store.set_user_config(updated_user, config)

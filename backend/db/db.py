@@ -3,7 +3,7 @@
 from abc import abstractmethod, ABC
 from collections import OrderedDict
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional, Any
 
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
@@ -19,7 +19,8 @@ class OAuthAccount(BaseOAuthAccount):
 
 
 class User(BeanieBaseUser, Document):
-    oauth_accounts: List[OAuthAccount] = Field(default_factory=list)
+    oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
+    slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 async def get_user_db():
@@ -27,15 +28,18 @@ async def get_user_db():
 
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):
-    pass
+    oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
+    slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class UserCreate(schemas.BaseUserCreate):
-    pass
+    oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
+    slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class UserUpdate(schemas.BaseUserUpdate):
-    pass
+    oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
+    slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
 
 
 class ConnectionStrategy(ABC):
@@ -408,6 +412,39 @@ class DBStore(object):
         return await metrics.distinct(
             "metric_name", {"user_id": user.id, "test_name": test_name}
         )
+
+    async def get_user_config(self, user: User):
+        """
+        Get the user's configuration.
+
+        If the user has no configuration, return an empty dictionary.
+        """
+        exclude_projection = {"_id": 0, "user_id": 0}
+        user_config = self.db.user_config
+        config = await user_config.find_one({"user_id": user.id}, exclude_projection)
+
+        return config if config else {}
+
+    async def set_user_config(self, user: User, config: Dict):
+        """
+        Set the user's configuration.
+
+        We don't do any validation on the configuration, so it's up to the caller to
+        ensure that the configuration is valid.
+        """
+        user_config = self.db.user_config
+        await user_config.update_one(
+            {"user_id": user.id}, {"$set": config}, upsert=True
+        )
+
+    async def delete_user_config(self, user: User):
+        """
+        Delete the user's configuration.
+
+        If the user has no configuration, do nothing.
+        """
+        user_config = self.db.user_config
+        await user_config.delete_one({"user_id": user.id})
 
 
 # Will be patched by conftest.py if we're running tests
