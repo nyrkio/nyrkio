@@ -96,7 +96,7 @@ class PerformanceTestResultSeries:
         """
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
-    async def calculate_changes(self):
+    async def calculate_changes(self, notifiers=None):
         timestamps = [r.timestamp for r in self.results]
 
         metric_units = {}
@@ -122,7 +122,13 @@ class PerformanceTestResultSeries:
         options.min_magnitude = self.config.min_magnitude
         options.max_pvalue = self.config.max_pvalue
 
-        change_points = series.analyze(options).change_points_by_time
+        analyzed_series = series.analyze(options)
+
+        if notifiers:
+            for notifier in notifiers:
+                await notifier.notify({self.name: analyzed_series})
+
+        change_points = analyzed_series.change_points_by_time
         report = GitHubReport(series, change_points)
         produced_report = await report.produce_report(self.name, ReportType.JSON)
         return json.loads(produced_report)
