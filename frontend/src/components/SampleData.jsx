@@ -62,7 +62,7 @@ export const SampleData = () => {
           <div className="row">
             <DrawLineChart
               changePointData={changePointData}
-              metric={{ unit: "ms", name: "load_accepted" }}
+              metric={{ unit: "tx/s", name: "load_accepted" }}
               testName={testName}
               timestamps={timestamps}
               displayData={displayData}
