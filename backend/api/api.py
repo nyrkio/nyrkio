@@ -11,7 +11,7 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.db.db import User, DBStore
+from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -77,7 +77,24 @@ async def add_result(
     test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
 ):
     store = DBStore()
-    await store.add_results(user, test_name, data.root)
+    try:
+        await store.add_results(user, test_name, data.root)
+    except DBStoreResultExists as e:
+        explanation = {
+            "reason": "Result already exists for key",
+            "data": e.key,
+        }
+        raise HTTPException(status_code=400, detail=explanation)
+    except DBStoreMissingRequiredKeys as e:
+        explanation = {
+            "reason": "Result is missing required keys",
+            "data": e.missing_keys,
+        }
+        raise HTTPException(status_code=400, detail=explanation)
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
     return {}
 
 

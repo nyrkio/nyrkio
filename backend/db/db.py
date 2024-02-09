@@ -1,10 +1,12 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from abc import abstractmethod, ABC
+from collections import OrderedDict
 import os
 from typing import Dict, List
 
 import motor.motor_asyncio
+from pymongo.errors import BulkWriteError
 from mongomock_motor import AsyncMongoMockClient
 from beanie import Document, PydanticObjectId, init_beanie
 from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
@@ -73,22 +75,35 @@ class MockDBStrategy(ConnectionStrategy):
         self.connection = client.get_database("test")
         return self.connection
 
+    DEFAULT_DATA = {
+        "timestamp": 123456,
+        "attributes": {
+            "git_repo": ["https://github.com/nyrkio/nyrkio"],
+            "branch": ["main"],
+            "git_commit": ["123456"],
+        },
+    }
+
     async def init_db(self):
         # Add test users
         from backend.auth.auth import UserManager
-
-        # Add some default data
-        await self.connection.default_data.insert_many(
-            [
-                {"test_name": "default_benchmark", "foo": "bar"},
-            ]
-        )
 
         user = UserCreate(
             id=1, email="john@foo.com", password="foo", is_active=True, is_verified=True
         )
         manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
         self.user = await manager.create(user)
+
+        # Add some default data
+        result = DBStore.create_doc_with_metadata(
+            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark"
+        )
+        await self.connection.default_data.insert_one(result)
+
+        # Usually a new user would get the default data automatically,
+        # but since we added the default data after the user was created,
+        # we need to add it manually.
+        await self.connection.test_results.insert_one(result)
 
     def get_test_user(self):
         assert self.user, "init_db() must be called first"
@@ -97,6 +112,21 @@ class MockDBStrategy(ConnectionStrategy):
 
 class DBStoreAlreadyInitialized(Exception):
     pass
+
+
+class DBStoreResultExists(Exception):
+    def __init__(self, duplicate_key):
+        self.key = duplicate_key
+
+
+class DBStoreMissingRequiredKeys(Exception):
+    """
+    Raised when the DBStore is unable to build a primary key because the
+    result is missing required keys.
+    """
+
+    def __init__(self, missing_keys):
+        self.missing_keys = missing_keys
 
 
 class DBStore(object):
@@ -157,8 +187,50 @@ class DBStore(object):
           user_id -> The ID of the user who created the document
           version -> The version of the schema for the document
           test_name -> The name of the test
+
+        We also build a primary key from the git_repo, branch, git_commit,
+        test_name, timestamp, and user ID. If any of the keys are missing,
+        raise a DBStoreMissingKeys exception.
         """
         d = dict(doc)
+
+        missing_keys = []
+
+        # Make sure all the required keys are present
+        for key in ["timestamp", "attributes"]:
+            if key not in d:
+                missing_keys.append(key)
+
+        attr_keys = ("git_repo", "branch", "git_commit")
+        if "attributes" not in d:
+            # They're all missing
+            missing_keys.extend([f"attributes.{k}" for k in attr_keys])
+            missing_keys.append(missing_keys)
+        else:
+            for key in attr_keys:
+                if key not in d["attributes"]:
+                    missing_keys.append(f"attributes.{key}")
+
+        if len(missing_keys) > 0:
+            raise DBStoreMissingRequiredKeys(missing_keys)
+
+        # The id is built from the git_repo, branch, test_name, timestamp and
+        # git commit. This tuple should be unique for each test result.
+        #
+        # NOTE The ordering of the keys is important for MongoDB -- a different
+        # order represents a different primary key.
+        primary_key = OrderedDict(
+            {
+                "git_repo": d["attributes"]["git_repo"],
+                "branch": d["attributes"]["branch"],
+                "git_commit": d["attributes"]["git_commit"],
+                "test_name": test_name,
+                "timestamp": d["timestamp"],
+                "user_id": user.id,
+            }
+        )
+
+        d["_id"] = primary_key
         d["user_id"] = user.id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
@@ -168,12 +240,26 @@ class DBStore(object):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
+
+        If the user tries to add a result that already exists, raise a
+        DBStoreResultExists exception.
         """
         new_list = [
             DBStore.create_doc_with_metadata(r, user, test_name) for r in results
         ]
         test_results = self.db.test_results
-        await test_results.insert_many(new_list)
+
+        try:
+            await test_results.insert_many(new_list)
+        except BulkWriteError as e:
+            if e.details["writeErrors"][0]["code"] == 11000:
+                duplicate_key = e.details["writeErrors"][0]["op"]["_id"]
+
+                # Don't leak user_id to the client. Anyway, it's not JSON
+                # serializable.
+                del duplicate_key["user_id"]
+
+                raise DBStoreResultExists(duplicate_key)
 
     async def get_results(self, user: User, test_name: str) -> List[Dict]:
         """
