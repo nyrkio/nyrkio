@@ -492,3 +492,78 @@ div.card div.card-header {
   text-decoration: none;
   width: 236px;
 }
+
+/* Pricing page */
+
+.nyrkio-pricing .nyrkio-compare-plans {
+  margin-top: 2em;
+
+}
+.nyrkio-pricing .nyrkio-plans .nyrkio-annual {
+  color: #dddddd;
+  font-size: 70%;
+  text-align: right;
+  position: absolute;
+  right: 4px;
+
+}
+.nyrkio-pricing .pricing-table .nyrkio-right {
+  text-align: right;
+}
+.nyrkio-pricing .pricing-table .nyrkio-right small {
+  font-style: italic;
+}
+.nyrkio-pricing .nyrkio-plans .col .card {
+  min-height: 23em;
+
+}
+
+.nyrkio-pricing .nyrkio-plans .col .card small {
+  font-size: 40%;
+  font-weight: light;
+
+}
+
+.nyrkio-pricing.container div {
+}
+
+.nyrkio-pricing .calculator {
+  margin-bottom: 7em;
+  margin-top: 1em;
+  background-color: var(--bs-light);
+  width: 80%;
+  position: relative;
+  left: 10%;
+}
+
+.nyrkio-pricing .nyrkio-plans .col .card button {
+  position: absolute;
+  bottom: 0px;
+  left: 0px;
+}
+
+.nyrkio-pricing .calculator #company_name {
+  width: 15em;
+  text-align: left;
+}
+.nyrkio-pricing .calculator #employees_total {
+  width: 5em;
+  text-align: right;
+}
+.nyrkio-pricing .calculator #employees_engineering {
+  width: 5em;
+  text-align: right;
+}
+.nyrkio-pricing .calculator div {
+  text-align: right;
+}
+
+.nyrkio-pricing .nyrkio-open-source {
+  margin-top: 9em;
+}
+
+.nyrkio-pricing-table h3,
+.nyrkio-pricing-table {
+  color: #cccccc;
+
+}
