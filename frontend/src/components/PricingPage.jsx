@@ -380,6 +380,12 @@ export const PricingPage = () => {
 
 
 
+      </div>
+    </>
+  );
+};
+
+/*
         <hr/>
         <div className="row nyrkio-pricing-table">
           <div className="text-center">
@@ -389,8 +395,4 @@ export const PricingPage = () => {
             </table>
           </div>
         </div>
-
-      </div>
-    </>
-  );
-};
+*/
