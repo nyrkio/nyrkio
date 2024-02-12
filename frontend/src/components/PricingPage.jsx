@@ -16,9 +16,11 @@ export const PricingPage = () => {
     if (total<cut1) {
       b= Math.max( businessPriceFloor*businessPricePerHead,
                                   total * businessPricePerHead ) ;
+      b=Math.round(b);
     }
     else if (total<=5000) {
       b=(cut1 + 0.1* (total-cut1) ) * businessPricePerHead ;
+      b=Math.round(b);
     }
     else {
       b= "Call" ;
@@ -30,9 +32,11 @@ export const PricingPage = () => {
     if (total<cut1) {
       e = Math.max( enterprisePriceFloor*enterprisePricePerHead,
                                     total * enterprisePricePerHead ) ;
+      e=Math.round(e);
     }
     else if (total<=5000) {
       e=(cut1 + 0.15* (total-cut1) ) * enterprisePricePerHead ;
+      e=Math.round(e);
     }
     else {
       e= "Call" ;
