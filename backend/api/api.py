@@ -6,6 +6,7 @@ from backend.core.core import (
     PerformanceTestResultSeries,
     ResultMetric,
 )
+from backend.core.config import Config
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
@@ -52,7 +53,13 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
     store = DBStore()
     results = await store.get_results(user, test_name)
     disabled = await store.get_disabled_metrics(user, test_name)
-    return await calc_changes(test_name, results, disabled)
+
+    config = await store.get_user_config(user)
+    config = config.get("core", None)
+    if config:
+        config = Config(**config)
+
+    return await calc_changes(test_name, results, disabled, config)
 
 
 @api_router.get("/results")
@@ -134,8 +141,8 @@ async def add_result(
     return {}
 
 
-async def calc_changes(test_name, results, disabled=None):
-    series = PerformanceTestResultSeries(test_name)
+async def calc_changes(test_name, results, disabled=None, core_config=None):
+    series = PerformanceTestResultSeries(test_name, core_config)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.

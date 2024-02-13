@@ -838,7 +838,7 @@ def test_add_and_get_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == config
+    assert response.json() == {**config, "core": None}
 
 
 def test_update_existing_user_config(client):
@@ -854,7 +854,7 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == config
+    assert response.json() == {**config, "core": None}
 
     new_config = {"notifiers": {"slack": False}}
     response = client.put("/api/v0/user/config", json=new_config)
@@ -862,7 +862,7 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == new_config
+    assert response.json() == {**new_config, "core": None}
 
 
 def test_create_test_result_with_slash_separator(client):
@@ -1146,3 +1146,110 @@ def test_delete_test_name_with_slashes(client):
 
     response = client.delete("/api/v0/result/benchmark1/test")
     assert response.status_code == 200
+
+
+def test_user_config_set_min_magnitude_max_pvalue(client):
+    """Ensure that we can set min_magnitude and max_pvalue in user config"""
+    client.login()
+    config = {
+        "core": {
+            "min_magnitude": 0.5,
+            "max_pvalue": 0.01,
+        }
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+
+    assert response.json() == {**config, "notifiers": None}
+
+
+def test_user_config_set_max_pvalue_invalid(client):
+    """Ensure that we can't set invalid max_pvalue in user config"""
+    client.login()
+    config = {
+        "core": {
+            "min_magnitude": 0.5,
+            "max_pvalue": 1.01,
+        }
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 400
+    assert response.json() == {"detail": "max_pvalue must be less than or equal to 1.0"}
+
+
+def test_setting_min_magnitude_config_shows_no_change_points(client):
+    """Ensure that setting min_magnitude to a high value shows no change points"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+
+    config = {
+        "core": {
+            "max_pvalue": 0.01,
+            "min_magnitude": 20.0,
+        }
+    }
+
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert not data["benchmark1"]
