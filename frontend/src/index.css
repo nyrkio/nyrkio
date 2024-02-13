@@ -567,3 +567,20 @@ div.card div.card-header {
   color: #cccccc;
 
 }
+
+.benchmark-select .create-new-test {
+  text-align: right;
+  margin-top:5em;
+
+}
+
+#get-jwt-token {
+  text-align: right;
+}
+#get-jwt-token a span{
+  color: var(--nyrkio-horn-light-brown);
+}
+#get-jwt-token #token-output {
+  font-size:33%;
+  color: #444;
+}

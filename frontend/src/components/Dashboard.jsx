@@ -124,9 +124,14 @@ export const Dashboard = () => {
   }
 
   const createTestList = () => {
-    if (shortNames.length === 0) {
-      return <div>No tests found</div>;
+    if(shortNames.length==0){
+        return (
+          <li className="list-group-item nyrkio-empty">
+            <span className="bi bi-emoji-surprise" title="There are no test results"></span>
+          </li>
+        );
     }
+
     return shortNames.map((name) => {
       var longName = prefix + "/" + name;
       if (testNames.includes(longName) || testNames.includes(name)) {
@@ -167,6 +172,13 @@ export const Dashboard = () => {
                   <ul className="list-group list-group-flush">
                     {createTestList()}
                   </ul>
+                </div>
+              </div>
+              <div className="card">
+                <div className="card-body create-new-test">
+                  <Link to="/docs/getting-started" className="btn btn-success">
+                    <span class="bi bi-plus-square-fill">&nbsp;&nbsp; Add test results</span>
+                  </Link>
                 </div>
               </div>
             </div>

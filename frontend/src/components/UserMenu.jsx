@@ -11,7 +11,7 @@ export const UserMenu = ({ setLoggedIn }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <b className="bi bi-gear"></b>
+        <b className="bi bi-gear-fill"></b>
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
