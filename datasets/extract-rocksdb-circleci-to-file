@@ -1,0 +1,235 @@
+#!/bin/bash
+
+
+base_url="http://localhost:8000"
+#base_url="http://nyrkio.readmodwrite.com"
+#PASSWORD="egVL2Ixb%%uZy7jh"
+USER=henrik@nyrk.io
+PASSWORD="5%mGBLggQC$gdx"
+#PASSWORD=test
+
+#USER=test1
+#PASSWORD="dCOeJJTmg22ja64ds5s"
+
+#TOKEN=$(curl -s ${base_url}/login/jwt/ -H 'Content-type: application/json' -d "{\"username\": \"$USER\", \"password\":\"$PASSWORD\"}" | jq -r '.data')
+TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NWM2NzI3MTg3YzNjOWQ5OTU5OGE3NzkiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTcxMDA5NjgxNH0.BLETZnwCoZO5SceiD3HNVwCi86GLS41lFJewhsU99CY"
+GIT_REPO="/home/hingo/hacking/github.com/facebook/rocksdb"
+
+
+METHOD=POST
+#METHOD=PUT
+
+
+if [ $# -lt 1 ]; then
+    echo "Usage: extract <tmpdir-with-results>" >&2
+    exit 1
+fi
+
+RESULT_DIR=$1
+
+TESTS="fillseq.wal_disabled.v400
+ fwdrangewhilewriting.t1
+ overwriteandwait.t1.s0
+ overwritesome.t1.s0
+ readrandom.t1
+ readwhilewriting.t1
+ revrange.t1
+ revrangewhilewriting.t1"
+
+counter=0
+ 
+for file in $(ls -1 $RESULT_DIR/*.tsv); do
+    echo "[" > "datasets/${file}.json"
+    for t in $TESTS; do
+
+        export githash=$(echo $file|cut -d- -f3|cut -d. -f1)
+
+        test_name=$t
+        line=$(grep $t $file)
+        ops_sec=$(echo $line | awk {'print $1}')
+        mb_sec=$(echo $line | awk {'print $2}')
+        lsm_sz=$(echo $line | awk {'print $3}')
+        blob_sz=$(echo $line | awk {'print $3}')
+        c_wgb=$(echo $line | awk {'print $4}')
+        w_amp=$(echo $line | awk {'print $5}')
+        c_mbps=$(echo $line | awk {'print $6}')
+        c_wsecs=$(echo $line | awk {'print $7}')
+        c_csecs=$(echo $line | awk {'print $8}')
+        b_rgb=$(echo $line | awk {'print $9}')
+        b_wgb=$(echo $line | awk {'print $10}')
+        usec_op=$(echo $line | awk {'print $11}')
+        p50=$(echo $line | awk {'print $12}')
+        p99=$(echo $line | awk {'print $13}')
+        p999=$(echo $line | awk {'print $14}')
+        p9999=$(echo $line | awk {'print $15}')
+        pmax=$(echo $line | awk {'print $16}')
+        uptime=$(echo $line | awk {'print $17}')
+        stall_pct=$(echo $line | awk {'print $18}')
+        Nstall=$(echo $line | awk {'print $19}')
+        u_cpu=$(echo $line | awk {'print $20}')
+        s_cpu=$(echo $line | awk {'print $21}')
+        rss=$(echo $line | awk {'print $22}')
+        date=$(echo $line | awk {'print $24}')
+        version=$(echo $line | awk {'print $25}')
+        #job_id=$(echo $line | awk {'print $26}')
+
+        if [ "$c_mbps" == "NA" ]; then
+            c_mbps=-1
+        fi
+        
+        counter=$((counter+1))
+
+#        commit_date=$(wget -O - -X "Authorization: $GITHUB_TOKEN" "https://api.github.com/repos/facebook/rocksdb/commits/$githash" |grep date| cut -d \: -f2-4|cut -c 3-)
+        #commit_date=$(cd $GIT_REPO; git log --date=raw|grep --after 15 $githash| grep Date|cut -d: -f2|cut -d- -f1)
+        echo fetch the time patch was merged
+        commit_date=$(cd $GIT_REPO; git rev-list --format=format:"%ci" --max-count=1 $githash|grep -v commit)
+
+        echo $githash $commit_date
+
+        epoch=$(date -d "$commit_date" +%s)
+        set -x
+            echo "{
+            _id:{
+                \"git_repo\": \"https://github.com/facebook/rocksdb\",
+                \"branch\": \"master\",
+                \"git_commit\": \"$githash\",
+                \"test_name\": \"$test_name\",
+                \"timestamp\": $epoch,
+                \"user_id\": \"$USER\",
+                \"version\": \"$version\"
+            },
+            \"timestamp\": $epoch,
+             \"metrics\": [
+                {
+                    \"name\": \"ops_sec\",
+                    \"value\": $ops_sec,
+                    \"unit\": \"tx/s\"
+                },
+                {
+                    \"name\": \"mb_sec\",
+                    \"value\": $mb_sec,
+                    \"unit\": \"mb/sec\"
+                },
+                {
+                    \"name\": \"lsm_sz\",
+                    \"value\": $(echo $lsm_sz | sed -e 's;GB;;'),
+                    \"unit\": \"GB\"
+                },
+                {
+                    \"name\": \"blob_sz\",
+                    \"value\": $(echo $blob_sz | sed -e 's;GB;;'),
+                    \"unit\": \"GB\"
+                },
+                {
+                    \"name\": \"c_wgb\",
+                    \"value\": $(echo $c_wgb | sed -e 's;GB;;'),
+                    \"unit\": \"GB\"
+                },
+                {
+                    \"name\": \"w_amp\",
+                    \"value\": $w_amp,
+                    \"unit\": \"bytes\"
+                },
+                {
+                    \"name\": \"c_mbps\",
+                    \"value\": $c_mbps,
+                    \"unit\": \"mb/sec\"
+                },
+                {
+                    \"name\": \"c_wsecs\",
+                    \"value\": $c_wsecs,
+                    \"unit\": \"secs\"
+                },
+                {
+                    \"name\": \"c_csecs\",
+                    \"value\": $c_csecs,
+                    \"unit\": \"secs\"
+                },
+                {
+                    \"name\": \"b_rgb\",
+                    \"value\": $b_rgb,
+                    \"unit\": \"GB\"
+                },
+                {
+                    \"name\": \"b_wgb\",
+                    \"value\": $b_wgb,
+                    \"unit\": \"GB\"
+                },
+                {
+                    \"name\": \"usec_op\",
+                    \"value\": $usec_op,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"p50\",
+                    \"value\": $p50,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"p99\",
+                    \"value\": $p99,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"p99.9\",
+                    \"value\": $p999,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"p99.99\",
+                    \"value\": $p9999,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"pmax\",
+                    \"value\": $pmax,
+                    \"unit\": \"usecs\"
+                },
+                {
+                    \"name\": \"uptime\",
+                    \"value\": $uptime,
+                    \"unit\": \"secs\"
+                },
+                {
+                    \"name\": \"stall%\",
+                    \"value\": $stall_pct,
+                    \"unit\": \"%\"
+                },
+                {
+                    \"name\": \"Nstall\",
+                    \"value\": $Nstall,
+                    \"unit\": \"num_stalls\"
+                },
+                {
+                    \"name\": \"u_cpu\",
+                    \"value\": $u_cpu,
+                    \"unit\": \"#seconds/1000\"
+                },
+                {
+                    \"name\": \"s_cpu\",
+                    \"value\": $s_cpu,
+                    \"unit\": \"#seconds/1000\"
+                },
+                {
+                    \"name\": \"rss\",
+                    \"value\": $rss,
+                    \"unit\": \"GB\"
+                }
+             ],
+            \"attributes\": {
+                \"branch\": [\"master\"],
+                \"git_repo\": [\"https://github.com/facebook/rocksdb\"],
+                \"git_commit\": [\"$githash\"],
+                \"version\": [\"$version\"],
+                \"build_date\": [\"$date\"],
+                \"commit_date\": [\"$commit_date\"]
+            }
+        }," >> "datasets/${file}.json"
+#END
+
+
+        echo
+        set +x
+    done
+    echo "]" >> "datasets/${file}.json"
+done
