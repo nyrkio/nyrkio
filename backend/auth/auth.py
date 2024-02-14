@@ -66,7 +66,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager, [jwt_backend, cookie_backend]
 )
 
-REDIRECT_URI = "https://nyrk.io/api/v0/auth/github/callback"
+REDIRECT_URI = "https://nyrk.io/api/v0/auth/github/mycallback"
 auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
     fastapi_users.get_oauth_router(
@@ -135,7 +135,7 @@ async def verify_email(
         )
 
 
-@auth_router.get("/github/callback", include_in_schema=False)
+@auth_router.get("/github/mycallback", include_in_schema=False)
 async def github_callback(
     request: Request,
     access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),

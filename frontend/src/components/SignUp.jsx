@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { githubSubmit } from "../lib/github";
 
 export const SignUpPage = () => {
   const formState = {
@@ -49,6 +48,22 @@ export const SignUpPage = () => {
       },
       body: JSON.stringify({ email: email }),
     });
+  };
+
+  // TODO (mfleming) Move to lib
+  const githubSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Github submit");
+    const data = await fetch("https://nyrk.io/api/v0/auth/github/authorize")
+      .then((response) => response.json())
+      .then((url) => url["authorization_url"])
+      .then((url) => {
+        console.log(url);
+        window.location.href = url;
+        setLoggedIn(true);
+        localStorage.setItem("loggedIn", "true");
+      })
+      .catch((error) => console.log(error));
   };
 
   if (showForm === formState.Visible) {
