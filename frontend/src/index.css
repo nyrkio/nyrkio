@@ -584,3 +584,41 @@ div.card div.card-header {
   font-size:33%;
   color: #444;
 }
+
+
+input[type="range"].range-slider.range-slider--primary::-moz-range-thumb {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: var(--nyrkio-tattoo-red);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+  border: 0px solid transparent;
+}
+input[type="range"].range-slider::-moz-range-track {
+  position: absolute;
+  cursor: pointer;
+  background-color: var(--nyrkio-light-gray);
+  box-shadow: inset 0 1px 2px var(--nyrkio-dark-gray);
+  border-radius: 4px;
+}
+input[type="range"].range-slider::-moz-range-progress {
+  position: absolute;
+  cursor: pointer;
+  background-color: var(--nyrkio-horn-light-brown);
+  -webkit-box-shadow: inset 0 -0.5px 1px var(--nyrkio-horn-dark-brown);
+  box-shadow: inset 0 -0.5px 1px var(--nyrkio-horn-dark-brown);
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  border-radius: 4px;
+}
+input[type="range"].range-slider.range-slider--primary::-webkit-slider-thumb{
+  width: 20px;
+  height: 20px;
+  background-color: var(--nyrkio-tattoo-red);
+  -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
+}
+input[type="range"].range-slider::-webkit-slider-runnable-track{
+  background-color: var(--nyrkio-light-gray);
+  -webkit-box-shadow: inset 0 1px 2px var(--nyrkio-dark-gray);
+  border-radius: 4px;
+}

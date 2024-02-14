@@ -2,7 +2,119 @@ import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
+import 'bootstrap/dist/css/bootstrap.css'; // or include from a CDN
+import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
+import RangeSlider from 'react-bootstrap-range-slider';
+
 export const UserSettings = () => {
+  return (
+    <>
+      <div className="container">
+      <HunterSettings />
+      <SlackSettings />
+      </div>
+    </>
+  );
+
+};
+
+
+
+const HunterSettings = () => {
+  // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
+  const [ minMagnitudeValueRaw, setMinMagnitudeValueRaw] = useState(0);
+  const [ pValueValueRaw, setPValueValueRaw] = useState(0);
+  const [ minMagnitudeValue, setMinMagnitudeValue] = useState(0);
+  const [ pValueValue, setPValueValue] = useState(0);
+  const NyrkioCpSliders = () => {
+  const minMagnitudeUpdate = (rawValue) => {
+      // surprised it's up to me to do this
+      setMinMagnitudeValueRaw(rawValue);
+      const scaledDown=rawValue/1000.0;
+      const logScale=((Math.pow(2,scaledDown)  ))/10;
+      const quantized =parseFloat((Math.round(logScale*2)/2.0).toPrecision(2 ));
+      setMinMagnitudeValue(quantized);
+  };
+  const pvalueUpdate = (rawValue) => {
+      setPValueValueRaw(rawValue);
+      const scaledDown=rawValue/1000.0;
+      const logScale=((Math.pow(2,scaledDown)  -1))/1;
+      const quantized =parseFloat((Math.round(logScale)).toPrecision(1 ))/1000.0;
+      setPValueValue(quantized);
+  };
+
+    return (
+      <>
+        <div id="nyrkio-cp-sliders">
+            <div className="row">
+                <div className="col col-md-12">
+                <label htmlFor="nyrkio-min-magnitude-slider" className="form-label">Change point threshold: </label>
+                </div>
+                <div className="col col-md-10">
+                <RangeSlider
+                  name="nyrkio-min-magnitude-slider"
+                  className="nyrkio-min-magnitude-slider"
+                  value={minMagnitudeValueRaw}
+                  min={0}
+                  max={10000}
+                  step={50}
+                  precision={50}
+                  tooltip="off"
+                  onChange={ev => minMagnitudeUpdate(ev.target.value)}
+                />
+              </div>
+              <div className="col col-md-2">
+                <span id="nyrkio-min-magnitude-value" className="form-label">{ minMagnitudeValue }</span><span className="form-label">%</span>
+              </div>
+            </div>
+            <div className="row mt-5 ">
+              <div className="col col-md-12">
+                <label htmlFor="nyrkio-p-value-slider" className="form-label">P-value threshold: </label>
+                </div>
+                <div className="col col-md-10">
+                <RangeSlider
+                  name="nyrkio-p-value-slider"
+                  value={pValueValueRaw}
+                  min={100}
+                  max={10100}
+                  step={10}
+                  precision={10}
+                  tooltip="off"
+                  onChange={ev => pvalueUpdate(ev.target.value)}
+                />
+              </div>
+              <div className="col col-md-2">
+                <span id="nyrkio-p-value-value" className="form-label">{ pValueValue }</span>
+              </div>
+            </div>
+        </div>
+      <br />
+      </>
+    );
+
+  };
+
+
+
+  return (
+      <div className="row pt-5 justify-content-center">
+        <div className="col-md-8">
+          <div className="card">
+            <div className="card-header">Change Point Detection</div>
+            <div className="card-body">
+                  <p className="card-text">
+                    These settings are global for all your metrics.
+                  </p>
+                  <NyrkioCpSliders />
+            </div>
+          </div>
+        </div>
+      </div>
+  );
+
+};
+
+const SlackSettings = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [slackData, setSlackData] = useState([]);
 
@@ -55,13 +167,11 @@ export const UserSettings = () => {
   const slackBtnText =
     Object.keys(slackData).length > 0 ? "Re-connect to Slack" : "Add to Slack";
   return (
-    <div className="container">
       <div className="row pt-5 justify-content-center">
         <div className="col-md-8">
           <div className="card">
             <div className="card-header">Slack</div>
             <div className="card-body">
-              <h5 className="card-title">Slack Integration</h5>
               {Object.keys(slackData).length > 0 ? (
                 <>
                   <form>
@@ -129,6 +239,5 @@ export const UserSettings = () => {
           </div>
         </div>
       </div>
-    </div>
   );
 };
