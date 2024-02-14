@@ -66,7 +66,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager, [jwt_backend, cookie_backend]
 )
 
-REDIRECT_URI = "http://localhost/api/v0/auth/github/mycallback"
+REDIRECT_URI = "https://nyrk.io/api/v0/auth/github/callback"
 auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
     fastapi_users.get_oauth_router(
@@ -135,7 +135,7 @@ async def verify_email(
         )
 
 
-@auth_router.get("/github/mycallback", include_in_schema=False)
+@auth_router.get("/github/callback", include_in_schema=False)
 async def github_callback(
     request: Request,
     access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
@@ -165,8 +165,8 @@ async def github_callback(
             token.get("expires_at"),
             token.get("refresh_token"),
             request,
-            associate_by_email=False,
-            is_verified_by_default=False,
+            associate_by_email=True,
+            is_verified_by_default=True,
         )
     except UserAlreadyExists:
         raise HTTPException(
@@ -184,7 +184,7 @@ async def github_callback(
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/")
-    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="lax")
+    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
     return response
 
 
