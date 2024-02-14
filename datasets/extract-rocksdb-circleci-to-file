@@ -1,23 +1,7 @@
 #!/bin/bash
-
-
-base_url="http://localhost:8000"
-#base_url="http://nyrkio.readmodwrite.com"
-#PASSWORD="egVL2Ixb%%uZy7jh"
-USER=henrik@nyrk.io
-PASSWORD="5%mGBLggQC$gdx"
-#PASSWORD=test
-
-#USER=test1
-#PASSWORD="dCOeJJTmg22ja64ds5s"
-
-#TOKEN=$(curl -s ${base_url}/login/jwt/ -H 'Content-type: application/json' -d "{\"username\": \"$USER\", \"password\":\"$PASSWORD\"}" | jq -r '.data')
+base_url="http://localhost"
 TOKEN="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI2NWM2NzI3MTg3YzNjOWQ5OTU5OGE3NzkiLCJhdWQiOlsiZmFzdGFwaS11c2VyczphdXRoIl0sImV4cCI6MTcxMDA5NjgxNH0.BLETZnwCoZO5SceiD3HNVwCi86GLS41lFJewhsU99CY"
 GIT_REPO="/home/hingo/hacking/github.com/facebook/rocksdb"
-
-
-METHOD=POST
-#METHOD=PUT
 
 
 if [ $# -lt 1 ]; then
@@ -39,7 +23,7 @@ TESTS="fillseq.wal_disabled.v400
 counter=0
  
 for file in $(ls -1 $RESULT_DIR/*.tsv); do
-    echo "[" > "datasets/${file}.json"
+    #echo "[" > "datasets/${file}.json"
     for t in $TESTS; do
 
         export githash=$(echo $file|cut -d- -f3|cut -d. -f1)
@@ -86,10 +70,18 @@ for file in $(ls -1 $RESULT_DIR/*.tsv); do
 
         echo $githash $commit_date
 
-        epoch=$(date -d "$commit_date" +%s)
+        #epoch=$(date -d "$commit_date" +%s)
+        # This data set has many builds for the same commit, and they are extremely noisy...
+        # So exceptionally use build_date as the timestamp even if generally that's not adviced!
+        epoch=$(date -d "$date" +%s)
+
+        outdir="datasets/rocksdb/$test_name"
+        mkdir -p $outdir
+        outfile=$(echo $file|cut -d - -f 3 | cut -d . -f 1)
+        outfile="${outdir}/${counter}-${outfile}.json"
         set -x
-            echo "{
-            _id:{
+            echo "[{
+            \"_id\":{
                 \"git_repo\": \"https://github.com/facebook/rocksdb\",
                 \"branch\": \"master\",
                 \"git_commit\": \"$githash\",
@@ -224,12 +216,21 @@ for file in $(ls -1 $RESULT_DIR/*.tsv); do
                 \"build_date\": [\"$date\"],
                 \"commit_date\": [\"$commit_date\"]
             }
-        }," >> "datasets/${file}.json"
-#END
+        }]" >"$outfile"
 
 
         echo
         set +x
     done
-    echo "]" >> "datasets/${file}.json"
 done
+
+
+# When done, this is a good command line to upload the data to Nyrkiö
+# cd datasets/rocksdb
+# for testname in $(ls);
+# do
+#    for filename in $(ls $testname);
+#    do
+#      curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" http://localhost/api/v0/result/rocksdb2023/$testname -d "$(cat ${testname}/${filename})";
+#    done;
+#  done
