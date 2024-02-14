@@ -13,14 +13,7 @@ import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import { UserSettings } from "./components/UserSettings.jsx";
-
-function NoMatch() {
-  return (
-    <div className="container text-center justify-content-center p-5">
-      <h2>404: Page Not Found</h2>
-    </div>
-  );
-}
+import { NoMatch } from "./components/NoMatch.jsx";
 
 const Root = ({ loggedIn }) => {
   return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
@@ -39,10 +32,7 @@ function App() {
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         <Routes>
           <Route path="/" element={<Root loggedIn={loggedIn} />} />
-          <Route
-            path="/tests/:prefix"
-            element={<Dashboard loggedIn={loggedIn} />}
-          />
+          <Route path="/tests/*" element={<Dashboard loggedIn={loggedIn} />} />
           <Route path="/product" element={<ProductPage />} />
           <Route path="/pricing" element={<PricingPage />} />
           <Route path="/legend" element={<LegendPage />} />
@@ -52,7 +42,7 @@ function App() {
             path="/login"
             element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
           />
-          <Route path="/result/:testName" element={<SingleResult />} />
+          <Route path="/result/*" element={<SingleResult />} />
           <Route path="/docs/getting-started" element={<Docs />} />
           <Route path="/user/settings" element={<UserSettings />} />
           <Route path="*" element={<NoMatch />} />

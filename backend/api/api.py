@@ -21,6 +21,40 @@ app = FastAPI(openapi_url="/openapi.json")
 api_router = APIRouter()
 
 
+@api_router.post("/result/{test_name:path}/changes/enable")
+async def enable_changes(
+    test_name: str,
+    user: User = Depends(auth.current_active_user),
+    metrics: List[str] = [],
+):
+    store = DBStore()
+    await store.enable_changes(user, test_name, metrics)
+    return {}
+
+
+@api_router.post("/result/{test_name:path}/changes/disable")
+async def disable_changes(
+    test_name: str,
+    user: User = Depends(auth.current_active_user),
+    metrics: List[str] = [],
+):
+    if not metrics:
+        raise HTTPException(
+            status_code=400, detail="No metrics to disable change detection for"
+        )
+    store = DBStore()
+    await store.disable_changes(user, test_name, metrics)
+    return {}
+
+
+@api_router.get("/result/{test_name:path}/changes")
+async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+    store = DBStore()
+    results = await store.get_results(user, test_name)
+    disabled = await store.get_disabled_metrics(user, test_name)
+    return await calc_changes(test_name, results, disabled)
+
+
 @api_router.get("/results")
 async def results(user: User = Depends(auth.current_active_user)) -> List[Dict]:
     store = DBStore()
@@ -35,7 +69,7 @@ async def delete_results(user: User = Depends(auth.current_active_user)) -> List
     return []
 
 
-@api_router.get("/result/{test_name}")
+@api_router.get("/result/{test_name:path}")
 async def get_result(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> List[Dict]:
@@ -48,7 +82,7 @@ async def get_result(
     return await store.get_results(user, test_name)
 
 
-@api_router.delete("/result/{test_name}")
+@api_router.delete("/result/{test_name:path}")
 async def delete_result(
     test_name: str,
     timestamp: Union[int, None] = None,
@@ -74,7 +108,7 @@ class TestResults(RootModel[Any]):
     root: List[TestResult]
 
 
-@api_router.post("/result/{test_name}")
+@api_router.post("/result/{test_name:path}")
 async def add_result(
     test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
 ):
@@ -121,40 +155,6 @@ async def calc_changes(test_name, results, disabled=None):
         series.add_result(result)
 
     return await series.calculate_changes()
-
-
-@api_router.get("/result/{test_name}/changes")
-async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
-    store = DBStore()
-    results = await store.get_results(user, test_name)
-    disabled = await store.get_disabled_metrics(user, test_name)
-    return await calc_changes(test_name, results, disabled)
-
-
-@api_router.post("/result/{test_name}/changes/enable")
-async def enable_changes(
-    test_name: str,
-    user: User = Depends(auth.current_active_user),
-    metrics: List[str] = [],
-):
-    store = DBStore()
-    await store.enable_changes(user, test_name, metrics)
-    return {}
-
-
-@api_router.post("/result/{test_name}/changes/disable")
-async def disable_changes(
-    test_name: str,
-    user: User = Depends(auth.current_active_user),
-    metrics: List[str] = [],
-):
-    if not metrics:
-        raise HTTPException(
-            status_code=400, detail="No metrics to disable change detection for"
-        )
-    store = DBStore()
-    await store.disable_changes(user, test_name, metrics)
-    return {}
 
 
 @api_router.get("/default/results")

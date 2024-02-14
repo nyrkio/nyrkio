@@ -863,3 +863,286 @@ def test_update_existing_user_config(client):
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
     assert response.json() == new_config
+
+
+def test_create_test_result_with_slash_separator(client):
+    """Ensure that we can create a test result with a slash separator"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        }
+    ]
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0] == data[0]
+
+
+def test_create_test_result_with_slash_separator_and_get_all_results(client):
+    """Ensure that we can create a test result with a slash separator and get all results"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        }
+    ]
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0]["test_name"] == "benchmark1/test"
+
+
+def test_calculate_changes_for_test_with_slashes(client):
+    """Ensure that we can calculate changes for a test with slashes"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    for ch in json["benchmark1/test"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert json["benchmark1/test"][0]["time"] == 3
+
+
+def test_disable_changes_for_test_with_slashes(client):
+    """Make sure we can disable changes for a test with slashes"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    for ch in json["benchmark1/test"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert json["benchmark1/test"][0]["time"] == 3
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/test/changes/disable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    assert not json["benchmark1/test"]
+
+
+def test_disable_reenable_changes_for_test_with_slashes(client):
+    """Make sure we can disable and re-enable changes for a test with slashes"""
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    for ch in json["benchmark1/test"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert json["benchmark1/test"][0]["time"] == 3
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/test/changes/disable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    assert not json["benchmark1/test"]
+
+    # Re-enable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/test/changes/enable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "benchmark1/test" in json
+    for ch in json["benchmark1/test"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert json["benchmark1/test"][0]["time"] == 3
+
+
+def test_delete_test_name_with_slashes(client):
+    """Ensure that we can delete a test name with slashes"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": ["https://github.com/nyrkio/nyrkio"],
+                "branch": ["main"],
+                "git_commit": ["123456"],
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1/test", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/test")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0] == data[0]
+
+    response = client.delete("/api/v0/result/benchmark1/test")
+    assert response.status_code == 200

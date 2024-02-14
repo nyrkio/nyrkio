@@ -1,9 +1,14 @@
 import { createContext, useEffect, useState } from "react";
-import { BrowserRouter as Router, Link, useParams } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Link,
+  useParams,
+  useLocation,
+} from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
-
+import { NoMatch } from "./NoMatch";
 
 const Breadcrumb = ({ testName }) => {
   const createItems = () => {
@@ -11,9 +16,9 @@ const Breadcrumb = ({ testName }) => {
       return <></>;
     }
 
-    return testName.split(".").map((name, i) => {
+    return testName.split("/").map((name, i) => {
       // Check if we're the last component
-      if (i === testName.split(".").length - 1) {
+      if (i === testName.split("/").length - 1) {
         return (
           <li className="breadcrumb-item active" aria-current="page">
             {name}
@@ -22,9 +27,9 @@ const Breadcrumb = ({ testName }) => {
       }
 
       var prefix = testName
-        .split(".")
+        .split("/")
         .slice(0, i + 1)
-        .join(".");
+        .join("/");
       return (
         <li className="breadcrumb-item">
           <Link to={`/tests/${prefix}`}>{name}</Link>
@@ -35,7 +40,7 @@ const Breadcrumb = ({ testName }) => {
   return (
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid breadcrumb-wrapper">
-        <nav aria-label="breadcrumb" >
+        <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
             <li className="breadcrumb-item">
               <Link to="/">Tests</Link>
@@ -51,7 +56,23 @@ const Breadcrumb = ({ testName }) => {
 export const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [testNames, setTestNames] = useState([]);
-  var { prefix } = useParams();
+  const location = useLocation();
+  var prefix;
+
+  // Remove /tests/ from the beginning of the path
+  if (location.pathname.startsWith("/tests/")) {
+    prefix = location.pathname.substring(7);
+
+    // Strip trailing / if it exists
+    if (prefix.endsWith("/")) {
+      prefix = prefix.substring(0, prefix.length - 1);
+    }
+
+    // If the prefix is empty, set it to undefined
+    if (prefix === "") {
+      prefix = undefined;
+    }
+  }
 
   const fetchData = async () => {
     const response = await fetch("/api/v0/results", {
@@ -82,7 +103,7 @@ export const Dashboard = () => {
   // Initial condition on page load
   if (prefix === undefined) {
     shortNames = testNames
-      .map((name) => name.split(".")[0])
+      .map((name) => name.split("/")[0])
       .filter((v, i, a) => a.indexOf(v) === i);
   } else {
     // remove prefix from name
@@ -92,19 +113,22 @@ export const Dashboard = () => {
         return (
           name.startsWith(prefix) &&
           name.length > prefix.length &&
-          name.substring(prefix.length, prefix.length + 1) === "."
+          name.substring(prefix.length, prefix.length + 1) === "/"
         );
       })
       .map((name) => {
-        var shortName = name.replace(prefix + ".", "");
-        return shortName.split(".")[0];
+        var shortName = name.replace(prefix + "/", "");
+        return shortName.split("/")[0];
       })
       .filter((v, i, a) => a.indexOf(v) === i);
   }
 
   const createTestList = () => {
+    if (shortNames.length === 0) {
+      return <div>No tests found</div>;
+    }
     return shortNames.map((name) => {
-      var longName = prefix + "." + name;
+      var longName = prefix + "/" + name;
       if (testNames.includes(longName) || testNames.includes(name)) {
         if (!testNames.includes(longName)) longName = name;
         return (
@@ -116,7 +140,7 @@ export const Dashboard = () => {
         );
       } else {
         var p = name;
-        if (prefix !== undefined) p = prefix + "." + name;
+        if (prefix !== undefined) p = prefix + "/" + name;
         return (
           <li className="list-group-item">
             <Link to={`/tests/${p}`} state={{ testName: name }}>
@@ -244,6 +268,12 @@ SingleResultWithTestname.propTypes = {
 };
 
 export const SingleResult = () => {
-  const { testName } = useParams();
+  const location = useLocation();
+
+  // check if testName exists
+  if (location.state === null || location.state.testName === undefined) {
+    return <NoMatch />;
+  }
+  const testName = location.state.testName;
   return <SingleResultWithTestname testName={testName} />;
 };
