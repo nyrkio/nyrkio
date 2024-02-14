@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-import { githubSubmit } from "../lib/github";
-
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
@@ -32,6 +30,22 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         } catch (error) {
           console.log(error);
         }
+      })
+      .catch((error) => console.log(error));
+  };
+
+  // TODO (mfleming) Move to lib
+  const githubSubmit = async (e) => {
+    e.preventDefault();
+    console.log("Github submit");
+    const data = await fetch("https://nyrk.io/api/v0/auth/github/authorize")
+      .then((response) => response.json())
+      .then((url) => url["authorization_url"])
+      .then((url) => {
+        console.log(url);
+        window.location.href = url;
+        setLoggedIn(true);
+        localStorage.setItem("loggedIn", "true");
       })
       .catch((error) => console.log(error));
   };
