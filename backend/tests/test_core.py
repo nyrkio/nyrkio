@@ -1,5 +1,6 @@
 import asyncio
 
+
 from backend.core.core import (
     PerformanceTestResult,
     PerformanceTestResultSeries,
@@ -8,6 +9,7 @@ from backend.core.core import (
 )
 
 from backend.core.core import GitHubReport
+from backend.core.config import Config
 
 import pytest
 
@@ -215,3 +217,31 @@ def test_github_message_cache():
         asyncio.run(GitHubReport.add_github_commit_msg(attr))
         assert "commit_msg" in attr
         assert attr["commit_msg"] == ["Linux 6.7"]
+
+
+def test_core_config():
+    """Test core config"""
+    config = Config(min_magnitude=1.0)
+    series = PerformanceTestResultSeries("benchmark1", config)
+
+    # Add a known time series that has change points and ensure that we
+    # don't see any change points when we use a high min_magnitude
+    series.add_result(
+        PerformanceTestResult(
+            1, [ResultMetric("metric1", "µs", 1.0)], {"attr1": "value1"}
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            2, [ResultMetric("metric1", "µs", 1.0)], {"attr1": "value1"}
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            3, [ResultMetric("metric1", "µs", 2.0)], {"attr1": "value1"}
+        )
+    )
+
+    changes = asyncio.run(series.calculate_changes())
+    assert "benchmark1" in changes
+    assert len(changes["benchmark1"]) == 0

@@ -11,6 +11,7 @@ from hunter.report import Report, ReportType
 from hunter.series import Series, AnalysisOptions
 
 from backend.core.sieve import sieve_cache
+from backend.core.config import Config
 
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
@@ -64,9 +65,14 @@ class PerformanceTestResult:
 
 
 class PerformanceTestResultSeries:
-    def __init__(self, name):
+    def __init__(self, name, config=None):
         self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
+
+        if not config:
+            config = Config()
+
+        self.config = config
 
     def add_result(self, result: PerformanceTestResult):
         """
@@ -113,8 +119,8 @@ class PerformanceTestResultSeries:
         )
 
         options = AnalysisOptions()
-        options.min_magnitude = 0.05
-        options.max_pvalue = 0.001
+        options.min_magnitude = self.config.min_magnitude
+        options.max_pvalue = self.config.max_pvalue
 
         change_points = series.analyze(options).change_points_by_time
         report = GitHubReport(series, change_points)
