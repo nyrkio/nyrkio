@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import posthog from "posthog-js";
 
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
@@ -25,6 +26,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         setLoggedIn(true);
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("token", body["access_token"]);
+        posthog.capture("login", { property: username });
         try {
           navigate("/");
         } catch (error) {

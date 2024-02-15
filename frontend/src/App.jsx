@@ -1,5 +1,10 @@
-import { useState } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import * as React from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  useLocation,
+} from "react-router-dom";
 import "./App.css";
 import { Login } from "./components/Login.jsx";
 import { Dashboard, SingleResult } from "./components/Dashboard.jsx";
@@ -14,13 +19,47 @@ import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import { UserSettings } from "./components/UserSettings.jsx";
 import { NoMatch } from "./components/NoMatch.jsx";
+import posthog from "posthog-js";
 
 const Root = ({ loggedIn }) => {
   return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
 };
 
+function MainApp({ loggedIn, setLoggedIn }) {
+  let location = useLocation();
+
+  React.useEffect(() => {
+    posthog.capture("$pageview");
+  }, [location]);
+
+  return (
+    <>
+      <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      <Routes>
+        <Route path="/" element={<Root loggedIn={loggedIn} />} />
+        <Route path="/tests/*" element={<Dashboard loggedIn={loggedIn} />} />
+        <Route path="/product" element={<ProductPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/legend" element={<LegendPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
+
+        <Route
+          path="/login"
+          element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
+        />
+        <Route path="/result/*" element={<SingleResult />} />
+        <Route path="/docs/getting-started" element={<Docs />} />
+        <Route path="/user/settings" element={<UserSettings />} />
+        <Route path="*" element={<NoMatch />} />
+      </Routes>
+      <ScrollToTop />
+      <Footer />
+    </>
+  );
+}
+
 function App() {
-  const [loggedIn, setLoggedIn] = useState(() => {
+  const [loggedIn, setLoggedIn] = React.useState(() => {
     const saved = localStorage.getItem("loggedIn");
     const initialValue = JSON.parse(saved);
     return initialValue || false;
@@ -29,26 +68,7 @@ function App() {
   return (
     <>
       <Router>
-        <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-        <Routes>
-          <Route path="/" element={<Root loggedIn={loggedIn} />} />
-          <Route path="/tests/*" element={<Dashboard loggedIn={loggedIn} />} />
-          <Route path="/product" element={<ProductPage />} />
-          <Route path="/pricing" element={<PricingPage />} />
-          <Route path="/legend" element={<LegendPage />} />
-          <Route path="/signup" element={<SignUpPage />} />
-
-          <Route
-            path="/login"
-            element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
-          />
-          <Route path="/result/*" element={<SingleResult />} />
-          <Route path="/docs/getting-started" element={<Docs />} />
-          <Route path="/user/settings" element={<UserSettings />} />
-          <Route path="*" element={<NoMatch />} />
-        </Routes>
-        <ScrollToTop />
-        <Footer />
+        <MainApp loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       </Router>
     </>
   );
