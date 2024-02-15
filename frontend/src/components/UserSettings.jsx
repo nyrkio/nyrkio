@@ -2,9 +2,6 @@ import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 
-import 'bootstrap/dist/css/bootstrap.css'; // or include from a CDN
-import 'react-bootstrap-range-slider/dist/react-bootstrap-range-slider.css';
-import RangeSlider from 'react-bootstrap-range-slider';
 
 export const UserSettings = () => {
   return (
@@ -19,29 +16,102 @@ export const UserSettings = () => {
 };
 
 
-
 const HunterSettings = () => {
+  const saveHunterSettings = async () => {
+    const minMagnitude = getRealMinMagnitude(document.getElementById("nyrkio-min-magnitude-slider").value)/100.0;
+    const pValue = getRealPValue(document.getElementById("nyrkio-p-value-slider").value);
+    const configObject = {core: {min_magnitude: minMagnitude, max_pvalue: pValue}};
+    console.debug("POST /api/v0/user/config ");
+    console.debug(configObject);
+
+    const response = await fetch("/api/v0/user/config", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify(configObject),
+    });
+    if (response.status !== 200) {
+      console.error("Failed to POST Nyrkiö core user settings");
+      console.log(response);
+    }
+    else console.debug(response);
+  };
+
+  const getHunterSettings = async () => {
+    console.debug("GET /api/v0/user/config")
+    const response = await fetch("/api/v0/user/config", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status !== 200) {
+      console.error("Failed to GET Nyrkiö core user settings");
+      console.log(response);
+    }
+    else console.debug(response);
+    const data = await response.json();
+    console.debug(data);
+    if (Object.keys(data).length > 0 && Object.keys(data.core).length > 0) {
+      //minMagnitudeSet(data.core.min_magnitude);
+      //pvalueSet(data.core.max_pvalue);
+      return data.core;
+    }
+    else {
+      return {min_magnitude: "Network error", max_pvalue: "Network error"};
+    }
+  };
+
   // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
-  const [ minMagnitudeValueRaw, setMinMagnitudeValueRaw] = useState(0);
-  const [ pValueValueRaw, setPValueValueRaw] = useState(0);
-  const [ minMagnitudeValue, setMinMagnitudeValue] = useState(0);
-  const [ pValueValue, setPValueValue] = useState(0);
-  const NyrkioCpSliders = () => {
   const minMagnitudeUpdate = (rawValue) => {
-      // surprised it's up to me to do this
-      setMinMagnitudeValueRaw(rawValue);
-      const scaledDown=rawValue/1000.0;
-      const logScale=((Math.pow(2,scaledDown)  ))/10;
-      const quantized =parseFloat((Math.round(logScale*2)/2.0).toPrecision(2 ));
-      setMinMagnitudeValue(quantized);
+      document.getElementById("nyrkio-min-magnitude-value").innerHTML=getRealMinMagnitude(rawValue);
+      saveHunterSettings();
   };
+  const getRealMinMagnitude = (rawValue) => {
+      const scaledDown=rawValue/1000.0;
+      const logScale=((Math.pow(scaledDown,4)  ))/100;
+      const quantized = parseFloat((Math.round(logScale*2)/2.0).toPrecision(2 ));
+      //console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized));
+      return quantized;
+  };
+  const getRawMinMagnitude = (realValue) => {
+      const scaledDown = Math.pow(realValue*100,1.0/4.0);
+      const rawValue = scaledDown*1000.0;
+      return rawValue;
+  };
+  const minMagnitudeSet = (realValue) => {
+      const rawValue=getRawMinMagnitude(realValue);
+      document.getElementById("nyrkio-min-magnitude-value").innerHTML=Math.round(realValue);
+      document.getElementById("nyrkio-min-magnitude-slider").value=rawValue;
+      return rawValue;
+  };
+
   const pvalueUpdate = (rawValue) => {
-      setPValueValueRaw(rawValue);
-      const scaledDown=rawValue/1000.0;
-      const logScale=((Math.pow(2,scaledDown)  -1))/1;
-      const quantized =parseFloat((Math.round(logScale)).toPrecision(1 ))/1000.0;
-      setPValueValue(quantized);
+      document.getElementById("nyrkio-p-value-value").innerHTML=getRealPValue(rawValue);
+      saveHunterSettings();
   };
+  const getRealPValue = (rawValue) => {
+      const scaledDown=rawValue/100.0;
+      const logScale=((Math.pow(scaledDown,3)))/1000;
+      const quantized =parseFloat((Math.round(logScale)).toPrecision(1 ))/1000.0;
+      //console.debug("prawreal " + rawValue + " " + quantized + " " + getRawPValue(logScale) + " " + getRawPValue(quantized));
+      return quantized;
+  };
+  const getRawPValue = (realValue) => {
+      const scaledDown = Math.pow(realValue*1000,1.0/3.0);
+      const rawValue = scaledDown*100.0*10;
+      return rawValue;
+  };
+  const pvalueSet = (realValue) => {
+    const rawValue=getRawPValue(realValue);
+      document.getElementById("nyrkio-p-value-value").innerHTML=realValue;
+      document.getElementById("nyrkio-p-value-slider").value=rawValue;
+      return rawValue;
+  };
+
+  const NyrkioCpSliders = () => {
 
     return (
       <>
@@ -51,10 +121,12 @@ const HunterSettings = () => {
                 <label htmlFor="nyrkio-min-magnitude-slider" className="form-label">Change point threshold: </label>
                 </div>
                 <div className="col col-md-10">
-                <RangeSlider
+                <input type="range"
+                  id="nyrkio-min-magnitude-slider"
                   name="nyrkio-min-magnitude-slider"
-                  className="nyrkio-min-magnitude-slider"
-                  value={minMagnitudeValueRaw}
+                  className="nyrkio-min-magnitude-slider nyrkio-slider"
+                  style={{width: "100%"}}
+                  defaultValue={0}
                   min={0}
                   max={10000}
                   step={50}
@@ -64,7 +136,7 @@ const HunterSettings = () => {
                 />
               </div>
               <div className="col col-md-2">
-                <span id="nyrkio-min-magnitude-value" className="form-label">{ minMagnitudeValue }</span><span className="form-label">%</span>
+                <span id="nyrkio-min-magnitude-value" className="form-label">{ 0 }</span><span className="form-label">%</span>
               </div>
             </div>
             <div className="row mt-5 ">
@@ -72,9 +144,12 @@ const HunterSettings = () => {
                 <label htmlFor="nyrkio-p-value-slider" className="form-label">P-value threshold: </label>
                 </div>
                 <div className="col col-md-10">
-                <RangeSlider
+                <input type="range"
+                  id="nyrkio-p-value-slider"
                   name="nyrkio-p-value-slider"
-                  value={pValueValueRaw}
+                  className="nyrkio-p-value-slider nyrkio-slider"
+                  style={{width: "100%"}}
+                  defaultValue={0}
                   min={100}
                   max={10100}
                   step={10}
@@ -84,18 +159,25 @@ const HunterSettings = () => {
                 />
               </div>
               <div className="col col-md-2">
-                <span id="nyrkio-p-value-value" className="form-label">{ pValueValue }</span>
+                <span id="nyrkio-p-value-value" className="form-label">{ 0 }</span>
               </div>
             </div>
         </div>
-      <br />
       </>
     );
 
   };
 
 
+  useEffect(() => {
+    getHunterSettings().then((initialConfig)=>{
+      pvalueSet(initialConfig.max_pvalue);
+      minMagnitudeSet(initialConfig.min_magnitude*100);
 
+    }
+    );
+  }, [NyrkioCpSliders]
+  );
   return (
       <div className="row pt-5 justify-content-center">
         <div className="col-md-8">

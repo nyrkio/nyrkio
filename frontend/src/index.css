@@ -586,23 +586,22 @@ div.card div.card-header {
 }
 
 
-input[type="range"].range-slider.range-slider--primary::-moz-range-thumb {
-  position: absolute;
+input[type="range"].nyrkio-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   background-color: var(--nyrkio-tattoo-red);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
   border: 0px solid transparent;
 }
-input[type="range"].range-slider::-moz-range-track {
-  position: absolute;
+input[type="range"].nyrkio-slider::-moz-range-track {
+  width: 100%;
   cursor: pointer;
   background-color: var(--nyrkio-light-gray);
   box-shadow: inset 0 1px 2px var(--nyrkio-dark-gray);
   border-radius: 4px;
 }
-input[type="range"].range-slider::-moz-range-progress {
-  position: absolute;
+input[type="range"].nyrkio-slider::-moz-range-progress {
+  width: 100%;
   cursor: pointer;
   background-color: var(--nyrkio-horn-light-brown);
   -webkit-box-shadow: inset 0 -0.5px 1px var(--nyrkio-horn-dark-brown);
@@ -611,13 +610,14 @@ input[type="range"].range-slider::-moz-range-progress {
   box-sizing: border-box;
   border-radius: 4px;
 }
-input[type="range"].range-slider.range-slider--primary::-webkit-slider-thumb{
+input[type="range"].nyrkio-slider::-webkit-slider-thumb{
   width: 20px;
   height: 20px;
   background-color: var(--nyrkio-tattoo-red);
   -webkit-box-shadow: inset 0 1px 0 rgba(255,255,255,.2), 0 1px 2px rgba(0,0,0,.05);
 }
-input[type="range"].range-slider::-webkit-slider-runnable-track{
+input[type="range"].nyrkio-slider::-webkit-slider-runnable-track{
+  width: 100%;
   background-color: var(--nyrkio-light-gray);
   -webkit-box-shadow: inset 0 1px 2px var(--nyrkio-dark-gray);
   border-radius: 4px;
