@@ -69,6 +69,7 @@ jobs:
 
       - name: Run performance tests
         run: |
+          echo "${{ secrets.NYRKIO_ENV_TESTING }}" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
           cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/
