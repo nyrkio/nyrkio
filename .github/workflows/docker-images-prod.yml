@@ -71,6 +71,6 @@ jobs:
         run: |
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
-          cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-results=results benches/
+          cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/
           docker compose -f docker-compose.dev.yml down
           cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json")
