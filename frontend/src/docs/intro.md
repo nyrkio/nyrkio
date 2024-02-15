@@ -81,11 +81,15 @@ curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $T
        }]'
 ```
 
-There are a few things to keep in mind when working with test result data.
+There are a few things to keep in mind when working with test result data:
 
-- `timestamp` should be the time of the _git commit_ that was tested, not the timestamp of the test execution. Using the git commit timestamp allows you to accurately pinpoint which commit (or sequence of commits) introduced a change in performance.
-- The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "instructions", "request/s", etc.
-- The `git_commit` attribute is special. If you include it in your performance test results and the `git_repo` attribute points to a git repository on GitHub then Nyrkiö will link to the url for that commit whenever it's part of a change point.
+`timestamp` should be the time of the _git commit_ that was tested, not the timestamp of the test execution. Using the git commit timestamp allows you to accurately pinpoint which commit (or sequence of commits) introduced a change in performance. In other words, you should use the timestamp of when the commits were merged to the branch being monitored. This you can get with the following command:
+
+    commit_date=$(cd $GIT_REPO; git rev-list --format=format:"%ci" --max-count=1 $githash|grep -v commit)
+
+The `git_commit` attribute is special. If you include it in your performance test results and the `git_repo` attribute points to a git repository on GitHub then Nyrkiö will link to the url for that commit whenever it's part of a change point.
+
+The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "instructions", "request/s", etc.
 
 ## View the charts in the dashboard
 
