@@ -2,13 +2,7 @@ import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
-import React, {
-  StrictMode,
-  useCallback,
-  useMemo,
-  useRef,
-  foo,
-} from 'react';
+import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 
 export const ChangePointSummaryTable = ({ changeData }) => {
   var rowData = [];
@@ -19,14 +13,14 @@ export const ChangePointSummaryTable = ({ changeData }) => {
       const changes = changePoint["changes"];
       console.log(changes);
       changes.map((change) => {
-        const commit = changePoint["attributes"]["git_commit"][0];
+        const commit = changePoint["attributes"]["git_commit"];
 
         let commit_msg = "";
         if (changePoint["attributes"].hasOwnProperty("commit_msg")) {
-          commit_msg = changePoint["attributes"]["commit_msg"][0];
+          commit_msg = changePoint["attributes"]["commit_msg"];
         }
 
-        const repo = changePoint["attributes"]["git_repo"][0];
+        const repo = changePoint["attributes"]["git_repo"];
         rowData.push({
           date: parseTimestamp(changePoint["time"]),
           commit: { commit, commit_msg, repo },
@@ -38,7 +32,11 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   });
 
   if (rowData.length === 0) {
-    return <><span className="no-changepoints">(no changepoints)</span></>;
+    return (
+      <>
+        <span className="no-changepoints">(no changepoints)</span>
+      </>
+    );
   }
 
   const colDefs = [
@@ -62,18 +60,26 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   ];
 
   const autoSizeStrategy = useMemo(() => {
-      return {
-        type: 'fitCellContents',
-      };
-    });
+    return {
+      type: "fitCellContents",
+    };
+  });
 
   return (
     <>
       <div className="row text-center">
         <h4>Performance Changes</h4>
       </div>
-      <div className="ag-theme-quartz ag-theme-nyrkio pb-5" style={{ height: 500, width: "90%" }}>
-        <AgGridReact rowData={rowData} columnDefs={colDefs} pagination={true} autoSizeStrategy={autoSizeStrategy}/>
+      <div
+        className="ag-theme-quartz ag-theme-nyrkio pb-5"
+        style={{ height: 500, width: "90%" }}
+      >
+        <AgGridReact
+          rowData={rowData}
+          columnDefs={colDefs}
+          pagination={true}
+          autoSizeStrategy={autoSizeStrategy}
+        />
       </div>
     </>
   );

@@ -184,18 +184,17 @@ class GitHubReport(Report):
         if "git_commit" not in attributes:
             return
 
-        # TODO(mfleming): Handle multiple git repos
-        attr_repo = attributes["git_repo"][0]
+        attr_repo = attributes["git_repo"]
         gh_url = "https://github.com"
         if not attr_repo.startswith(gh_url):
             return
 
         repo = attr_repo[len(gh_url) + 1 :]
-        commit = attributes["git_commit"][0]
+        commit = attributes["git_commit"]
 
         msg = await cached_get(repo, commit)
         if msg:
-            attributes["commit_msg"] = [msg]
+            attributes["commit_msg"] = msg
 
     async def produce_report(self, test_name: str, report_type: ReportType):
         change_points = self._Report__change_points

@@ -51,9 +51,9 @@ def test_add_result(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -80,18 +80,18 @@ def test_add_multiple_test_results_at_once(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -119,9 +119,9 @@ def test_add_multiple_tests(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -150,18 +150,18 @@ def test_delete_all_user_results(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -192,27 +192,27 @@ def test_delete_single_result(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
             "timestamp": 2,
             "metrics": [{"metric1": 2.0, "metric2": 3.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
             "timestamp": 3,
             "metrics": [{"metric1": 3.0, "metric2": 4.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -259,9 +259,9 @@ def test_change_points(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -271,9 +271,9 @@ def test_change_points(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -283,9 +283,9 @@ def test_change_points(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -363,9 +363,9 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -376,9 +376,9 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -389,9 +389,9 @@ def test_disable_change_detection_for_metric(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -434,9 +434,9 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -447,9 +447,9 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -460,9 +460,9 @@ def test_disable_and_reenable_changes_for_metrics(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -528,9 +528,9 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -541,9 +541,9 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -554,9 +554,9 @@ def test_enable_change_for_empty_metrics_succeeds(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -613,9 +613,9 @@ def test_changes_data_is_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -624,9 +624,9 @@ def test_changes_data_is_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -635,9 +635,9 @@ def test_changes_data_is_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -646,9 +646,9 @@ def test_changes_data_is_sorted_by_timestamp(client):
                 {"name": "metric1", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -682,9 +682,9 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -694,9 +694,9 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -706,9 +706,9 @@ def test_results_are_sorted_by_timestamp(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -737,7 +737,7 @@ def test_user_adds_result_with_invalid_primary_key(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["myrepo"],
+                "git_repo": "myrepo",
                 # Missing branch and git_commit keys
             },
         }
@@ -763,9 +763,9 @@ def test_user_cannot_add_same_result_twice(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["myrepo"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "myrepo",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -778,9 +778,9 @@ def test_user_cannot_add_same_result_twice(client):
     assert response.json()["detail"]["data"] == {
         "test_name": "benchmark1",
         "timestamp": 1,
-        "git_repo": ["myrepo"],
-        "branch": ["main"],
-        "git_commit": ["123456"],
+        "git_repo": "myrepo",
+        "branch": "main",
+        "git_commit": "123456",
     }
 
     # Modify the timestamp and try again and make sure it succeeds
@@ -790,7 +790,7 @@ def test_user_cannot_add_same_result_twice(client):
 
     # Now modify the repo and try again and make sure it succeeds
     data[0]["timestamp"] = 1
-    data[0]["attributes"]["git_repo"] = ["myrepo2"]
+    data[0]["attributes"]["git_repo"] = "myrepo2"
     response = client.post("/api/v0/result/benchmark1", json=data)
     assert response.status_code == 200
 
@@ -807,9 +807,9 @@ def test_duplicate_result_message_includes_key(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["myrepo"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "myrepo",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -823,9 +823,9 @@ def test_duplicate_result_message_includes_key(client):
     assert dup_key == {
         "test_name": "benchmark1",
         "timestamp": 1,
-        "git_repo": ["myrepo"],
-        "branch": ["main"],
-        "git_commit": ["123456"],
+        "git_repo": "myrepo",
+        "branch": "main",
+        "git_commit": "123456",
     }
 
 
@@ -877,9 +877,9 @@ def test_create_test_result_with_slash_separator(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -901,9 +901,9 @@ def test_create_test_result_with_slash_separator_and_get_all_results(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -928,9 +928,9 @@ def test_calculate_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -940,9 +940,9 @@ def test_calculate_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -952,9 +952,9 @@ def test_calculate_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -983,9 +983,9 @@ def test_disable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -995,9 +995,9 @@ def test_disable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -1007,9 +1007,9 @@ def test_disable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -1051,9 +1051,9 @@ def test_disable_reenable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -1063,9 +1063,9 @@ def test_disable_reenable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 3.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -1075,9 +1075,9 @@ def test_disable_reenable_changes_for_test_with_slashes(client):
                 {"name": "metric2", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -1132,9 +1132,9 @@ def test_delete_test_name_with_slashes(client):
             "timestamp": 1,
             "metrics": [{"metric1": 1.0, "metric2": 2.0}],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -1197,9 +1197,9 @@ def test_setting_min_magnitude_config_shows_no_change_points(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -1210,9 +1210,9 @@ def test_setting_min_magnitude_config_shows_no_change_points(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
         {
@@ -1223,9 +1223,9 @@ def test_setting_min_magnitude_config_shows_no_change_points(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         },
     ]
@@ -1352,3 +1352,31 @@ def test_admin_api_get_results_with_invalid_email():
         response = superuser_client.get(f"/api/v0/admin/result/{invalid_email}")
         assert response.status_code == 404
         assert response.json() == {"detail": "No such user exists"}
+
+
+def test_attributes_without_list(client):
+    """Ensure attribute values can be singular and not part of a list"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0] == data[0]

@@ -56,9 +56,9 @@ def test_add_single_result():
         {
             "timestamp": 1234,
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
@@ -79,9 +79,9 @@ def test_create_doc_with_metadata():
     test_result = {
         "timestamp": 1234,
         "attributes": {
-            "git_repo": ["https://github.com/nyrkio/nyrkio"],
-            "branch": ["main"],
-            "git_commit": ["123456"],
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "123456",
         },
     }
     doc = store.create_doc_with_metadata(test_result, user, test_name)
@@ -212,9 +212,9 @@ def test_cannot_add_same_result_twice():
         {
             "timestamp": 1234,
             "attributes": {
-                "git_repo": ["https://github.com/nyrkio/nyrkio"],
-                "branch": ["main"],
-                "git_commit": ["123456"],
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
             },
         }
     ]
