@@ -39,3 +39,11 @@ jobs:
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Run performance tests
+        run: |
+          echo "Running performance tests..."
+          docker compose -f docker-compose-dev.yml up -d
+          cd backend && poetry run pytest benches --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-results=results benches/
+          docker compose -f docker-compose-dev.yml down
+          cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json")

@@ -3,6 +3,7 @@
 /backend/build
 /backend/dist
 /backend/nykrio.egg-info/
+/backend/.benchmarks
 
 **/__pycache__
 
