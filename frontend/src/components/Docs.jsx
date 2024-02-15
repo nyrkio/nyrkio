@@ -21,6 +21,48 @@ export const SidePanel = () => {
     </div>
   );
 };
+
+const revealToken = (ev) => {
+  //console.log(ev);
+  const target = ev.target;
+  const span = document.getElementById("token-output");
+  if(span.innerHTML==""){
+    span.innerHTML=localStorage.getItem("token");
+    target.classList.remove("bi-envelope");
+    target.classList.add("bi-envelope-open");
+  }
+  else {
+    span.innerHTML="";
+    target.classList.remove("bi-envelope-open");
+    target.classList.add("bi-envelope");
+  }
+  ev.preventDefault( );
+};
+
+const getMyLoggedInToken = () => {
+  const loggedIn = localStorage.getItem("loggedIn");
+  if(!loggedIn){
+    return (
+      <></>
+    );
+  }
+  else {
+    return (
+
+    <>
+      <div id="get-jwt-token">
+      <Link to="/" className="text-right" onClick={revealToken}>
+      <span title="Click here to get your current JWT token..."
+            className="get-jwt-token bi bi-envelope"></span>
+      </Link>
+      <br />
+      <span id="token-output"></span>
+      </div>
+    </>
+    );
+  }
+};
+
 export const Docs = () => {
   const [content, setContent] = useState("");
 
@@ -39,6 +81,7 @@ export const Docs = () => {
           <SidePanel />
           <div className="row">
             <div className="col-sm-9 p-5">
+              {getMyLoggedInToken()}
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 children={content}

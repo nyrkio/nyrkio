@@ -69,10 +69,10 @@ Praying for a generous catch<br/>
 
           <div class="row col-lg-12 mt-4">
           <p>When properly summonned, a hunter could then expect <span class="nyrkio-accent-dark">Nyyrikki</span> to reveal a squirrel or some other pray up on a branch. And <span class="nyrkio-accent-dark">Nyyrikki</span> will also put some <span class="nyrkio-accent-dark">markers</span> in front of the hunter, so that they will see a clear path out of the dark forests.</p>
-          <img src={hornImage} className="nyyrikki-horn-right"/>
           </div>
 
           <div class="row col-lg-12 mt-4" className="nyyrikki-last-text">
+          <img src={hornImage} className="nyyrikki-horn-right"/>
           <p><em>And that, my friends... Is exactly what we do at <a href="/product">Nyrkiö</a>.</em></p>
           </div>
 

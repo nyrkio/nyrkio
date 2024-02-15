@@ -11,13 +11,13 @@ export const UserMenu = ({ setLoggedIn }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <b className="bi bi-gear"></b>
+        <b className="bi bi-gear-fill"></b>
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
         <Dropdown.Item href="/user/settings">
           <Link to="/user/settings">
-            <i className="bi bi-person-circle"></i> User Settings
+            <span className="bi bi-person-circle"></span> User Settings
           </Link>
         </Dropdown.Item>
 
@@ -25,7 +25,7 @@ export const UserMenu = ({ setLoggedIn }) => {
 
         <Dropdown.Item href="/" onClick={handleLogoutClick}>
           <Link to="/">
-            <i className="bi bi-box-arrow-right"></i> Log Out
+            <span className="bi bi-box-arrow-right"></span> Log Out
           </Link>
         </Dropdown.Item>
       </Dropdown.Menu>

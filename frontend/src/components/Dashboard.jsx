@@ -20,7 +20,7 @@ const Breadcrumb = ({ testName }) => {
       // Check if we're the last component
       if (i === testName.split("/").length - 1) {
         return (
-          <li className="breadcrumb-item active" aria-current="page">
+          <li className="breadcrumb-item active" aria-current="page" key={i}>
             {name}
           </li>
         );
@@ -31,18 +31,20 @@ const Breadcrumb = ({ testName }) => {
         .slice(0, i + 1)
         .join("/");
       return (
-        <li className="breadcrumb-item">
+        <li className="breadcrumb-item" key={prefix}>
           <Link to={`/tests/${prefix}`}>{name}</Link>
         </li>
       );
     });
   };
+
   return (
+    <>
     <nav className="navbar navbar-expand-lg">
       <div className="container-fluid breadcrumb-wrapper">
         <nav aria-label="breadcrumb">
           <ol className="breadcrumb">
-            <li className="breadcrumb-item">
+            <li className="breadcrumb-item" key="root">
               <Link to="/">Tests</Link>
             </li>
             {createItems()}
@@ -50,6 +52,7 @@ const Breadcrumb = ({ testName }) => {
         </nav>
       </div>
     </nav>
+    </>
   );
 };
 
@@ -124,9 +127,14 @@ export const Dashboard = () => {
   }
 
   const createTestList = () => {
-    if (shortNames.length === 0) {
-      return <div>No tests found</div>;
+    if(shortNames.length==0){
+        return (
+          <li className="list-group-item nyrkio-empty">
+            <span className="bi bi-emoji-surprise" title="There are no test results"></span>
+          </li>
+        );
     }
+
     return shortNames.map((name) => {
       var longName = prefix + "/" + name;
       if (testNames.includes(longName) || testNames.includes(name)) {
@@ -167,6 +175,13 @@ export const Dashboard = () => {
                   <ul className="list-group list-group-flush">
                     {createTestList()}
                   </ul>
+                </div>
+              </div>
+              <div className="card">
+                <div className="card-body create-new-test">
+                  <Link to="/docs/getting-started" className="btn btn-success">
+                    <span className="bi bi-plus-square-fill">&nbsp;&nbsp; Add test results</span>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -277,3 +292,4 @@ export const SingleResult = () => {
   const testName = location.state.testName;
   return <SingleResultWithTestname testName={testName} />;
 };
+

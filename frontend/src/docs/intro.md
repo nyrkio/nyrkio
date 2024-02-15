@@ -4,6 +4,20 @@ This guide will show you how to get started with Nyrkiö. All of the examples in
 
 For all of these steps, be sure to change the example email address and password.
 
+## Use your current JWT token
+
+We use JWT to access the Nyrkiö API. If you are already logged in to nyrk.io, then you'll see a
+small envelope on your top right. You can click on it, and copy paste your current JWT token
+and skip right to *Upload performance test results* below.
+
+
+**OR...**
+
+If you rather want to do everything via the API, continue reading for how to sign up and get a JWT
+token programatically:
+
+
+
 ## Sign up for an account
 
 You can either do this via the front page of the website or programatically by calling the REST API.
