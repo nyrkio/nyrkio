@@ -64,10 +64,13 @@ jobs:
       - run: cd backend && poetry install --no-interaction --no-root
         if: steps.cache-deps.outputs.cache-hit != 'true'
 
+      # Is this needed?
+      - run: cd backend && poetry install --no-interaction
+
       - name: Run performance tests
         run: |
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
-          cd backend && poetry run pytest benches --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-results=results benches/
+          cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-results=results benches/
           docker compose -f docker-compose.dev.yml down
           cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json")
