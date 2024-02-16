@@ -30,10 +30,11 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           AWS_REGION: eu-north-1
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          NYRKIO_ENV_PROD: ${{ secrets.NYRKIO_ENV_PROD }}
           ENV: prod
         run: |
           # Build a docker container and push it to ECR
-          echo "${{ secrets.NYRKIO_ENV_PROD }}" > .env.backend
+          echo "$NYRKIO_ENV_PROD" > .env.backend
           docker compose -f docker-compose.yml build
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
