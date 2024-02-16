@@ -9,6 +9,8 @@ from backend.db.db import (
     MockDBStrategy,
 )
 
+from backend.auth.auth import add_user
+
 
 def test_singleton_dbstore():
     """Ensure we only ever have one copy of DBStore."""
@@ -288,3 +290,38 @@ def test_delete_user_config():
 
     response = asyncio.run(store.get_user_config(user))
     assert response == {}
+
+
+def test_get_all_test_names_without_user():
+    """Ensure that we can get all test names without a user"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    asyncio.run(store.add_results(user, test_name, results))
+
+    user2 = asyncio.run(add_user("user2@foo.com", "password2"))
+    test_name2 = "benchmark2"
+    asyncio.run(store.add_results(user2, test_name2, results))
+
+    response = asyncio.run(store.get_test_names())
+    user_results = response[user.email]
+    for t in (test_name, "default_benchmark"):
+        assert t in user_results
+    user2_results = response[user2.email]
+    for t in (test_name2, "default_benchmark"):
+        assert t in user2_results

@@ -1,3 +1,7 @@
+import asyncio
+from backend.auth import auth
+
+
 def test_test_user_can_login(client):
     client.login()
 
@@ -20,3 +24,10 @@ def test_create_new_user(unauthenticated_client):
         json={"email": email, "password": password},
     )
     assert response.status_code == 201
+
+
+def test_get_user_by_email():
+    email = "blah@foo.com"
+    user = asyncio.run(auth.add_user(email, "foo"))
+    u = asyncio.run(auth.get_user_by_email(email))
+    assert user == u

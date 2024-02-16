@@ -27,7 +27,15 @@ from pydantic import BaseModel
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
 
-from backend.db.db import User, get_user_db, UserRead, UserCreate, DBStore, UserUpdate
+from backend.db.db import (
+    User,
+    get_user_db,
+    UserRead,
+    UserCreate,
+    DBStore,
+    UserUpdate,
+    OAuthAccount,
+)
 from backend.auth.github import github_oauth
 from backend.auth.email import send_email, read_template_file
 
@@ -99,11 +107,17 @@ auth_router.include_router(
 )
 
 current_active_user = fastapi_users.current_user(active=True)
+current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
 
 
 @auth_router.get("/authenticated-route")
 async def authenticated_route(user: User = Depends(current_active_user)):
     return {"message": f"Hello {user.email}!"}
+
+
+@auth_router.get("/admin")
+async def admin_route(user: User = Depends(current_active_superuser)):
+    return {"message": f"Hello admin {user.email}!"}
 
 
 oauth2_authorize_callback = OAuth2AuthorizeCallback(
@@ -263,3 +277,16 @@ async def slack_oauth(
     updated_user = await user_manager.update(update, user, safe=True)
 
     await store.set_user_config(updated_user, config)
+
+
+async def add_user(username, password):
+    user = UserCreate(
+        email=username, password=password, is_active=True, is_verified=True
+    )
+    manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+    return await manager.create(user)
+
+
+async def get_user_by_email(email):
+    manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+    return await manager.get_by_email(email)

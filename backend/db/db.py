@@ -109,6 +109,16 @@ class MockDBStrategy(ConnectionStrategy):
         # we need to add it manually.
         await self.connection.test_results.insert_one(result)
 
+        su = UserCreate(
+            id=2,
+            email="admin@foo.com",
+            password="admin",
+            is_active=True,
+            is_verified=True,
+            is_superuser=True,
+        )
+        await manager.create(su)
+
     def get_test_user(self):
         assert self.user, "init_db() must be called first"
         return self.user
@@ -288,14 +298,35 @@ class DBStore(object):
 
         return results
 
-    async def get_test_names(self, user: User) -> List[str]:
+    async def get_test_names(self, user: User = None) -> Any:
         """
-        Get a list of all test names for a given user.
+        Get a list of all test names for a given user. If user is None then
+        return a dictionary of all test names for all users.
 
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
-        return await test_results.distinct("test_name", {"user_id": user.id})
+        if user:
+            return await test_results.distinct("test_name", {"user_id": user.id})
+        else:
+            results = await test_results.aggregate(
+                [
+                    {
+                        "$group": {
+                            "_id": "$user_id",
+                            "test_names": {"$addToSet": "$test_name"},
+                        }
+                    }
+                ]
+            ).to_list(None)
+
+            # Convert the user_id to a user email
+            user_results = {}
+            for result in results:
+                user = await self.db.User.find_one({"_id": result["_id"]})
+                email = user["email"]
+                user_results[email] = result["test_names"]
+            return user_results
 
     async def delete_all_results(self, user: User):
         """

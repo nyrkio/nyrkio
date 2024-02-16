@@ -15,6 +15,7 @@ from backend.auth import auth
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 
 from backend.api.user import user_router
+from backend.api.admin import admin_router
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -187,6 +188,7 @@ async def default_changes(test_name: str):
 app.include_router(api_router, prefix="/api/v0")
 app.include_router(auth.auth_router, prefix="/api/v0")
 app.include_router(user_router, prefix="/api/v0")
+app.include_router(admin_router, prefix="/api/v0")
 
 
 @app.on_event("startup")

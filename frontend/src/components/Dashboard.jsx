@@ -40,18 +40,18 @@ const Breadcrumb = ({ testName }) => {
 
   return (
     <>
-    <nav className="navbar navbar-expand-lg">
-      <div className="container-fluid breadcrumb-wrapper">
-        <nav aria-label="breadcrumb">
-          <ol className="breadcrumb">
-            <li className="breadcrumb-item" key="root">
-              <Link to="/">Tests</Link>
-            </li>
-            {createItems()}
-          </ol>
-        </nav>
-      </div>
-    </nav>
+      <nav className="navbar navbar-expand-lg">
+        <div className="container-fluid breadcrumb-wrapper">
+          <nav aria-label="breadcrumb">
+            <ol className="breadcrumb">
+              <li className="breadcrumb-item" key="root">
+                <Link to="/">Tests</Link>
+              </li>
+              {createItems()}
+            </ol>
+          </nav>
+        </div>
+      </nav>
     </>
   );
 };
@@ -127,12 +127,15 @@ export const Dashboard = () => {
   }
 
   const createTestList = () => {
-    if(shortNames.length==0){
-        return (
-          <li className="list-group-item nyrkio-empty">
-            <span className="bi bi-emoji-surprise" title="There are no test results"></span>
-          </li>
-        );
+    if (shortNames.length == 0) {
+      return (
+        <li className="list-group-item nyrkio-empty">
+          <span
+            className="bi bi-emoji-surprise"
+            title="There are no test results"
+          ></span>
+        </li>
+      );
     }
 
     return shortNames.map((name) => {
@@ -180,7 +183,9 @@ export const Dashboard = () => {
               <div className="card">
                 <div className="card-body create-new-test">
                   <Link to="/docs/getting-started" className="btn btn-success">
-                    <span className="bi bi-plus-square-fill">&nbsp;&nbsp; Add test results</span>
+                    <span className="bi bi-plus-square-fill">
+                      &nbsp;&nbsp; Add test results
+                    </span>
                   </Link>
                 </div>
               </div>
@@ -192,12 +197,15 @@ export const Dashboard = () => {
   );
 };
 
-export const SingleResultWithTestname = ({ testName }) => {
+export const SingleResultWithTestname = ({ testName, baseUrl }) => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
+  console.log("Display data");
+  console.log(displayData);
+
   const fetchData = async () => {
-    const results = await fetch("/api/v0/result/" + testName, {
+    const results = await fetch(baseUrl + testName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -206,7 +214,7 @@ export const SingleResultWithTestname = ({ testName }) => {
     const resultData = await results.json();
     setDisplayData(resultData);
 
-    const changes = await fetch("/api/v0/result/" + testName + "/changes", {
+    const changes = await fetch(baseUrl + testName + "/changes", {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -222,9 +230,6 @@ export const SingleResultWithTestname = ({ testName }) => {
       setLoading(false);
     });
   }, []);
-
-  console.log("Display data");
-  console.log(displayData);
 
   const timestamps = displayData.map((result) => {
     return result.timestamp;
@@ -290,6 +295,6 @@ export const SingleResult = () => {
     return <NoMatch />;
   }
   const testName = location.state.testName;
-  return <SingleResultWithTestname testName={testName} />;
+  const baseUrl = "/api/v0/result/";
+  return <SingleResultWithTestname testName={testName} baseUrl={baseUrl} />;
 };
-
