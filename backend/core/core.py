@@ -152,7 +152,7 @@ async def cached_get(repo, commit):
     if response.status_code == 200:
         # Only save the first line of the message
         commit_msg = response.json()["commit"]["message"].split("\n")[0]
-        logging.error("Adding commit message {} to {}".format(commit_msg, commit))
+        logging.debug("Adding commit message {} to {}".format(commit_msg, commit))
     else:
         logging.error(
             f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
@@ -199,7 +199,6 @@ class GitHubReport(Report):
 
     async def produce_report(self, test_name: str, report_type: ReportType):
         change_points = self._Report__change_points
-        logging.error(change_points)
         for cp in change_points:
             await GitHubReport.add_github_commit_msg(cp.attributes)
 

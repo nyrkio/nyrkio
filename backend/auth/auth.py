@@ -223,12 +223,12 @@ async def slack_oauth(
 ):
     store = DBStore()
 
-    logging.error(f"got code {code.code}")
+    logging.info(f"got code {code.code}")
     # Fetch the access token from slack.com
     client = httpx.AsyncClient()
     # redirect_uri = f"https://{SERVER_NAME}/user/settings"
     redirect_uri = "https://nyrk.io/user/settings"
-    logging.error(f"redirect_uri: {redirect_uri}")
+    logging.info(f"redirect_uri: {redirect_uri}")
     response = await client.post(
         "https://slack.com/api/oauth.v2.access",
         data={
@@ -245,7 +245,7 @@ async def slack_oauth(
         )
 
     data = response.json()
-    logging.error(f"Got response from Slack: {data}")
+    logging.info(f"Got response from Slack: {data}")
 
     if not data["ok"]:
         logging.error(f"Slack returned an error: {data['error']}")
