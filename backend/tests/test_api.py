@@ -1,3 +1,7 @@
+from backend.api.api import app
+from conftest import SuperuserClient
+
+
 def test_results(client):
     """Minimal test that includes logging in and getting a token"""
     response = client.get("/api/v0/results")
@@ -1253,3 +1257,98 @@ def test_setting_min_magnitude_config_shows_no_change_points(client):
     assert data
     assert "benchmark1" in data
     assert not data["benchmark1"]
+
+
+def test_superuser_can_see_all_test_results(client):
+    """Ensure that superusers can see all test results"""
+    superuser_client = SuperuserClient(app)
+    superuser_client.login()
+
+    # Add some results for regular user
+    client.login()
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    # Ensure superuser can use admin API to view all results
+    response = superuser_client.get("/api/v0/admin/results")
+    assert response.status_code == 200
+    superuser_data = response.json()
+    assert len(superuser_data) == 2
+
+    client_results = superuser_data[client.email]
+    assert client_results == [{"test_name": "benchmark1"}]
+
+
+def test_regular_user_cannot_access_admin_api(client):
+    """Ensure that regular users cannot access the admin API"""
+    client.login()
+    response = client.get("/api/v0/admin/results")
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Forbidden"}
+
+
+def test_get_results_for_users_test(client):
+    """Ensure that we can get results for a user's test"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    superuser_client = SuperuserClient(app)
+    superuser_client.login()
+
+    response = superuser_client.get("/api/v0/admin/results")
+    assert response.status_code == 200
+
+    superuser_data = response.json()
+    assert len(superuser_data) == 2
+
+    client_results = superuser_data[client.email]
+    assert client_results == [{"test_name": "benchmark1"}]
+
+    response = superuser_client.get(f"/api/v0/admin/result/{client.email}/benchmark1")
+    assert response.status_code == 200
+    assert response.json()[0]["timestamp"] == 1
+    assert response.json() == data
+
+
+def test_admin_api_get_results_with_invalid_email():
+    """Ensure that the admin API returns 400 for invalid email"""
+    superuser_client = SuperuserClient(app)
+    superuser_client.login()
+
+    invalid_email_addresses = [
+        "invalidemail",
+        "invalidemail@",
+        "invalidemail@.com",
+        "",
+        "@",
+    ]
+    for invalid_email in invalid_email_addresses:
+        response = superuser_client.get(f"/api/v0/admin/result/{invalid_email}")
+        assert response.status_code == 404
+        assert response.json() == {"detail": "No such user exists"}

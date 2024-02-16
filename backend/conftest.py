@@ -22,11 +22,12 @@ class AuthenticatedTestClient(TestClient):
     def __init__(self, app):
         super().__init__(app)
         self.headers = None
+        self.email = "john@foo.com"
 
     def login(self):
         response = self.post(
             "/api/v0/auth/jwt/login",
-            data={"username": "john@foo.com", "password": "foo"},
+            data={"username": self.email, "password": "foo"},
         )
         assert response.status_code == 200
         token = response.json()["access_token"]
@@ -56,6 +57,22 @@ class AuthenticatedTestClient(TestClient):
         ), "Cannot pass headers explicitly to AuthenicatedTestClient.get()"
         assert self.headers, "You must call login() first"
         return super().post(*args, **dict(kwargs, headers=self.headers))
+
+
+class SuperuserClient(AuthenticatedTestClient):
+    def __init__(self, app):
+        super().__init__(app)
+        self.email = "admin@foo.com"
+
+    def login(self):
+        response = self.post(
+            "/api/v0/auth/jwt/login",
+            data={"username": self.email, "password": "admin"},
+        )
+        assert response.status_code == 200
+        token = response.json()["access_token"]
+        self.headers = {"Authorization": f"Bearer {token}"}
+        return response
 
 
 @pytest.fixture

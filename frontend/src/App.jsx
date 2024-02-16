@@ -20,6 +20,7 @@ import ScrollToTop from "./components/ScrollToTop.jsx";
 import { UserSettings } from "./components/UserSettings.jsx";
 import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
+import { AdminDashboard } from "./components/AdminDashboard.jsx";
 
 const Root = ({ loggedIn }) => {
   return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
@@ -50,6 +51,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <Route path="/result/*" element={<SingleResult />} />
         <Route path="/docs/getting-started" element={<Docs />} />
         <Route path="/user/settings" element={<UserSettings />} />
+        <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
       <ScrollToTop />
