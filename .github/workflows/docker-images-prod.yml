@@ -64,16 +64,15 @@ jobs:
           key: pydeps-${{ hashFiles('**/poetry.lock') }}
       - run: cd backend && poetry install --no-interaction --no-root
         if: steps.cache-deps.outputs.cache-hit != 'true'
-
-      # Is this needed?
       - run: cd backend && poetry install --no-interaction
 
       - name: Run performance tests
+        env:
+          NYRKIO_ENV_TESTING: ${{ secrets.NYRKIO_ENV_TESTING }}
         run: |
-          echo "${{ secrets.NYRKIO_ENV_TESTING }}" > .env.backend
+          echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
-          docker compose -f docker-compose.dev.yml logs
-          cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/
+          cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/ && cd ..
           docker compose -f docker-compose.dev.yml down
           cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json")
