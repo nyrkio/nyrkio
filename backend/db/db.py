@@ -477,6 +477,51 @@ class DBStore(object):
         user_config = self.db.user_config
         await user_config.delete_one({"user_id": user.id})
 
+    async def get_test_config(self, user: User, test_name: str) -> List[Dict]:
+        """
+        Get the test's configuration.
+
+        If the test has no configuration, return an empty list.
+        """
+        exclude_projection = {"_id": 0, "test_name": 0, "user_id": 0}
+        test_config = self.db.test_config
+        config = await test_config.find(
+            {"user_id": user.id, "test_name": test_name}, exclude_projection
+        ).to_list(None)
+
+        return config if config else []
+
+    async def set_test_config(self, user: User, test_name: str, config: List[Dict]):
+        """
+        Set the test's configuration.
+
+        We don't do any validation on the configuration, so it's up to the caller to
+        ensure that the configuration is valid.
+        """
+        test_config = self.db.test_config
+
+        # Build _id from user_id, test_name, git_repo and branch
+        internal_configs = []
+        for conf in config:
+            c = dict(conf)
+            primary_key = OrderedDict(
+                {
+                    "git_repo": conf["attributes"]["git_repo"],
+                    "branch": conf["attributes"]["branch"],
+                    "test_name": test_name,
+                    "user_id": user.id,
+                }
+            )
+
+            c["_id"] = primary_key
+            c["user_id"] = user.id
+            c["test_name"] = test_name
+            internal_configs.append(c)
+
+        # Perform an upsert
+        for c in internal_configs:
+            await test_config.update_one({"_id": c["_id"]}, {"$set": c}, upsert=True)
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

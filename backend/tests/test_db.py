@@ -325,3 +325,49 @@ def test_get_all_test_names_without_user():
     user2_results = response[user2.email]
     for t in (test_name2, "default_benchmark"):
         assert t in user2_results
+
+
+def test_test_config():
+    """Ensure that we can store and retrieve test configuration"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/foo/bar",
+                "branch": "main",
+            },
+        }
+    ]
+    asyncio.run(store.set_test_config(user, test_name, config))
+
+    response = asyncio.run(store.get_test_config(user, test_name))
+    assert response == config
+
+    # Test that we can update the config
+    config = [
+        {
+            "public": False,
+            "attributes": {
+                "git_repo": "https://github.com/foo/bar",
+                "branch": "main",
+            },
+        },
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/foo/bar",
+                "branch": "dev",
+            },
+        },
+    ]
+    asyncio.run(store.set_test_config(user, test_name, config))
+
+    response = asyncio.run(store.get_test_config(user, test_name))
+    assert response == config

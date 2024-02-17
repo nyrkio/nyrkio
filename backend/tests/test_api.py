@@ -1380,3 +1380,191 @@ def test_attributes_without_list(client):
     json = response.json()
     assert len(json) == 1
     assert json[0] == data[0]
+
+
+def test_mark_results_as_public(client):
+    """Ensure that we can mark results as public"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    data = response.json()
+    assert not data
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json()[0]["public"] is True
+
+
+def test_results_have_no_config_by_default(client):
+    """Ensure that results have no config by default (and are private)"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert not response.json()
+
+
+def test_mark_results_as_private(client):
+    """Ensure that we can mark results as private"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert not response.json()
+
+    config = [
+        {
+            "public": False,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json()[0]["public"] is False
+
+
+def test_set_test_config_different_repos(client):
+    """Ensure that we can set test config for different repos"""
+    client.login()
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        },
+        {
+            "public": False,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio2",
+                "branch": "main",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == config
+
+
+def test_set_test_config_same_repo_different_branch(client):
+    """Ensure that we can set test config for the same repo but different branches"""
+    client.login()
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        },
+        {
+            "public": False,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "feature",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == config
+
+
+def test_config_requires_attributes_with_git_repo_and_branch(client):
+    """Ensure that test config requires attributes with git_repo and branch"""
+    client.login()
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/notnyrkio/nyrkio",
+                "branch": "main",
+            },
+        },
+        {
+            "public": False,
+            "attributes": {
+                "git_repo": "https://github.com/notnyrkio/nyrkio",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["msg"] == "Field required"
