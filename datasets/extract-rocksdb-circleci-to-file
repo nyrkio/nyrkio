@@ -209,12 +209,12 @@ for file in $(ls -1 $RESULT_DIR/*.tsv); do
                 }
              ],
             \"attributes\": {
-                \"branch\": [\"master\"],
-                \"git_repo\": [\"https://github.com/facebook/rocksdb\"],
-                \"git_commit\": [\"$githash\"],
-                \"version\": [\"$version\"],
-                \"build_date\": [\"$date\"],
-                \"commit_date\": [\"$commit_date\"]
+                \"branch\": \"master\",
+                \"git_repo\": \"https://github.com/facebook/rocksdb\",
+                \"git_commit\": \"$githash\",
+                \"version\": \"$version\",
+                \"build_date\": \"$date\",
+                \"commit_date\": \"$commit_date\"
             }
         }]" >"$outfile"
 

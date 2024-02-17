@@ -37,9 +37,9 @@ def create_nyrkio_payload(commit_info, benchmark):
         "timestamp": timestamp,
         "metrics": metrics,
         "attributes": {
-            "git_commit": [commit_info["id"]],
-            "branch": [commit_info["branch"]],
-            "git_repo": ["https://github.com/nyrkio/nyrkio"],
+            "git_commit": commit_info["id"],
+            "branch": commit_info["branch"],
+            "git_repo": "https://github.com/nyrkio/nyrkio",
         },
     }
 

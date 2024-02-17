@@ -8,15 +8,12 @@ For all of these steps, be sure to change the example email address and password
 
 We use JWT to access the Nyrkiö API. If you are already logged in to nyrk.io, then you'll see a
 small envelope on your top right. You can click on it, and copy paste your current JWT token
-and skip right to *Upload performance test results* below.
-
+and skip right to _Upload performance test results_ below.
 
 **OR...**
 
 If you rather want to do everything via the API, continue reading for how to sign up and get a JWT
 token programatically:
-
-
 
 ## Sign up for an account
 
@@ -74,9 +71,9 @@ curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $T
                {"name": "p99", "unit": "us", "value": 280 }
              ],
              "attributes": {
-               "git_repo": ["https://github.com/nyrkio/nyrkio"],
-               "branch": ["main"],
-               "git_commit": ["6995e2de6891c724bfeb2db33d7b87775f913ad1"],
+               "git_repo": "https://github.com/nyrkio/nyrkio",
+               "branch": "main",
+               "git_commit": "6995e2de6891c724bfeb2db33d7b87775f913ad1",
              }
        }]'
 ```

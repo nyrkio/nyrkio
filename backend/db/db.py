@@ -82,9 +82,9 @@ class MockDBStrategy(ConnectionStrategy):
     DEFAULT_DATA = {
         "timestamp": 123456,
         "attributes": {
-            "git_repo": ["https://github.com/nyrkio/nyrkio"],
-            "branch": ["main"],
-            "git_commit": ["123456"],
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "123456",
         },
     }
 
