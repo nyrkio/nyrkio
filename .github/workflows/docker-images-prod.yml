@@ -69,6 +69,8 @@ jobs:
       - name: Run performance tests
         env:
           NYRKIO_ENV_TESTING: ${{ secrets.NYRKIO_ENV_TESTING }}
+          NYRKIO_USERNAME: ${{ secrets.NYRKIO_USERNAME }}
+          NYRKIO_PASSWORD: ${{ secrets.NYRKIO_PASSWORD }}
         run: |
           echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
