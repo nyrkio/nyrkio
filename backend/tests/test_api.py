@@ -1,5 +1,11 @@
+import asyncio
+
+from starlette.testclient import TestClient
+
 from backend.api.api import app
-from conftest import SuperuserClient
+from backend.api.config import extract_public_test_name
+
+from conftest import AuthenticatedTestClient, SuperuserClient
 
 
 def test_results(client):
@@ -1568,3 +1574,271 @@ def test_config_requires_attributes_with_git_repo_and_branch(client):
     response = client.post("/api/v0/config/benchmark1", json=config)
     assert response.status_code == 422
     assert response.json()["detail"][0]["msg"] == "Field required"
+
+
+def test_delete_test_config(client):
+    """Ensure that we can delete a test config"""
+    client.login()
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == config
+
+    response = client.delete("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_public_test_results(client, unauthenticated_client):
+    """Ensure that we can fetch public test results"""
+    response = unauthenticated_client.get("/api/v0/public/results")
+    assert response.status_code == 200
+    assert response.json() == []
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    client.login()
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = unauthenticated_client.get("/api/v0/public/results")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+            "test_name": "benchmark1",
+        }
+    ]
+
+    response = unauthenticated_client.get(
+        "/api/v0/public/result/nyrkio/nyrkio/main/benchmark1"
+    )
+    assert response.status_code == 200
+    assert response.json() == data
+
+
+def test_invalid_public_test_name(unauthenticated_client):
+    """Ensure that we can't fetch invalid public test results"""
+    invalid_urls = (
+        "/api/v0/public/result",
+        "/api/v0/public/result/foo",
+        "/api/v0/public/result/foo/bar",
+        "/api/v0/public/result/foo/bar/baz",
+    )
+
+    for url in invalid_urls:
+        response = unauthenticated_client.get(url)
+        assert response.status_code == 404
+        assert response.json() == {"detail": "No such test exists"}
+
+
+def test_only_one_user_can_make_a_test_public(client):
+    """Ensure that only one user can make a test public"""
+    client1 = client
+    client1.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    response = client1.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client1.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    from backend.auth import auth
+
+    asyncio.run(auth.add_user("user2@foo.com", "foo"))
+    client2 = AuthenticatedTestClient(app)
+    client2.email = "user2@foo.com"
+    client2.login()
+
+    response = client2.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client2.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 409
+
+
+def test_extract_public_test_name():
+    config = {
+        "attributes": {"git_repo": "https://github.com/nyrkio/nyrkio", "branch": "main"}
+    }
+
+    name = extract_public_test_name(config["attributes"])
+    assert name == "nyrkio/nyrkio/main"
+
+
+def test_delete_test_config_deletes_public_test(client):
+    """Ensure that we can delete a public test config"""
+    client.login()
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+
+    response = client.delete("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_same_test_name_different_repos(client):
+    """Ensure that we can have the same test name for different repos"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio2",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+
+    assert len(response.json()) == 1
+    assert response.json()[0]["test_name"] == "benchmark1"
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+
+    assert len(response.json()) == 2
+
+    repos = []
+    for result in response.json():
+        repos.append(result["attributes"]["git_repo"])
+
+    assert repos == [
+        "https://github.com/nyrkio/nyrkio",
+        "https://github.com/nyrkio/nyrkio2",
+    ]
+
+    # Make benchmark1 public for github.com/nyrkio/nyrkio
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio2",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json()[0]["public"] is True
+
+    unauth_client = TestClient(app)
+    response = unauth_client.get("/api/v0/public/results")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio2",
+                "branch": "main",
+            },
+            "test_name": "benchmark1",
+        }
+    ]
+
+    response = unauth_client.get("/api/v0/public/result/nyrkio/nyrkio/main/benchmark1")
+    assert response.status_code == 404
+
+    response = unauth_client.get("/api/v0/public/result/nyrkio/nyrkio2/main/benchmark1")
+    assert response.status_code == 200

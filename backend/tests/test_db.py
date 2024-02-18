@@ -371,3 +371,134 @@ def test_test_config():
 
     response = asyncio.run(store.get_test_config(user, test_name))
     assert response == config
+
+
+def test_get_public_results():
+    """Ensure that we can get public results"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    response = asyncio.run(store.get_public_results())
+    assert response == []
+
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+    user = strategy.get_test_user()
+    asyncio.run(store.add_results(user, test_name, results))
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+    asyncio.run(store.set_test_config(user, test_name, config))
+
+    response = asyncio.run(store.get_public_results())
+    expected = [
+        {
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+            "test_name": "benchmark1",
+        }
+    ]
+    assert response == expected
+
+    # Add another test for the same repository
+    test_name = "benchmark2"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+    asyncio.run(store.add_results(user, test_name, results))
+
+    # Make benchmark2 public
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    asyncio.run(store.set_test_config(user, test_name, config))
+
+    response = asyncio.run(store.get_public_results())
+    expected = [
+        {
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+            "test_name": "benchmark1",
+        },
+        {
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+            "test_name": "benchmark2",
+        },
+    ]
+    assert response == expected
+
+
+def test_update_public_map():
+    """Ensure that we can update the public map"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    public_test_name = "org/repo/branch/benchmark1"
+    user = strategy.get_test_user()
+    asyncio.run(store.set_public_map(public_test_name, user, True))
+
+    response = asyncio.run(store.get_public_user(public_test_name))
+    assert response == user.id
+
+    asyncio.run(store.set_public_map(public_test_name, user, False))
+    response = asyncio.run(store.get_public_user(public_test_name))
+    assert response is None
+
+
+def test_update_public_map_different_users():
+    """Verify that a second user cannot create a map if one exists"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    public_test_name = "org/repo/branch/benchmark1"
+    user = strategy.get_test_user()
+    asyncio.run(store.set_public_map(public_test_name, user, True))
+    # This should effectively be a nop
+    asyncio.run(store.set_public_map(public_test_name, user, True))
+
+    user2 = asyncio.run(add_user("user2@foo.com", "foo"))
+    with pytest.raises(DBStoreResultExists):
+        asyncio.run(store.set_public_map(public_test_name, user2, True))
