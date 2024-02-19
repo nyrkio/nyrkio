@@ -201,17 +201,22 @@ export const SingleResultWithTestname = ({ testName, baseUrl }) => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
+  const [notFound, setNotFound] = useState(false);
   console.log("Display data");
   console.log(displayData);
 
   const fetchData = async () => {
-    const results = await fetch(baseUrl + testName, {
+    const response = await fetch(baseUrl + testName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    const resultData = await results.json();
+    if (response.status == 404) {
+      setNotFound(true);
+      return;
+    }
+    const resultData = await response.json();
     setDisplayData(resultData);
 
     const changes = await fetch(baseUrl + testName + "/changes", {
@@ -230,6 +235,10 @@ export const SingleResultWithTestname = ({ testName, baseUrl }) => {
       setLoading(false);
     });
   }, []);
+
+  if (notFound) {
+    return <NoMatch />;
+  }
 
   const timestamps = displayData.map((result) => {
     return result.timestamp;
@@ -290,11 +299,8 @@ SingleResultWithTestname.propTypes = {
 export const SingleResult = () => {
   const location = useLocation();
 
-  // check if testName exists
-  if (location.state === null || location.state.testName === undefined) {
-    return <NoMatch />;
-  }
-  const testName = location.state.testName;
+  const testName = location.pathname.substring(8);
+  console.log(testName);
   const baseUrl = "/api/v0/result/";
   return <SingleResultWithTestname testName={testName} baseUrl={baseUrl} />;
 };
