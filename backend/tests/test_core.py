@@ -6,9 +6,9 @@ from backend.core.core import (
     PerformanceTestResultSeries,
     PerformanceTestResultExistsError,
     ResultMetric,
+    GitHubReport,
 )
 
-from backend.core.core import GitHubReport
 from backend.core.config import Config
 
 import pytest
@@ -245,3 +245,31 @@ def test_core_config():
     changes = asyncio.run(series.calculate_changes())
     assert "benchmark1" in changes
     assert len(changes["benchmark1"]) == 0
+
+
+def test_notifiers_get_notified():
+    """Ensure notifiers get notified"""
+    series = PerformanceTestResultSeries("benchmark1")
+
+    metrics = [ResultMetric("metric1", "µs", 1.0)]
+    attr = {"attr1": "value1", "attr2": "value2"}
+
+    series.add_result(PerformanceTestResult(1, metrics, attr))
+    series.add_result(PerformanceTestResult(2, metrics, attr))
+    series.add_result(PerformanceTestResult(3, metrics, attr))
+
+    class Notifier:
+        notified = False
+
+        async def notify(self, analyzed_series):
+            self.notified = True
+            output = {}
+            for k, v in analyzed_series.items():
+                output[k] = v.change_points_by_time
+            self.expected_output = output
+
+    notifier = Notifier()
+
+    asyncio.run(series.calculate_changes([notifier]))
+    assert notifier.notified
+    assert notifier.expected_output == {"benchmark1": []}

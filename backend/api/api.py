@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from typing import Dict, List, Optional, Any, Union
+
 from backend.core.core import (
     PerformanceTestResult,
     PerformanceTestResultSeries,
@@ -12,10 +13,10 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
-
 from backend.api.user import user_router
 from backend.api.admin import admin_router
+from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
+from backend.notifiers.slack import SlackNotifier
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -50,17 +51,32 @@ async def disable_changes(
 
 
 @api_router.get("/result/{test_name:path}/changes")
-async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+async def changes(
+    test_name: str,
+    notify: Union[int, None] = None,
+    user: User = Depends(auth.current_active_user),
+):
     store = DBStore()
     results = await store.get_results(user, test_name)
     disabled = await store.get_disabled_metrics(user, test_name)
 
     config = await store.get_user_config(user)
-    config = config.get("core", None)
-    if config:
-        config = Config(**config)
+    core_config = config.get("core", None)
+    if core_config:
+        core_config = Config(**core_config)
 
-    return await calc_changes(test_name, results, disabled, config)
+    notifiers = []
+    if notify:
+        slack = config.get("slack", {})
+        if slack and slack.get("channel"):
+            if not user.slack:
+                raise HTTPException(status_code=400, detail="Slack not configured")
+
+            url = user.slack["incoming_webhook"]["url"]
+            channel = slack["channel"]
+            notifiers.append(SlackNotifier(url, [channel]))
+
+    return await calc_changes(test_name, results, disabled, core_config, notifiers)
 
 
 @api_router.get("/results")
@@ -142,7 +158,9 @@ async def add_result(
     return {}
 
 
-async def calc_changes(test_name, results, disabled=None, core_config=None):
+async def calc_changes(
+    test_name, results, disabled=None, core_config=None, notifiers=None
+):
     series = PerformanceTestResultSeries(test_name, core_config)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
@@ -162,7 +180,7 @@ async def calc_changes(test_name, results, disabled=None, core_config=None):
         )
         series.add_result(result)
 
-    return await series.calculate_changes()
+    return await series.calculate_changes(notifiers)
 
 
 @api_router.get("/default/results")
