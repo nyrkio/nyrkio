@@ -613,8 +613,6 @@ input[type="range"].nyrkio-slider::-moz-range-progress {
 
 input[type="range"].nyrkio-slider{
   -webkit-appearance: none;
-  background-color:darkgreen;
-
 }
 input[type="range"].nyrkio-slider::-webkit-slider-thumb{
   -webkit-appearance: none;
