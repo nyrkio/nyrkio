@@ -23,24 +23,6 @@ async def results(user: User = Depends(auth.current_active_superuser)) -> Dict:
     return updated_results
 
 
-@admin_router.get("/result/{test_path:path}")
-async def get_result(
-    test_path: str, user: User = Depends(auth.current_active_superuser)
-) -> List[Dict]:
-    logging.info(f"Admin {user.email} requested results for {test_path}")
-
-    # Extract the user email from the first component in test_path
-    user_email = test_path.split("/")[0]
-    try:
-        user = await auth.get_user_by_email(user_email)
-    except UserNotExists:
-        raise HTTPException(status_code=404, detail="No such user exists")
-
-    store = DBStore()
-    test_name = "/".join(test_path.split("/")[1:])
-    return await store.get_results(user, test_name)
-
-
 @admin_router.get("/result/{test_path:path}/changes")
 async def changes(test_path: str, user: User = Depends(auth.current_active_superuser)):
     logging.info(f"Admin {user.email} requested changes for {test_path}")
@@ -64,3 +46,21 @@ async def changes(test_path: str, user: User = Depends(auth.current_active_super
     from backend.api.api import calc_changes
 
     return await calc_changes(test_name, results, disabled, config)
+
+
+@admin_router.get("/result/{test_path:path}")
+async def get_result(
+    test_path: str, user: User = Depends(auth.current_active_superuser)
+) -> List[Dict]:
+    logging.info(f"Admin {user.email} requested results for {test_path}")
+
+    # Extract the user email from the first component in test_path
+    user_email = test_path.split("/")[0]
+    try:
+        user = await auth.get_user_by_email(user_email)
+    except UserNotExists:
+        raise HTTPException(status_code=404, detail="No such user exists")
+
+    store = DBStore()
+    test_name = "/".join(test_path.split("/")[1:])
+    return await store.get_results(user, test_name)
