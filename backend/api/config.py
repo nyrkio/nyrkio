@@ -68,3 +68,17 @@ async def set_config(
             raise HTTPException(status_code=409, detail="Public test already exists")
 
     return {}
+
+
+@config_router.delete("/config/{test_name:path}")
+async def delete_config(
+    test_name: str, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    store = DBStore()
+    config = await store.get_test_config(user, test_name)
+    for c in config:
+        public_test_name = extract_public_test_name(c["attributes"]) + "/" + test_name
+        await store.set_public_map(public_test_name, user, False)
+
+    await store.delete_test_config(user, test_name)
+    return {}

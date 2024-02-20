@@ -502,3 +502,40 @@ def test_update_public_map_different_users():
     user2 = asyncio.run(add_user("user2@foo.com", "foo"))
     with pytest.raises(DBStoreResultExists):
         asyncio.run(store.set_public_map(public_test_name, user2, True))
+
+
+def test_delete_test_config():
+    """Ensure that we can delete a test config"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name1 = "benchmark1"
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    asyncio.run(store.set_test_config(user, test_name1, config))
+
+    test_name2 = "benchmark2"
+    asyncio.run(store.set_test_config(user, test_name2, config))
+
+    response = asyncio.run(store.get_test_config(user, test_name1))
+    assert response == config
+
+    asyncio.run(store.delete_test_config(user, test_name1))
+    asyncio.run(store.delete_test_config(user, test_name1))
+
+    response = asyncio.run(store.get_test_config(user, test_name1))
+    assert response == []
+
+    response = asyncio.run(store.get_test_config(user, test_name2))
+    assert response == config

@@ -522,6 +522,15 @@ class DBStore(object):
         for c in internal_configs:
             await test_config.update_one({"_id": c["_id"]}, {"$set": c}, upsert=True)
 
+    async def delete_test_config(self, user: User, test_name: str):
+        """
+        Delete the test's configuration.
+
+        If the test has no configuration, do nothing.
+        """
+        test_config = self.db.test_config
+        await test_config.delete_many({"user_id": user.id, "test_name": test_name})
+
     async def get_public_results(self) -> List[Dict]:
         """
         Get all public results.
