@@ -43,7 +43,7 @@ Now go to your inbox and click on the link in the verification email.
 In order to send performance test results to nyrk.io using `HTTP POST` you'll need to generate an API token. To do that, use the following code snippet.
 
 ```bash
-curl -s -X POST https://nyrk.io/api/v0/auth/jwt/login -d username="foo@bar.com" -d password="mypassword"
+curl -s -X POST https://nyrk.io/api/v0/auth/jwt/login --data-urlencode username="foo@bar.com" --data-urlencode password="mypassword"
 ```
 
 Your newly generated API token will be returned in the `access_code` field of the JSON response. This API token should be used with the [bearer authenication](https://swagger.io/docs/specification/authentication/bearer-authentication/) scheme.
@@ -63,7 +63,7 @@ Briefly, here's a list of the required fields.
 Here's an example payload for a performance test named `benchmark1`.
 
 ```bash
-curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" -X POST https://nyrk.io/api/v0/result/benchmark1 \
+curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" https://nyrk.io/api/v0/result/benchmark1 \
            -d '[{"timestamp": 1706220908,
              "metrics": [
                {"name": "p50", "unit": "us", "value": 56 },
