@@ -1,6 +1,7 @@
 import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { throttle } from "../lib/utils";
 
 export const UserSettings = () => {
   return (
@@ -13,8 +14,9 @@ export const UserSettings = () => {
   );
 };
 
+
 const HunterSettings = () => {
-  const saveHunterSettings = async () => {
+  const saveHunterSettingsReal = async () => {
     const minMagnitude =
       getRealMinMagnitude(
         document.getElementById("nyrkio-min-magnitude-slider").value
@@ -42,9 +44,12 @@ const HunterSettings = () => {
     } else console.debug(response);
   };
 
+  const saveHunterSettings = throttle(saveHunterSettingsReal, 1000);
+
   const getHunterSettings = async () => {
     console.debug("GET /api/v0/user/config");
     // TODO(mfleming) It'd be nice to not hard code this.
+    // TODO(hingo) yeah actually if we don't get values from the backend it should fail somehow. Now there's a risk of resetting stored values back to defaults. It should only be possible to POST after one successful GET first fetched current values.
     const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
     const response = await fetch("/api/v0/user/config", {
       headers: {
