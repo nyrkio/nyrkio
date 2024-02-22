@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from collections import defaultdict
+from datetime import datetime
 import json
 from typing import List
 import httpx
@@ -138,6 +139,17 @@ class PerformanceTestResultExistsError(Exception):
     pass
 
 
+class GitHubRateLimitExceededError(Exception):
+    def __init__(self, used, limit, reset):
+        self.used = used
+        self.limit = limit
+        self.reset = reset
+
+    def __str__(self):
+        timestamp = datetime.fromtimestamp(int(self.reset))
+        return f"GitHub API rate limit exceeded: {self.used}/{self.limit} reqs used. Resets at {timestamp}"
+
+
 # The assumption is that the first line of a commit message is typically 80
 # characters or less. So storing 16K entries means this cache will use about
 # 1.2MiB of memory. This is an important cache.
@@ -151,6 +163,8 @@ async def cached_get(repo, commit):
     before and save the first line of the commit message in the cache.
 
     On cache miss, if the HTTP request fails then nothing is added to the cache.
+
+    If we exceed the GitHub API rate limit, raise a GitHubRateLimitExceededError.
     """
     commit_msg = None
     client = httpx.AsyncClient()
@@ -169,7 +183,8 @@ async def cached_get(repo, commit):
         if remaining and int(remaining) <= 0:
             used = response.headers.get("x-ratelimit-used")
             limit = response.headers.get("x-ratelimit-limit")
-            logging.error(f"GitHub API rate limit exceeded: {used}/{limit} reqs used")
+            reset = response.headers.get("x-ratelimit-reset")
+            raise GitHubRateLimitExceededError(used, limit, reset)
 
     return commit_msg
 
@@ -186,6 +201,8 @@ class GitHubReport(Report):
         If attributes contains a 'git_commit' key and the 'git_repo' indicates a
         GitHub repository, add a 'commit_msg' key with the first line of the commit
         message.
+
+        Raises GitHubRateLimitExceededError if the GitHub API rate limit is exceeded.
         """
         if "git_commit" not in attributes:
             return
@@ -205,7 +222,10 @@ class GitHubReport(Report):
     async def produce_report(self, test_name: str, report_type: ReportType):
         change_points = self._Report__change_points
         for cp in change_points:
-            await GitHubReport.add_github_commit_msg(cp.attributes)
+            try:
+                await GitHubReport.add_github_commit_msg(cp.attributes)
+            except GitHubRateLimitExceededError as e:
+                logging.error(e)
 
         report = super().produce_report(test_name, report_type)
         return report
