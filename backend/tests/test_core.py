@@ -2,6 +2,7 @@ import asyncio
 
 
 from backend.core.core import (
+    GitHubRateLimitExceededError,
     PerformanceTestResult,
     PerformanceTestResultSeries,
     PerformanceTestResultExistsError,
@@ -145,7 +146,10 @@ def test_github_message():
         "git_commit": "0dd3ee31125508cd67f7e7172247f05b7fd1753a",
         "branch": "master",
     }
-    asyncio.run(GitHubReport.add_github_commit_msg(attr))
+    try:
+        asyncio.run(GitHubReport.add_github_commit_msg(attr))
+    except GitHubRateLimitExceededError as e:
+        pytest.skip(str(e))
     assert "commit_msg" in attr
     assert attr["commit_msg"] == "Linux 6.7"
 
@@ -214,7 +218,11 @@ def test_github_message_cache():
     # The GitHub API rate limit for unauthenticated users is 60 reqs/hr
     # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
     for i in range(1, 120):
-        asyncio.run(GitHubReport.add_github_commit_msg(attr))
+        try:
+            asyncio.run(GitHubReport.add_github_commit_msg(attr))
+        except GitHubRateLimitExceededError as e:
+            pytest.skip(str(e))
+
         assert "commit_msg" in attr
         assert attr["commit_msg"] == "Linux 6.7"
 
