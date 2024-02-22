@@ -43,6 +43,11 @@ const NavigationItems = () => {
               Legend
             </a>
           </li>
+          <li className="nav-item">
+            <a className="nav-link" href="/public">
+              Open Source Results
+            </a>
+          </li>
         </ul>
       </div>
     </>

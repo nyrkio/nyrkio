@@ -1,0 +1,88 @@
+import { useEffect, useState } from "react";
+import { Button } from "react-bootstrap";
+
+export const TestSettings = ({ testName }) => {
+  const [publicTest, setPublicTest] = useState(false);
+  const [testConfig, setTestConfig] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = async () => {
+    const response = await fetch("/api/v0/config/" + testName, {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    if (response.status !== 200) {
+      console.error("Failed to fetch config for " + testName);
+      return;
+    }
+    const data = await response.json();
+    console.debug("Fetched config: " + JSON.stringify(data));
+    setTestConfig(data);
+
+    if (data[0].public) {
+      setPublicTest(true);
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    fetchData().finally(() => {
+      setLoading(false);
+    });
+  }, []);
+
+  if (loading) return <> </>;
+
+  const handleToggle = async (value) => {
+    var newConfig = structuredClone(testConfig);
+    newConfig[0].public = value;
+    console.debug("Sending new config: " + JSON.stringify(newConfig));
+    const response = await fetch("/api/v0/config/" + testName, {
+      method: "POST",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify(newConfig),
+    });
+
+    if (response.status === 200) {
+      setTestConfig(newConfig);
+      setPublicTest(value);
+    }
+  };
+
+  return (
+    <>
+      <div className="container mb-5">
+        <div className="row justify-content-center">
+          <div className="col-md-6 justify-content-center">
+            <div className="form-check form-switch justify-content-center text-center">
+              <input
+                className="form-check-input text-center justify-content-center align-items-center"
+                onChange={() => handleToggle(!publicTest)}
+                type="checkbox"
+                role="switch"
+                id="flexSwitchCheckUnChecked"
+                defaultChecked={publicTest}
+              ></input>
+              <label
+                className="form-check-label"
+                htmlFor="flexSwitchCheckUnChecked"
+              >
+                {publicTest ? (
+                  <b>These test results are public</b>
+                ) : (
+                  <i>These test results are private</i>
+                )}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+    </>
+  );
+};
