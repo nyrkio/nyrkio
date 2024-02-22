@@ -26,10 +26,21 @@ export const UserMenu = ({ setLoggedIn }) => {
     checkForAdminPrvis();
   }, []);
 
-  const handleLogoutClick = () => {
-    console.log("Setting logged in to false");
+  const handleLogoutClick = async () => {
+    console.debug("Setting logged in to false");
+    const response = await fetch("/api/v0/auth/jwt/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status !== 200) {
+      console.error("Failed to log out");
+    }
     setLoggedIn(false);
     localStorage.setItem("loggedIn", "false");
+    localStorage.removeItem("token");
   };
   return (
     <Dropdown>
@@ -55,7 +66,7 @@ export const UserMenu = ({ setLoggedIn }) => {
 
         <Dropdown.Divider />
 
-        <Dropdown.Item href="/" onClick={handleLogoutClick}>
+        <Dropdown.Item onClick={handleLogoutClick}>
           <Link to="/">
             <span className="bi bi-box-arrow-right"></span> Log Out
           </Link>
