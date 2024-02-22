@@ -8,6 +8,9 @@ from backend.db.db import User, DBStore
 user_router = APIRouter(prefix="/user")
 
 
+class User(BaseModel):
+
+
 class Notifiers(BaseModel):
     slack: bool
 
