@@ -6,6 +6,10 @@ import { is } from "unist-util-is";
 
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  var username = null;
+  if(localStorage.getItem("loggedIn") == "true"){
+    username = localStorage.getItem("username");
+  }
 
   const checkForAdminPrvis = async () => {
     const response = await fetch("/api/v0/auth/admin", {
@@ -45,7 +49,7 @@ export const UserMenu = ({ setLoggedIn }) => {
   return (
     <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <b className="bi bi-gear-fill"></b>
+        <span className="bi bi-gear-fill"> {username}</span>
       </Dropdown.Toggle>
 
       <Dropdown.Menu>
