@@ -22,7 +22,7 @@ def calculate_unit(value):
     return round(value, 3), unit
 
 
-def create_nyrkio_payload(commit_info, benchmark):
+def create_nyrkio_payload(commit_info, benchmark, extra_info):
     # convert date to epoch
     timestamp = int(
         datetime.strptime(commit_info["time"], "%Y-%m-%dT%H:%M:%S%z").timestamp()
@@ -41,6 +41,7 @@ def create_nyrkio_payload(commit_info, benchmark):
             "branch": commit_info["branch"],
             "git_repo": "https://github.com/nyrkio/nyrkio",
         },
+        "extra_info": extra_info,
     }
 
 
@@ -57,11 +58,14 @@ def submit_results(test_name, results, token):
     response.raise_for_status()
 
 
-def main(filename):
+def main(result_filename, extra_info_filename):
     # ...
     # Load the results from the file
-    with open(filename, "r") as f:
+    with open(result_filename, "r") as f:
         results = json.load(f)
+
+    with open(extra_info_filename, "r") as f:
+        extra_info = json.load(f)
 
     username = os.environ.get("NYRKIO_USERNAME")
     password = os.environ.get("NYRKIO_PASSWORD")
@@ -87,7 +91,7 @@ def main(filename):
         test_name = test_name.replace("::", "/")
         test_names.append(test_name)
 
-        payload = create_nyrkio_payload(results["commit_info"], r)
+        payload = create_nyrkio_payload(results["commit_info"], r, extra_info)
         post_data[test_name] = [payload]
 
     for test_name in test_names:
@@ -95,8 +99,8 @@ def main(filename):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: process_results.py <filename>")
+    if len(sys.argv) != 3:
+        print("Usage: process_results.py <result_filename> <extra_info_filename>")
         sys.exit(1)
 
-    main(sys.argv[1])
+    main(sys.argv[1], sys.argv[2])
