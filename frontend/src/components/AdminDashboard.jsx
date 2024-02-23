@@ -27,7 +27,12 @@ const UserResults = ({ user, testNames }) => {
 
             const baseUrl = "/api/v0/admin/result/" + user + "/";
             return (
-              <SingleResultWithTestname testName={testName} baseUrl={baseUrl} />
+              <SingleResultWithTestname
+                testName={testName}
+                baseUrl={baseUrl}
+                breadcrumbName={testName}
+                isPublic={false}
+              />
             );
           });
         })}

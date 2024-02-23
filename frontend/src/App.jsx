@@ -21,6 +21,7 @@ import { UserSettings } from "./components/UserSettings.jsx";
 import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
+import { PublicDashboard } from "./components/PublicDashboard.jsx";
 
 const Root = ({ loggedIn }) => {
   return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
@@ -43,6 +44,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/legend" element={<LegendPage />} />
         <Route path="/signup" element={<SignUpPage />} />
+        <Route path="/public/*" element={<PublicDashboard />} />
 
         <Route
           path="/login"

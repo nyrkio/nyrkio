@@ -290,3 +290,8 @@ async def add_user(username, password):
 async def get_user_by_email(email):
     manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
     return await manager.get_by_email(email)
+
+
+async def get_user(id):
+    manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+    return await manager.get(id)

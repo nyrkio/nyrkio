@@ -29,3 +29,49 @@ export const throttle = function( fn, delay ) {
         }, delay );
     };
 };
+
+// Build a URL from a test result' attributes and test name.
+// If we're accidentally passed a string that isn't a GitHub URL, just
+// return the original string.
+export const parseGitHubRepo = (result) => {
+  const url = result.attributes.git_repo;
+  if (!url.startsWith("https://github.com/")) return url;
+
+  // const path = url.replace("https://github.com/", "");
+  // url encode url
+  const path = encodeURIComponent(url);
+  return path + "/" + result.attributes.branch + "/" + result.test_name;
+};
+
+// Convert an array of testnames, potentially with "/" separators, into an array
+// of short names.
+//
+// A short name is the first part of a test name, up to the first "/", e.g.
+// "foo/bar/baz" -> "foo".
+//
+// This function is used by the dashboard code (PublicDashboard and Dashboard).
+export const createShortNames = (prefix, testNames) => {
+  var shortNames = [];
+  if (prefix === undefined) {
+    shortNames = testNames
+      .map((name) => name.split("/")[0])
+      .filter((v, i, a) => a.indexOf(v) === i);
+  } else {
+    // remove prefix from name
+    shortNames = testNames
+      .filter((name) => {
+        // Prefix must be an exact match
+        return (
+          name.startsWith(prefix) &&
+          name.length > prefix.length &&
+          name.substring(prefix.length, prefix.length + 1) === "/"
+        );
+      })
+      .map((name) => {
+        var shortName = name.replace(prefix + "/", "");
+        return shortName.split("/")[0];
+      })
+      .filter((v, i, a) => a.indexOf(v) === i);
+  }
+  return shortNames;
+};

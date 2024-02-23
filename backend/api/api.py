@@ -13,8 +13,10 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
-from backend.api.user import user_router
 from backend.api.admin import admin_router
+from backend.api.config import config_router
+from backend.api.public import public_router
+from backend.api.user import user_router
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 from backend.notifiers.slack import SlackNotifier
 
@@ -207,6 +209,8 @@ app.include_router(api_router, prefix="/api/v0")
 app.include_router(auth.auth_router, prefix="/api/v0")
 app.include_router(user_router, prefix="/api/v0")
 app.include_router(admin_router, prefix="/api/v0")
+app.include_router(config_router, prefix="/api/v0")
+app.include_router(public_router, prefix="/api/v0")
 
 
 @app.on_event("startup")
