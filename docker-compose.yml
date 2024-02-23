@@ -33,4 +33,4 @@ services:
     volumes:
       - ./certbot/conf/:/etc/letsencrypt/:rw
       - ./certbot/www/:/var/www/certbot/:rw
-    command: certonly --webroot --webroot-path=/var/www/certbot --email admin@nyrk.io --agree-tos --no-eff-email -d nyrk.io -d nyrkio.com
+    command: certonly --webroot --webroot-path=/var/www/certbot --email admin@nyrk.io --agree-tos --no-eff-email -d nyrk.io -d nyrkio.com -d xn--nyrki-nua.com
