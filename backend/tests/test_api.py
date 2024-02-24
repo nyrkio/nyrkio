@@ -1851,3 +1851,43 @@ def test_same_test_name_different_repos(client):
 
     response = unauth_client.get("/api/v0/public/result/nyrkio/nyrkio2/main/benchmark1")
     assert response.status_code == 200
+
+
+def test_extra_info(client):
+    """Ensure that we can store and retrieve extra info"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "extra_info": {"foo": "bar"},
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    json = response.json()
+    assert_response_data_matches_expected(json, data)
+
+    # Upload some arbitrarily nested extra info
+    nested_data = dict(data[0])
+    nested_data["timestamp"] = 2
+    nested_data["extra_info"] = {"foo": {"bar": {"baz": 1}, "qux": [1, 2, 3]}}
+    response = client.post("/api/v0/result/benchmark1", json=[nested_data])
+    assert response.status_code == 200
+
+    data.append(nested_data)
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    json = response.json()
+    assert_response_data_matches_expected(json, data)
