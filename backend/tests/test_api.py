@@ -1,4 +1,5 @@
 import asyncio
+from typing import Dict, List
 
 from starlette.testclient import TestClient
 
@@ -48,6 +49,19 @@ def test_get_non_existing_result(client):
     assert response.status_code == 404
 
 
+def assert_response_data_matches_expected(resp_data: List[Dict], req_data: List[Dict]):
+    """
+    Check that the response data matches the expected data in a
+    backwards-compatible way, i.e. we ignore fields that we didn't
+    set but appear in the response.
+
+    Using this function makes it possible to add new fields to the
+    schema without breaking the tests.
+    """
+    assert len(resp_data) == len(req_data)
+    assert any(resp.items() >= req.items() for resp, req in zip(resp_data, req_data))
+
+
 def test_add_result(client):
     client.login()
 
@@ -74,8 +88,7 @@ def test_add_result(client):
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
     json = response.json()
-    assert len(json) == 1
-    assert json[0] == data[0]
+    assert_response_data_matches_expected(json, data)
 
 
 def test_add_multiple_test_results_at_once(client):
@@ -111,9 +124,7 @@ def test_add_multiple_test_results_at_once(client):
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
     json = response.json()
-    assert len(json) == 2
-    assert data[0] in json
-    assert data[1] in json
+    assert_response_data_matches_expected(json, data)
 
 
 def test_add_multiple_tests(client):
@@ -233,7 +244,7 @@ def test_delete_single_result(client):
 
     response = client.get(f"/api/v0/result/{test_name}")
     assert response.status_code == 200
-    assert response.json() == data
+    assert_response_data_matches_expected(response.json(), data)
 
     # Delete a single result by timestamp
     response = client.delete(f"/api/v0/result/{test_name}?timestamp=1")
@@ -242,7 +253,7 @@ def test_delete_single_result(client):
     # Read back the result and check timestamp2 is still there
     response = client.get(f"/api/v0/result/{test_name}")
     assert response.status_code == 200
-    assert response.json() == [data[1], data[2]]
+    assert_response_data_matches_expected(response.json(), [data[1], data[2]])
 
     # Delete the remaining result
     response = client.delete(f"/api/v0/result/{test_name}")
@@ -895,8 +906,7 @@ def test_create_test_result_with_slash_separator(client):
     response = client.get("/api/v0/result/benchmark1/test")
     assert response.status_code == 200
     json = response.json()
-    assert len(json) == 1
-    assert json[0] == data[0]
+    assert_response_data_matches_expected(json, data)
 
 
 def test_create_test_result_with_slash_separator_and_get_all_results(client):
@@ -1151,8 +1161,7 @@ def test_delete_test_name_with_slashes(client):
     response = client.get("/api/v0/result/benchmark1/test")
     assert response.status_code == 200
     json = response.json()
-    assert len(json) == 1
-    assert json[0] == data[0]
+    assert_response_data_matches_expected(json, data)
 
     response = client.delete("/api/v0/result/benchmark1/test")
     assert response.status_code == 200
@@ -1339,7 +1348,7 @@ def test_get_results_for_users_test(client):
     response = superuser_client.get(f"/api/v0/admin/result/{client.email}/benchmark1")
     assert response.status_code == 200
     assert response.json()[0]["timestamp"] == 1
-    assert response.json() == data
+    assert_response_data_matches_expected(response.json(), data)
 
 
 def test_admin_api_get_results_with_invalid_email():
@@ -1384,8 +1393,7 @@ def test_attributes_without_list(client):
     response = client.get("/api/v0/result/benchmark1")
     assert response.status_code == 200
     json = response.json()
-    assert len(json) == 1
-    assert json[0] == data[0]
+    assert_response_data_matches_expected(json, data)
 
 
 def test_mark_results_as_public(client):
@@ -1656,7 +1664,8 @@ def test_public_test_results(client, unauthenticated_client):
         "/api/v0/public/result/nyrkio/nyrkio/main/benchmark1"
     )
     assert response.status_code == 200
-    assert response.json() == data
+    json = response.json()
+    assert_response_data_matches_expected(json, data)
 
 
 def test_invalid_public_test_name(unauthenticated_client):
