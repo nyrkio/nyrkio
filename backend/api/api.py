@@ -126,8 +126,9 @@ async def delete_result(
 
 class TestResult(BaseModel):
     timestamp: int
-    metrics: Optional[List[Dict]]
-    attributes: Optional[Dict]
+    metrics: List[Dict]
+    attributes: Dict
+    extra_info: Optional[Dict] = {}
 
 
 class TestResults(RootModel[Any]):
