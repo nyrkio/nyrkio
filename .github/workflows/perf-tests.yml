@@ -1,12 +1,13 @@
 name: Performance Tests
 on:
-  push:
-    branches: [main]
+  # push:
+  #   branches: [main]
+  pull_request:
 
 jobs:
   perf-tests:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: staging
     steps:
       - uses: actions/checkout@v2
         with:
@@ -51,4 +52,4 @@ jobs:
           docker compose -f docker-compose.dev.yml up -d
           cd backend && poetry run pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/ && cd ..
           docker compose -f docker-compose.dev.yml down
-          cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json") ../extra_info.json
+          # cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json") ../extra_info.json
