@@ -1,8 +1,9 @@
+import { useState, useRef, useEffect } from "react";
+import { Button, Modal, ModalHeader } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
 // DO NOT REMOVE
 // necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";
-import { Chart } from "react-chartjs-2";
 import { parseTimestamp } from "../lib/utils";
 
 const nyrkio_dark_red = "#a34111";
@@ -27,9 +28,6 @@ const nyrkio_text_light = "#6c757d";
 const nyrkio_chart_line_color = nyrkio_horn_light_brown;
 const nyrkio_chart_cp_color = nyrkio_tattoo_red;
 
-
-
-
 export const DrawLineChart = ({
   metric,
   testName,
@@ -37,6 +35,7 @@ export const DrawLineChart = ({
   displayData,
   changePointData,
 }) => {
+  const chartRef = useRef();
   const metricName = metric["name"];
   const metricUnit = metric["unit"];
   const parseData = (data, metricName) => {
@@ -97,112 +96,228 @@ export const DrawLineChart = ({
     return timestamps.length > 100 ? 0 : 1;
   };
 
+  const PopupModal = ({ show, setShow, timestamp, setTimestamp }) => {
+    const handleClose = () => setShow(false);
+
+    var result = displayData.find(
+      (o) => parseTimestamp(o.timestamp) === timestamp
+    );
+
+    if (result === undefined) {
+      return <></>;
+    }
+
+    const result_index = displayData.indexOf(result);
+    const metric = result.metrics.find((metric) => metric.name === metricName);
+    const unit = metric.unit;
+    const value = metric.value;
+
+    const gh_link =
+      result.attributes.git_repo + "/commit/" + result.attributes.git_commit;
+
+    return (
+      <>
+        <Modal
+          size="lg"
+          show={show}
+          onHide={handleClose}
+          centered
+          animation={false}
+        >
+          <Modal.Header closeButton>
+            <Modal.Title>Test Result Data: {timestamp}</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>
+            <ul>
+              <li>
+                <b>value:</b> {value} {unit}
+              </li>
+              <li>
+                <b>git repo: </b>
+                {result.attributes.git_repo}
+              </li>
+              <li>
+                <b>branch:</b> {result.attributes.branch}
+              </li>
+              <li>
+                <b>git commit:</b>{" "}
+                <a href={gh_link} target="_blank">
+                  {result.attributes.git_commit}
+                </a>
+              </li>
+              <li>
+                <b>extra_info:</b>
+                <pre>{JSON.stringify(result.extra_info, null, 2)}</pre>
+              </li>
+            </ul>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (result_index === 0) {
+                  return;
+                }
+                const prev_timestamp = timestamps[result_index - 1];
+                setTimestamp(parseTimestamp(prev_timestamp));
+              }}
+            >
+              Prev
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (result_index === timestamps.length - 1) {
+                  return;
+                }
+                const next_timestamp = timestamps[result_index + 1];
+                setTimestamp(parseTimestamp(next_timestamp));
+              }}
+            >
+              Next
+            </Button>
+          </Modal.Footer>
+        </Modal>
+      </>
+    );
+  };
+
+  const chartClick = (e) => {
+    const chart = chartRef.current;
+    const points = chart.getElementsAtEventForMode(
+      e.nativeEvent,
+      "nearest",
+      { intersect: false },
+      true
+    );
+
+    if (points.length === 0) {
+      return;
+    }
+
+    const firstPoint = points[0];
+    const label = chart.data.labels[firstPoint.index];
+
+    setModalData(label);
+    setShowModal(true);
+  };
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState({});
   return (
     <>
+      <PopupModal
+        show={showModal}
+        setShow={setShowModal}
+        timestamp={modalData}
+        setTimestamp={setModalData}
+      />
       <div className="chart-wrapper">
-      <h6 className="text-center">
-        {testName}: {metricName}
-      </h6>
-      <Line
-        datasetIdKey="foo"
-        data={{
-          labels: timestamps.map(parseTimestamp),
-          datasets: [
-            {
-              id: 1,
-              label: metricName,
-              data: parseData(displayData, metricName),
-              fill: true,
-              borderColor: nyrkio_chart_line_color,
-              borderWidth: 2,
-              maxBarThickness: 6,
-              backgroundColor: ({ chart: { ctx } }) => {
-                const gradient = ctx.createLinearGradient(0, 230, 0, 50);
-                gradient.addColorStop(1, "rgba(209,193,168,0.2)");
-                gradient.addColorStop(0.2, "rgba(209,193,168,0.2)");
-                gradient.addColorStop(0, "rgba(255,249,241,0.3)");
+        <h6 className="text-center">
+          {testName}: {metricName}
+        </h6>
+        <Line
+          ref={chartRef}
+          datasetIdKey="foo"
+          data={{
+            labels: timestamps.map(parseTimestamp),
+            datasets: [
+              {
+                id: 1,
+                label: metricName,
+                data: parseData(displayData, metricName),
+                fill: true,
+                borderColor: nyrkio_chart_line_color,
+                borderWidth: 2,
+                maxBarThickness: 6,
+                backgroundColor: ({ chart: { ctx } }) => {
+                  const gradient = ctx.createLinearGradient(0, 230, 0, 50);
+                  gradient.addColorStop(1, "rgba(209,193,168,0.2)");
+                  gradient.addColorStop(0.2, "rgba(209,193,168,0.2)");
+                  gradient.addColorStop(0, "rgba(255,249,241,0.3)");
 
-                return gradient;
+                  return gradient;
+                },
+                pointBorderColor: (context) => {
+                  return isChangePoint(context.dataIndex)
+                    ? nyrkio_chart_cp_color
+                    : nyrkio_chart_line_color;
+                },
+                pointBackgroundColor: (context) => {
+                  return isChangePoint(context.dataIndex)
+                    ? nyrkio_chart_cp_color
+                    : nyrkio_chart_line_color;
+                },
+                pointRadius: (context) => {
+                  return pointRadius(context.dataIndex);
+                },
               },
-              pointBorderColor: (context) => {
-                return isChangePoint(context.dataIndex)
-                  ? nyrkio_chart_cp_color
-                  : nyrkio_chart_line_color;
-              },
-              pointBackgroundColor: (context) => {
-                return isChangePoint(context.dataIndex)
-                  ? nyrkio_chart_cp_color
-                  : nyrkio_chart_line_color;
-              },
-              pointRadius: (context) => {
-                return pointRadius(context.dataIndex);
+            ],
+          }}
+          onClick={chartClick}
+          options={{
+            scales: {
+              x: {
+                grid: {
+                  display: false,
+                },
               },
             },
-          ],
-        }}
-        options={{
-          scales: {
-            x: {
-              grid: {
+            plugins: {
+              legend: {
                 display: false,
               },
-            },
-          },
-          plugins: {
-            legend: {
-              display: false,
-            },
-            interaction: {
-              intersect: false,
-              mode: "index",
-            },
-            tooltip: {
-              displayColors: false,
-              callbacks: {
-                label: (context) => {
-                  var labelArray = ["value: " + context.raw + metricUnit];
+              interaction: {
+                intersect: false,
+                mode: "index",
+              },
+              tooltip: {
+                displayColors: false,
+                callbacks: {
+                  label: (context) => {
+                    var labelArray = ["value: " + context.raw + metricUnit];
 
-                  // Search in changePointData for this timestamp and metric
-                  const timestamp = timestamps[context.dataIndex];
-                  Object.entries(changePointData).forEach(
-                    ([testName, value]) => {
-                      value.forEach((changePoint) => {
-                        if (changePoint["time"] === timestamp) {
-                          labelArray.push("");
+                    // Search in changePointData for this timestamp and metric
+                    const timestamp = timestamps[context.dataIndex];
+                    Object.entries(changePointData).forEach(
+                      ([testName, value]) => {
+                        value.forEach((changePoint) => {
+                          if (changePoint["time"] === timestamp) {
+                            labelArray.push("");
 
-                          // Add all change point attributes to the label
-                          changePoint["changes"].forEach((change) => {
-                            if (change["metric"] !== metricName) {
-                              return;
-                            }
-
-                            Object.entries(change).map(([key, value]) => {
-                              if (key === "metric") {
+                            // Add all change point attributes to the label
+                            changePoint["changes"].forEach((change) => {
+                              if (change["metric"] !== metricName) {
                                 return;
                               }
 
-                              var label = key + ": " + value;
-                              if (key.includes("percent")) {
-                                label = label + "%";
-                              }
+                              Object.entries(change).map(([key, value]) => {
+                                if (key === "metric") {
+                                  return;
+                                }
 
-                              labelArray.push(label);
+                                var label = key + ": " + value;
+                                if (key.includes("percent")) {
+                                  label = label + "%";
+                                }
+
+                                labelArray.push(label);
+                              });
                             });
-                          });
-                        }
-                      });
-                    }
-                  );
+                          }
+                        });
+                      }
+                    );
 
-                  return labelArray;
+                    return labelArray;
+                  },
                 },
+                intersect: false,
               },
-              intersect: false,
             },
-          },
-        }}
-      />
-    </div>
+          }}
+        />
+      </div>
     </>
   );
 };
