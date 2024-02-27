@@ -14,7 +14,6 @@ export const UserSettings = () => {
   );
 };
 
-
 const HunterSettings = () => {
   const saveHunterSettingsReal = async () => {
     const minMagnitude =
@@ -314,7 +313,7 @@ const SlackSettings = () => {
               </>
             )}
             <a
-              href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fnyrk.io%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
+              href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fnyrkio.com%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
               className="slack-btn"
             >
               <svg

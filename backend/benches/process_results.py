@@ -47,7 +47,7 @@ def create_nyrkio_payload(commit_info, benchmark):
 def submit_results(test_name, results, token):
     # Submit results
     response = requests.post(
-        f"https://nyrk.io/api/v0/result/{test_name}",
+        f"https://nyrkio.com/api/v0/result/{test_name}",
         json=results,
         headers={
             "Authorization": f"Bearer {token}",
@@ -72,7 +72,7 @@ def main(filename):
 
     # Get JWT token
     response = requests.post(
-        "https://nyrk.io/api/v0/auth/jwt/login",
+        "https://nyrkio.com/api/v0/auth/jwt/login",
         data={"username": username, "password": password},
     )
     response.raise_for_status()

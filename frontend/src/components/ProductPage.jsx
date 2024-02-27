@@ -213,7 +213,7 @@ export const ProductPage = () => {
           <p>
             <i>
               Not yet running automated perf tests nightly?{" "}
-              <a href="mailto:helloworld@nyrk.io">We can help!</a>
+              <a href="mailto:helloworld@nyrkio.com">We can help!</a>
             </i>
           </p>
         </div>

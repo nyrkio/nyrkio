@@ -6,7 +6,7 @@ For all of these steps, be sure to change the example email address and password
 
 ## Use your current JWT token
 
-We use JWT to access the Nyrkiö API. If you are already logged in to nyrk.io, then you'll see a
+We use JWT to access the Nyrkiö API. If you are already logged in to nyrkio.com, then you'll see a
 small envelope on your top right. You can click on it, and copy paste your current JWT token
 and skip right to _Upload performance test results_ below.
 
@@ -20,7 +20,7 @@ token programatically:
 You can either do this via the front page of the website or programatically by calling the REST API.
 
 ```bash
-curl -s -H "Content-type: application/json" https://nyrk.io/api/v0/auth/register \
+curl -s -H "Content-type: application/json" https://nyrkio.com/api/v0/auth/register \
     -d '{"email": "foo@bar.com", "password": "mypassword"}'
 ```
 
@@ -33,17 +33,17 @@ If you signed up via the website, you'll recieve a verification in your inbox au
 If instead you used the REST API to sign up, you'll need to execute the following command which will send the verification email to your inbox.
 
 ```bash
-curl -s -X POST -H "Content-type: application/json" https://nyrk.io/api/v0/auth/request-verify-token -d '{"email": "foo@bar.com"}'
+curl -s -X POST -H "Content-type: application/json" https://nyrkio.com/api/v0/auth/request-verify-token -d '{"email": "foo@bar.com"}'
 ```
 
 Now go to your inbox and click on the link in the verification email.
 
 ## Generate an API token
 
-In order to send performance test results to nyrk.io using `HTTP POST` you'll need to generate an API token. To do that, use the following code snippet.
+In order to send performance test results to nyrkio.com using `HTTP POST` you'll need to generate an API token. To do that, use the following code snippet.
 
 ```bash
-curl -s -X POST https://nyrk.io/api/v0/auth/jwt/login --data-urlencode username="foo@bar.com" --data-urlencode password="mypassword"
+curl -s -X POST https://nyrkio.com/api/v0/auth/jwt/login --data-urlencode username="foo@bar.com" --data-urlencode password="mypassword"
 ```
 
 Your newly generated API token will be returned in the `access_code` field of the JSON response. This API token should be used with the [bearer authenication](https://swagger.io/docs/specification/authentication/bearer-authentication/) scheme.
@@ -63,7 +63,7 @@ Briefly, here's a list of the required fields.
 Here's an example payload for a performance test named `benchmark1`.
 
 ```bash
-curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" https://nyrk.io/api/v0/result/benchmark1 \
+curl -s -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKEN" https://nyrkio.com/api/v0/result/benchmark1 \
            -d '[{"timestamp": 1706220908,
              "metrics": [
                {"name": "p50", "unit": "us", "value": 56 },
@@ -90,8 +90,8 @@ The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "in
 
 ## View the charts in the dashboard
 
-Now, if you navigate to https://nyrk.io/result/benchmark1 you'll see three charts with a single data point each.
+Now, if you navigate to https://nyrkio.com/result/benchmark1 you'll see three charts with a single data point each.
 
 ## Questions?
 
-You can email us directly at [helloworld@nyrk.io](mailto:helloworld@nyrk.io).
+You can email us directly at [helloworld@nyrkio.com](mailto:helloworld@nyrkio.com).

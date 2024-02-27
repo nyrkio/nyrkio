@@ -74,7 +74,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager, [jwt_backend, cookie_backend]
 )
 
-REDIRECT_URI = "https://nyrk.io/api/v0/auth/github/mycallback"
+REDIRECT_URI = "https://nyrkio.com/api/v0/auth/github/mycallback"
 auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
     fastapi_users.get_oauth_router(
@@ -241,7 +241,7 @@ async def slack_oauth(
     # Fetch the access token from slack.com
     client = httpx.AsyncClient()
     # redirect_uri = f"https://{SERVER_NAME}/user/settings"
-    redirect_uri = "https://nyrk.io/user/settings"
+    redirect_uri = "https://nyrkio.com/user/settings"
     logging.info(f"redirect_uri: {redirect_uri}")
     response = await client.post(
         "https://slack.com/api/oauth.v2.access",

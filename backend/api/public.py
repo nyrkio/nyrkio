@@ -11,7 +11,7 @@ view them without creating an account or logging in.
 
 The url scheme for public results is,
 
-  https://nyrk.io/public/github-org/github-repo/branch/testname
+  https://nyrkio.com/public/github-org/github-repo/branch/testname
 
 Internally, Nyrkiö maintains a mapping between user test results and
 public results. Since there's no user namespace in the above url scheme,

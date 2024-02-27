@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://nyrk.io/sitemap.xml
+Sitemap: https://nyrkio.com/sitemap.xml
