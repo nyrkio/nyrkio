@@ -251,6 +251,9 @@ export const DrawLineChart = ({
                 pointRadius: (context) => {
                   return pointRadius(context.dataIndex);
                 },
+                pointHoverBorderColor: nyrkio_chart_line_color,
+                pointHoverBackgroundColor: nyrkio_chart_line_color,
+                pointHoverRadius: 3,
               },
             ],
           }}
@@ -262,6 +265,10 @@ export const DrawLineChart = ({
                   display: false,
                 },
               },
+            },
+            hover: {
+              mode: "nearest",
+              intersect: false,
             },
             plugins: {
               legend: {
