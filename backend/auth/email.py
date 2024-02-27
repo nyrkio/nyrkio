@@ -29,7 +29,7 @@ async def send_email(email: str, token: str, subject: str, msg: str):
                 "X-Postmark-Server-Token": POSTMARK_API_KEY,
             },
             json={
-                "From": "matt@nyrk.io",
+                "From": "matt@nyrkio.com",
                 "To": email,
                 "Subject": subject,
                 "HtmlBody": msg,

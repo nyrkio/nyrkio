@@ -1,49 +1,52 @@
-import { useState } from 'react';
+import { useState } from "react";
 
 export const PricingPage = () => {
   const businessPriceFloor = 10;
   const businessPricePerHead = 20;
   const enterprisePriceFloor = 40;
   const enterprisePricePerHead = 40;
-  const [businessPrice, setBusinessPrice] = useState(businessPriceFloor*businessPricePerHead);
-  const [enterprisePrice, setEnterprisePrice] = useState(enterprisePriceFloor*enterprisePricePerHead);
-  const cut1=100;
-  const [busYear, setBusYear] = useState(businessPrice*12);
-  const [entYear, setEntYear] = useState(enterprisePrice*12);
+  const [businessPrice, setBusinessPrice] = useState(
+    businessPriceFloor * businessPricePerHead
+  );
+  const [enterprisePrice, setEnterprisePrice] = useState(
+    enterprisePriceFloor * enterprisePricePerHead
+  );
+  const cut1 = 100;
+  const [busYear, setBusYear] = useState(businessPrice * 12);
+  const [entYear, setEntYear] = useState(enterprisePrice * 12);
 
   const getBusPrice = (total) => {
     var b;
-    if (total<cut1) {
-      b= Math.max( businessPriceFloor*businessPricePerHead,
-                                  total * businessPricePerHead ) ;
-      b=Math.round(b);
-    }
-    else if (total<=5000) {
-      b=(cut1 + 0.1* (total-cut1) ) * businessPricePerHead ;
-      b=Math.round(b);
-    }
-    else {
-      b= "Call" ;
+    if (total < cut1) {
+      b = Math.max(
+        businessPriceFloor * businessPricePerHead,
+        total * businessPricePerHead
+      );
+      b = Math.round(b);
+    } else if (total <= 5000) {
+      b = (cut1 + 0.1 * (total - cut1)) * businessPricePerHead;
+      b = Math.round(b);
+    } else {
+      b = "Call";
     }
     return b;
   };
   const getEntPrice = (total) => {
     var e;
-    if (total<cut1) {
-      e = Math.max( enterprisePriceFloor*enterprisePricePerHead,
-                                    total * enterprisePricePerHead ) ;
-      e=Math.round(e);
-    }
-    else if (total<=5000) {
-      e=(cut1 + 0.15* (total-cut1) ) * enterprisePricePerHead ;
-      e=Math.round(e);
-    }
-    else {
-      e= "Call" ;
+    if (total < cut1) {
+      e = Math.max(
+        enterprisePriceFloor * enterprisePricePerHead,
+        total * enterprisePricePerHead
+      );
+      e = Math.round(e);
+    } else if (total <= 5000) {
+      e = (cut1 + 0.15 * (total - cut1)) * enterprisePricePerHead;
+      e = Math.round(e);
+    } else {
+      e = "Call";
     }
     return e;
   };
-
 
   /*
    * CPUH = CPU-Hours on a C7g instance type.
@@ -56,125 +59,160 @@ export const PricingPage = () => {
    *
    * TODO: verify whether dedicated or i.metal servers are needed. Hypothesis is no.
    */
-  const CPUHdollars=0.1 * 1.25; // round up from 0.0774 + 25% markup
-  const dollarToEuro=1; // Currently 0.93, round up to cover currency risk
+  const CPUHdollars = 0.1 * 1.25; // round up from 0.0774 + 25% markup
+  const dollarToEuro = 1; // Currently 0.93, round up to cover currency risk
 
   const getBusHours = (totalPrice) => {
-      var exactly = dollarToEuro*totalPrice / 10 / CPUHdollars; // Allocate 10% of subscription for CPUH credits. Heavy users will have to pay more.
-      var rounded = parseFloat(exactly.toPrecision(2));         // Note: With all the rounding going on ends up being more like 5%
-      return rounded;
+    var exactly = (dollarToEuro * totalPrice) / 10 / CPUHdollars; // Allocate 10% of subscription for CPUH credits. Heavy users will have to pay more.
+    var rounded = parseFloat(exactly.toPrecision(2)); // Note: With all the rounding going on ends up being more like 5%
+    return rounded;
   };
 
   const getEntHours = (totalPrice) => {
-      var exactly = dollarToEuro*totalPrice / 10 / CPUHdollars;
-      var rounded = parseFloat(exactly.toPrecision(1));
-      return rounded;
+    var exactly = (dollarToEuro * totalPrice) / 10 / CPUHdollars;
+    var rounded = parseFloat(exactly.toPrecision(1));
+    return rounded;
   };
-  const [busHours, setBusHours] = useState( getBusHours( businessPriceFloor*businessPricePerHead ) );
-  const [entHours, setEntHours] = useState( getEntHours( enterprisePriceFloor*enterprisePricePerHead ) );
+  const [busHours, setBusHours] = useState(
+    getBusHours(businessPriceFloor * businessPricePerHead)
+  );
+  const [entHours, setEntHours] = useState(
+    getEntHours(enterprisePriceFloor * enterprisePricePerHead)
+  );
 
   const priceCalculator = () => {
     var total = document.getElementById("employees_total").value;
     var eng = document.getElementById("employees_engineering").value;
-    var b =getBusPrice(total);
-    var e =getEntPrice(total);
+    var b = getBusPrice(total);
+    var e = getEntPrice(total);
 
+    setBusinessPrice(b);
+    setEnterprisePrice(e);
+    setBusYear(b * 12);
+    setEntYear(e * 12);
 
-    setBusinessPrice( b );
-    setEnterprisePrice( e );
-    setBusYear(b*12);
-    setEntYear(e*12);
-
-    setBusHours( getBusHours(b) );
-    setEntHours( getEntHours(e) );
+    setBusHours(getBusHours(b));
+    setEntHours(getEntHours(e));
     return true;
   };
 
   const generatePricingTable = () => {
     var pricingTable = [];
-    for (var zeros=0; zeros<=4; zeros++){
-      for (var i=1; i<10; i++){
-        var employees=i*Math.pow(10,zeros);
+    for (var zeros = 0; zeros <= 4; zeros++) {
+      for (var i = 1; i < 10; i++) {
+        var employees = i * Math.pow(10, zeros);
         //pricingTable.push(<ObjectRow key={employees} data={obj} />);
         pricingTable.push(
           <tr key={employees}>
-          <td>{employees}</td>
-          <td>{getBusPrice(employees)} / {getBusPrice(employees)*12}</td>
-          <td>{getEntPrice(employees)} / {getEntPrice(employees)*12}</td>
-          <td>{getBusHours(getBusPrice(employees))} / {getBusHours(getBusPrice(employees)) /2 * CPUHdollars*dollarToEuro}€</td>
-          <td>{getEntHours(getEntPrice(employees))} / {getEntHours(getEntPrice(employees)) /2 * CPUHdollars*dollarToEuro}€</td>
+            <td>{employees}</td>
+            <td>
+              {getBusPrice(employees)} / {getBusPrice(employees) * 12}
+            </td>
+            <td>
+              {getEntPrice(employees)} / {getEntPrice(employees) * 12}
+            </td>
+            <td>
+              {getBusHours(getBusPrice(employees))} /{" "}
+              {(getBusHours(getBusPrice(employees)) / 2) *
+                CPUHdollars *
+                dollarToEuro}
+              €
+            </td>
+            <td>
+              {getEntHours(getEntPrice(employees))} /{" "}
+              {(getEntHours(getEntPrice(employees)) / 2) *
+                CPUHdollars *
+                dollarToEuro}
+              €
+            </td>
           </tr>
         );
       }
     }
     return (
       <>
-      <thead>
-      <tr><th>Employees</th><th>Business €/mo &amp; yr</th><th>Enterprise €/mo &amp; yr</th><th>Business CPUH /mo &amp; $/mo</th><th>Enterprise CPUH/mo &amp; $/mo</th></tr>
-      </thead>
-      <tbody>
-      {pricingTable}
-      </tbody>
+        <thead>
+          <tr>
+            <th>Employees</th>
+            <th>Business €/mo &amp; yr</th>
+            <th>Enterprise €/mo &amp; yr</th>
+            <th>Business CPUH /mo &amp; $/mo</th>
+            <th>Enterprise CPUH/mo &amp; $/mo</th>
+          </tr>
+        </thead>
+        <tbody>{pricingTable}</tbody>
       </>
     );
   };
   const pricingTableRows = generatePricingTable();
 
-
-
-
   return (
     <>
-      <div className="nyrkio-pricing container py-3" style={{ maxWidth: "960px" }}>
+      <div
+        className="nyrkio-pricing container py-3"
+        style={{ maxWidth: "960px" }}
+      >
         <div className="row justify-content-center">
           <div className="text-center">
             <h1>Pricing</h1>
             <div className="p-3 mb-3">
-              Pricing plans are simple: For small to medium sized companies, pricing is based on the size of your team or organization size.
-              The subscription automatically covers all engineers, because we want to empower everyone on the team to be responsible for performance of their own code.
+              Pricing plans are simple: For small to medium sized companies,
+              pricing is based on the size of your team or organization size.
+              The subscription automatically covers all engineers, because we
+              want to empower everyone on the team to be responsible for
+              performance of their own code.
             </div>
           </div>
         </div>
 
-
-          <div className="text-right rounded-3">
-            <div className="p-3 calculator rounded-3 shadow-sm">
-              <div className="row mb-3">
-                 <div className="col col-md-6" id="company_name_label">
-                    Company name:
-                 </div>
-                 <div className="col col-md-6">
-                    <input type="text" id="company_name" name="company_name"
-                           className="form-control" onChange={priceCalculator} />
-                 </div>
+        <div className="text-right rounded-3">
+          <div className="p-3 calculator rounded-3 shadow-sm">
+            <div className="row mb-3">
+              <div className="col col-md-6" id="company_name_label">
+                Company name:
               </div>
-              <div className="row mb-3">
-                 <div className="col col-md-6" id="employees_total_label">
-                    Employees in the company:
-                 </div>
-                 <div className="col col-md-6">
-                    <input type="text" id="employees_total" name="employees_total"
-                           className="form-control" onChange={priceCalculator} />
-                 </div>
+              <div className="col col-md-6">
+                <input
+                  type="text"
+                  id="company_name"
+                  name="company_name"
+                  className="form-control"
+                  onChange={priceCalculator}
+                />
               </div>
-              <div className="row mb-3">
-                 <div className="col col-md-6" id="employees_engineering_label">
-                    Employees in Engineering/IT department:
-                 </div>
-                 <div className="col col-md-6">
-                    <input type="text" id="employees_engineering" name="employees_engineering"
-                           className="form-control" onChange={priceCalculator} />
-                 </div>
+            </div>
+            <div className="row mb-3">
+              <div className="col col-md-6" id="employees_total_label">
+                Employees in the company:
+              </div>
+              <div className="col col-md-6">
+                <input
+                  type="text"
+                  id="employees_total"
+                  name="employees_total"
+                  className="form-control"
+                  onChange={priceCalculator}
+                />
+              </div>
+            </div>
+            <div className="row mb-3">
+              <div className="col col-md-6" id="employees_engineering_label">
+                Employees in Engineering/IT department:
+              </div>
+              <div className="col col-md-6">
+                <input
+                  type="text"
+                  id="employees_engineering"
+                  name="employees_engineering"
+                  className="form-control"
+                  onChange={priceCalculator}
+                />
               </div>
             </div>
           </div>
-
-
-
-
+        </div>
 
         <div className="nyrkio-plans row row-cols-1 row-cols-md-3 text-center justify-content-center">
-
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm">
               <div className="card-header py-3">
@@ -182,8 +220,7 @@ export const PricingPage = () => {
               </div>
               <div className="card-body">
                 <h1 className="card-title pricing-card-title">
-                  0
-                  <small className="text-body-secondary fw-light"> €/mo</small>
+                  0<small className="text-body-secondary fw-light"> €/mo</small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>100 test results</li>
@@ -200,7 +237,6 @@ export const PricingPage = () => {
             </div>
           </div>
 
-
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success">
               <div className="card-header py-3">
@@ -209,7 +245,7 @@ export const PricingPage = () => {
               <div className="card-body">
                 <p className="nyrkio-annual">{busYear}/yr</p>
                 <h1 className="card-title pricing-card-title">
-                {businessPrice}
+                  {businessPrice}
                   <small className="text-body-secondary fw-light"> €/mo</small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
@@ -220,14 +256,13 @@ export const PricingPage = () => {
                   <li>{busHours} cpu-hours/month*</li>
                 </ul>
                 <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrk.io">
+                  <a className="btn-link" href="mailto:founders@nyrkio.com">
                     Contact us
                   </a>
                 </button>
               </div>
             </div>
           </div>
-
 
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm">
@@ -237,7 +272,7 @@ export const PricingPage = () => {
               <div className="card-body">
                 <p className="nyrkio-annual">{entYear}/yr</p>
                 <h1 className="card-title pricing-card-title">
-                {enterprisePrice}
+                  {enterprisePrice}
                   <small className="text-body-secondary fw-light"> €/mo</small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
@@ -248,7 +283,7 @@ export const PricingPage = () => {
                   <li>{entHours} cpu-hours/month*</li>
                 </ul>
                 <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrk.io">
+                  <a className="btn-link" href="mailto:founders@nyrkio.com">
                     Contact us
                   </a>
                 </button>
@@ -257,18 +292,17 @@ export const PricingPage = () => {
           </div>
         </div>
 
-        <p>*) <small>Coming soon: Benchmarking as a Service. We run your benchmarks on servers tuned to minimize random noise in the results.</small></p>
+        <p>
+          *){" "}
+          <small>
+            Coming soon: Benchmarking as a Service. We run your benchmarks on
+            servers tuned to minimize random noise in the results.
+          </small>
+        </p>
 
-
-
-
-
-
-
-
-
-
-        <h2 className="display-6 text-center mb-4 nyrkio-compare-plans">Compare plans</h2>
+        <h2 className="display-6 text-center mb-4 nyrkio-compare-plans">
+          Compare plans
+        </h2>
 
         <div className="row">
           <div className="table-responsive">
@@ -345,8 +379,18 @@ export const PricingPage = () => {
                     Integrations
                   </th>
                   <td></td>
-                  <td>Email<br/>Slack</td>
-                  <td>Email<br/>Slack<br/>JIRA</td>
+                  <td>
+                    Email
+                    <br />
+                    Slack
+                  </td>
+                  <td>
+                    Email
+                    <br />
+                    Slack
+                    <br />
+                    JIRA
+                  </td>
                 </tr>
               </tbody>
 
@@ -360,9 +404,13 @@ export const PricingPage = () => {
                   <td>{entHours} cpu-hours/month</td>
                 </tr>
                 <tr>
-                  <th scope="row" className="text-start">
-                  </th>
-                  <td colSpan="3" className="nyrkio-right"><small>Additional CPUH credits at {CPUHdollars * dollarToEuro} EUR.</small></td>
+                  <th scope="row" className="text-start"></th>
+                  <td colSpan="3" className="nyrkio-right">
+                    <small>
+                      Additional CPUH credits at {CPUHdollars * dollarToEuro}{" "}
+                      EUR.
+                    </small>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -372,14 +420,12 @@ export const PricingPage = () => {
           <div className="text-center">
             <h4>Open Source projects apply here...</h4>
             <div className="p-3 mb-3">
-              We have a limited capacity, but whenever possible, we offer free Business subscriptions to Open Source projects.
-              If you're interested, <a href="mailto:helloworld@nyrk.io">email us!</a>
+              We have a limited capacity, but whenever possible, we offer free
+              Business subscriptions to Open Source projects. If you're
+              interested, <a href="mailto:helloworld@nyrkio.com">email us!</a>
             </div>
           </div>
         </div>
-
-
-
       </div>
     </>
   );
