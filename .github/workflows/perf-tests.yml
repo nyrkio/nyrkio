@@ -2,11 +2,12 @@ name: Performance Tests
 on:
   push:
     branches: [main]
+  pull_request:
 
 jobs:
   perf-tests:
     runs-on: ubuntu-latest
-    environment: prod
+    environment: staging
     steps:
       - uses: actions/checkout@v2
         with:
