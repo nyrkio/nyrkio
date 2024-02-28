@@ -5,11 +5,12 @@ import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import github from "../static/github.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
+import { Logo } from "./Logo"
 
 const Banner = () => {
   return (
-    <div className="container-fluid p-5 text-center">
-      <h4>Nyrkiö</h4>
+    <div className="container-fluid text-center nyrkio-title">
+      <Logo color="Brown" filetype="png"/>
       <h1>For Faster Software</h1>
       <h5>
         Harness the power of
@@ -161,7 +162,7 @@ const FeatureBanner2 = () => {
 export const FrontPage = () => {
   return (
     <>
-      <div className="container my-5 text-center">
+      <div className="frontpage container my-5 text-center">
         <Banner />
         <div className="padding-block "></div>
         <FeatureHighlight />

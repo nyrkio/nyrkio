@@ -1,5 +1,6 @@
 import { LogOut, LoginButton } from "./Login.jsx";
 import { UserMenu } from "./UserMenu.jsx";
+import { SmallLogo } from "./Logo";
 
 const NavigationItems = () => {
   return (
@@ -17,9 +18,9 @@ const NavigationItems = () => {
       </button>
       <div className="collapse navbar-collapse" id="navbarSupportedContent">
         <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-          <li className="nav-item">
-            <a className="nav-link" aria-current="page" href="/">
-              Nyrkiö
+          <li className="nav-item nyrkio-logo-nav-item">
+            <a className="nav-link nyrkio-logo-nav-link" aria-current="page" href="/">
+              <SmallLogo />
             </a>
           </li>
           <li className="nav-item">
