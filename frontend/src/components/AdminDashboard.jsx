@@ -25,11 +25,15 @@ const UserResults = ({ user, testNames }) => {
               return <></>;
             }
 
-            const baseUrl = "/api/v0/admin/result/" + user + "/";
+            const baseUrls = {
+              api: "/api/v0/admin/result/" + user + "/",
+              testRoot: "/admin",
+              testRootTitle: "Admin",
+            };
             return (
               <SingleResultWithTestname
                 testName={testName}
-                baseUrl={baseUrl}
+                baseUrls={baseUrls}
                 breadcrumbName={testName}
                 isPublic={false}
               />
