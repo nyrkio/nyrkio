@@ -8,11 +8,7 @@ from backend.auth import auth
 def test_add_and_get_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
-    config = {
-        "notifiers": {
-            "slack": True,
-        }
-    }
+    config = {"notifiers": {"slack": True, "github": False}}
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -28,6 +24,7 @@ def test_update_existing_user_config(client):
     config = {
         "notifiers": {
             "slack": True,
+            "github": False,
         }
     }
     response = client.post("/api/v0/user/config", json=config)
@@ -38,7 +35,7 @@ def test_update_existing_user_config(client):
     json = response.json()
     assert json == {**config, "core": None, "billing": None}
 
-    new_config = {"notifiers": {"slack": False}}
+    new_config = {"notifiers": {"slack": False, "github": True}}
     response = client.put("/api/v0/user/config", json=new_config)
     assert response.status_code == 200
 

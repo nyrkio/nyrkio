@@ -6,6 +6,7 @@
 /backend/dist
 /backend/nykrio.egg-info/
 /backend/.benchmarks
+/backend/keys/nyrkio.pem
 
 **/__pycache__
 
