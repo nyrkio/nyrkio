@@ -1891,3 +1891,165 @@ def test_extra_info(client):
     assert response.status_code == 200
     json = response.json()
     assert_response_data_matches_expected(json, data)
+
+
+def test_pr_add_result(client):
+    """Ensure that we can add a PR result"""
+    client.login()
+
+    pull_number = 123
+    data = {
+        "timestamp": 1,
+        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "attributes": {
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "12345",
+        },
+        "extra_info": {},
+    }
+
+    response = client.post(f"/api/v0/pulls/benchmark1/{pull_number}", json=[data])
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0]["test_name"] == "benchmark1"
+
+
+def test_pr_delete_result(client):
+    """Ensure that we can delete a PR result"""
+    client.login()
+
+    pull_number = 123
+    data = {
+        "timestamp": 1,
+        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "attributes": {
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "12345",
+        },
+        "extra_info": {},
+    }
+
+    response = client.post(f"/api/v0/pulls/benchmark1/{pull_number}", json=[data])
+    assert response.status_code == 200
+
+    response = client.delete(f"/api/v0/pulls/benchmark1/{pull_number}")
+    assert response.status_code == 200
+
+    response = client.get(f"/api/v0/pulls/benchmark1/{pull_number}")
+    assert response.status_code == 404
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    assert not json
+
+
+def test_pr_add_fails_with_identical_timestamp(client):
+    """Ensure that adding a PR result with an identical timestamp fails"""
+    client.login()
+
+    pull_number = 123
+    data = {
+        "timestamp": 1,
+        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "attributes": {
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "12345",
+        },
+        "extra_info": {},
+    }
+
+    response = client.post(f"/api/v0/pulls/benchmark1/{pull_number}", json=[data])
+    assert response.status_code == 200
+
+    response = client.post(f"/api/v0/pulls/benchmark1/{pull_number}", json=[data])
+    assert response.status_code == 400
+
+
+def test_pr_add_results_with_non_pr_results(client):
+    """Ensure that we can add results at /api/v0/result/ and a pr result"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+            "extra_info": {},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+            "extra_info": {},
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    pull_number = 123
+    pr_data = [
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 20.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+            "extra_info": {},
+        }
+    ]
+
+    response = client.post(f"/api/v0/pulls/benchmark1/{pull_number}", json=pr_data)
+    assert response.status_code == 200
+
+    # Check that we don't see the PR result in the regular results
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 2
+    assert json[0]["timestamp"] == 1
+    assert json[1]["timestamp"] == 2
+
+    # Check we detect the performance change from the PR result, but not the regular results
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 0
+
+    response = client.get(f"/api/v0/pulls/benchmark1/{pull_number}/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 1
+    assert json["benchmark1"][0]["time"] == 3

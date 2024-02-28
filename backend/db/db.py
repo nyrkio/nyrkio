@@ -100,7 +100,7 @@ class MockDBStrategy(ConnectionStrategy):
 
         # Add some default data
         result = DBStore.create_doc_with_metadata(
-            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark"
+            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark", None
         )
         await self.connection.default_data.insert_one(result)
 
@@ -192,7 +192,9 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
-    def create_doc_with_metadata(doc: Dict, user: User, test_name: str) -> Dict:
+    def create_doc_with_metadata(
+        doc: Dict, user: User, test_name: str, pull_number
+    ) -> Dict:
         """
         Return a new document with added metadata, e.g. the version of the schema and the user ID.
 
@@ -248,9 +250,15 @@ class DBStore(object):
         d["user_id"] = user.id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
+
+        if pull_number:
+            d["pull_request"] = pull_number
+
         return d
 
-    async def add_results(self, user: User, test_name: str, results: List[Dict]):
+    async def add_results(
+        self, user: User, test_name: str, results: List[Dict], pull_number=None
+    ):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
@@ -259,7 +267,8 @@ class DBStore(object):
         DBStoreResultExists exception.
         """
         new_list = [
-            DBStore.create_doc_with_metadata(r, user, test_name) for r in results
+            DBStore.create_doc_with_metadata(r, user, test_name, pull_number)
+            for r in results
         ]
         test_results = self.db.test_results
 
@@ -275,12 +284,19 @@ class DBStore(object):
 
                 raise DBStoreResultExists(duplicate_key)
 
-    async def get_results(self, user: User, test_name: str) -> List[Dict]:
+    async def get_results(
+        self, user: User, test_name: str, pull_request=None
+    ) -> List[Dict]:
         """
         Retrieve test results for a given user and test name. The results are
         guaranteed to be sorted by timestamp in ascending order.
 
         If no results are found, return an empty list.
+
+        If pull_request is not None, then return results where the pull_request
+        field is empty or matches the pull_request argument. This is used to
+        filter results so you get A) the historic results of a branch (e.g.
+        main) and B) the pull request result.
         """
         test_results = self.db.test_results
 
@@ -288,13 +304,35 @@ class DBStore(object):
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
-        results = (
-            await test_results.find(
-                {"user_id": user.id, "test_name": test_name}, exclude_projection
+        if pull_request:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "$or": [
+                            {"pull_request": {"$eq": pull_request}},
+                            {"pull_request": {"$exists": False}},
+                        ],
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
             )
-            .sort("timestamp")
-            .to_list(None)
-        )
+        else:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "pull_request": {"$exists": False},
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
+            )
 
         return results
 
