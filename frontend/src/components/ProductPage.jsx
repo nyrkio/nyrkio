@@ -1,6 +1,7 @@
 import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import grafanaDashboard from "../static/Grafana_dashboard.png";
 import image1 from "../static/50776727286_cdd63903f4_w.jpg";
+import { Logo } from "./Logo"
 
 export const ProductPage = () => {
   document.body.classList.add("nyyrikki-banner-right");
@@ -142,11 +143,22 @@ export const ProductPage = () => {
         <div className="row col-md-10 offset-md-1">
           <div className="col">
             <h3 className="nyrkio-accent">The smart way</h3>
+
             <p>
               We founded Nyrkiö to help the left shifting of performance testing
               by bringing to general consumption a technique we've found
               superior to all of the above methods.
             </p>
+
+            </div>
+
+            <div className="col nyrkio-logo-productpage text-center">
+            <Logo />
+            </div>
+
+        </div>
+        <div className="row col-md-10 offset-md-1">
+          <div className="col">
 
             <p>
               Between the two of us we have over 20 years of experience
@@ -155,7 +167,6 @@ export const ProductPage = () => {
               part of Continuous Integration is the right way to catch
               regressions as they happen.
             </p>
-
             <p>
               However, this is only feasible and scalable with sophisticated
               Change Point Detection algorithms that can reliably detect
@@ -193,16 +204,6 @@ export const ProductPage = () => {
         </div>
         <div className="row col-md-10 offset-md-1 mt-5">
           <p>
-            The articles below explain in detail why change detection algorithms
-            like e-divisive are superior in solving this problem. The results
-            speak for themselves. For example the Mongodb paper reports that
-            thanks to this system 17 performance regressions were found and
-            fixed during a year of development. Only 1 regression slipped
-            through the cracks and was later reported by a customer testing the
-            released product.
-          </p>
-
-          <p>
             <i>
               Do you already run perf tests in your CI?{" "}
               <a href="/">Create a free account</a> and upload your historical
@@ -216,6 +217,19 @@ export const ProductPage = () => {
               <a href="mailto:helloworld@nyrkio.com">We can help!</a>
             </i>
           </p>
+
+          <p>&nbsp;</p>
+
+          <p>
+            The articles below explain in detail why change detection algorithms
+            like e-divisive are superior in solving this problem. The results
+            speak for themselves. For example the Mongodb paper reports that
+            thanks to this system 17 performance regressions were found and
+            fixed during a year of development. Only 1 regression slipped
+            through the cracks and was later reported by a customer testing the
+            released product.
+          </p>
+
         </div>
         <div className="row col-md-10 offset-md-1">
           <h3>Technical Articles</h3>

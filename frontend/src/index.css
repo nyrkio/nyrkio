@@ -92,6 +92,32 @@ img.nyyrikki-original-art {
   max-height: 110vh;
 }
 
+div.frontpage div.nyrkio-logo {
+  margin-bottom: 8em;
+}
+
+div.frontpage div.nyrkio-logo img.nyrkio-logo-img{
+max-width: 36rem;
+}
+
+.frontpage .nyrkio-title h1 {
+  font-size: 4em;
+  letter-spacing: 0.5rem;
+  margin-bottom: 0.5em;
+}
+.frontpage .nyrkio-title h5 {
+  font-size: 2em;
+  letter-spacing: 0.1rem;
+}
+
+
+div.nyrkio-logo-productpage div.nyrkio-logo img.nyrkio-logo-img {
+  max-width: 80%;
+  padding: 3em;
+  position: relative;
+  top: -2em;
+}
+
 img.tb-logo {
   max-width: 20em;
   margin-top: 2em;
@@ -236,6 +262,24 @@ button:focus-visible {
 .navbar-light .navbar-nav .nav-link:hover {
   color: var(--nyrkio-active);
 }
+
+
+.navbar-top .nyrkio-logo-img {
+  max-width: 6em;
+  max-height: 1.7em;
+}
+.navbar-top .nyrkio-logo {
+  position: relative;
+  top: -0.5em;
+}
+
+.navbar-left .navbar-nav a.nyrkio-logo-nav-link,
+.navbar-light .navbar-nav a.nyrkio-logo-nav-link {
+  margin: 0px;
+  padding-right: 0.5em;
+
+}
+
 
 .btn-success {
   color: var(--nyrkio-light-gray3);
