@@ -220,6 +220,19 @@ export const ProductPage = () => {
 
           <p>&nbsp;</p>
 
+        </div>
+        <div className="row col-md-10 offset-md-1">
+          <h3>Watch Nyrkiö users in action</h3>
+          <p>Some Nyrkiö users have chosen to <a href="/public">publish their performance testing results</a>.
+             This way anyone can verify the performance of their software.</p>
+
+          <p>To see Nyrkiö in action and what it can do for you:<br />
+             <a href="/public">More public test results from other Nyrkiö users...</a>
+          </p>
+
+        </div>
+        <div className="row col-md-10 offset-md-1">
+          <h3>Technical Articles</h3>
           <p>
             The articles below explain in detail why change detection algorithms
             like e-divisive are superior in solving this problem. The results
@@ -229,10 +242,6 @@ export const ProductPage = () => {
             through the cracks and was later reported by a customer testing the
             released product.
           </p>
-
-        </div>
-        <div className="row col-md-10 offset-md-1">
-          <h3>Technical Articles</h3>
           <ul>
             <li>
               <a href="https://arxiv.org/pdf/2003.00584.pdf">

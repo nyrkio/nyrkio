@@ -7,6 +7,22 @@ import { NoMatch } from "./NoMatch";
 import { createShortNames } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 
+const SidePanel = () => {
+  const [content, setContent] = useState("");
+
+  return (
+    <div className="navbar-nav navbar-left justify-content-start col-sm-3 pe-1 p-1">
+      {/*<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">*/}
+      <Link to="/" className="nav-link">
+        My Dashboard
+      </Link>
+      <Link to="/public" className="nav-link">
+        Public Dashboards
+      </Link>
+    </div>
+  );
+};
+
 export const Breadcrumb = ({ testName, baseUrls }) => {
   const createItems = () => {
     if (testName === undefined) {
@@ -166,6 +182,7 @@ export const Dashboard = () => {
 
   return (
     <>
+      <SidePanel />
       <Breadcrumb
         testName={prefix}
         baseUrls={{ tests: "tests", testRoot: "/", testRootTitle: "Tests" }}
@@ -200,22 +217,6 @@ export const Dashboard = () => {
                   </Link>
                 </div>
               </div>
-
-              <div className="card">
-                <div className="card-body">
-                &nbsp;
-                 </div>
-              </div>
-
-              <div className="card">
-                <div className="card-header">Public Test Results</div>
-                <div className="card-body">
-                  <a href="/public">
-                    Public Test Results
-                  </a>
-                </div>
-              </div>
-
 
             </div>
           </>

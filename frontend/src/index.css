@@ -240,7 +240,7 @@ button:focus-visible {
 .navbar-top {
   border-bottom: 1px solid var(--nyrkio-light-gray2);
   background-color: transparent;
-  margin-bottom: 2em;
+  margin-bottom: 1em;
 }
 
 .border-top {
