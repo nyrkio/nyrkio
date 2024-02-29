@@ -284,7 +284,14 @@ export const SingleResultWithTestname = ({
         <>
           {!isPublicDashboard && (
             <div className="row">
-              <TestSettings testName={testName} />
+              <TestSettings
+                testName={testName}
+                attributes={
+                  displayData.length > 0
+                    ? displayData[displayData.length - 1].attributes
+                    : undefined
+                }
+              />
             </div>
           )}
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
