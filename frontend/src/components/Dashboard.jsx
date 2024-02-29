@@ -1,10 +1,5 @@
-import { createContext, useEffect, useState } from "react";
-import {
-  BrowserRouter as Router,
-  Link,
-  useParams,
-  useLocation,
-} from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
@@ -83,6 +78,7 @@ export const TestList = ({
   }
 
   return shortNames.map((name, index) => {
+    const displayName = displayNames[index];
     var longName = prefix + "/" + name;
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
@@ -102,7 +98,7 @@ export const TestList = ({
       return (
         <li className="list-group-item">
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
-            {displayNames[index]}
+            <TestListEntry name={displayName} />
           </Link>
         </li>
       );
@@ -339,4 +335,71 @@ export const SingleResult = () => {
       isPublicDashboard={false}
     />
   );
+};
+
+const nameIsGitHubRepo = (name) => {
+  return name.toLowerCase().startsWith("https://github.com/");
+};
+
+// Create a test list entry element. If the name for this entry
+// looks like a GitHub repo, fetch the avatar URL and display it
+// alongside the name.
+//
+// TODO(mfleming) Fetching the avatar url is a really quick way
+// to exhaust the GitHub API rate limit. We should cache these.
+const TestListEntry = ({ name }) => {
+  const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState(undefined);
+  const [isGitHubUrl, setIsGitHubUrl] = useState(false);
+
+  const fetchImage = async (repo) => {
+    const response = await fetch(`https://api.github.com/repos/${repo}`);
+    if (response.status !== 200) {
+      console.error("Failed to fetch GitHub repo data: " + response.status);
+      return;
+    }
+
+    const data = await response.json();
+    if (data.owner.avatar_url) {
+      setImageUrl(data.owner.avatar_url);
+    }
+  };
+
+  useEffect(() => {
+    if (nameIsGitHubRepo(name)) {
+      setIsGitHubUrl(true);
+      const url = name;
+      const repo = url.replace("https://github.com/", "");
+      setLoading(true);
+      fetchImage(repo).finally(() => {
+        setLoading(false);
+      });
+    }
+  }, []);
+
+  if (!isGitHubUrl) {
+    return <>{name}</>;
+  }
+
+  if (loading) {
+    return <div>Loading</div>;
+  }
+
+  if (imageUrl) {
+    return (
+      <div className="row justify-content-center">
+        <div className="col-1">
+          <img
+            src={imageUrl}
+            alt="GitHub repo avatar"
+            title="GitHub repo avatar"
+            style={{ width: "30px", height: "30px" }}
+          />
+        </div>
+        <div className="col">{name}</div>
+      </div>
+    );
+  } else {
+    return <>{name}</>;
+  }
 };
