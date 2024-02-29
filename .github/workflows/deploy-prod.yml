@@ -73,6 +73,7 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           ENV: prod
         run: |
+          echo "$NYRKIO_ENV_PROD" > .env.backend
           # Derived from https://github.com/ArwynFr/actions-docker-context/blob/master/action.yml
           mkdir -p $HOME/.ssh
           if [ -z "$SSH_AGENT_PID" ]; then
