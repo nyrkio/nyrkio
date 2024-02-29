@@ -99,6 +99,11 @@ export const SampleData = () => {
       <div className="row">
         {loading ? <div>Loading...</div> : displayTigerbeetleData()}
       </div>
+      <hr />
+      <div className="row">
+        <a href="/public">More public test results from other Nyrkiö users...</a>
+      </div>
+      <hr />
     </div>
   );
 };

@@ -190,6 +190,7 @@ export const Dashboard = () => {
                   </ul>
                 </div>
               </div>
+
               <div className="card">
                 <div className="card-body create-new-test">
                   <Link to="/docs/getting-started" className="btn btn-success">
@@ -199,6 +200,23 @@ export const Dashboard = () => {
                   </Link>
                 </div>
               </div>
+
+              <div className="card">
+                <div className="card-body">
+                &nbsp;
+                 </div>
+              </div>
+
+              <div className="card">
+                <div className="card-header">Public Test Results</div>
+                <div className="card-body">
+                  <a href="/public">
+                    Public Test Results
+                  </a>
+                </div>
+              </div>
+
+
             </div>
           </>
         )}
