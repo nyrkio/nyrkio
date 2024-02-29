@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react";
 import { Button } from "react-bootstrap";
 
-export const TestSettings = ({ testName }) => {
+// Configure the test settings for a given test.  attributes is the attributes
+// field for the most recent test result, and is used when configuring the
+// settings for the first time.
+export const TestSettings = ({ testName, attributes }) => {
   const [publicTest, setPublicTest] = useState(false);
   const [testConfig, setTestConfig] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,7 +25,7 @@ export const TestSettings = ({ testName }) => {
     console.debug("Fetched config: " + JSON.stringify(data));
     setTestConfig(data);
 
-    if (data[0].public) {
+    if (data.length > 0 && data[0].public) {
       setPublicTest(true);
     }
   };
@@ -34,11 +37,27 @@ export const TestSettings = ({ testName }) => {
     });
   }, []);
 
-  if (loading) return <> </>;
+  if (loading || attributes === undefined) return <> </>;
 
   const handleToggle = async (value) => {
-    var newConfig = structuredClone(testConfig);
+    var newConfig;
+    if (testConfig.length > 0) {
+      newConfig = structuredClone(testConfig);
+    } else {
+      // If there's no existing config, use the attributes from the most recent
+      // test result.
+      newConfig = [
+        {
+          attributes: {
+            git_repo: attributes.git_repo,
+            branch: attributes.branch,
+          },
+        },
+      ];
+    }
+
     newConfig[0].public = value;
+
     console.debug("Sending new config: " + JSON.stringify(newConfig));
     const response = await fetch("/api/v0/config/" + testName, {
       method: "POST",
