@@ -41,6 +41,26 @@ jobs:
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
+  deployment:
+    needs: docker-images
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
       - name: docker compose up
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
@@ -66,6 +86,4 @@ jobs:
           echo "$SSH_PRIVATE_KEY" | ssh-add -
           docker context create $ENV --docker "host=ssh://$SSH_USER@nyrkio.com"
           docker context use $ENV
-
-          echo "Deploy IMAGE_TAG to $ENV" >> $GITHUB_OUTPUT
           docker compose -f docker-compose.yml up -d
