@@ -2,8 +2,6 @@
 # Based on https://jacobian.org/til/github-actions-poetry/
 name: Backend CI
 on:
-  push:
-    branches: [main]
   pull_request:
 
 jobs:
