@@ -134,22 +134,32 @@ export const Dashboard = () => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
+
+    if (response.status != 200) {
+      console.error("Failed to fetch test names: " + response.status);
+      return;
+    }
+
     const resultData = await response.json();
     resultData.map((element) => {
       const test_name = element.test_name;
       setTestNames((prevState) => [...prevState, test_name]);
     });
+    setLoading(false);
   };
 
   useEffect(() => {
     setLoading(true);
-    fetchData().finally(() => {
-      setLoading(false);
-    });
+    fetchData();
   }, []);
 
   if (loading) {
     return <div>Loading</div>;
+  }
+
+  // Check for invalid test name in url
+  if (prefix !== undefined && !validTestName(prefix, testNames)) {
+    return <NoMatch />;
   }
 
   const shortNames = createShortNames(prefix, testNames);
@@ -227,7 +237,7 @@ export const SingleResultWithTestname = ({
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    if (response.status == 404) {
+    if (response.status != 200) {
       setNotFound(true);
       return;
     }
@@ -409,4 +419,10 @@ const TestListEntry = ({ name }) => {
   } else {
     return <>{name}</>;
   }
+};
+
+// Helper function to catch invalid urls that contain non-existent test names
+const validTestName = (name, testNames) => {
+  const match = testNames.filter((test) => test.startsWith(name));
+  return match.length > 0;
 };
