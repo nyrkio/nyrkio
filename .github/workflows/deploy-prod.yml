@@ -1,4 +1,4 @@
-name: Docker Images (Prod)
+name: Deploy (Prod)
 on:
   push:
     branches: [main]
@@ -40,3 +40,32 @@ jobs:
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: docker compose up
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+          AWS_REGION: eu-north-1
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          NYRKIO_ENV_PROD: ${{ secrets.NYRKIO_ENV_PROD }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ENV: prod
+        run: |
+          # Derived from https://github.com/ArwynFr/actions-docker-context/blob/master/action.yml
+          mkdir -p $HOME/.ssh
+          if [ -z "$SSH_AGENT_PID" ]; then
+            eval $(ssh-agent)
+            echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+            echo "SSH_AGENT_PID=SSH_AGENT_PID" >> $GITHUB_ENV
+          fi
+
+          echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+
+          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          docker context create $ENV --docker "host=ssh://$SSH_USER@nyrkio.com"
+          docker context use $ENV
+
+          echo "Deploy IMAGE_TAG to $ENV" >> $GITHUB_OUTPUT
+          docker compose -f docker-compose.yml up -d
