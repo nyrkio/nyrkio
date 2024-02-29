@@ -16,7 +16,7 @@ from backend.api.admin import admin_router
 from backend.api.config import config_router
 from backend.api.model import TestResults
 from backend.api.public import public_router
-from backend.api.pullrequest import pr_router
+from backend.api.pull_request import pr_router
 from backend.api.user import user_router
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 from backend.notifiers.slack import SlackNotifier
