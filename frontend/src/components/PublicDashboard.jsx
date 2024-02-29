@@ -48,13 +48,15 @@ const TableOrResult = ({ prefix, publicData }) => {
             testRootTitle: "GitHub Repos",
           }}
         />
-        <TestList
-          baseUrls={{ tests: "public", result: "public" }}
-          testNames={publicData}
-          shortNames={shortNames}
-          displayNames={shortNames.map((name) => decodeURIComponent(name))}
-          prefix={prefix}
-        />
+        <div className="col-md-7">
+          <TestList
+            baseUrls={{ tests: "public", result: "public" }}
+            testNames={publicData}
+            shortNames={shortNames}
+            displayNames={shortNames.map((name) => decodeURIComponent(name))}
+            prefix={prefix}
+          />
+        </div>
       </>
     );
   }
