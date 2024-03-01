@@ -2,22 +2,17 @@
 
 from typing import Dict, List, Union
 
-from backend.core.core import (
-    PerformanceTestResult,
-    PerformanceTestResultSeries,
-    ResultMetric,
-)
-from backend.core.config import Config
-
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 
 from backend.auth import auth
 from backend.api.admin import admin_router
+from backend.api.changes import calc_changes
 from backend.api.config import config_router
 from backend.api.model import TestResults
 from backend.api.public import public_router
 from backend.api.pull_request import pr_router
 from backend.api.user import user_router
+from backend.core.core import Config
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 from backend.notifiers.slack import SlackNotifier
 
@@ -149,31 +144,6 @@ async def add_result(
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
     return {}
-
-
-async def calc_changes(
-    test_name, results, disabled=None, core_config=None, notifiers=None
-):
-    series = PerformanceTestResultSeries(test_name, core_config)
-
-    # TODO(matt) - iterating like this is silly, we should just be able to pass
-    # the results in batch.
-    for r in results:
-        metrics = []
-        for m in r["metrics"]:
-            # Metrics can opt out of change detection
-            if disabled and m["name"] in disabled:
-                continue
-
-            rm = ResultMetric(name=m["name"], unit=m["unit"], value=m["value"])
-            metrics.append(rm)
-
-        result = PerformanceTestResult(
-            timestamp=r["timestamp"], metrics=metrics, attributes=r["attributes"]
-        )
-        series.add_result(result)
-
-    return await series.calculate_changes(notifiers)
 
 
 @api_router.get("/default/results")

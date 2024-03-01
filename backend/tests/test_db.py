@@ -600,3 +600,21 @@ def test_pull_number():
     assert len(response) == 2
     assert response[0]["timestamp"] == 2
     assert response[1]["timestamp"] == 3
+
+
+def test_pr_add_tests():
+    """Ensure that we can add tests for a pr and commit"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_names = ["benchmark1", "benchmark2"]
+    pull_number = 123
+    git_commit = "123456"
+
+    asyncio.run(store.add_pr_test_name(user, git_commit, pull_number, test_names))
+    results = asyncio.run(store.get_pr_test_names(user, git_commit, pull_number))
+
+    assert results == test_names

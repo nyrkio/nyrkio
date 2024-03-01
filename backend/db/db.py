@@ -2,6 +2,7 @@
 
 from abc import abstractmethod, ABC
 from collections import OrderedDict
+import logging
 import os
 from typing import Dict, List, Optional, Any
 
@@ -618,6 +619,48 @@ class DBStore(object):
         public_results = self.db.public_results
         result = await public_results.find_one({"_id": public_test_name})
         return result["user_id"] if result else None
+
+    async def add_pr_test_name(self, user, git_commit, pull_number, test_name):
+        """
+        Add a list of test_names for a given pull request and git commit.
+
+        Because the pull request API only allows results for a single test name
+        to be added at a time, we may need to update the existing list of test
+        names for a given pull request and git commit.
+        """
+        pr_tests = self.db.pr_tests
+        id = OrderedDict(
+            {
+                "git_commit": git_commit,
+                "pull_number": pull_number,
+                "user_id": user.id,
+            }
+        )
+
+        # Push a new test name onto the list
+        logging.error(f"pushing test_name: {test_name} to {id}")
+        await pr_tests.update_one(
+            {"_id": id}, {"$push": {"test_names": test_name}}, upsert=True
+        )
+
+
+    async def get_pr_test_names(self, user, git_commit, pull_number):
+        """
+        Get a list of test_names for a given pull request and git commit.
+
+        Returns None if no results are found.
+        """
+        pr_tests = self.db.pr_tests
+        id = OrderedDict(
+            {
+                "git_commit": git_commit,
+                "pull_number": pull_number,
+                "user_id": user.id,
+            }
+        )
+        test_names = await pr_tests.find_one({"_id": id})
+        logging.error(f"Looking up test_names for {id} and found {test_names}")
+        return test_names["test_names"] if test_names else None
 
 
 # Will be patched by conftest.py if we're running tests

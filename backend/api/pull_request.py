@@ -21,6 +21,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.model import TestResults
 from backend.auth import auth
+from backend.api.changes import calc_changes
 from backend.core.config import Config
 from backend.db.db import DBStoreResultExists, User, DBStore
 from backend.notifiers.github import GitHubCommentNotifier
@@ -28,27 +29,34 @@ from backend.notifiers.github import GitHubCommentNotifier
 pr_router = APIRouter()
 
 
-@pr_router.get("/pulls/{pull_number}/changes")
+@pr_router.get("/pulls/{pull_number}/changes/{git_commit}")
 async def get_pr_changes(
-    test_name: str,
     pull_number: int,
+    git_commit: str,
     notify: Union[int, None] = None,
     user: User = Depends(auth.current_active_user),
 ):
     store = DBStore()
-    results = await store.get_results(user, test_name, pull_number)
-    disabled = await store.get_disabled_metrics(user, test_name)
+    test_names = await store.get_pr_test_names(user, git_commit, pull_number)
+    if not test_names:
+        raise HTTPException(status_code=404, detail="Not Found")
 
-    config = await store.get_user_config(user)
-    config = config.get("core", None)
-    if config:
-        config = Config(**config)
+    changes = []
+    user_config = await store.get_user_config(user)
+    for test_name in test_names:
+        disabled = await store.get_disabled_metrics(user, test_name)
+        results = await store.get_results(user, test_name, pull_number)
+        core_config = user_config.get("core", {})
+        if core_config:
+            core_config = Config(**core_config)
+        ch = await calc_changes(test_name, results, disabled, core_config)
+        if ch:
+            changes.append(ch)
 
-    notifiers = []
     if notify:
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
-        gh = config.get("github", {})
+        gh = user_config.get("github", {})
         if gh:
             access_token = None
             for account in user.oauth_accounts:
@@ -58,14 +66,12 @@ async def get_pr_changes(
             if access_token is None:
                 raise HTTPException(status_code=400, detail="GitHub not configured")
 
-            notifiers.append(GitHubCommentNotifier(access_token, pull_number))
+            GitHubCommentNotifier(access_token, pull_number, results)
 
-    from backend.api.api import calc_changes
-
-    return await calc_changes(test_name, results, disabled, config, notifiers)
+    return changes
 
 
-@pr_router.post("/pulls/{test_name:path}/{pull_number}")
+@pr_router.post("/pulls/{pull_number}/result/{test_name:path}")
 async def add_pr_result(
     test_name: str,
     test_result: TestResults,
@@ -82,8 +88,12 @@ async def add_pr_result(
             status_code=400, detail="Result for this pull request already exists"
         )
 
+    # mfleming: The expectation is that this is usually a singleton list.
+    for r in results:
+        await store.add_pr_test_name(user, r.attributes["git_commit"], pull_number, test_name)
 
-@pr_router.delete("/pulls/{test_name:path}/{pull_number}")
+
+@pr_router.delete("/pulls/{pull_number}/result/{test_name:path}")
 async def delete_pr_result(
     test_name: str,
     timestamp: Union[int, None] = None,
@@ -94,7 +104,7 @@ async def delete_pr_result(
     return []
 
 
-@pr_router.get("/pulls/{test_name:path}/{pull_number}")
+@pr_router.get("/pulls/{pull_number}/result/{test_name:path}")
 async def get_pr_result(test_name: str, user: User = Depends(auth.current_active_user)):
     store = DBStore()
     test_names = await store.get_test_names(user)
