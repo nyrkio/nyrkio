@@ -2,6 +2,6 @@ FROM certbot/certbot:latest
 
 COPY certbot/check-certs.sh /check-certs.sh
 
-# TODO(mfleming) remove me
-ENV DOMAIN=staging.nyrkio.com
+ARG SSL_DOMAIN
+ENV DOMAIN=${SSL_DOMAIN}
 ENTRYPOINT ["/check-certs.sh"]
