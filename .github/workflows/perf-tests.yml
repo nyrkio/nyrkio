@@ -52,6 +52,9 @@ jobs:
         run: |
           export GIT_TARGET_BRANCH=${GITHUB_BASE_REF}
           export GIT_COMMIT_TIME=$(git show -s --format=%ct $GIT_COMMIT)
+          echo "commit is $GIT_COMMIT"
+          echo "commit time is $GIT_COMMIT_TIME"
+          echo "target branch is $GIT_TARGET_BRANCH"
           echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
