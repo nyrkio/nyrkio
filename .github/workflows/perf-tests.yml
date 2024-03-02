@@ -48,7 +48,10 @@ jobs:
           NYRKIO_PASSWORD: ${{ secrets.NYRKIO_PASSWORD }}
           # https://stackoverflow.com/a/62436027
           PULL_NUMBER: ${{ github.event.number }}
+          GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
+          export GIT_TARGET_BRANCH=${GITHUB_BASE_REF}
+          export GIT_COMMIT_TIME=$(git show -s --format=%ct $GIT_COMMIT)
           echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d

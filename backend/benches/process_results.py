@@ -21,24 +21,22 @@ def calculate_unit(value):
     # Round to 3 decimal places
     return round(value, 3), unit
 
+GIT_COMMIT_TIME = os.environ.get("GIT_COMMIT_TIME")
+GIT_COMMIT = os.environ.get("GIT_COMMIT")
+GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
 
-def create_nyrkio_payload(commit_info, benchmark, extra_info):
-    # convert date to epoch
-    timestamp = int(
-        datetime.strptime(commit_info["time"], "%Y-%m-%dT%H:%M:%S%z").timestamp()
-    )
-
+def create_nyrkio_payload(benchmark, extra_info):
     metrics = []
     for m in ("median", "mean", "max", "min", "stddev", "iqr"):
         value, unit = calculate_unit(benchmark["stats"][m])
         metrics.append({"name": m, "value": value, "unit": unit})
 
     return {
-        "timestamp": timestamp,
+        "timestamp": GIT_COMMIT_TIME,
         "metrics": metrics,
         "attributes": {
-            "git_commit": commit_info["id"],
-            "branch": commit_info["branch"],
+            "git_commit": GIT_COMMIT,
+            "branch": GIT_TARGET_BRANCH,
             "git_repo": "https://github.com/nyrkio/nyrkio",
         },
         "extra_info": extra_info,
@@ -96,7 +94,7 @@ def main(result_filename, extra_info_filename):
         test_name = test_name.replace("::", "/")
         test_names.append(test_name)
 
-        payload = create_nyrkio_payload(results["commit_info"], r, extra_info)
+        payload = create_nyrkio_payload(r, extra_info)
         post_data[test_name] = [payload]
 
     for test_name in test_names:
