@@ -2067,3 +2067,42 @@ def test_pulls_changes_on_non_existent_pr(client):
 
     response = client.get("/api/v0/pulls/123/changes?git_commit=12345")
     assert response.status_code == 404
+
+
+def test_results_returns_sorted_test_names(client):
+    """Ensure that the results endpoint returns sorted test names"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+    ]
+
+    for b in ("benchmark3", "benchmark2", "benchmark1"):
+        response = client.post(f"/api/v0/result/{b}", json=data)
+        assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+    json = response.json()
+    assert json == [
+        {"test_name": "benchmark1"},
+        {"test_name": "benchmark2"},
+        {"test_name": "benchmark3"},
+    ]

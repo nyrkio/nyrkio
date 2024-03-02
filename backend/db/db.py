@@ -340,13 +340,25 @@ class DBStore(object):
     async def get_test_names(self, user: User = None) -> Any:
         """
         Get a list of all test names for a given user. If user is None then
-        return a dictionary of all test names for all users.
+        return a dictionary of all test names for all users. Entries are returned
+        in sorted order.
 
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
         if user:
-            return await test_results.distinct("test_name", {"user_id": user.id})
+            results = await test_results.aggregate(
+                [
+                    {"$match": {"user_id": user.id}},
+                    {"$group": {"_id": None, "names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_name": 1}},
+                    {"$project": {"_id": 0, "test_names": "$names"}},
+                ],
+            ).to_list(None)
+            # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
+            sorted_list = results[0]["test_names"] if results else []
+            sorted_list.sort()
+            return sorted_list
         else:
             results = await test_results.aggregate(
                 [
