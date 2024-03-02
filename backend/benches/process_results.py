@@ -45,10 +45,10 @@ def create_nyrkio_payload(commit_info, benchmark, extra_info):
     }
 
 
-def submit_results(test_name, results, token):
+def submit_results(test_name, results, token, pull_number):
     # Submit results
     response = requests.post(
-        f"https://nyrkio.com/api/v0/result/{test_name}",
+        f"https://staging.nyrkio.com/api/v0/pulls/{pull_number}/result/{test_name}",
         json=results,
         headers={
             "Authorization": f"Bearer {token}",
@@ -69,14 +69,15 @@ def main(result_filename, extra_info_filename):
 
     username = os.environ.get("NYRKIO_USERNAME")
     password = os.environ.get("NYRKIO_PASSWORD")
+    pull_number = os.environ.get("PULL_NUMBER")
 
-    if not username or not password:
-        print("NYRKIO_USERNAME and NYRKIO_PASSWORD must be set")
+    if not username or not password or not pull_number:
+        print("NYRKIO_USERNAME and NYRKIO_PASSWORD and PULL_NUMBER must be set")
         sys.exit(1)
 
     # Get JWT token
     response = requests.post(
-        "https://nyrkio.com/api/v0/auth/jwt/login",
+        "https://staging.nyrkio.com/api/v0/auth/jwt/login",
         data={"username": username, "password": password},
     )
     response.raise_for_status()
@@ -95,7 +96,7 @@ def main(result_filename, extra_info_filename):
         post_data[test_name] = [payload]
 
     for test_name in test_names:
-        submit_results(test_name, post_data[test_name], token)
+        submit_results(test_name, post_data[test_name], token, pull_number)
 
 
 if __name__ == "__main__":
