@@ -21,18 +21,28 @@ def calculate_unit(value):
     # Round to 3 decimal places
     return round(value, 3), unit
 
-GIT_COMMIT_TIME = os.environ.get("GIT_COMMIT_TIME")
 GIT_COMMIT = os.environ.get("GIT_COMMIT")
 GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
 
 def create_nyrkio_payload(benchmark, extra_info):
+    # The loops we need to jump through to get the commit time are
+    # ridiculous. GitHub actions do a shallow clone so we can't use
+    # git show -s --format=%ct HEAD. Instead we have to use the
+    # REST API.
+    response = requests.get(
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{GIT_COMMIT}"
+    )
+    response.raise_for_status()
+    timestamp = int(datetime.strptime(response.json()["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z").timestamp())
+    print(f"Timestamp is {timestamp}")
+
     metrics = []
     for m in ("median", "mean", "max", "min", "stddev", "iqr"):
         value, unit = calculate_unit(benchmark["stats"][m])
         metrics.append({"name": m, "value": value, "unit": unit})
 
     return {
-        "timestamp": int(GIT_COMMIT_TIME),
+        "timestamp": timestamp,
         "metrics": metrics,
         "attributes": {
             "git_commit": GIT_COMMIT,
