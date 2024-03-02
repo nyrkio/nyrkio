@@ -226,6 +226,8 @@ class GitHubReport(Report):
                 await GitHubReport.add_github_commit_msg(cp.attributes)
             except GitHubRateLimitExceededError as e:
                 logging.error(e)
+            except httpx.ConnectTimeout as e:
+                logging.error(f"Connection to api.github.com timed out: {e}")
 
         report = super().produce_report(test_name, report_type)
         return report
