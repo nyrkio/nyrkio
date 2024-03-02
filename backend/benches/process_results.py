@@ -22,10 +22,23 @@ def calculate_unit(value):
     return round(value, 3), unit
 
 
-def create_nyrkio_payload(commit_info, benchmark, extra_info):
-    # convert date to epoch
+GIT_COMMIT = os.environ.get("GIT_COMMIT")
+GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
+
+
+def create_nyrkio_payload(benchmark, extra_info):
+    # The loops we need to jump through to get the commit time are
+    # ridiculous. GitHub actions do a shallow clone so we can't use
+    # git show -s --format=%ct HEAD. Instead we have to use the
+    # REST API.
+    response = requests.get(
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{GIT_COMMIT}"
+    )
+    response.raise_for_status()
     timestamp = int(
-        datetime.strptime(commit_info["time"], "%Y-%m-%dT%H:%M:%S%z").timestamp()
+        datetime.strptime(
+            response.json()["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z"
+        ).timestamp()
     )
 
     metrics = []
@@ -37,25 +50,46 @@ def create_nyrkio_payload(commit_info, benchmark, extra_info):
         "timestamp": timestamp,
         "metrics": metrics,
         "attributes": {
-            "git_commit": commit_info["id"],
-            "branch": commit_info["branch"],
+            "git_commit": GIT_COMMIT,
+            "branch": GIT_TARGET_BRANCH,
             "git_repo": "https://github.com/nyrkio/nyrkio",
         },
         "extra_info": extra_info,
     }
 
 
-def submit_results(test_name, results, token):
-    # Submit results
-    response = requests.post(
-        f"https://nyrkio.com/api/v0/result/{test_name}",
-        json=results,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Content-Type": "application/json",
-        },
-    )
+def raise_for_status(response, test_name):
+    if response.status_code != 200:
+        print(
+            f"Failed to submit results for {test_name}"
+            f" with status {response.status_code}"
+        )
+        print(response.json())
     response.raise_for_status()
+
+
+def submit_results(test_name, results, token, pull_number):
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-type": "application/json",
+    }
+
+    url = f"https://nyrkio.com/api/v0/result/{test_name}"
+
+    if pull_number:
+        repo = "nyrkio/nyrkio"
+        url = f"https://nyrkio.com/api/v0/pulls/{repo}/{pull_number}/result/{test_name}"
+
+    response = requests.post(url, json=results, headers=headers)
+    raise_for_status(response, test_name)
+
+    if pull_number:
+        # Trigger GitHub PR comment notification
+        response = requests.get(
+            f"https://nyrkio.com/api/v0/pulls/{repo}/{pull_number}/changes/{GIT_COMMIT}?notify=1",
+            headers=headers,
+        )
+        raise_for_status(response, test_name)
 
 
 def main(result_filename, extra_info_filename):
@@ -69,6 +103,7 @@ def main(result_filename, extra_info_filename):
 
     username = os.environ.get("NYRKIO_USERNAME")
     password = os.environ.get("NYRKIO_PASSWORD")
+    pull_number = os.environ.get("PULL_NUMBER")
 
     if not username or not password:
         print("NYRKIO_USERNAME and NYRKIO_PASSWORD must be set")
@@ -91,11 +126,11 @@ def main(result_filename, extra_info_filename):
         test_name = test_name.replace("::", "/")
         test_names.append(test_name)
 
-        payload = create_nyrkio_payload(results["commit_info"], r, extra_info)
+        payload = create_nyrkio_payload(r, extra_info)
         post_data[test_name] = [payload]
 
     for test_name in test_names:
-        submit_results(test_name, post_data[test_name], token)
+        submit_results(test_name, post_data[test_name], token, pull_number)
 
 
 if __name__ == "__main__":
