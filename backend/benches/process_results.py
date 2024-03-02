@@ -55,6 +55,10 @@ def submit_results(test_name, results, token, pull_number):
             "Content-Type": "application/json",
         },
     )
+    if response.status_code != 200:
+        print(f"Failed to submit results for {test_name}"
+              f" with status {response.status_code}")
+        print(response.json())
     response.raise_for_status()
 
 
