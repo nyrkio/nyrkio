@@ -655,12 +655,11 @@ class DBStore(object):
             {"_id": id}, {"$push": {"test_names": test_name}}, upsert=True
         )
 
-
-    async def get_pr_test_names(self, user, git_commit, pull_number):
+    async def get_pr_test_names(self, user, git_commit, pull_number) -> List:
         """
         Get a list of test_names for a given pull request and git commit.
 
-        Returns None if no results are found.
+        Returns an empty list if no results are found.
         """
         pr_tests = self.db.pr_tests
         id = OrderedDict(
@@ -672,7 +671,7 @@ class DBStore(object):
         )
         test_names = await pr_tests.find_one({"_id": id})
         logging.error(f"Looking up test_names for {id} and found {test_names}")
-        return test_names["test_names"] if test_names else None
+        return test_names["test_names"][0] if test_names else []
 
 
 # Will be patched by conftest.py if we're running tests

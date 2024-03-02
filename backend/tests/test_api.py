@@ -1911,15 +1911,17 @@ def test_pr_add_result(client):
 
     benchmark_names = ["benchmark1", "benchmark2"]
     for benchmark_name in benchmark_names:
-        response = client.post(f"/api/v0/pulls/{pull_number}/result/{benchmark_name}", json=[data])
+        response = client.post(
+            f"/api/v0/pulls/{pull_number}/result/{benchmark_name}", json=[data]
+        )
         assert response.status_code == 200
 
     response = client.get("/api/v0/pulls")
     assert response.status_code == 200
     json = response.json()
     assert len(json) == 2
-    assert json[0]["test_name"] == "benchmark1"
-    assert json[1]["test_name"] == "benchmark2"
+    test_names = [j["test_name"] for j in json]
+    assert test_names == benchmark_names
 
 
 def test_pr_delete_result(client):
@@ -1938,7 +1940,9 @@ def test_pr_delete_result(client):
         "extra_info": {},
     }
 
-    response = client.post(f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data])
+    response = client.post(
+        f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data]
+    )
     assert response.status_code == 200
 
     response = client.delete(f"/api/v0/pulls/{pull_number}/result/benchmark1")
@@ -1969,10 +1973,14 @@ def test_pr_add_fails_with_identical_timestamp(client):
         "extra_info": {},
     }
 
-    response = client.post(f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data])
+    response = client.post(
+        f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data]
+    )
     assert response.status_code == 200
 
-    response = client.post(f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data])
+    response = client.post(
+        f"/api/v0/pulls/{pull_number}/result/benchmark1", json=[data]
+    )
     assert response.status_code == 400
 
 
@@ -2033,7 +2041,9 @@ def test_pr_add_results_with_non_pr_results(client):
         }
     ]
 
-    response = client.post(f"/api/v0/pulls/{pull_number}/result/benchmark1", json=pr_data)
+    response = client.post(
+        f"/api/v0/pulls/{pull_number}/result/benchmark1", json=pr_data
+    )
     assert response.status_code == 200
 
     # Check that we don't see the PR result in the regular results
@@ -2051,21 +2061,20 @@ def test_pr_add_results_with_non_pr_results(client):
     assert "benchmark1" in json
     assert len(json["benchmark1"]) == 0
 
-    response = client.get(
-        f"/api/v0/pulls/{pull_number}/changes/{git_commit}"
-    )
+    response = client.get(f"/api/v0/pulls/{pull_number}/changes/{git_commit}")
     assert response.status_code == 200
     json = response.json()
-    assert "benchmark1" in list(filter(lambda x: x["test_name"] == "benchmark1", json))
-    assert len(json["benchmark1"]) == 1
-    assert json["benchmark1"][0]["time"] == 3
+    assert list(filter(lambda x: "benchmark1" in x.keys(), json))
+    assert len(json) == 1
+    result = json[0]
+    assert result["benchmark1"][0]["time"] == 3
 
 
 def test_pulls_changes_on_non_existent_pr(client):
     """Ensure that we get a 404 for changes on a non-existent PR"""
     client.login()
 
-    response = client.get("/api/v0/pulls/123/changes?git_commit=12345")
+    response = client.get("/api/v0/pulls/123/changes/1234")
     assert response.status_code == 404
 
 

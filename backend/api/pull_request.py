@@ -15,6 +15,7 @@ from the regular results API. Given a historical series of test results, the PR
 API will detect performance changes in the most recent result.
 """
 
+import logging
 from typing import Union
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -39,13 +40,25 @@ async def get_pr_changes(
     store = DBStore()
     test_names = await store.get_pr_test_names(user, git_commit, pull_number)
     if not test_names:
-        raise HTTPException(status_code=404, detail="Not Found")
+        raise HTTPException(status_code=404, detail="No test results found")
 
     changes = []
+    repo = None
     user_config = await store.get_user_config(user)
     for test_name in test_names:
         disabled = await store.get_disabled_metrics(user, test_name)
         results = await store.get_results(user, test_name, pull_number)
+        if not repo:
+            # We don't actually enforce this anywhere but we assume that all
+            # results are from the same repository.
+            values = {r["attributes"]["git_repo"] for r in results}
+            if len(values) != 1:
+                logging.error(
+                    f"Multiple git_repo values in pull test results: {values}"
+                )
+
+            repo = values.pop()
+
         core_config = user_config.get("core", {})
         if core_config:
             core_config = Config(**core_config)
@@ -57,7 +70,7 @@ async def get_pr_changes(
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
         gh = user_config.get("github", {})
-        if gh:
+        if gh and repo.startswith("https://github.com"):
             access_token = None
             for account in user.oauth_accounts:
                 if account.oauth_name == "github":
@@ -66,7 +79,8 @@ async def get_pr_changes(
             if access_token is None:
                 raise HTTPException(status_code=400, detail="GitHub not configured")
 
-            GitHubCommentNotifier(access_token, pull_number, results)
+            notifier = GitHubCommentNotifier(access_token, repo, pull_number, changes)
+            notifier.notify()
 
     return changes
 
@@ -90,7 +104,9 @@ async def add_pr_result(
 
     # mfleming: The expectation is that this is usually a singleton list.
     for r in results:
-        await store.add_pr_test_name(user, r.attributes["git_commit"], pull_number, test_name)
+        await store.add_pr_test_name(
+            user, r.attributes["git_commit"], pull_number, test_name
+        )
 
 
 @pr_router.delete("/pulls/{pull_number}/result/{test_name:path}")
@@ -120,4 +136,5 @@ async def get_pr_result(test_name: str, user: User = Depends(auth.current_active
 async def get_pr_results(user: User = Depends(auth.current_active_user)):
     store = DBStore()
     results = await store.get_test_names(user)
+    logging.error(f"Results is {results}")
     return [{"test_name": name} for name in results]

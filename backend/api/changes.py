@@ -1,13 +1,8 @@
-from fastapi import HTTPException
-
 from backend.core.core import (
     PerformanceTestResult,
     PerformanceTestResultSeries,
     ResultMetric,
-    Config,
 )
-
-from backend.notifiers.slack import SlackNotifier
 
 
 async def calc_changes(
