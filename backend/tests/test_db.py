@@ -614,7 +614,8 @@ def test_pr_add_tests():
     pull_number = 123
     git_commit = "123456"
 
-    asyncio.run(store.add_pr_test_name(user, git_commit, pull_number, test_names))
+    for t in test_names:
+        asyncio.run(store.add_pr_test_name(user, git_commit, pull_number, t))
     results = asyncio.run(store.get_pr_test_names(user, git_commit, pull_number))
 
     assert results == test_names

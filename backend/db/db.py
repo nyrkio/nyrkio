@@ -632,7 +632,9 @@ class DBStore(object):
         result = await public_results.find_one({"_id": public_test_name})
         return result["user_id"] if result else None
 
-    async def add_pr_test_name(self, user, git_commit, pull_number, test_name):
+    async def add_pr_test_name(
+        self, user: User, git_commit: str, pull_number: int, test_name: str
+    ):
         """
         Add a list of test_names for a given pull request and git commit.
 
@@ -671,7 +673,7 @@ class DBStore(object):
         )
         test_names = await pr_tests.find_one({"_id": id})
         logging.error(f"Looking up test_names for {id} and found {test_names}")
-        return test_names["test_names"][0] if test_names else []
+        return test_names["test_names"] if test_names else []
 
 
 # Will be patched by conftest.py if we're running tests

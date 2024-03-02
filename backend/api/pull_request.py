@@ -52,7 +52,7 @@ async def get_pr_changes(
             # We don't actually enforce this anywhere but we assume that all
             # results are from the same repository.
             values = {r["attributes"]["git_repo"] for r in results}
-            if len(values) != 1:
+            if len(values) > 1:
                 logging.error(
                     f"Multiple git_repo values in pull test results: {values}"
                 )
