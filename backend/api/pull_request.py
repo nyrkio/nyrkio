@@ -51,6 +51,8 @@ async def get_pr_changes(
         if not repo:
             # We don't actually enforce this anywhere but we assume that all
             # results are from the same repository.
+            logging.error(f"Results is {results}")
+            logging.error(f"Results[0] is {results[0]}")
             values = {r["attributes"]["git_repo"] for r in results}
             if len(values) > 1:
                 logging.error(
