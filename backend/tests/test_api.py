@@ -1923,6 +1923,30 @@ def test_pr_add_result(client):
     test_names = [j["test_name"] for j in json]
     assert test_names == benchmark_names
 
+def test_pr_pulls_doesnt_show_regular_results(client):
+    """Ensure that /api/v0/pulls doesn't show regular results"""
+    client.login()
+
+    data = [{
+        "timestamp": 1,
+        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "attributes": {
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "12345",
+        },
+        "extra_info": {},
+    }]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    assert not json
+
+
 
 def test_pr_delete_result(client):
     """Ensure that we can delete a PR result"""
