@@ -410,7 +410,8 @@ class DBStore(object):
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
         Get a list of all test names for a given user. If id is None then
-        return a dictionary of all test names for all users.
+        return a dictionary of all test names for all users. Entries are returned
+        in sorted order.
 
         If test_name_prefix is specified, returns the subset of names (paths, really) where the
         beginning of the test name matches the test_name_prefix.
@@ -419,17 +420,18 @@ class DBStore(object):
         """
         test_results = self.db.test_results
         if id:
-            test_names = await test_results.distinct("test_name", {"user_id": id})
-            # TODO: I was just refactoring existing code here, but the below could actually be
-            # pushed into the MongoDB query.
-            if test_name_prefix:
-                prfx_len = len(test_name_prefix)
-                test_names = list(
-                    filter(lambda name: name[:prfx_len] == test_name_prefix, test_names)
-                )
-
-            return test_names
-
+            results = await test_results.aggregate(
+                [
+                    {"$match": {"user_id": id}},
+                    {"$group": {"_id": None, "names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_name": 1}},
+                    {"$project": {"_id": 0, "test_names": "$names"}},
+                ],
+            ).to_list(None)
+            # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
+            sorted_list = results[0]["test_names"] if results else []
+            sorted_list.sort()
+            return sorted_list
         else:
             results = await test_results.aggregate(
                 [
