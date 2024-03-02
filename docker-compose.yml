@@ -16,6 +16,8 @@ services:
     build:
       context: ./
       dockerfile: ./nginx/Dockerfile
+      args:
+        - SSL_DOMAIN
     ports:
       - "80:80"
       - "443:443"
@@ -23,14 +25,16 @@ services:
       - backend
       - certbot
     volumes:
-      - ./certbot/conf:/etc/nginx/ssl:ro
-      - ./certbot/www:/var/www/certbot:ro
+      - ./certbot/run/conf:/etc/nginx/ssl:ro
+      - ./certbot/run/www:/var/www/certbot:ro
     restart: always
   certbot:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/certbot:${IMAGE_TAG}
+    build:
+      context: ./
+      dockerfile: ./certbot/Dockerfile
     env_file:
       - .env.backend
-    image: certbot/certbot:latest
     volumes:
-      - ./certbot/conf/:/etc/letsencrypt/:rw
-      - ./certbot/www/:/var/www/certbot/:rw
-    command: certonly --webroot --webroot-path=/var/www/certbot --email admin@nyrk.io --agree-tos --no-eff-email -d nyrk.io -d nyrkio.com -d xn--nyrki-nua.com
+      - ./certbot/run/conf/:/etc/letsencrypt/:rw
+      - ./certbot/run/www/:/var/www/certbot/:rw

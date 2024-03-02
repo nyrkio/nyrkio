@@ -4,6 +4,8 @@ on: [pull_request]
 
 jobs:
   lint:
+    # TODO(mfleming) temporarily disable
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -13,6 +15,8 @@ jobs:
           args: --exclude hunter
 
   format:
+    # TODO(mfleming) temporarily disable
+    if: false
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

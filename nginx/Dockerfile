@@ -2,7 +2,6 @@ FROM node:bookworm as build
 
 WORKDIR /app
 COPY frontend/package*.json ./
-RUN ls -al /app/package.json
 RUN npm install
 COPY frontend/. ./
 RUN npm run build
@@ -14,4 +13,8 @@ COPY nginx/static/ /usr/share/nginx/html
 EXPOSE 80
 EXPOSE 443
 RUN rm /etc/nginx/conf.d/default.conf
-COPY nginx/nginx.conf /etc/nginx/conf.d
+COPY nginx/nginx.conf /etc/nginx/conf.d/nginx.conf.template
+ARG SSL_DOMAIN
+ENV DOMAIN=$SSL_DOMAIN
+RUN envsubst '$DOMAIN' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf
+RUN cat /etc/nginx/conf.d/nginx.conf
