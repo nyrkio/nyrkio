@@ -32,7 +32,7 @@ def create_nyrkio_payload(benchmark, extra_info):
         metrics.append({"name": m, "value": value, "unit": unit})
 
     return {
-        "timestamp": GIT_COMMIT_TIME,
+        "timestamp": int(GIT_COMMIT_TIME),
         "metrics": metrics,
         "attributes": {
             "git_commit": GIT_COMMIT,
@@ -95,6 +95,7 @@ def main(result_filename, extra_info_filename):
         test_names.append(test_name)
 
         payload = create_nyrkio_payload(r, extra_info)
+        print(payload)
         post_data[test_name] = [payload]
 
     for test_name in test_names:
