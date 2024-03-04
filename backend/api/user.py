@@ -10,6 +10,7 @@ user_router = APIRouter(prefix="/user")
 
 class Notifiers(BaseModel):
     slack: bool
+    github: bool
 
 
 class Core(BaseModel):

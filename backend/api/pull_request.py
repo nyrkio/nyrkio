@@ -45,9 +45,11 @@ async def get_pr_changes(
     changes = []
     repo = None
     user_config = await store.get_user_config(user)
+    all_results = []
     for test_name in test_names:
         disabled = await store.get_disabled_metrics(user, test_name)
         results = await store.get_results(user, test_name, pull_number)
+        all_results.append(results)
         if not repo:
             # We don't actually enforce this anywhere but we assume that all
             # results are from the same repository.
@@ -68,21 +70,29 @@ async def get_pr_changes(
         if ch:
             changes.append(ch)
 
+    logging.error(f"Changes is {changes}")
+    logging.error(f"Notify is {notify}")
     if notify:
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
-        gh = user_config.get("github", {})
-        if gh and repo.startswith("https://github.com"):
-            access_token = None
-            for account in user.oauth_accounts:
-                if account.oauth_name == "github":
-                    access_token = account.access_token
+        notifiers = user_config.get("notifiers", {})
+        logging.error(f"notifiers is {notifiers}")
+        if (
+            notifiers
+            and notifiers.get("github", {})
+            and repo.startswith("https://github.com")
+        ):
+            # access_token = None
+            # for account in user.oauth_accounts:
+            #     if account.oauth_name == "github":
+            #         access_token = account.access_token
 
-            if access_token is None:
-                raise HTTPException(status_code=400, detail="GitHub not configured")
+            # if access_token is None:
+            #     raise HTTPException(status_code=400, detail="GitHub not configured")
 
-            notifier = GitHubCommentNotifier(access_token, repo, pull_number, changes)
-            notifier.notify()
+            notifier = GitHubCommentNotifier(repo, pull_number)
+            logging.error(f"notifier is {notifier}")
+            await notifier.notify(all_results, changes)
 
     return changes
 

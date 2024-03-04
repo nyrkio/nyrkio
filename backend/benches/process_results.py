@@ -21,8 +21,10 @@ def calculate_unit(value):
     # Round to 3 decimal places
     return round(value, 3), unit
 
+
 GIT_COMMIT = os.environ.get("GIT_COMMIT")
 GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
+
 
 def create_nyrkio_payload(benchmark, extra_info):
     # The loops we need to jump through to get the commit time are
@@ -33,7 +35,11 @@ def create_nyrkio_payload(benchmark, extra_info):
         f"https://api.github.com/repos/nyrkio/nyrkio/commits/{GIT_COMMIT}"
     )
     response.raise_for_status()
-    timestamp = int(datetime.strptime(response.json()["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z").timestamp())
+    timestamp = int(
+        datetime.strptime(
+            response.json()["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z"
+        ).timestamp()
+    )
     print(f"Timestamp is {timestamp}")
 
     metrics = []
@@ -64,8 +70,10 @@ def submit_results(test_name, results, token, pull_number):
         },
     )
     if response.status_code != 200:
-        print(f"Failed to submit results for {test_name}"
-              f" with status {response.status_code}")
+        print(
+            f"Failed to submit results for {test_name}"
+            f" with status {response.status_code}"
+        )
         print(response.json())
     response.raise_for_status()
 

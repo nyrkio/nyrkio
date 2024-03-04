@@ -852,6 +852,7 @@ def test_add_and_get_user_config(client):
     config = {
         "notifiers": {
             "slack": True,
+            "github": False,
         }
     }
     response = client.post("/api/v0/user/config", json=config)
@@ -868,6 +869,7 @@ def test_update_existing_user_config(client):
     config = {
         "notifiers": {
             "slack": True,
+            "github": False,
         }
     }
     response = client.post("/api/v0/user/config", json=config)
@@ -877,7 +879,7 @@ def test_update_existing_user_config(client):
     assert response.status_code == 200
     assert response.json() == {**config, "core": None}
 
-    new_config = {"notifiers": {"slack": False}}
+    new_config = {"notifiers": {"slack": False, "github": True}}
     response = client.put("/api/v0/user/config", json=new_config)
     assert response.status_code == 200
 
@@ -1923,20 +1925,23 @@ def test_pr_add_result(client):
     test_names = [j["test_name"] for j in json]
     assert test_names == benchmark_names
 
+
 def test_pr_pulls_doesnt_show_regular_results(client):
     """Ensure that /api/v0/pulls doesn't show regular results"""
     client.login()
 
-    data = [{
-        "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
-        "attributes": {
-            "git_repo": "https://github.com/nyrkio/nyrkio",
-            "branch": "main",
-            "git_commit": "12345",
-        },
-        "extra_info": {},
-    }]
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+            "extra_info": {},
+        }
+    ]
 
     response = client.post("/api/v0/result/benchmark1", json=data)
     assert response.status_code == 200
@@ -1945,7 +1950,6 @@ def test_pr_pulls_doesnt_show_regular_results(client):
     assert response.status_code == 200
     json = response.json()
     assert not json
-
 
 
 def test_pr_delete_result(client):
