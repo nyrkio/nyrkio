@@ -43,7 +43,10 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <Route path="/product" element={<ProductPage />} />
         <Route path="/pricing" element={<PricingPage />} />
         <Route path="/legend" element={<LegendPage />} />
-        <Route path="/signup" element={<SignUpPage />} />
+        <Route
+          path="/signup"
+          element={<SignUpPage setLoggedIn={setLoggedIn} />}
+        />
         <Route path="/public/*" element={<PublicDashboard />} />
 
         <Route
