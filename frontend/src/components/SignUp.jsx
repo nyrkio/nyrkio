@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export const SignUpPage = () => {
+export const SignUpPage = ({ setLoggedIn }) => {
   const formState = {
     Visible: "Visible",
     Registered: "Registered",
