@@ -109,7 +109,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </div>
             <div className="text-center mt-2">
               <button type="submit" className="btn btn-success">
-                Submit
+                Login
               </button>
             </div>
           </form>
