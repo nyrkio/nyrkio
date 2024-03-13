@@ -469,21 +469,45 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
 
     const testsToSummarize = testNames.filter((name) => {return name.startsWith(prefix)});
     setRawChanges([]);
-    //console.debug(testsToSummarize);
-    testsToSummarize.forEach(async (testName) => {
-      const url = baseUrls.api + testName + "/changes";
-      //console.debug(url);
-      const changes = await fetch(url, {
+      const options = {
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
+      };
+
+      //console.debug(testsToSummarize);
+    testsToSummarize.forEach(async (testName) => {
+      const url = baseUrls.api + testName + "/changes";
+      //console.debug(url);
+      caches.open("nyrkio-changes").then((cache)=>{
+        cache.match(url).then(async (response)=>{
+          if(response){
+            const resultData = await response.json();
+            setRawChanges((prevState) => [...prevState, resultData]);
+          }
+          else {
+            const response2 = await cache.add(new Request(url, options));
+            if(response2){
+              const resultData = response2.json();
+              setRawChanges((prevState) => [...prevState, resultData]);
+            }
+            else {
+              const response3 = await fetch(url, options);
+              if(response3){
+                console.debug("Change point summaries: Caching failed, fetching from backend directly. " + testName + " " + url);
+                const resultData = response3.json();
+                setRawChanges((prevState) => [...prevState, resultData]);
+              }
+              else {
+                console.error("Failed to get change point summary for " + testName + " " + url);
+              }
+            }
+          }
+        });
       });
 
-      const resultData = await changes.json();
-      setRawChanges((prevState) => [...prevState, resultData]);
     });
-    return sumChanges;
   };
 
   useEffect(() => {
