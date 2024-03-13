@@ -420,6 +420,11 @@ div.card div.card-header {
   text-align: center;
 }
 
+.summarize-change-points {
+  font-size: 70%;
+  color: var(--nyrkio-active)
+}
+
 .ag-theme-nyrkio a {
   color: var(--nyrkio-tattoo-red);
 }

@@ -33,7 +33,7 @@ export const Breadcrumb = ({ testName, baseUrls }) => {
       // Check if we're the last component
       if (i === testName.split("/").length - 1) {
         return (
-          <li className="breadcrumb-item active" aria-current="page" key={i}>
+          <li className="breadcrumb-item active" aria-current="page" key="leaf">
             {decodeURIComponent(name)}
           </li>
         );
@@ -84,7 +84,7 @@ export const TestList = ({
 }) => {
   if (shortNames.length == 0) {
     return (
-      <li className="list-group-item nyrkio-empty">
+      <li className="list-group-item nyrkio-empty" key="0">
         <span
           className="bi bi-emoji-surprise"
           title="There are no test results"
@@ -99,22 +99,23 @@ export const TestList = ({
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
-        <li className="list-group-item">
+        <li className="list-group-item" key={longName}>
           <Link
             to={`/${baseUrls.result}/${longName}`}
             state={{ testName: longName }}
           >
             {name}
           </Link>
+            <SummarizeChangePoints name={name} longName={longName} baseUrls={baseUrls} testNames={testNames} />
         </li>
       );
     } else {
       var p = name;
       if (prefix !== undefined) p = prefix + "/" + name;
       return (
-        <li className="list-group-item">
+        <li className="list-group-item" key={longName}>
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
-            <TestListEntry name={displayName} />
+            <TestListEntry name={displayName} longName={longName} baseUrls={baseUrls} testNames={testNames}/>
           </Link>
         </li>
       );
@@ -198,7 +199,7 @@ export const Dashboard = () => {
                 <div className="card-body">
                   <ul className="list-group list-group-flush">
                     <TestList
-                      baseUrls={{ tests: "tests", result: "result" }}
+                      baseUrls={{ tests: "tests", result: "result", api: "/api/v0/result/" }}
                       testNames={testNames}
                       shortNames={shortNames}
                       prefix={prefix}
@@ -383,7 +384,7 @@ const nameIsGitHubRepo = (name) => {
 //
 // TODO(mfleming) Fetching the avatar url is a really quick way
 // to exhaust the GitHub API rate limit. We should cache these.
-const TestListEntry = ({ name }) => {
+const TestListEntry = ({ name , longName , baseUrls, testNames }) => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(undefined);
   const [isGitHubUrl, setIsGitHubUrl] = useState(false);
@@ -414,7 +415,13 @@ const TestListEntry = ({ name }) => {
   }, []);
 
   if (!isGitHubUrl) {
-    return <>{name}</>;
+    return (
+      <>
+      <div className="row justify-content-center">
+        <div className="col">{name}  <SummarizeChangePoints name={name} longName={longName} baseUrls={baseUrls} testNames={testNames} /></div>
+      </div>
+      </>
+    );
   }
 
   if (loading) {
@@ -432,11 +439,17 @@ const TestListEntry = ({ name }) => {
             style={{ width: "30px", height: "30px" }}
           />
         </div>
-        <div className="col">{name}</div>
+        <div className="col">{name}  <SummarizeChangePoints name={name}  longName={longName} baseUrls={baseUrls}  testNames={testNames} /></div>
       </div>
     );
   } else {
-    return <>{name}</>;
+    return (
+      <>
+      <div className="row justify-content-center">
+        <div className="col">{name}  <SummarizeChangePoints name={name}  longName={longName} baseUrls={baseUrls}  testNames={testNames} /></div>
+      </div>
+      </>
+    );
   }
 };
 
@@ -445,3 +458,67 @@ const validTestName = (name, testNames) => {
   const match = testNames.filter((test) => test.startsWith(name));
   return match.length > 0;
 };
+
+const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
+  const [rawChanges, setRawChanges] = useState([]);
+  const [sumChanges, setSumChanges] = useState(0);
+  const [firstChanges, setFirstChanges] = useState("");
+
+  const fetchSummarizedData = async ( prefix ) => {
+    console.debug("Fetching number of changes for " + prefix);
+
+    const testsToSummarize = testNames.filter((name) => {return name.startsWith(prefix)});
+    setRawChanges([]);
+    //console.debug(testsToSummarize);
+    testsToSummarize.forEach(async (testName) => {
+      const url = baseUrls.api + testName + "/changes";
+      //console.debug(url);
+      const changes = await fetch(url, {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      const resultData = await changes.json();
+      setRawChanges((prevState) => [...prevState, resultData]);
+    });
+    return sumChanges;
+  };
+
+  useEffect(() => {
+    const res = fetchSummarizedData(longName)
+
+    return () => {
+      const a = 1;
+      //console.log(rawChanges);
+    };
+  }, [baseUrls, longName,testNames]);
+
+  useEffect(() => {
+    var recentDate = 0;
+    rawChanges.forEach((obj)=>{
+      if(obj&&obj[longName] ){
+        setSumChanges(0);
+        setFirstChanges("");
+        obj[longName].forEach((testobj)=>{
+          setSumChanges((prevState) => prevState + testobj.changes.length);
+          if(testobj.time >= recentDate){
+            const testdate = new Date(testobj.time*1000);
+            const newestDate = testdate.toLocaleDateString();
+            setFirstChanges(" changes, latest on " + newestDate );
+            //if(testdate)  setFirstChanges(testdate.toLocaleString());
+            recentDate = testobj.time;
+          }
+        });
+      }
+    })
+  },[rawChanges]);
+
+  return (
+    <span className="summarize-change-points" style={{position: "absolute", right:"1em"}}>{sumChanges > 0 ? sumChanges : ""}
+    {firstChanges}</span>
+  );
+};
+
+
