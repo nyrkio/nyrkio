@@ -62,7 +62,7 @@ export const LegendPage = () => {
           <div class="row mt-4 my-sm-4 text-center ">
             <center>
               <img
-                src="https://nyrkio.com/p/nyyrikki/nyyrikki-low-res.png"
+                src="https://nyrkio.com/p/nyyrikki/nyyrikki/nyyrikki-low-res.png"
                 className="rounded-3 shadow-blur nyyrikki-original-art"
               />
             </center>
@@ -164,7 +164,7 @@ export const LegendPage = () => {
 
           <div class="row col-lg-12 mt-4" className="nyyrikki-last-text">
             <img
-              src="https://nyrkio.com/p/nyyrikki/nyyrikki-horn2.png"
+              src="https://nyrkio.com/p/nyyrikki/nyyrikki/nyyrikki-horn2.png"
               className="nyyrikki-horn-right"
             />
             <p>

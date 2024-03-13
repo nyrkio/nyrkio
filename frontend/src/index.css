@@ -69,7 +69,7 @@ body {
 }
 div.nyyrikki-banner-right,
 body.nyyrikki-banner-right {
-  background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-banner.png);
+  background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki/nyyrikki-vertical-banner.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top right;
@@ -79,7 +79,7 @@ body.nyyrikki-banner-right {
 
 body.nyyrikki-banner-right-bw,
 main .nyyrikki-banner-right-bw {
-  background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-medium-outline.png);
+  background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki/nyyrikki-vertical-medium-outline.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: top right;
