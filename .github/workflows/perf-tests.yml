@@ -1,7 +1,6 @@
 name: Performance Tests
 on:
-  push:
-    branches: [main]
+  pull_request:
 
 jobs:
   perf-tests:
