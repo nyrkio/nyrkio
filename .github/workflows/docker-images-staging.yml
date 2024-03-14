@@ -1,6 +1,6 @@
 name: Docker Images (Staging)
 on:
-  pull_request:
+  #pull_request:
 
 jobs:
   docker-images:
