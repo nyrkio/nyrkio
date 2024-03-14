@@ -494,7 +494,7 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
           else {
             const response2 = await fetch(url, options);
             if(response2 && response2.ok){
-              const resultData = response2.json();
+              const resultData = response2.clone().json();
               cache.put(url, response2);
               const newobj = {};
               newobj[url]=resultData;
