@@ -494,25 +494,15 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
           else {
             const response2 = await fetch(url, options);
             if(response2 && response2.ok){
-              cache.put(response2);
               const resultData = response2.json();
-                const newobj = {};
-                newobj[url]=resultData;
-                setRawChanges((prevState) => [...prevState, newobj]);
+              cache.put(url, response2);
+              const newobj = {};
+              newobj[url]=resultData;
+              setRawChanges((prevState) => [...prevState, newobj]);
             }
             else {
-              const response3 = await fetch(url, options);
-              if(response3 && response3.ok){
-                console.debug("Change point summaries: Caching failed, fetching from backend directly. " + testName + " " + url);
-                const resultData = response3.json();
-                const newobj = {};
-                newobj[url]=resultData;
-                setRawChanges((prevState) => [...prevState, newobj]);
-              }
-              else {
-                console.error("Failed to get change point summary for " + testName + " " + url);
-                console.error(response3);
-              }
+              console.error("Failed to get change point summary for " + testName + " " + url);
+              console.error(response2);
             }
           }
         });
@@ -539,8 +529,8 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
     // Remove duplicates due to multiple calls to useEffect
     const correctRawChanges=[];
     const seen = [];
-    console.debug(longName);
-    console.debug(rawChanges);
+    //console.debug(longName);
+    //console.debug(rawChanges);
     rawChanges.forEach((obj)=>{
       const key = Object.keys(obj)[0];
       if (!seen.includes(key)){
@@ -551,7 +541,7 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
 
     correctRawChanges.forEach((obj)=>{
       const objname = Object.keys(obj)[0];
-      if( objname.startsWith(longName) ){
+      if( objname && objname.startsWith(longName) ){
         obj[objname].forEach((testobj)=>{
           localSum = localSum + testobj.changes.length;
           //console.log(sumChanges + "  " + rawChanges.length);

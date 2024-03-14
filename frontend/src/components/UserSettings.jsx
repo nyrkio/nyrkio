@@ -41,6 +41,9 @@ const HunterSettings = () => {
       console.error("Failed to POST Nyrkiö core user settings");
       console.log(response);
     } else console.debug(response);
+
+    caches.delete("nyrkio-changes");
+
   };
 
   const saveHunterSettings = throttle(saveHunterSettingsReal, 1000);
