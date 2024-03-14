@@ -10,6 +10,11 @@ services:
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
   nginx:
     build:
       context: ./
@@ -19,3 +24,8 @@ services:
     depends_on:
       - backend
     restart: always
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          mem: 1G
