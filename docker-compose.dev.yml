@@ -28,4 +28,4 @@ services:
       resources:
         limits:
           cpus: "1"
-          mem: 1G
+          memory: 1G
