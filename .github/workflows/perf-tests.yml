@@ -50,6 +50,7 @@ jobs:
           sudo apt -y install linux-tools-$(uname -r) sysstat
           mpstat -P ALL 5 > mpstat.log &
           cpupower frequency-info
+          sar -A 5 > sar.log &
           echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
@@ -59,4 +60,6 @@ jobs:
           cd .. && docker compose -f docker-compose.dev.yml down
           cd backend && poetry run python benches/process_results.py $(find .benchmarks -name "*.json") ../extra_info.json
           cd .. && cat mpstat.log
+          cat sar.log
           kill %1
+          kill %2
