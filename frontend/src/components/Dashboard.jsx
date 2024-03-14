@@ -93,9 +93,9 @@ export const TestList = ({
     );
   }
 
-  return shortNames.map((name, index) => {
+    return shortNames.map((name, index) => {
     const displayName = displayNames[index];
-    var longName = prefix + "/" + name;
+    var longName = prefix===undefined ? name : prefix + "/" + name;
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
@@ -468,7 +468,6 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
     console.debug("Fetching number of changes for " + prefix);
 
     const testsToSummarize = testNames.filter((name) => {return name.startsWith(prefix)});
-    setRawChanges([]);
       const options = {
         headers: {
           "Content-type": "application/json",
@@ -477,30 +476,42 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
       };
 
       //console.debug(testsToSummarize);
+    const yesterday = (new Date())-24*60*60*1000;
     testsToSummarize.forEach(async (testName) => {
       const url = baseUrls.api + testName + "/changes";
       //console.debug(url);
       caches.open("nyrkio-changes").then((cache)=>{
         cache.match(url).then(async (response)=>{
-          if(response){
+          //console.debug(response);
+          if(response && response.ok &&
+             Date.parse(response.headers.get("Date")) > yesterday
+          ){
             const resultData = await response.json();
-            setRawChanges((prevState) => [...prevState, resultData]);
+                const newobj = {};
+                newobj[url]=resultData;
+                setRawChanges((prevState) => [...prevState, newobj]);
           }
           else {
-            const response2 = await cache.add(new Request(url, options));
-            if(response2){
+            const response2 = await fetch(url, options);
+            if(response2 && response2.ok){
+              cache.put(response2);
               const resultData = response2.json();
-              setRawChanges((prevState) => [...prevState, resultData]);
+                const newobj = {};
+                newobj[url]=resultData;
+                setRawChanges((prevState) => [...prevState, newobj]);
             }
             else {
               const response3 = await fetch(url, options);
-              if(response3){
+              if(response3 && response3.ok){
                 console.debug("Change point summaries: Caching failed, fetching from backend directly. " + testName + " " + url);
                 const resultData = response3.json();
-                setRawChanges((prevState) => [...prevState, resultData]);
+                const newobj = {};
+                newobj[url]=resultData;
+                setRawChanges((prevState) => [...prevState, newobj]);
               }
               else {
                 console.error("Failed to get change point summary for " + testName + " " + url);
+                console.error(response3);
               }
             }
           }
@@ -511,6 +522,7 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
   };
 
   useEffect(() => {
+
     const res = fetchSummarizedData(longName)
 
     return () => {
@@ -521,26 +533,44 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
 
   useEffect(() => {
     var recentDate = 0;
+    var localSum=0;
+    setFirstChanges("");
+
+    // Remove duplicates due to multiple calls to useEffect
+    const correctRawChanges=[];
+    const seen = [];
+    console.debug(longName);
+    console.debug(rawChanges);
     rawChanges.forEach((obj)=>{
-      if(obj&&obj[longName] ){
-        setSumChanges(0);
-        setFirstChanges("");
-        obj[longName].forEach((testobj)=>{
-          setSumChanges((prevState) => prevState + testobj.changes.length);
+      const key = Object.keys(obj)[0];
+      if (!seen.includes(key)){
+        seen.push(key);
+        correctRawChanges.push(obj[key]);
+      }
+    });
+
+    correctRawChanges.forEach((obj)=>{
+      const objname = Object.keys(obj)[0];
+      if( objname.startsWith(longName) ){
+        obj[objname].forEach((testobj)=>{
+          localSum = localSum + testobj.changes.length;
+          //console.log(sumChanges + "  " + rawChanges.length);
           if(testobj.time >= recentDate){
             const testdate = new Date(testobj.time*1000);
             const newestDate = testdate.toLocaleDateString();
+            //console.log(newestDate);
             setFirstChanges(" changes, latest on " + newestDate );
             //if(testdate)  setFirstChanges(testdate.toLocaleString());
             recentDate = testobj.time;
           }
         });
       }
+    setSumChanges(localSum);
     })
   },[rawChanges]);
 
   return (
-    <span className="summarize-change-points" style={{position: "absolute", right:"1em"}}>{sumChanges > 0 ? sumChanges : ""}
+    <span className="summarize-change-points" style={{position: "absolute", right:"0.5em"}}>{sumChanges > 0 ? sumChanges : ""}
     {firstChanges}</span>
   );
 };
