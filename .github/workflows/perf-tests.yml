@@ -49,6 +49,7 @@ jobs:
           sudo apt update
           sudo apt -y install linux-tools-$(uname -r) sysstat
           mpstat -P ALL 5 > mpstat.log &
+          cpupower frequency-info
           echo "$NYRKIO_ENV_TESTING" > .env.backend
           echo "Running performance tests..."
           docker compose -f docker-compose.dev.yml up -d
