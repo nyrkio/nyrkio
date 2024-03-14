@@ -2,6 +2,7 @@
 
 from abc import abstractmethod, ABC
 from collections import OrderedDict
+import logging
 import os
 from typing import Dict, List, Optional, Any
 
@@ -100,7 +101,7 @@ class MockDBStrategy(ConnectionStrategy):
 
         # Add some default data
         result = DBStore.create_doc_with_metadata(
-            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark"
+            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark", None
         )
         await self.connection.default_data.insert_one(result)
 
@@ -192,7 +193,9 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
-    def create_doc_with_metadata(doc: Dict, user: User, test_name: str) -> Dict:
+    def create_doc_with_metadata(
+        doc: Dict, user: User, test_name: str, pull_number
+    ) -> Dict:
         """
         Return a new document with added metadata, e.g. the version of the schema and the user ID.
 
@@ -248,9 +251,15 @@ class DBStore(object):
         d["user_id"] = user.id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
+
+        if pull_number:
+            d["pull_request"] = pull_number
+
         return d
 
-    async def add_results(self, user: User, test_name: str, results: List[Dict]):
+    async def add_results(
+        self, user: User, test_name: str, results: List[Dict], pull_number=None
+    ):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
@@ -259,7 +268,8 @@ class DBStore(object):
         DBStoreResultExists exception.
         """
         new_list = [
-            DBStore.create_doc_with_metadata(r, user, test_name) for r in results
+            DBStore.create_doc_with_metadata(r, user, test_name, pull_number)
+            for r in results
         ]
         test_results = self.db.test_results
 
@@ -275,12 +285,19 @@ class DBStore(object):
 
                 raise DBStoreResultExists(duplicate_key)
 
-    async def get_results(self, user: User, test_name: str) -> List[Dict]:
+    async def get_results(
+        self, user: User, test_name: str, pull_request=None
+    ) -> List[Dict]:
         """
         Retrieve test results for a given user and test name. The results are
         guaranteed to be sorted by timestamp in ascending order.
 
         If no results are found, return an empty list.
+
+        If pull_request is not None, then return results where the pull_request
+        field is empty or matches the pull_request argument. This is used to
+        filter results so you get A) the historic results of a branch (e.g.
+        main) and B) the pull request result.
         """
         test_results = self.db.test_results
 
@@ -288,26 +305,60 @@ class DBStore(object):
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
-        results = (
-            await test_results.find(
-                {"user_id": user.id, "test_name": test_name}, exclude_projection
+        if pull_request:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "$or": [
+                            {"pull_request": {"$eq": pull_request}},
+                            {"pull_request": {"$exists": False}},
+                        ],
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
             )
-            .sort("timestamp")
-            .to_list(None)
-        )
+        else:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": user.id,
+                        "test_name": test_name,
+                        "pull_request": {"$exists": False},
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
+            )
 
         return results
 
     async def get_test_names(self, user: User = None) -> Any:
         """
         Get a list of all test names for a given user. If user is None then
-        return a dictionary of all test names for all users.
+        return a dictionary of all test names for all users. Entries are returned
+        in sorted order.
 
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
         if user:
-            return await test_results.distinct("test_name", {"user_id": user.id})
+            results = await test_results.aggregate(
+                [
+                    {"$match": {"user_id": user.id}},
+                    {"$group": {"_id": None, "names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_name": 1}},
+                    {"$project": {"_id": 0, "test_names": "$names"}},
+                ],
+            ).to_list(None)
+            # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
+            sorted_list = results[0]["test_names"] if results else []
+            sorted_list.sort()
+            return sorted_list
         else:
             results = await test_results.aggregate(
                 [
@@ -580,6 +631,49 @@ class DBStore(object):
         public_results = self.db.public_results
         result = await public_results.find_one({"_id": public_test_name})
         return result["user_id"] if result else None
+
+    async def add_pr_test_name(
+        self, user: User, git_commit: str, pull_number: int, test_name: str
+    ):
+        """
+        Add a list of test_names for a given pull request and git commit.
+
+        Because the pull request API only allows results for a single test name
+        to be added at a time, we may need to update the existing list of test
+        names for a given pull request and git commit.
+        """
+        pr_tests = self.db.pr_tests
+        id = OrderedDict(
+            {
+                "git_commit": git_commit,
+                "pull_number": pull_number,
+                "user_id": user.id,
+            }
+        )
+
+        # Push a new test name onto the list
+        logging.error(f"pushing test_name: {test_name} to {id}")
+        await pr_tests.update_one(
+            {"_id": id}, {"$push": {"test_names": test_name}}, upsert=True
+        )
+
+    async def get_pr_test_names(self, user, git_commit, pull_number) -> List:
+        """
+        Get a list of test_names for a given pull request and git commit.
+
+        Returns an empty list if no results are found.
+        """
+        pr_tests = self.db.pr_tests
+        id = OrderedDict(
+            {
+                "git_commit": git_commit,
+                "pull_number": pull_number,
+                "user_id": user.id,
+            }
+        )
+        test_names = await pr_tests.find_one({"_id": id})
+        logging.error(f"Looking up test_names for {id} and found {test_names}")
+        return test_names["test_names"] if test_names else []
 
 
 # Will be patched by conftest.py if we're running tests

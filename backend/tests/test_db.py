@@ -84,32 +84,39 @@ def test_create_doc_with_metadata():
             "git_commit": "123456",
         },
     }
-    doc = store.create_doc_with_metadata(test_result, user, test_name)
+    doc = store.create_doc_with_metadata(test_result, user, test_name, None)
 
-    assert doc["user_id"] == user.id
-    assert doc["version"] == DBStore._VERSION
-    assert doc["test_name"] == test_name
+    def assert_document_metadata(document):
+        assert doc["user_id"] == user.id
+        assert doc["version"] == DBStore._VERSION
+        assert doc["test_name"] == test_name
 
-    d = doc["_id"]
-    assert d["user_id"] == user.id
-    assert d["git_repo"] == test_result["attributes"]["git_repo"]
-    assert d["git_commit"] == test_result["attributes"]["git_commit"]
-    assert d["branch"] == test_result["attributes"]["branch"]
+        d = doc["_id"]
+        assert d["user_id"] == user.id
+        assert d["git_repo"] == test_result["attributes"]["git_repo"]
+        assert d["git_commit"] == test_result["attributes"]["git_commit"]
+        assert d["branch"] == test_result["attributes"]["branch"]
 
-    # The order of keys is critical. Make sure we don't change it
-    assert list(d.keys()) == [
-        "git_repo",
-        "branch",
-        "git_commit",
-        "test_name",
-        "timestamp",
-        "user_id",
-    ]
+        # The order of keys is critical. Make sure we don't change it
+        assert list(d.keys()) == [
+            "git_repo",
+            "branch",
+            "git_commit",
+            "test_name",
+            "timestamp",
+            "user_id",
+        ]
+
+    assert_document_metadata(doc)
 
     # Ensure that we don't modify the original dict
     assert "user_id" not in test_result
     assert "version" not in test_result
     assert "test_name" not in test_result
+
+    doc = store.create_doc_with_metadata(test_result, user, test_name, 123)
+    assert doc["pull_request"] == 123
+    assert_document_metadata(doc)
 
 
 def test_default_data_for_new_user():
@@ -539,3 +546,76 @@ def test_delete_test_config():
 
     response = asyncio.run(store.get_test_config(user, test_name2))
     assert response == config
+
+
+def test_pull_number():
+    """Ensure that we can store and retrieve results with pull numbers"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    pull_number = 123
+    results = [
+        {
+            "timestamp": 1,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+    # Add pr result
+    asyncio.run(store.add_results(user, test_name, results, pull_number))
+
+    # Add regular main branch result
+    results[0]["timestamp"] = 2
+    asyncio.run(store.add_results(user, test_name, results))
+
+    # Ensure we don't see the pull request result
+    response = asyncio.run(store.get_results(user, test_name))
+    assert len(response) == 1
+    assert response[0]["timestamp"] == 2
+
+    # Ensure we can see the pull request result and the regular result
+    response = asyncio.run(store.get_results(user, test_name, pull_number))
+    assert len(response) == 2
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+
+    results[0]["timestamp"] = 3
+    asyncio.run(store.add_results(user, test_name, results, 456))
+
+    # Ensure pr 456 isn't visible
+    response = asyncio.run(store.get_results(user, test_name, pull_number))
+    assert len(response) == 2
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+
+    # Should we both the pull request (456) result and the regular main branch result
+    response = asyncio.run(store.get_results(user, test_name, 456))
+    assert len(response) == 2
+    assert response[0]["timestamp"] == 2
+    assert response[1]["timestamp"] == 3
+
+
+def test_pr_add_tests():
+    """Ensure that we can add tests for a pr and commit"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_names = ["benchmark1", "benchmark2"]
+    pull_number = 123
+    git_commit = "123456"
+
+    for t in test_names:
+        asyncio.run(store.add_pr_test_name(user, git_commit, pull_number, t))
+    results = asyncio.run(store.get_pr_test_names(user, git_commit, pull_number))
+
+    assert results == test_names

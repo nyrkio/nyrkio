@@ -22,11 +22,25 @@ def calculate_unit(value):
     return round(value, 3), unit
 
 
-def create_nyrkio_payload(commit_info, benchmark, extra_info):
-    # convert date to epoch
-    timestamp = int(
-        datetime.strptime(commit_info["time"], "%Y-%m-%dT%H:%M:%S%z").timestamp()
+GIT_COMMIT = os.environ.get("GIT_COMMIT")
+GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
+
+
+def create_nyrkio_payload(benchmark, extra_info):
+    # The loops we need to jump through to get the commit time are
+    # ridiculous. GitHub actions do a shallow clone so we can't use
+    # git show -s --format=%ct HEAD. Instead we have to use the
+    # REST API.
+    response = requests.get(
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{GIT_COMMIT}"
     )
+    response.raise_for_status()
+    timestamp = int(
+        datetime.strptime(
+            response.json()["commit"]["author"]["date"], "%Y-%m-%dT%H:%M:%S%z"
+        ).timestamp()
+    )
+    print(f"Timestamp is {timestamp}")
 
     metrics = []
     for m in ("median", "mean", "max", "min", "stddev", "iqr"):
@@ -37,24 +51,30 @@ def create_nyrkio_payload(commit_info, benchmark, extra_info):
         "timestamp": timestamp,
         "metrics": metrics,
         "attributes": {
-            "git_commit": commit_info["id"],
-            "branch": commit_info["branch"],
+            "git_commit": GIT_COMMIT,
+            "branch": GIT_TARGET_BRANCH,
             "git_repo": "https://github.com/nyrkio/nyrkio",
         },
         "extra_info": extra_info,
     }
 
 
-def submit_results(test_name, results, token):
+def submit_results(test_name, results, token, pull_number):
     # Submit results
     response = requests.post(
-        f"https://nyrkio.com/api/v0/result/{test_name}",
+        f"https://staging.nyrkio.com/api/v0/pulls/{pull_number}/result/{test_name}",
         json=results,
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         },
     )
+    if response.status_code != 200:
+        print(
+            f"Failed to submit results for {test_name}"
+            f" with status {response.status_code}"
+        )
+        print(response.json())
     response.raise_for_status()
 
 
@@ -69,14 +89,15 @@ def main(result_filename, extra_info_filename):
 
     username = os.environ.get("NYRKIO_USERNAME")
     password = os.environ.get("NYRKIO_PASSWORD")
+    pull_number = os.environ.get("PULL_NUMBER")
 
-    if not username or not password:
-        print("NYRKIO_USERNAME and NYRKIO_PASSWORD must be set")
+    if not username or not password or not pull_number:
+        print("NYRKIO_USERNAME and NYRKIO_PASSWORD and PULL_NUMBER must be set")
         sys.exit(1)
 
     # Get JWT token
     response = requests.post(
-        "https://nyrkio.com/api/v0/auth/jwt/login",
+        "https://staging.nyrkio.com/api/v0/auth/jwt/login",
         data={"username": username, "password": password},
     )
     response.raise_for_status()
@@ -91,11 +112,12 @@ def main(result_filename, extra_info_filename):
         test_name = test_name.replace("::", "/")
         test_names.append(test_name)
 
-        payload = create_nyrkio_payload(results["commit_info"], r, extra_info)
+        payload = create_nyrkio_payload(r, extra_info)
+        print(payload)
         post_data[test_name] = [payload]
 
     for test_name in test_names:
-        submit_results(test_name, post_data[test_name], token)
+        submit_results(test_name, post_data[test_name], token, pull_number)
 
 
 if __name__ == "__main__":
