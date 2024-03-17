@@ -17,6 +17,8 @@ export const PricingPage = () => {
   const [annualSavingsEuro, setAnnualSavingsEuro] = useState(enterprisePrice*12*(annualSavingsPercent/100));
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
+  const [eng, setEng] = useState(0);
+  const [total, setTotal] = useState(0);
 
   const getBusPrice = (total) => {
     var b;
@@ -91,8 +93,8 @@ export const PricingPage = () => {
   }
 
   const priceCalculator = () => {
-    var total = document.getElementById("employees_total").value;
-    var eng = document.getElementById("employees_engineering").value;
+    setTotal(document.getElementById("employees_total").value);
+    setEng( document.getElementById("employees_engineering").value );
     var b = getBusPrice(total);
     var e = getEntPrice(total);
 
@@ -177,6 +179,26 @@ export const PricingPage = () => {
     }
   };
 
+  const NoticeEngineeringSmall = () => {
+
+    //console.debug("If Engineering dept isn't 25-50% of total employees, give custom price after talking to them.")
+    if (eng>0 && total > 0
+        && eng / total<0.25){
+      console.debug("Small engineering dept -> custom price notice")
+      return (
+          <>
+          <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
+            <p>Note: Our list price may not be perfect for your organization. Please <a href="">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+          </div>
+          </>
+      );
+    }
+    else {
+      return (
+        <></>
+      );
+    }
+  };
 
   const generatePricingTable = () => {
     var pricingTable = [];
@@ -293,6 +315,8 @@ export const PricingPage = () => {
             </div>
           </div>
         </div>
+
+        <NoticeEngineeringSmall />
 
         <div className="nyrkio-plans row row-cols-1 row-cols-md-3 text-center justify-content-center">
           <div className="col">
