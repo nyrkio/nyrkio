@@ -12,6 +12,9 @@ export const PricingPage = () => {
     enterprisePriceFloor * enterprisePricePerHead
   );
   const cut1 = 100;
+  const [annualDiscount, setAnnualDiscount] = useState(false);
+  const [annualSavingsPercent, setAnnualSavingsPercent] = useState(20);
+  const [annualSavingsEuro, setAnnualSavingsEuro] = useState(enterprisePrice*12*(annualSavingsPercent/100));
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
 
@@ -27,7 +30,7 @@ export const PricingPage = () => {
       b = (cut1 + 0.1 * (total - cut1)) * businessPricePerHead;
       b = Math.round(b);
     } else {
-      b = "Call";
+      b = null;
     }
     return b;
   };
@@ -43,7 +46,7 @@ export const PricingPage = () => {
       e = (cut1 + 0.15 * (total - cut1)) * enterprisePricePerHead;
       e = Math.round(e);
     } else {
-      e = "Call";
+      e = null;
     }
     return e;
   };
@@ -80,6 +83,13 @@ export const PricingPage = () => {
     getEntHours(enterprisePriceFloor * enterprisePricePerHead)
   );
 
+  const updateDiscount = () => {
+    const widget = document.getElementById("flexSwitchAnnual");
+    if(widget){
+      setAnnualDiscount(widget.checked);
+    }
+  }
+
   const priceCalculator = () => {
     var total = document.getElementById("employees_total").value;
     var eng = document.getElementById("employees_engineering").value;
@@ -93,8 +103,80 @@ export const PricingPage = () => {
 
     setBusHours(getBusHours(b));
     setEntHours(getEntHours(e));
+    if(e){
+      setAnnualSavingsEuro(e*12*(annualSavingsPercent/100));
+    }
+    else {
+      setAnnualSavingsEuro(null);
+    }
     return true;
   };
+
+  const BusinessPrice = () => {
+    if(businessPrice===null){
+      return (
+        <>
+        Call us
+        </>
+      );
+    }
+    if(annualDiscount) {
+      return (
+        <>
+        {businessPrice*12*(1-annualSavingsPercent/100)} <small className="text-body-secondary fw-light"> €/yr</small>
+        </>
+      );
+    }
+    else {
+      return (
+        <>
+        {businessPrice} <small className="text-body-secondary fw-light"> €/mo</small>
+        </>
+      );
+
+    }
+  };
+
+  const EnterprisePrice = () => {
+    if(enterprisePrice===null){
+      return (
+        <>
+        Call us
+        </>
+      );
+    }
+    if(annualDiscount) {
+      return (
+        <>
+        {enterprisePrice*12*(1-annualSavingsPercent/100)} <small className="text-body-secondary fw-light"> €/yr</small>
+        </>
+      );
+    }
+    else {
+      return (
+        <>
+        {enterprisePrice} <small className="text-body-secondary fw-light"> €/mo</small>
+        </>
+      );
+
+    }
+  };
+
+
+  const AnnualSavingsEuro = () => {
+    if(annualSavingsEuro===null){
+      return "";
+    }
+    else {
+      return (
+        <>
+        (That's {annualSavingsEuro} € for you!)
+      </>
+      )
+
+    }
+  };
+
 
   const generatePricingTable = () => {
     var pricingTable = [];
@@ -243,10 +325,9 @@ export const PricingPage = () => {
                 <h4 className="my-0 fw-normal">Business</h4>
               </div>
               <div className="card-body">
-                <p className="nyrkio-annual">{busYear}/yr</p>
+                <p className="nyrkio-annual">{busYear}</p>
                 <h1 className="card-title pricing-card-title">
-                  {businessPrice}
-                  <small className="text-body-secondary fw-light"> €/mo</small>
+                  <BusinessPrice />
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>10,000 test results</li>
@@ -270,10 +351,9 @@ export const PricingPage = () => {
                 <h4 className="my-0 fw-normal">Enterprise</h4>
               </div>
               <div className="card-body">
-                <p className="nyrkio-annual">{entYear}/yr</p>
+                <p className="nyrkio-annual">{entYear}</p>
                 <h1 className="card-title pricing-card-title">
-                  {enterprisePrice}
-                  <small className="text-body-secondary fw-light"> €/mo</small>
+                  <EnterprisePrice />
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>Everything in Business, plus...</li>
@@ -291,6 +371,17 @@ export const PricingPage = () => {
             </div>
           </div>
         </div>
+
+          <div className="p-3 calculator calculator-annual rounded-3 shadow-sm">
+             <div className="row mb-3">
+              <div className="col col-md-12" id="employees_engineering_label">
+                <div className="form-check form-switch">
+                  <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchAnnual" onChange={updateDiscount} />
+                  <label className="form-check-label" htmlFor="flexSwitchAnnual">Save {annualSavingsPercent} % by paying for the full year up front! <AnnualSavingsEuro /></label>
+                </div>
+              </div>
+            </div>
+          </div>
 
         <p>
           *){" "}

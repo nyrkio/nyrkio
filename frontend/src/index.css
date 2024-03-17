@@ -599,8 +599,30 @@ div.card div.card-header {
   width: 5em;
   text-align: right;
 }
-.nyrkio-pricing .calculator div {
-  text-align: right;
+.nyrkio-pricing .calculator-annual {
+  margin-top:5em;
+  margin-bottom:5em;
+}
+.nyrkio-pricing .calculator-annual div {
+  text-align: left;
+  padding-top:0.5em;
+}
+
+.form-switch .form-check-input {
+  background-color: var(--nyrkio-light-gray);
+  border-color: var(--nyrkio-horn-light-brown);
+}
+.form-switch .form-check-input:focus {
+    border-color: var(--nyrkio-horn-light-brown);
+    outline: 0;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
+}
+.form-switch .form-check-input:checked {
+    background-color: var(--nyrkio-tattoo-red);
+    border-color: white;
+    border: none;
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
 }
 
 .nyrkio-pricing .nyrkio-open-source {
