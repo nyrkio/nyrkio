@@ -183,8 +183,29 @@ export const PricingPage = () => {
 
     //console.debug("If Engineering dept isn't 25-50% of total employees, give custom price after talking to them.")
     if (eng>0 && total > 0
-        && eng / total<0.25){
+        && eng / total<0.25
+        && total < 1000){
       console.debug("Small engineering dept -> custom price notice")
+      return (
+          <>
+          <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
+            <p>Note: Our list price may not be perfect for your organization. Please <a href="">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+          </div>
+          </>
+      );
+    }
+    else {
+      return (
+        <></>
+      );
+    }
+  };
+
+  const NoticeTotalLarge = () => {
+
+    //console.debug("If Engineering dept isn't 25-50% of total employees, give custom price after talking to them.")
+    if (total > 999){
+      console.debug("Large total -> custom price notice")
       return (
           <>
           <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
@@ -316,6 +337,7 @@ export const PricingPage = () => {
           </div>
         </div>
 
+        <NoticeTotalLarge />
         <NoticeEngineeringSmall />
 
         <div className="nyrkio-plans row row-cols-1 row-cols-md-3 text-center justify-content-center">
