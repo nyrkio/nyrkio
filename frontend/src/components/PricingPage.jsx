@@ -38,6 +38,8 @@ export const PricingPage = () => {
   };
   const getEntPrice = (total) => {
     var e;
+
+
     if (total < cut1) {
       e = Math.max(
         enterprisePriceFloor * enterprisePricePerHead,
@@ -92,11 +94,12 @@ export const PricingPage = () => {
     }
   }
 
-  const priceCalculator = () => {
+  const priceCalculator = (sourceElement) => {
+    const localTotal = document.getElementById("employees_total").value;
     setTotal(document.getElementById("employees_total").value);
     setEng( document.getElementById("employees_engineering").value );
-    var b = getBusPrice(total);
-    var e = getEntPrice(total);
+    var b = getBusPrice(localTotal);
+    var e = getEntPrice(localTotal);
 
     setBusinessPrice(b);
     setEnterprisePrice(e);
@@ -221,6 +224,7 @@ export const PricingPage = () => {
     }
   };
 
+  /*
   const generatePricingTable = () => {
     var pricingTable = [];
     for (var zeros = 0; zeros <= 4; zeros++) {
@@ -269,7 +273,8 @@ export const PricingPage = () => {
       </>
     );
   };
-  const pricingTableRows = generatePricingTable();
+  */
+  //const pricingTableRows = generatePricingTable();
 
   return (
     <>
