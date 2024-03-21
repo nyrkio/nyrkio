@@ -175,7 +175,7 @@ export const PricingPage = () => {
     else {
       return (
         <>
-        (That's {annualSavingsEuro} € for you!)
+        That's {annualSavingsEuro} € for you! (For Enterprise subscription).
       </>
       )
 
@@ -192,7 +192,7 @@ export const PricingPage = () => {
       return (
           <>
           <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
-            <p>Note: Our list price may not be perfect for your organization. Please <a href="">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+            <p>Note: Our list price may not be perfect for your organization. Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
           </div>
           </>
       );
@@ -212,7 +212,7 @@ export const PricingPage = () => {
       return (
           <>
           <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
-            <p>Note: Our list price may not be perfect for your organization. Please <a href="">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+            <p>Note: Our list price may not be perfect for your organization. Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
           </div>
           </>
       );
