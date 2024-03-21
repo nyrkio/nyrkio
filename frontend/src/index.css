@@ -179,6 +179,7 @@ h4,
   color: var(--nyrkio-tattoo-red);
 }
 
+a.dropdown-item,
 a {
   font-weight: 500;
   color: var(--nyrkio-tattoo-red);
@@ -191,6 +192,7 @@ a {
   }
 }
 
+a.dropdown-item:hover,
 a:hover {
   color: var(--nyrkio-active);
 }

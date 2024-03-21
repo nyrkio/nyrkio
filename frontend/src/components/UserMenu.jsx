@@ -55,25 +55,19 @@ export const UserMenu = ({ setLoggedIn }) => {
       <Dropdown.Menu>
         {isAdmin ? (
           <Dropdown.Item href="/admin">
-            <Link to="/admin">
               <span className="bi bi-box-arrow-up-right"></span> Admin
-            </Link>
           </Dropdown.Item>
         ) : (
           <></>
         )}
         <Dropdown.Item href="/user/settings">
-          <Link to="/user/settings">
             <span className="bi bi-person-circle"></span> User Settings
-          </Link>
         </Dropdown.Item>
 
         <Dropdown.Divider />
 
         <Dropdown.Item onClick={handleLogoutClick}>
-          <Link to="/">
             <span className="bi bi-box-arrow-right"></span> Log Out
-          </Link>
         </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>
