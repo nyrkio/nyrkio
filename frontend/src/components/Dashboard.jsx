@@ -549,7 +549,7 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
             const testdate = new Date(testobj.time*1000);
             const newestDate = testdate.toLocaleDateString();
             //console.log(newestDate);
-            setFirstChanges( newestDate );
+            setFirstChanges(" changes, latest on " + newestDate );
             //if(testdate)  setFirstChanges(testdate.toLocaleString());
             recentDate = testobj.time;
           }
@@ -559,17 +559,9 @@ const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
     })
   },[rawChanges]);
 
-  if(sumChanges>0 && firstChanges)
   return (
-    <>
-    <div className="summarize-change-points" style={{position: "absolute", right:"0.5em", top:0, textAlign:"right"}}>
-    <span className="summarize-cp-sum-total">{sumChanges > 0 ? sumChanges : ""}</span>
-    <span className="summarize-cp-text summarize-cp-text-changes">&nbsp;changes,</span>
-    <br />
-    <span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span>
-    <span className="summarize-cp-first-changes">{firstChanges}</span>
-    </div>
-    </>
+    <span className="summarize-change-points" style={{position: "absolute", right:"0.5em"}}>{sumChanges > 0 ? sumChanges : ""}
+    {firstChanges}</span>
   );
 };
 
