@@ -425,6 +425,13 @@ div.card div.card-header {
   color: var(--nyrkio-active)
 }
 
+@media (max-width: 799px) {
+    .summarize-change-points .summarize-cp-text{
+        display: none;
+    }
+}
+
+
 .ag-theme-nyrkio a {
   color: var(--nyrkio-tattoo-red);
 }
