@@ -97,42 +97,87 @@ class PerformanceTestResultSeries:
         """
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
+    class SingleMetricSeries:
+        def __init__(self):
+            self.timestamps = []
+            self.attributes = defaultdict(list)
+            self.metric_unit = None
+            self.metric_data = []
+
+        def add_result(self, timestamp, metric, attributes):
+            self.timestamps.append(timestamp)
+            self.metric_unit = metric.unit
+            self.metric_data.append(metric.value)
+            for k, v in attributes.items():
+                self.attributes[k].append(v)
+
     async def calculate_changes(self, notifiers=None):
-        timestamps = [r.timestamp for r in self.results]
-
-        metric_units = {}
+        # TODO(mfleming) Instead of building this dict here we should refactor
+        # PerformanceTestResultSeries to store the data in this way, i.e. by
+        # metric name, when we add results.
+        data = {}
         for r in self.results:
             for m in r.metrics:
-                metric_units[m.name] = m.unit
+                if m.name not in data:
+                    s = data[m.name] = PerformanceTestResultSeries.SingleMetricSeries()
+                else:
+                    s = data[m.name]
 
-        metric_data = defaultdict(list)
-        for r in self.results:
-            for m in r.metrics:
-                metric_data[m.name].append(m.value)
+                s.add_result(r.timestamp, m, r.attributes)
 
-        attributes = defaultdict(list)
-        for r in self.results:
-            for k, v in r.attributes.items():
-                attributes[k].append(v)
+        # Hunter has the ability to analyze multiple series at once but requires
+        # that all series have the same number of data points (timestamps,
+        # metric values, etc).  This isn't always true for us, for example when
+        # a user only recently started collecting data for a new metric. So we
+        # analyze each series separately.
+        reports = []
+        for name, m in data.items():
+            timestamps = m.timestamps
+            metric_units = {name: m.metric_unit}
+            metric_data = {name: m.metric_data}
+            attributes = m.attributes
+            logging.error(f"{timestamps}, {metric_units}, {metric_data}, {attributes}")
+            series = Series(
+                self.name, None, timestamps, metric_units, metric_data, attributes
+            )
 
-        series = Series(
-            self.name, None, timestamps, metric_units, metric_data, attributes
-        )
+            options = AnalysisOptions()
+            options.min_magnitude = self.config.min_magnitude
+            options.max_pvalue = self.config.max_pvalue
 
-        options = AnalysisOptions()
-        options.min_magnitude = self.config.min_magnitude
-        options.max_pvalue = self.config.max_pvalue
+            analyzed_series = series.analyze(options)
+            change_points = analyzed_series.change_points_by_time
+            report = GitHubReport(m, change_points)
+            produced_report = await report.produce_report(self.name, ReportType.JSON)
+            reports.append(json.loads(produced_report))
 
-        analyzed_series = series.analyze(options)
+            if notifiers:
+                for notifier in notifiers:
+                    await notifier.notify({self.name: analyzed_series})
 
-        if notifiers:
-            for notifier in notifiers:
-                await notifier.notify({self.name: analyzed_series})
+        # Merge all change points into a single list
+        final_report = {}
+        for report in reports:
+            changes = report[self.name]
 
-        change_points = analyzed_series.change_points_by_time
-        report = GitHubReport(series, change_points)
-        produced_report = await report.produce_report(self.name, ReportType.JSON)
-        return json.loads(produced_report)
+            if not final_report:
+                final_report[self.name] = changes
+                continue
+
+            timestamps = [c["time"] for c in changes]
+            change_points = [c["changes"] for c in changes]
+            existing_timestamps = [c["time"] for c in final_report[self.name]]
+
+            for t in timestamps:
+                if t not in existing_timestamps:
+                    final_report[self.name].extend(changes)
+                else:
+                    index = existing_timestamps.index(t)
+                    existing_cp = final_report[self.name][index]
+                    for c in change_points:
+                        existing_cp["changes"].extend(c)
+
+        return final_report
 
 
 class PerformanceTestResultExistsError(Exception):

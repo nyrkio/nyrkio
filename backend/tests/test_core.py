@@ -281,3 +281,71 @@ def test_notifiers_get_notified():
     asyncio.run(series.calculate_changes([notifier]))
     assert notifier.notified
     assert notifier.expected_output == {"benchmark1": []}
+
+
+def test_changes_for_metrics_with_different_timestamps():
+    """Calculate changes for metrics with different number of timestamps"""
+    config = Config(min_magnitude=0.0, max_pvalue=0.01)
+    series = PerformanceTestResultSeries("benchmark1", config)
+
+    # Add a known time series that has change points and ensure that we
+    # don't see any change points when we use a high min_magnitude
+    series.add_result(
+        PerformanceTestResult(
+            1,
+            [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 10.0)],
+            {"attr1": "value1"},
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            2,
+            [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 10.0)],
+            {"attr1": "value1"},
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            3,
+            [
+                ResultMetric("metric1", "µs", 1.0),
+                ResultMetric("metric2", "µs", 10.0),
+                ResultMetric("metric3", "µs", 2.0),
+            ],
+            {"attr1": "value1"},
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            4,
+            [
+                ResultMetric("metric1", "µs", 20.0),
+                ResultMetric("metric2", "µs", 200.0),
+                ResultMetric("metric3", "µs", 2.0),
+            ],
+            {"attr1": "value1"},
+        )
+    )
+    series.add_result(
+        PerformanceTestResult(
+            5,
+            [
+                ResultMetric("metric1", "µs", 20.0),
+                ResultMetric("metric2", "µs", 200.0),
+                ResultMetric("metric3", "µs", 20.0),
+            ],
+            {"attr1": "value1"},
+        )
+    )
+
+    changes = asyncio.run(series.calculate_changes())
+
+    assert "benchmark1" in changes
+    assert len(changes["benchmark1"]) == 2
+    assert len(changes["benchmark1"][0]["changes"]) == 2
+    assert changes["benchmark1"][0]["time"] == 4
+    assert changes["benchmark1"][0]["changes"][0]["metric"] == "metric1"
+    assert changes["benchmark1"][0]["changes"][1]["metric"] == "metric2"
+    assert len(changes["benchmark1"][1]["changes"]) == 1
+    assert changes["benchmark1"][1]["time"] == 5
+    assert changes["benchmark1"][1]["changes"][0]["metric"] == "metric3"
