@@ -136,7 +136,6 @@ class PerformanceTestResultSeries:
             metric_units = {name: m.metric_unit}
             metric_data = {name: m.metric_data}
             attributes = m.attributes
-            logging.error(f"{timestamps}, {metric_units}, {metric_data}, {attributes}")
             series = Series(
                 self.name, None, timestamps, metric_units, metric_data, attributes
             )
