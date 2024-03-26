@@ -3,7 +3,7 @@
 from collections import defaultdict
 from datetime import datetime
 import json
-from typing import List
+from typing import List, final
 import httpx
 import logging
 from sortedcontainers import SortedList
@@ -132,12 +132,17 @@ class PerformanceTestResultSeries:
         # analyze each series separately.
         reports = []
         for name, m in data.items():
-            timestamps = m.timestamps
+            metric_timestamps = m.timestamps
             metric_units = {name: m.metric_unit}
             metric_data = {name: m.metric_data}
             attributes = m.attributes
             series = Series(
-                self.name, None, timestamps, metric_units, metric_data, attributes
+                self.name,
+                None,
+                metric_timestamps,
+                metric_units,
+                metric_data,
+                attributes,
             )
 
             options = AnalysisOptions()
@@ -154,27 +159,37 @@ class PerformanceTestResultSeries:
                 for notifier in notifiers:
                     await notifier.notify({self.name: analyzed_series})
 
-        # Merge all change points into a single list
+        # Merge all reports into a single list, collapsing metrics with the same
+        # timestamp into a single entry.
         final_report = {}
         for report in reports:
-            changes = report[self.name]
+            metric_report = report[self.name]
 
+            # Simple case when we're adding the first metric report
             if not final_report:
-                final_report[self.name] = changes
+                final_report[self.name] = metric_report
                 continue
 
-            timestamps = [c["time"] for c in changes]
-            change_points = [c["changes"] for c in changes]
-            existing_timestamps = [c["time"] for c in final_report[self.name]]
+            for r in metric_report:
+                # Each entry in metric_report can be for a timestamp we've never seen
+                # before or for an existing timestamp.
+                existing_timestamps = [c["time"] for c in final_report[self.name]]
 
-            for t in timestamps:
-                if t not in existing_timestamps:
-                    final_report[self.name].extend(changes)
+                if r["time"] in existing_timestamps:
+                    # Collapse the changes into the existing report
+                    index = existing_timestamps.index(r["time"])
+                    final_report[self.name][index]["changes"].extend(r["changes"])
+
+                    # This should be impossible because we built the metric reports
+                    # from a single series where an element has one set of attributes
+                    # and potentially multiple metrics Check anyway.
+                    if final_report[self.name][index]["attributes"] != r["attributes"]:
+                        logging.error(
+                            f"Attributes differ between metrics for timestamp {r['time']}"
+                        )
                 else:
-                    index = existing_timestamps.index(t)
-                    existing_cp = final_report[self.name][index]
-                    for c in change_points:
-                        existing_cp["changes"].extend(c)
+                    # No existing report for this timestamp. Just add it.
+                    final_report[self.name].append(r)
 
         return final_report
 

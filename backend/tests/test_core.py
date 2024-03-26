@@ -191,6 +191,44 @@ def test_tigerbeetle_data(shared_datadir):
         expected_commits = expected_commits[1:]
 
 
+def test_tigerbeetle_data_dup_metrics_and_timestamps(shared_datadir):
+    """Ensure analysis of tigerbeetle data doesn't contain dups"""
+    series = PerformanceTestResultSeries("tigerbeetle")
+
+    json_data = None
+    path = (shared_datadir / "tigerbeetle.json").resolve()
+    with open(path) as f:
+        import json
+
+        json_data = json.load(f)
+
+    for result in json_data:
+        metrics = []
+        for m in result["metrics"]:
+            metrics.append(ResultMetric(m["name"], m["unit"], m["value"]))
+
+        series.add_result(
+            PerformanceTestResult(result["timestamp"], metrics, result["attributes"])
+        )
+
+    changes = asyncio.run(series.calculate_changes())
+
+    assert len(changes) == 1
+    assert "tigerbeetle" in changes
+
+    times = set()
+    for change in changes["tigerbeetle"]:
+        t = change["time"]
+        assert t not in times
+        times.add(t)
+
+        metrics = []
+        for c in change["changes"]:
+            metric = c["metric"]
+            assert metric not in metrics
+            metrics.append(metric)
+
+
 def test_add_results_in_any_order_returns_sorted():
     """Test that adding results in any order returns sorted results"""
     series = PerformanceTestResultSeries("benchmark1")
