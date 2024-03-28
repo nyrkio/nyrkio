@@ -86,6 +86,8 @@ def main(result_filename, extra_info_filename):
     test_names = []
     for r in results["benchmarks"]:
         test_name = r["fullname"]
+        # Replaces the first benches with benches-test
+        test_name = test_name.replace("benches", "benches-test", 1)
         # Convert :: to / to use Nyrkiö's hierarchical navigation and
         # grouping of results.
         test_name = test_name.replace("::", "/")
