@@ -3,7 +3,7 @@
 from collections import defaultdict
 from datetime import datetime
 import json
-from typing import List, final
+from typing import List
 import httpx
 import logging
 from sortedcontainers import SortedList
