@@ -1,0 +1,97 @@
+name: Deploy (Staging)
+on:
+  pull_request:
+
+jobs:
+  docker-images:
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push the image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.event.pull_request.head.sha }}
+          AWS_REGION: eu-north-1
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          NYRKIO_ENV_STAGING: ${{ secrets.NYRKIO_ENV_STAGING }}
+          ENV: staging
+        run: |
+          # Build a docker container and push it to ECR
+          echo "$NYRKIO_ENV_STAGING " > .env.backend
+          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg SSL_DOMAIN=staging.nyrkio.com
+          echo "Pushing image to ECR..."
+          docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nyrkio/staging/certbot:$IMAGE_TAG
+          echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+  deployment:
+    needs: docker-images
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: "true"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: docker compose up
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.event.pull_request.head.sha }}
+          AWS_REGION: eu-north-1
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          NYRKIO_ENV_STAGING: ${{ secrets.NYRKIO_ENV_STAGING }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          ENV: staging
+        run: |
+          echo "$NYRKIO_ENV_STAGING" > .env.backend
+          # Derived from https://github.com/ArwynFr/actions-docker-context/blob/master/action.yml
+          mkdir -p $HOME/.ssh
+          if [ -z "$SSH_AGENT_PID" ]; then
+            eval $(ssh-agent)
+            echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
+            echo "SSH_AGENT_PID=SSH_AGENT_PID" >> $GITHUB_ENV
+          fi
+
+          echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+
+          echo "$SSH_PRIVATE_KEY" | ssh-add -
+          docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
+          docker context use $ENV
+
+          # Check for valid certificates, creating dummy ones if necessary
+          docker compose -f docker-compose.yml up --no-build -d certbot
+
+          docker compose -f docker-compose.yml up --no-build -d nginx backend
+
+          # Potentially update the dummy certificates with real ones
+          docker compose -f docker-compose.yml up --no-build -d certbot

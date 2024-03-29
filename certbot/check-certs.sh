@@ -1,0 +1,51 @@
+#!/bin/sh
+# Copyright (c) 2024, Nyrkiö Oy
+
+# Handle the chicken and egg problem of having to create certificates before
+# nginx will run which can't happen unless nginx is running.
+#
+# Create dummy certificates if no certificates are found, and replace dummy
+# certs with real ones. The user is responsible for running this script like
+# so,
+#
+# 1. check-certs.sh (creates dummy certs)
+# 2. Start nginx
+# 3. check-certs.sh (replaces dummy certs with real ones)
+#
+# This allows us to avoid rewriting the nginx configuration until the real
+# certificates are available.
+
+if [ -z "$DOMAIN" ]; then
+  echo "DOMAIN environment variable is not set"
+  exit 1
+fi
+
+if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
+  echo "Creating dummy certificate for $DOMAIN"
+  mkdir -p /etc/letsencrypt/live/$DOMAIN
+  openssl req -x509 -nodes -newkey rsa:2048 -days 1\
+    -keyout "/etc/letsencrypt/live/$DOMAIN/privkey.pem" \
+    -out "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" \
+    -subj "/CN=localhost"
+else
+  # If the certificate common name (CN) is localhost then that's a dummy certificate
+  # and we need to use certbot to create a real one.
+  if [ "$(openssl x509 -noout -subject -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem)" = "subject=CN = localhost" ]; then
+    echo "Creating real certificate for $DOMAIN"
+    # Avoid "live directory exists for $DOMAIN" error
+    rm -fr /etc/letsencrypt/*
+
+    # Check EXTRA_DOMAINS and add them to the certificate
+    EXTRAS=""
+    if [ ! -z "$EXTRA_DOMAINS" ]; then
+      for DOMAIN in $EXTRA_DOMAINS; do
+        EXTRAS="$EXTRAS -d $DOMAIN"
+      done
+    fi
+    certbot certonly --expand --webroot --webroot-path=/var/www/certbot --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
+  else
+    echo "Certificate for $DOMAIN already exists and is not a dummy certificate."
+  fi
+fi
+
+exit 0

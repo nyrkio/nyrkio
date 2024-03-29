@@ -35,7 +35,7 @@ jobs:
         run: |
           # Build a docker container and push it to ECR
           echo "$NYRKIO_ENV_PROD" > .env.backend
-          docker compose -f docker-compose.yml build
+          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg SSL_DOMAIN=nyrkio.com EXTRA_DOMAINS="nyrk.io xn--nyrki-nua.com"
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
