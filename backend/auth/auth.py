@@ -192,6 +192,31 @@ async def github_callback(
             detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
         )
 
+    # Find all organizations the user is a member of
+    client = httpx.AsyncClient()
+    response = await client.get(
+        "https://api.github.com/user/orgs",
+        headers={"Authorization": f"token {token['access_token']}"},
+    )
+    if response.status_code != 200:
+        logging.error(
+            f"Failed to fetch organizations from GitHub: {response.status_code}: {response.text}"
+        )
+    else:
+        orgs = response.json()
+
+        # Find the github account in the user's oauth_accounts
+        for account in user.oauth_accounts:
+            if (
+                account.oauth_name == github_oauth.name
+                and account.account_id == account_id
+            ):
+                account.organizations = orgs
+
+        data = user.oauth_accounts
+        update = UserUpdate(oauth_accounts=data)
+        user = await user_manager.update(update, user, safe=True)
+
     response = await jwt_backend.login(get_jwt_strategy(), user)
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)

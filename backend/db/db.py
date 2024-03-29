@@ -16,7 +16,7 @@ from pydantic import Field
 
 
 class OAuthAccount(BaseOAuthAccount):
-    pass
+    organizations: Optional[List[Dict]] = Field(default_factory=list)
 
 
 class User(BeanieBaseUser, Document):

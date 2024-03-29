@@ -8,4 +8,5 @@ CLIENT_SECRET = os.environ.get("GITHUB_CLIENT_SECRET", None)
 github_oauth = GitHubOAuth2(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
+    scopes=["user", "user:email", "read:org"],
 )
