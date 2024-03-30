@@ -38,11 +38,11 @@ else
     # Check EXTRA_DOMAINS and add them to the certificate
     EXTRAS=""
     if [ ! -z "$EXTRA_DOMAINS" ]; then
-      for DOMAIN in $EXTRA_DOMAINS; do
-        EXTRAS="$EXTRAS -d $DOMAIN"
+      for D in $EXTRA_DOMAINS; do
+        EXTRAS="$EXTRAS -d $D"
       done
     fi
-    certbot certonly --expand --webroot --webroot-path=/var/www/certbot --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
+    certbot certonly --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
   else
     echo "Certificate for $DOMAIN already exists and is not a dummy certificate."
   fi
