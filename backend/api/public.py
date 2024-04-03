@@ -72,10 +72,10 @@ async def changes(test_name: str):
 
     short_test_name = get_short_test_name(test_name)
     user = await auth.get_user(user_id)
-    results = await store.get_results(user, short_test_name)
-    disabled = await store.get_disabled_metrics(user, short_test_name)
+    results = await store.get_results(user.id, short_test_name)
+    disabled = await store.get_disabled_metrics(user.id, short_test_name)
 
-    config = await store.get_user_config(user)
+    config = await store.get_user_config(user.id)
     core_config = config.get("core", None)
     if core_config:
         core_config = Config(**core_config)
@@ -94,4 +94,4 @@ async def get_result(test_name: str) -> List[Dict]:
         raise HTTPException(status_code=404, detail="No such test exists")
 
     user = await auth.get_user(user_id)
-    return await store.get_results(user, short_test_name)
+    return await store.get_results(user.id, short_test_name)

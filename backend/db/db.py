@@ -101,7 +101,7 @@ class MockDBStrategy(ConnectionStrategy):
 
         # Add some default data
         result = DBStore.create_doc_with_metadata(
-            MockDBStrategy.DEFAULT_DATA, self.user, "default_benchmark"
+            MockDBStrategy.DEFAULT_DATA, self.user.id, "default_benchmark"
         )
         await self.connection.default_data.insert_one(result)
 
@@ -193,13 +193,13 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
-    def create_doc_with_metadata(doc: Dict, user: User, test_name: str) -> Dict:
+    def create_doc_with_metadata(doc: Dict, id: Any, test_name: str) -> Dict:
         """
         Return a new document with added metadata, e.g. the version of the schema and the user ID.
 
         This is used when storing documents in the DB.
 
-          user_id -> The ID of the user who created the document
+          id -> The ID of the user who created the document. Can also be a GitHub org ID
           version -> The version of the schema for the document
           test_name -> The name of the test
 
@@ -241,17 +241,17 @@ class DBStore(object):
                 "git_commit": d["attributes"]["git_commit"],
                 "test_name": test_name,
                 "timestamp": d["timestamp"],
-                "user_id": user.id,
+                "user_id": id,
             }
         )
 
         d["_id"] = primary_key
-        d["user_id"] = user.id
+        d["user_id"] = id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
         return d
 
-    async def add_results(self, user: User, test_name: str, results: List[Dict]):
+    async def add_results(self, id: Any, test_name: str, results: List[Dict]):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
@@ -259,9 +259,7 @@ class DBStore(object):
         If the user tries to add a result that already exists, raise a
         DBStoreResultExists exception.
         """
-        new_list = [
-            DBStore.create_doc_with_metadata(r, user, test_name) for r in results
-        ]
+        new_list = [DBStore.create_doc_with_metadata(r, id, test_name) for r in results]
         test_results = self.db.test_results
 
         try:
@@ -276,7 +274,7 @@ class DBStore(object):
 
                 raise DBStoreResultExists(duplicate_key)
 
-    async def get_results(self, user: User, test_name: str) -> List[Dict]:
+    async def get_results(self, id: Any, test_name: str) -> List[Dict]:
         """
         Retrieve test results for a given user and test name. The results are
         guaranteed to be sorted by timestamp in ascending order.
@@ -291,7 +289,7 @@ class DBStore(object):
         # TODO(matt) We should read results in batches, not all at once
         results = (
             await test_results.find(
-                {"user_id": user.id, "test_name": test_name}, exclude_projection
+                {"user_id": id, "test_name": test_name}, exclude_projection
             )
             .sort("timestamp")
             .to_list(None)
@@ -299,16 +297,16 @@ class DBStore(object):
 
         return results
 
-    async def get_test_names(self, user: User = None) -> Any:
+    async def get_test_names(self, id: Any = None) -> Any:
         """
-        Get a list of all test names for a given user. If user is None then
+        Get a list of all test names for a given user. If id is None then
         return a dictionary of all test names for all users.
 
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
-        if user:
-            return await test_results.distinct("test_name", {"user_id": user.id})
+        if id:
+            return await test_results.distinct("test_name", {"user_id": id})
         else:
             results = await test_results.aggregate(
                 [
@@ -328,6 +326,7 @@ class DBStore(object):
                 if not user:
                     logging.error(f"No user found for id {result['_id']}")
                     continue
+
                 email = user["email"]
                 user_results[email] = result["test_names"]
             return user_results
@@ -341,7 +340,7 @@ class DBStore(object):
         test_results = self.db.test_results
         await test_results.delete_many({"user_id": user.id})
 
-    async def delete_result(self, user: User, test_name: str, timestamp: int):
+    async def delete_result(self, id: Any, test_name: str, timestamp: int):
         """
         Delete a single result for a given user, test name, and timestamp.
 
@@ -350,10 +349,10 @@ class DBStore(object):
         test_results = self.db.test_results
         if timestamp:
             await test_results.delete_one(
-                {"user_id": user.id, "test_name": test_name, "timestamp": timestamp}
+                {"user_id": id, "test_name": test_name, "timestamp": timestamp}
             )
         else:
-            await test_results.delete_many({"user_id": user.id, "test_name": test_name})
+            await test_results.delete_many({"user_id": id, "test_name": test_name})
 
     async def add_default_data(self, user: User):
         """
@@ -372,7 +371,7 @@ class DBStore(object):
         # TODO(Matt) We assume that all default data has the same test name
         # but this won't be true when we add more tests
         test_name = default_results[0]["test_name"]
-        await self.add_results(user, test_name, default_results)
+        await self.add_results(user.id, test_name, default_results)
 
     async def get_default_test_names(self):
         """
@@ -396,92 +395,92 @@ class DBStore(object):
         return await cursor.sort("timestamp").to_list(None)
 
     #
-    # Change detection can be disabled for metrics on a per-user, per-test basis.
+    # Change detection can be disabled for metrics on a per-user (or per-org),
+    # per-test basis.
+    #
     # This is useful when certain metrics are too noisy to be useful and users just
     # want to outright not used them.
     #
     # A metric is "disabled" by adding a document to the "metrics" collection. It can
     # be re-enabled by removing the document.
     #
-    async def disable_changes(self, user: User, test_name: str, metrics: List[str]):
+    async def disable_changes(self, id: Any, test_name: str, metrics: List[str]):
         """
-        Disable changes for a given user, test, metric combination.
+        Disable changes for a given user (or org), test, metric combination.
         """
         for metric in metrics:
             await self.db.metrics.insert_one(
                 {
-                    "user_id": user.id,
+                    "user_id": id,
                     "test_name": test_name,
                     "metric_name": metric,
                     "is_disabled": True,
                 }
             )
 
-    async def enable_changes(self, user: User, test_name: str, metrics: List[str]):
+    async def enable_changes(self, id: Any, test_name: str, metrics: List[str]):
         """
-        Enable changes for a given user, test, metric combination.
+        Enable changes for a given user (or org), test, metric combination.
         """
         if not metrics:
             # Enable all metrics
             await self.db.metrics.delete_many(
-                {"user_id": user.id, "test_name": test_name, "is_disabled": True}
+                {"user_id": id, "test_name": test_name, "is_disabled": True}
             )
         else:
             for metric in metrics:
                 await self.db.metrics.delete_one(
                     {
-                        "user_id": user.id,
+                        "user_id": id,
                         "test_name": test_name,
                         "metric_name": metric,
                         "is_disabled": True,
                     }
                 )
 
-    async def get_disabled_metrics(self, user: User, test_name: str) -> List[str]:
+    async def get_disabled_metrics(self, id: Any, test_name: str) -> List[str]:
         """
-        Get a list of disabled metrics for a given user and test name.
+        Get a list of disabled metrics for a given user or org id and test name.
 
         Returns an empty list if no results are found.
         """
         metrics = self.db.metrics
         return await metrics.distinct(
-            "metric_name", {"user_id": user.id, "test_name": test_name}
+            "metric_name", {"user_id": id, "test_name": test_name}
         )
 
-    async def get_user_config(self, user: User):
+    async def get_user_config(self, id: Any):
         """
-        Get the user's configuration.
+        Get the user's (or organization) configuration.
 
         If the user has no configuration, return an empty dictionary.
         """
         exclude_projection = {"_id": 0, "user_id": 0}
         user_config = self.db.user_config
-        config = await user_config.find_one({"user_id": user.id}, exclude_projection)
+        config = await user_config.find_one({"user_id": id}, exclude_projection)
 
         return config if config else {}
 
-    async def set_user_config(self, user: User, config: Dict):
+    async def set_user_config(self, id: Any, config: Dict):
         """
-        Set the user's configuration.
+        Set the user's (or organization) configuration.
 
         We don't do any validation on the configuration, so it's up to the caller to
         ensure that the configuration is valid.
         """
         user_config = self.db.user_config
-        await user_config.update_one(
-            {"user_id": user.id}, {"$set": config}, upsert=True
-        )
+        await user_config.update_one({"user_id": id}, {"$set": config}, upsert=True)
 
-    async def delete_user_config(self, user: User):
+    async def delete_user_config(self, id: Any):
         """
-        Delete the user's configuration.
+        Delete the user's (or organization) configuration.
 
         If the user has no configuration, do nothing.
         """
         user_config = self.db.user_config
-        await user_config.delete_one({"user_id": user.id})
+        await user_config.delete_one({"user_id": id})
 
-    async def get_test_config(self, user: User, test_name: str) -> List[Dict]:
+    async def get_test_config(self, id: Any, test_name: str) -> List[Dict]:
         """
         Get the test's configuration.
 
@@ -490,12 +489,12 @@ class DBStore(object):
         exclude_projection = {"_id": 0, "test_name": 0, "user_id": 0}
         test_config = self.db.test_config
         config = await test_config.find(
-            {"user_id": user.id, "test_name": test_name}, exclude_projection
+            {"user_id": id, "test_name": test_name}, exclude_projection
         ).to_list(None)
 
         return config if config else []
 
-    async def set_test_config(self, user: User, test_name: str, config: List[Dict]):
+    async def set_test_config(self, id: Any, test_name: str, config: List[Dict]):
         """
         Set the test's configuration.
 
@@ -513,12 +512,12 @@ class DBStore(object):
                     "git_repo": conf["attributes"]["git_repo"],
                     "branch": conf["attributes"]["branch"],
                     "test_name": test_name,
-                    "user_id": user.id,
+                    "user_id": id,
                 }
             )
 
             c["_id"] = primary_key
-            c["user_id"] = user.id
+            c["user_id"] = id
             c["test_name"] = test_name
             internal_configs.append(c)
 
@@ -526,14 +525,14 @@ class DBStore(object):
         for c in internal_configs:
             await test_config.update_one({"_id": c["_id"]}, {"$set": c}, upsert=True)
 
-    async def delete_test_config(self, user: User, test_name: str):
+    async def delete_test_config(self, id: Any, test_name: str):
         """
         Delete the test's configuration.
 
         If the test has no configuration, do nothing.
         """
         test_config = self.db.test_config
-        await test_config.delete_many({"user_id": user.id, "test_name": test_name})
+        await test_config.delete_many({"user_id": id, "test_name": test_name})
 
     async def get_public_results(self) -> List[Dict]:
         """
@@ -549,10 +548,10 @@ class DBStore(object):
             .to_list(None)
         )
 
-    async def set_public_map(self, public_test_name, user, is_public):
+    async def set_public_map(self, public_test_name, id, is_public):
         """
         Update the public results map. This is a simple mapping from a public test
-        name to user id to show which user "owns" the public name.
+        name to an id to show which user or organization "owns" the public name.
 
         This is called when the user sets a test to be public or private.
 
@@ -563,12 +562,12 @@ class DBStore(object):
         if is_public:
             # Only update if the user is the same
             result = await public_results.find_one({"_id": public_test_name})
-            if result and result["user_id"] != user.id:
+            if result and result["user_id"] != id:
                 raise DBStoreResultExists(result["user_id"])
             else:
                 await public_results.update_one(
                     {"_id": public_test_name},
-                    {"$set": {"user_id": user.id}},
+                    {"$set": {"user_id": id}},
                     upsert=True,
                 )
         else:

@@ -299,7 +299,7 @@ async def slack_oauth(
     update = UserUpdate(slack=data)
     updated_user = await user_manager.update(update, user, safe=True)
 
-    await store.set_user_config(updated_user, config)
+    await store.set_user_config(updated_user.id, config)
 
 
 async def add_user(username, password):

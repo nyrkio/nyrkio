@@ -24,7 +24,7 @@ async def get_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> List[Dict]:
     store = DBStore()
-    config = await store.get_test_config(user, test_name)
+    config = await store.get_test_config(user.id, test_name)
     return config
 
 
@@ -52,7 +52,7 @@ async def set_config(
     # Reconsider whether this is the best approach sometime in the future.
     configs = [elem.model_dump() for elem in data.root]
 
-    await store.set_test_config(user, test_name, configs)
+    await store.set_test_config(user.id, test_name, configs)
 
     # Update the public results map
     for c in configs:
@@ -63,7 +63,7 @@ async def set_config(
             f"Setting up public map for {public_test_name} and {user} and {c['public']}"
         )
         try:
-            await store.set_public_map(public_test_name, user, c["public"])
+            await store.set_public_map(public_test_name, user.id, c["public"])
         except DBStoreResultExists:
             raise HTTPException(status_code=409, detail="Public test already exists")
 
@@ -75,10 +75,10 @@ async def delete_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
     store = DBStore()
-    config = await store.get_test_config(user, test_name)
+    config = await store.get_test_config(user.id, test_name)
     for c in config:
         public_test_name = extract_public_test_name(c["attributes"]) + "/" + test_name
-        await store.set_public_map(public_test_name, user, False)
+        await store.set_public_map(public_test_name, user.id, False)
 
-    await store.delete_test_config(user, test_name)
+    await store.delete_test_config(user.id, test_name)
     return {}

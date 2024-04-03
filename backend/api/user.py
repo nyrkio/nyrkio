@@ -40,7 +40,7 @@ def validate_config(config: UserConfig):
 @user_router.get("/config")
 async def get_user_config(user: User = Depends(auth.current_active_user)):
     store = DBStore()
-    config = await store.get_user_config(user)
+    config = await store.get_user_config(user.id)
     return config
 
 
@@ -50,7 +50,7 @@ async def set_user_config(
 ):
     validate_config(config)
     store = DBStore()
-    await store.set_user_config(user, config.model_dump())
+    await store.set_user_config(user.id, config.model_dump())
 
 
 @user_router.put("/config")
@@ -61,10 +61,10 @@ async def update_user_config(
 
     store = DBStore()
     json = config.model_dump()
-    await store.set_user_config(user, json)
+    await store.set_user_config(user.id, json)
 
 
 @user_router.delete("/config")
 async def delete_user_config(user: User = Depends(auth.current_active_user)):
     store = DBStore()
-    await store.delete_user_config(user)
+    await store.delete_user_config(user.id)

@@ -41,7 +41,7 @@ def test_invalid_primary_key():
 
     user = strategy.get_test_user()
     with pytest.raises(DBStoreMissingRequiredKeys):
-        asyncio.run(store.add_results(user, "benchmark1", [{"foo": "bar"}]))
+        asyncio.run(store.add_results(user.id, "benchmark1", [{"foo": "bar"}]))
 
 
 def test_add_single_result():
@@ -62,8 +62,8 @@ def test_add_single_result():
             },
         }
     ]
-    asyncio.run(store.add_results(user, "benchmark1", results))
-    response = asyncio.run(store.get_results(user, "benchmark1"))
+    asyncio.run(store.add_results(user.id, "benchmark1", results))
+    response = asyncio.run(store.get_results(user.id, "benchmark1"))
     assert results == response
 
 
@@ -84,7 +84,7 @@ def test_create_doc_with_metadata():
             "git_commit": "123456",
         },
     }
-    doc = store.create_doc_with_metadata(test_result, user, test_name)
+    doc = store.create_doc_with_metadata(test_result, user.id, test_name)
 
     assert doc["user_id"] == user.id
     assert doc["version"] == DBStore._VERSION
@@ -122,12 +122,12 @@ def test_default_data_for_new_user():
     user = strategy.get_test_user()
 
     # Ensure that the user has some test results
-    test_names = asyncio.run(store.get_test_names(user))
+    test_names = asyncio.run(store.get_test_names(user.id))
     assert len(test_names) > 0
     assert "default_benchmark" in test_names
 
     # Lookup the data for benchmark1
-    results = asyncio.run(store.get_results(user, "default_benchmark"))
+    results = asyncio.run(store.get_results(user.id, "default_benchmark"))
     assert len(results) == 1
     assert results == [MockDBStrategy.DEFAULT_DATA]
 
@@ -171,9 +171,9 @@ def test_can_disable_change_detection_for_metrics():
     user = strategy.get_test_user()
     test_name = "benchmark1"
     metrics = ["foo", "bar"]
-    asyncio.run(store.disable_changes(user, test_name, metrics))
+    asyncio.run(store.disable_changes(user.id, test_name, metrics))
 
-    disabled = asyncio.run(store.get_disabled_metrics(user, test_name))
+    disabled = asyncio.run(store.get_disabled_metrics(user.id, test_name))
     assert set(disabled) == set(metrics)
 
 
@@ -187,15 +187,15 @@ def test_can_enable_prev_disabled_metric():
     user = strategy.get_test_user()
     test_name = "benchmark1"
     disabled_metrics = ["foo", "bar"]
-    asyncio.run(store.disable_changes(user, test_name, disabled_metrics))
+    asyncio.run(store.disable_changes(user.id, test_name, disabled_metrics))
 
-    disabled = asyncio.run(store.get_disabled_metrics(user, test_name))
+    disabled = asyncio.run(store.get_disabled_metrics(user.id, test_name))
     assert set(disabled) == set(disabled_metrics)
 
     enabled_metrics = ["foo"]
-    asyncio.run(store.enable_changes(user, test_name, enabled_metrics))
+    asyncio.run(store.enable_changes(user.id, test_name, enabled_metrics))
 
-    disabled = asyncio.run(store.get_disabled_metrics(user, test_name))
+    disabled = asyncio.run(store.get_disabled_metrics(user.id, test_name))
     assert set(disabled) == set(disabled_metrics) - set(enabled_metrics)
 
 
@@ -218,10 +218,10 @@ def test_cannot_add_same_result_twice():
             },
         }
     ]
-    asyncio.run(store.add_results(user, test_name, results))
+    asyncio.run(store.add_results(user.id, test_name, results))
 
     with pytest.raises(DBStoreResultExists):
-        asyncio.run(store.add_results(user, test_name, results))
+        asyncio.run(store.add_results(user.id, test_name, results))
 
 
 def test_user_config():
@@ -233,9 +233,9 @@ def test_user_config():
 
     user = strategy.get_test_user()
     config = {"foo": "bar"}
-    asyncio.run(store.set_user_config(user, config))
+    asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
 
@@ -247,7 +247,7 @@ def test_get_user_config_with_no_config():
     asyncio.run(store.startup())
 
     user = strategy.get_test_user()
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == {}
 
 
@@ -260,15 +260,15 @@ def test_get_user_config_update_existing():
 
     user = strategy.get_test_user()
     config = {"foo": "bar"}
-    asyncio.run(store.set_user_config(user, config))
+    asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
     config = {"foo": "baz"}
-    asyncio.run(store.set_user_config(user, config))
+    asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
 
@@ -281,14 +281,14 @@ def test_delete_user_config():
 
     user = strategy.get_test_user()
     config = {"foo": "bar"}
-    asyncio.run(store.set_user_config(user, config))
+    asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
-    asyncio.run(store.delete_user_config(user))
+    asyncio.run(store.delete_user_config(user.id))
 
-    response = asyncio.run(store.get_user_config(user))
+    response = asyncio.run(store.get_user_config(user.id))
     assert response == {}
 
 
@@ -312,11 +312,11 @@ def test_get_all_test_names_without_user():
         }
     ]
 
-    asyncio.run(store.add_results(user, test_name, results))
+    asyncio.run(store.add_results(user.id, test_name, results))
 
     user2 = asyncio.run(add_user("user2@foo.com", "password2"))
     test_name2 = "benchmark2"
-    asyncio.run(store.add_results(user2, test_name2, results))
+    asyncio.run(store.add_results(user2.id, test_name2, results))
 
     response = asyncio.run(store.get_test_names())
     user_results = response[user.email]
@@ -345,9 +345,9 @@ def test_test_config():
             },
         }
     ]
-    asyncio.run(store.set_test_config(user, test_name, config))
+    asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_test_config(user, test_name))
+    response = asyncio.run(store.get_test_config(user.id, test_name))
     assert response == config
 
     # Test that we can update the config
@@ -367,9 +367,9 @@ def test_test_config():
             },
         },
     ]
-    asyncio.run(store.set_test_config(user, test_name, config))
+    asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_test_config(user, test_name))
+    response = asyncio.run(store.get_test_config(user.id, test_name))
     assert response == config
 
 
@@ -395,7 +395,7 @@ def test_get_public_results():
         }
     ]
     user = strategy.get_test_user()
-    asyncio.run(store.add_results(user, test_name, results))
+    asyncio.run(store.add_results(user.id, test_name, results))
 
     config = [
         {
@@ -406,7 +406,7 @@ def test_get_public_results():
             },
         }
     ]
-    asyncio.run(store.set_test_config(user, test_name, config))
+    asyncio.run(store.set_test_config(user.id, test_name, config))
 
     response = asyncio.run(store.get_public_results())
     expected = [
@@ -432,7 +432,7 @@ def test_get_public_results():
             },
         }
     ]
-    asyncio.run(store.add_results(user, test_name, results))
+    asyncio.run(store.add_results(user.id, test_name, results))
 
     # Make benchmark2 public
     config = [
@@ -445,7 +445,7 @@ def test_get_public_results():
         }
     ]
 
-    asyncio.run(store.set_test_config(user, test_name, config))
+    asyncio.run(store.set_test_config(user.id, test_name, config))
 
     response = asyncio.run(store.get_public_results())
     expected = [
@@ -476,12 +476,12 @@ def test_update_public_map():
 
     public_test_name = "org/repo/branch/benchmark1"
     user = strategy.get_test_user()
-    asyncio.run(store.set_public_map(public_test_name, user, True))
+    asyncio.run(store.set_public_map(public_test_name, user.id, True))
 
     response = asyncio.run(store.get_public_user(public_test_name))
     assert response == user.id
 
-    asyncio.run(store.set_public_map(public_test_name, user, False))
+    asyncio.run(store.set_public_map(public_test_name, user.id, False))
     response = asyncio.run(store.get_public_user(public_test_name))
     assert response is None
 
@@ -495,13 +495,13 @@ def test_update_public_map_different_users():
 
     public_test_name = "org/repo/branch/benchmark1"
     user = strategy.get_test_user()
-    asyncio.run(store.set_public_map(public_test_name, user, True))
+    asyncio.run(store.set_public_map(public_test_name, user.id, True))
     # This should effectively be a nop
-    asyncio.run(store.set_public_map(public_test_name, user, True))
+    asyncio.run(store.set_public_map(public_test_name, user.id, True))
 
     user2 = asyncio.run(add_user("user2@foo.com", "foo"))
     with pytest.raises(DBStoreResultExists):
-        asyncio.run(store.set_public_map(public_test_name, user2, True))
+        asyncio.run(store.set_public_map(public_test_name, user2.id, True))
 
 
 def test_delete_test_config():
@@ -523,21 +523,21 @@ def test_delete_test_config():
         }
     ]
 
-    asyncio.run(store.set_test_config(user, test_name1, config))
+    asyncio.run(store.set_test_config(user.id, test_name1, config))
 
     test_name2 = "benchmark2"
-    asyncio.run(store.set_test_config(user, test_name2, config))
+    asyncio.run(store.set_test_config(user.id, test_name2, config))
 
-    response = asyncio.run(store.get_test_config(user, test_name1))
+    response = asyncio.run(store.get_test_config(user.id, test_name1))
     assert response == config
 
-    asyncio.run(store.delete_test_config(user, test_name1))
-    asyncio.run(store.delete_test_config(user, test_name1))
+    asyncio.run(store.delete_test_config(user.id, test_name1))
+    asyncio.run(store.delete_test_config(user.id, test_name1))
 
-    response = asyncio.run(store.get_test_config(user, test_name1))
+    response = asyncio.run(store.get_test_config(user.id, test_name1))
     assert response == []
 
-    response = asyncio.run(store.get_test_config(user, test_name2))
+    response = asyncio.run(store.get_test_config(user.id, test_name2))
     assert response == config
 
 
@@ -560,7 +560,38 @@ def test_result_names_for_invalid_user():
         }
     ]
 
-    invalid_user = type("", (), {"id": 7777})()
-    asyncio.run(store.add_results(invalid_user, test_name, results))
+    invalid_user_id = 7777
+    asyncio.run(store.add_results(invalid_user_id, test_name, results))
     response = asyncio.run(store.get_test_names(None))
     assert response
+
+
+def test_delete_result():
+    """Ensure that we can delete a result"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    asyncio.run(store.add_results(user.id, test_name, results))
+
+    response = asyncio.run(store.get_results(user.id, test_name))
+    assert response == results
+
+    asyncio.run(store.delete_result(user.id, test_name, None))
+
+    response = asyncio.run(store.get_results(user.id, test_name))
+    assert response == []
