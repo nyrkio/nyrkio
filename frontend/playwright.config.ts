@@ -15,7 +15,7 @@ reporter: [
     ['list'],
     ['json', {  outputFile: 'test-results/test-results.json' }],
     ['html'],
-    ['./playwright.nyrkio.reporter.ts', {gitRepo: "https://github.com/nyrkio/nyrkio", projectName: "Nyrkiö frontend"}]
+    ['./playwright.nyrkio.reporter.ts', {gitRepo: "https://github.com/nyrkio/nyrkio", projectName: "NyrkioFrontend"}]
   ],
 
 });

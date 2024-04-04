@@ -80,6 +80,7 @@ class NyrkioReporter implements Reporter {
       nyrkioResult.pathPrefix(parent.title);
       parent = parent.parent;
     }
+    nyrkioResult.pathPrefix(branchName());
     nyrkioResult.pathPrefix(this.projectName);
 
     nyrkioResult.addMetric ("test duration", "msec", result.duration);
