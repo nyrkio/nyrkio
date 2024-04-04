@@ -114,6 +114,8 @@ class NyrkioReporter implements Reporter {
       return false;
     } else {
       //console.debug(response);
+      console.log("Test durations were posted to Nyrkiö. View them at https://nyrkio.com/tests/"
+                  + this.projectName + "/" +branchName());
       return true;
     }
   }
