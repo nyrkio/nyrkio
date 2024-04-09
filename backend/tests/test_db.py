@@ -539,3 +539,28 @@ def test_delete_test_config():
 
     response = asyncio.run(store.get_test_config(user, test_name2))
     assert response == config
+
+
+def test_result_names_for_invalid_user():
+    """Ensure that we can't get test names with an invalid user"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    invalid_user = type("", (), {"id": 7777})()
+    asyncio.run(store.add_results(invalid_user, test_name, results))
+    response = asyncio.run(store.get_test_names(None))
+    assert response
