@@ -2,6 +2,7 @@
 
 from abc import abstractmethod, ABC
 from collections import OrderedDict
+import logging
 import os
 from typing import Dict, List, Optional, Any
 
@@ -324,6 +325,9 @@ class DBStore(object):
             user_results = {}
             for result in results:
                 user = await self.db.User.find_one({"_id": result["_id"]})
+                if not user:
+                    logging.error(f"No user found for id {result['_id']}")
+                    continue
                 email = user["email"]
                 user_results[email] = result["test_names"]
             return user_results
