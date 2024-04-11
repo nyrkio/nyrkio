@@ -120,9 +120,56 @@ class MockDBStrategy(ConnectionStrategy):
         )
         await manager.create(su)
 
+        self.gh_users = []
+        gh_user1 = UserCreate(
+            id=3,
+            email="gh@foo.com",
+            password="gh",
+            is_active=True,
+            is_verified=True,
+            oauth_accounts=[
+                OAuthAccount(
+                    account_id="123",
+                    account_email="gh@foo.com",
+                    oauth_name="github",
+                    access_token="gh_token",
+                    organizations=[
+                        {"login": "nyrkio", "id": 123},
+                        {"login": "nyrkio2", "id": 456},
+                    ],
+                )
+            ],
+        )
+        self.gh_users.append(await manager.create(gh_user1))
+
+        gh_user2 = UserCreate(
+            id=4,
+            email="gh2@foo.com",
+            password="gh",
+            is_active=True,
+            is_verified=True,
+            oauth_accounts=[
+                OAuthAccount(
+                    account_id="456",
+                    account_email="gh2@foo.com",
+                    oauth_name="github",
+                    access_token="gh_token",
+                    organizations=[
+                        {"login": "nyrkio2", "id": 456},
+                        {"login": "nyrkio3", "id": 789},
+                    ],
+                )
+            ],
+        )
+        self.gh_users.append(await manager.create(gh_user2))
+
     def get_test_user(self):
         assert self.user, "init_db() must be called first"
         return self.user
+
+    def get_github_users(self):
+        assert self.gh_users, "init_db() must be called first"
+        return self.gh_users
 
 
 class DBStoreAlreadyInitialized(Exception):

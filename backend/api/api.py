@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Union
 
 from backend.core.core import (
     PerformanceTestResult,
@@ -10,11 +10,12 @@ from backend.core.core import (
 from backend.core.config import Config
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
-from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
 from backend.api.admin import admin_router
 from backend.api.config import config_router
+from backend.api.model import TestResults
+from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.user import user_router
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
@@ -124,17 +125,6 @@ async def delete_result(
     return []
 
 
-class TestResult(BaseModel):
-    timestamp: int
-    metrics: List[Dict]
-    attributes: Dict
-    extra_info: Optional[Dict] = {}
-
-
-class TestResults(RootModel[Any]):
-    root: List[TestResult]
-
-
 @api_router.post("/result/{test_name:path}")
 async def add_result(
     test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
@@ -212,6 +202,7 @@ app.include_router(user_router, prefix="/api/v0")
 app.include_router(admin_router, prefix="/api/v0")
 app.include_router(config_router, prefix="/api/v0")
 app.include_router(public_router, prefix="/api/v0")
+app.include_router(org_router, prefix="/api/v0")
 
 
 @app.on_event("startup")

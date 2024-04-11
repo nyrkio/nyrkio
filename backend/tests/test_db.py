@@ -595,3 +595,41 @@ def test_delete_result():
 
     response = asyncio.run(store.get_results(user.id, test_name))
     assert response == []
+
+
+def test_delete_result_by_org():
+    """Ensure that we can delete a result by org"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user, _ = strategy.get_github_users()
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    def get_org_id(user, name):
+        for account in user.oauth_accounts:
+            for org in account.organizations:
+                if org["login"] == name:
+                    return org["id"]
+        return None
+
+    org_id = get_org_id(user, "nyrkio2")
+    assert org_id
+
+    asyncio.run(store.add_results(org_id, test_name, results))
+
+    response = asyncio.run(store.get_results(org_id, test_name))
+    assert response == results
+
+    asyncio.run(store.delete_result(org_id, test_name, None))

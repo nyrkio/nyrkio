@@ -75,6 +75,22 @@ class SuperuserClient(AuthenticatedTestClient):
         return response
 
 
+class GitHubClient(AuthenticatedTestClient):
+    def __init__(self, app):
+        super().__init__(app)
+        self.email = "gh@foo.com"
+
+    def login(self):
+        response = self.post(
+            "/api/v0/auth/jwt/login",
+            data={"username": self.email, "password": "gh"},
+        )
+        assert response.status_code == 200
+        token = response.json()["access_token"]
+        self.headers = {"Authorization": f"Bearer {token}"}
+        return response
+
+
 @pytest.fixture
 def client():
     with AuthenticatedTestClient(app) as client:
@@ -86,4 +102,10 @@ def client():
 @pytest.fixture
 def unauthenticated_client():
     with TestClient(app) as client:
+        yield client
+
+
+@pytest.fixture
+def gh_client():
+    with GitHubClient(app) as client:
         yield client
