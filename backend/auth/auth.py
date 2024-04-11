@@ -53,9 +53,7 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 
 
 def get_jwt_strategy() -> JWTStrategy:
-    # Expires after a month
-    expiration_secs = 3600 * 24 * 30
-    return JWTStrategy(secret=SECRET, lifetime_seconds=expiration_secs)
+    return JWTStrategy(secret=SECRET, lifetime_seconds=None)
 
 
 jwt_backend = AuthenticationBackend(
