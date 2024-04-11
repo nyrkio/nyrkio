@@ -1,32 +1,37 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router";
-import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
+import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
+import { SidePanel } from "./SidePanel";
+import { dashboardTypes } from "../lib/utils";
 
-export const PublicDashboard = () => {
+export const OrgDashboard = () => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [prefix, setPrefix] = useState(undefined);
-  const [publicData, setPublicData] = React.useState([]);
+  const [orgData, setOrgData] = React.useState([]);
 
-  const fetchPublicTests = async () => {
-    const response = await fetch("/api/v0/public/results");
-    const publicData = await response.json();
-    console.debug(publicData);
-
-    let results = [];
-    publicData.map((result) => {
-      const url = parseGitHubRepo(result);
-      console.debug("url: " + url);
-      results.push(url);
+  const fetchOrgs = async () => {
+    const response = await fetch("/api/v0/orgs/results", {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
     });
-    setPublicData(results);
+
+    const data = await response.json();
+    console.debug(data);
+    let results = [];
+
+    data.map((result) => {
+      results.push(result.test_name);
+    });
+    setOrgData(results);
   };
 
   useEffect(() => {
     setLoading(true);
 
-    var path = location.pathname.substring("/public".length);
+    var path = location.pathname.substring("/orgs".length);
     if (path.startsWith("/")) {
       path = path.substring(1);
     }
@@ -37,26 +42,26 @@ export const PublicDashboard = () => {
 
     setPrefix(path);
 
-    fetchPublicTests().finally(() => {
+    fetchOrgs().finally(() => {
       setLoading(false);
     });
   }, [location]);
 
   const baseUrls = {
     testRootTitle: "GH Repos",
-    api: "/api/v0/public/result/",
-    testRoot: "/public",
-    results: "/public",
-    result: "public",
-    tests: "public",
+    api: "/api/v0/orgs/result/",
+    testRoot: "/orgs",
+    results: "/orgs",
+    result: "orgs",
+    tests: "orgs",
     breadcrumbTestRootTitle: "GitHub Repos",
   };
 
   return (
-    <div className="container">
+    <>
+      <SidePanel />
       <div className="row text-center">
-        <h1 className="mb-4">Public Test Results</h1>
-        <p>Public benchmark results as shared by Nyrkiö users.</p>
+        <h1 className="mb-4">Organization Test Results</h1>
       </div>
       <div className="row justify-content-center text-center pt-5">
         {loading ? (
@@ -64,12 +69,12 @@ export const PublicDashboard = () => {
         ) : (
           <TableOrResult
             prefix={prefix}
-            data={publicData}
+            data={orgData}
             baseUrls={baseUrls}
-            dashboardType={dashboardTypes.PUBLIC}
+            dashboardType={dashboardTypes.ORG}
           />
         )}
       </div>
-    </div>
+    </>
   );
 };

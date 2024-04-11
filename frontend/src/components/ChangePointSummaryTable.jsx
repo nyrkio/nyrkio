@@ -7,6 +7,7 @@ import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 export const ChangePointSummaryTable = ({ changeData }) => {
   var rowData = [];
 
+  console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
       console.log(changePoint);
