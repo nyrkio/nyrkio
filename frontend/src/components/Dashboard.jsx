@@ -278,6 +278,10 @@ export const SingleResultWithTestname = ({
       },
     });
     const changeData = await changes.json();
+    if (changes.status != 200) {
+      console.error("Failed to fetch change point data: " + changes.status);
+      return;
+    }
     setChangePointData(changeData);
   };
 
