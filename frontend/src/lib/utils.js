@@ -18,16 +18,17 @@ export const formatCommit = (commit, commit_msg) => {
 
 // Throttling function calls, by Remy Sharp (via impress.js...)
 // http://remysharp.com/2010/07/21/throttling-function-calls/
-export const throttle = function( fn, delay ) {
-    var timer = null;
-    return function() {
-        var context = this, args = arguments;
-        window.clearTimeout( timer );
-        timer = window.setTimeout( function() {
-            fn();
-            //fn.apply( context, args );
-        }, delay );
-    };
+export const throttle = function (fn, delay) {
+  var timer = null;
+  return function () {
+    var context = this,
+      args = arguments;
+    window.clearTimeout(timer);
+    timer = window.setTimeout(function () {
+      fn();
+      //fn.apply( context, args );
+    }, delay);
+  };
 };
 
 // Build a URL from a test result' attributes and test name.
