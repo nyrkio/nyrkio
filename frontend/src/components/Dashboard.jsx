@@ -104,7 +104,7 @@ export const TestList = ({
             to={`/${baseUrls.result}/${longName}`}
             state={{ testName: longName }}
           >
-            {name}
+            {displayName}
           </Link>
           <SummarizeChangePoints
             name={name}
@@ -135,7 +135,7 @@ export const TestList = ({
 
 export const Dashboard = () => {
   const [loading, setLoading] = useState(false);
-  const [testNames, setTestNames] = useState([]);
+  const [unencodedTestNames, setUnencodedTestNames] = useState([]);
   const location = useLocation();
   var prefix;
 
@@ -170,7 +170,7 @@ export const Dashboard = () => {
     const resultData = await response.json();
     resultData.map((element) => {
       const test_name = element.test_name;
-      setTestNames((prevState) => [...prevState, test_name]);
+      setUnencodedTestNames((prevState) => [...prevState, test_name]);
     });
     setLoading(false);
   };
@@ -184,12 +184,15 @@ export const Dashboard = () => {
     return <div>Loading</div>;
   }
 
+  const testNames = unencodedTestNames.map((name) => encodeURI(name));
+
   // Check for invalid test name in url
   if (prefix !== undefined && !validTestName(prefix, testNames)) {
     return <NoMatch />;
   }
 
   const shortNames = createShortNames(prefix, testNames);
+  const displayNames = shortNames.map((name) => decodeURI(name));
 
   return (
     <>
@@ -217,7 +220,7 @@ export const Dashboard = () => {
                       testNames={testNames}
                       shortNames={shortNames}
                       prefix={prefix}
-                      displayNames={shortNames}
+                      displayNames={displayNames}
                     />
                   </ul>
                 </div>
