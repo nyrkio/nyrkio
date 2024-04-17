@@ -516,7 +516,15 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
     //console.debug(testsToSummarize);
     const yesterday = new Date() - 24 * 60 * 60 * 1000;
     testsToSummarize.forEach(async (testName) => {
-      const url = baseUrls.api + testName + "/changes";
+      // TODO(mfleming) Hack alert. For public results we added
+      // the "https://github.com" prefix in PublicDashboard.jsx and need
+      // to strip it here, otherwise we'll get HTTP 404 when hitting the
+      // backend.
+      const unencodedTestName = decodeURIComponent(testName).replace(
+        "https://github.com/",
+        ""
+      );
+      const url = baseUrls.api + unencodedTestName + "/changes";
       //console.debug(url);
       caches.open("nyrkio-changes").then((cache) => {
         cache.match(url).then(async (response) => {

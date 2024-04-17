@@ -4,7 +4,8 @@ from pydantic import BaseModel, RootModel
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.auth import auth
-from backend.db.db import User, DBStore, DBStoreResultExists
+from backend.db.db import User, DBStore
+from backend.api.public import build_public_test_name
 
 config_router = APIRouter()
 
@@ -32,17 +33,16 @@ class TestConfigList(RootModel[Any]):
     root: List[TestConfig]
 
 
-def extract_public_test_name(attributes):
-    # TODO(mfleming) we assume a https://github.com repo
-    name = attributes["git_repo"].replace("https://github.com/", "")
-    name += "/" + attributes["branch"]
-    return name
-
-
 @config_router.post("/config/{test_name:path}")
 async def set_config(
     test_name: str, data: TestConfigList, user: User = Depends(auth.current_active_user)
 ) -> Dict:
+    """
+    If the config is adding a public test (by setting the "public" key to True),
+    we check if the test name is already in use by another user.  If it is,
+    raise a HTTP 409 exception. When an exception is raised, none of the
+    configuration changes are made.
+    """
     store = DBStore()
 
     # TODO(mfleming) This is an attempt to avoid an abstraction leak. The DB
@@ -52,21 +52,20 @@ async def set_config(
     # Reconsider whether this is the best approach sometime in the future.
     configs = [elem.model_dump() for elem in data.root]
 
-    await store.set_test_config(user.id, test_name, configs)
+    public_tests = await store.get_public_results()
+    public_test_names = [build_public_test_name(p) for p in public_tests]
 
-    # Update the public results map
     for c in configs:
-        public_test_name = extract_public_test_name(c["attributes"]) + "/" + test_name
-        import logging
+        conf = dict(c)
+        conf["user_id"] = user.id
+        conf["test_name"] = test_name
+        name = build_public_test_name(conf)
+        if conf["public"] and name in public_test_names:
+            raise HTTPException(
+                status_code=409, detail=f"Public test already exists for {name}"
+            )
 
-        logging.info(
-            f"Setting up public map for {public_test_name} and {user} and {c['public']}"
-        )
-        try:
-            await store.set_public_map(public_test_name, user.id, c["public"])
-        except DBStoreResultExists:
-            raise HTTPException(status_code=409, detail="Public test already exists")
-
+    await store.set_test_config(user.id, test_name, configs)
     return {}
 
 
@@ -75,10 +74,5 @@ async def delete_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
     store = DBStore()
-    config = await store.get_test_config(user.id, test_name)
-    for c in config:
-        public_test_name = extract_public_test_name(c["attributes"]) + "/" + test_name
-        await store.set_public_map(public_test_name, user.id, False)
-
     await store.delete_test_config(user.id, test_name)
     return {}

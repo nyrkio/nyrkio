@@ -16,8 +16,15 @@ export const PublicDashboard = () => {
 
     let results = [];
     publicData.map((result) => {
-      const url = parseGitHubRepo(result);
-      console.debug("url: " + url);
+      const name = result.test_name;
+      // The imageFetch() logic in Dashboard.jsx relies on the org/repo
+      // part of the testname being treated as an atomic unit, which we
+      // achieve by URI-encoding it.
+      const parts = name.split("/");
+      const orgRepo = parts[0] + "/" + parts[1];
+      const testName = parts.slice(2).join("/");
+      const url =
+        encodeURIComponent("https://github.com/" + orgRepo) + "/" + testName;
       results.push(url);
     });
     setPublicData(results);

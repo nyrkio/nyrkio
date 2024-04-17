@@ -1,13 +1,13 @@
-import logging
 from typing import Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException
 
-from backend.api.config import TestConfigList, extract_public_test_name
+from backend.api.config import TestConfigList
 from backend.api.model import TestResults
+from backend.api.public import build_public_test_name
 from backend.api.user import UserConfig, validate_config
 from backend.auth import auth
 from backend.core.config import Config
-from backend.db.db import DBStore, User, DBStoreResultExists
+from backend.db.db import DBStore, User
 
 """
 Per-organization test result API endpoints.
@@ -170,16 +170,21 @@ async def set_config(
         )
 
     configs = [elem.model_dump() for elem in data.root]
+
+    conf = dict(configs[0])
+    conf["user_id"] = org_id
+    conf["test_name"] = test_name
+    name = build_public_test_name(conf)
+
+    public_tests = await store.get_public_results()
+    public_test_names = [build_public_test_name(p) for p in public_tests]
+
+    if conf["public"] and name in public_test_names:
+        raise HTTPException(
+            status_code=409, detail=f"Public test already exists for {name}"
+        )
+
     await store.set_test_config(org_id, test_name, configs)
-
-    logging.info(
-        f"Setting up public map for {test_name} and {org_id} and {configs[0]['public']}"
-    )
-    try:
-        await store.set_public_map(test_name, org_id, configs[0]["public"])
-    except DBStoreResultExists:
-        raise HTTPException(status_code=409, detail="Public test already exists")
-
     return {}
 
 

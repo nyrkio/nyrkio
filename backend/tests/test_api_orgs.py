@@ -280,13 +280,15 @@ def test_org_test_config_public(gh_client):
     )
     assert response.status_code == 200
 
-    data = [{
-        "public": True,
-        "attributes": {
-            "git_repo": "https://github.com/nyrkio/nyrkio",
-            "branch": "main",
-        },
-    }]
+    data = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
 
     response = gh_client.post(
         "/api/v0/orgs/config/nyrkio/nyrkio/main/benchmark1", json=data
@@ -301,6 +303,14 @@ def test_org_test_config_public(gh_client):
 
     response = gh_client.get("/api/v0/public/results")
     assert response.status_code == 200
+    assert response.json() == [
+        {
+            "test_name": "nyrkio/nyrkio/main/benchmark1",
+        }
+    ]
+
+    response = gh_client.get("/api/v0/public/result/nyrkio/nyrkio/main/benchmark1")
+    assert response.status_code == 200
 
     # Delete the test config
     response = gh_client.delete("/api/v0/orgs/config/nyrkio/nyrkio/main/benchmark1")
@@ -313,6 +323,83 @@ def test_org_test_config_public(gh_client):
     response = gh_client.get("/api/v0/public/results")
     assert response.status_code == 200
     assert response.json() == []
+
+
+def test_org_public_test_changes(gh_client):
+    """Ensure that we can fetch public org result changes"""
+    gh_client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "extra_info": {"foo": "bar"},
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
+            "extra_info": {"foo": "baz"},
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "4567889",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "extra_info": {"foo": "baz"},
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "abc123",
+            },
+        },
+    ]
+
+    response = gh_client.post(
+        "/api/v0/orgs/result/nyrkio/nyrkio/main/benchmark1", json=data
+    )
+    assert response.status_code == 200
+
+    data = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = gh_client.post(
+        "/api/v0/orgs/config/nyrkio/nyrkio/main/benchmark1", json=data
+    )
+    assert response.status_code == 200
+
+    response = gh_client.get(
+        "/api/v0/public/result/nyrkio/nyrkio/main/benchmark1/changes"
+    )
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "nyrkio/nyrkio/main/benchmark1" in json
+    assert len(json["nyrkio/nyrkio/main/benchmark1"]) == 1
+    assert json["nyrkio/nyrkio/main/benchmark1"][0]["time"] == 3
 
 
 def test_org_config(gh_client):

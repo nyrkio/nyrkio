@@ -545,8 +545,9 @@ class DBStore(object):
         """
         Set the test's configuration.
 
-        We don't do any validation on the configuration, so it's up to the caller to
-        ensure that the configuration is valid.
+        We don't do any validation on the configuration, so it's up to the
+        caller to ensure that the configuration is valid. In particular, we
+        don't check whether two public tests conflict.
         """
         test_config = self.db.test_config
 
@@ -588,48 +589,12 @@ class DBStore(object):
         Returns an empty list if no results are found.
         """
         test_configs = self.db.test_config
-        exclude_projection = {"_id": 0, "user_id": 0, "public": 0}
+        exclude_projection = {"_id": 0}
         return (
             await test_configs.find({"public": True}, exclude_projection)
             .sort("attributes, test_name")
             .to_list(None)
         )
-
-    async def set_public_map(self, public_test_name, id, is_public):
-        """
-        Update the public results map. This is a simple mapping from a public test
-        name to an id to show which user or organization "owns" the public name.
-
-        This is called when the user sets a test to be public or private.
-
-        If a mapping already exists for a different user, raise a DBStoreResultExists
-        """
-        public_results = self.db.public_results
-
-        if is_public:
-            # Only update if the user is the same
-            result = await public_results.find_one({"_id": public_test_name})
-            if result and result["user_id"] != id:
-                raise DBStoreResultExists(result["user_id"])
-            else:
-                await public_results.update_one(
-                    {"_id": public_test_name},
-                    {"$set": {"user_id": id}},
-                    upsert=True,
-                )
-        else:
-            # Remove the test from the public results map
-            await public_results.delete_one({"_id": public_test_name})
-
-    async def get_public_user(self, public_test_name):
-        """
-        Get the user who owns the public test name.
-
-        Returns None if no results are found.
-        """
-        public_results = self.db.public_results
-        result = await public_results.find_one({"_id": public_test_name})
-        return result["user_id"] if result else None
 
 
 # Will be patched by conftest.py if we're running tests

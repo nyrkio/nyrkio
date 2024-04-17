@@ -411,6 +411,8 @@ def test_get_public_results():
     response = asyncio.run(store.get_public_results())
     expected = [
         {
+            "user_id": user.id,
+            "public": True,
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -450,6 +452,8 @@ def test_get_public_results():
     response = asyncio.run(store.get_public_results())
     expected = [
         {
+            "public": True,
+            "user_id": user.id,
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -457,6 +461,8 @@ def test_get_public_results():
             "test_name": "benchmark1",
         },
         {
+            "public": True,
+            "user_id": user.id,
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -465,43 +471,6 @@ def test_get_public_results():
         },
     ]
     assert response == expected
-
-
-def test_update_public_map():
-    """Ensure that we can update the public map"""
-    store = DBStore()
-    strategy = MockDBStrategy()
-    store.setup(strategy)
-    asyncio.run(store.startup())
-
-    public_test_name = "org/repo/branch/benchmark1"
-    user = strategy.get_test_user()
-    asyncio.run(store.set_public_map(public_test_name, user.id, True))
-
-    response = asyncio.run(store.get_public_user(public_test_name))
-    assert response == user.id
-
-    asyncio.run(store.set_public_map(public_test_name, user.id, False))
-    response = asyncio.run(store.get_public_user(public_test_name))
-    assert response is None
-
-
-def test_update_public_map_different_users():
-    """Verify that a second user cannot create a map if one exists"""
-    store = DBStore()
-    strategy = MockDBStrategy()
-    store.setup(strategy)
-    asyncio.run(store.startup())
-
-    public_test_name = "org/repo/branch/benchmark1"
-    user = strategy.get_test_user()
-    asyncio.run(store.set_public_map(public_test_name, user.id, True))
-    # This should effectively be a nop
-    asyncio.run(store.set_public_map(public_test_name, user.id, True))
-
-    user2 = asyncio.run(add_user("user2@foo.com", "foo"))
-    with pytest.raises(DBStoreResultExists):
-        asyncio.run(store.set_public_map(public_test_name, user2.id, True))
 
 
 def test_delete_test_config():
