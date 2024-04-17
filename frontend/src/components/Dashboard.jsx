@@ -93,9 +93,9 @@ export const TestList = ({
     );
   }
 
-    return shortNames.map((name, index) => {
+  return shortNames.map((name, index) => {
     const displayName = displayNames[index];
-    var longName = prefix===undefined ? name : prefix + "/" + name;
+    var longName = prefix === undefined ? name : prefix + "/" + name;
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
@@ -106,7 +106,12 @@ export const TestList = ({
           >
             {name}
           </Link>
-            <SummarizeChangePoints name={name} longName={longName} baseUrls={baseUrls} testNames={testNames} />
+          <SummarizeChangePoints
+            name={name}
+            longName={longName}
+            baseUrls={baseUrls}
+            testNames={testNames}
+          />
         </li>
       );
     } else {
@@ -115,7 +120,12 @@ export const TestList = ({
       return (
         <li className="list-group-item" key={longName}>
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
-            <TestListEntry name={displayName} longName={longName} baseUrls={baseUrls} testNames={testNames}/>
+            <TestListEntry
+              name={displayName}
+              longName={longName}
+              baseUrls={baseUrls}
+              testNames={testNames}
+            />
           </Link>
         </li>
       );
@@ -199,7 +209,11 @@ export const Dashboard = () => {
                 <div className="card-body">
                   <ul className="list-group list-group-flush">
                     <TestList
-                      baseUrls={{ tests: "tests", result: "result", api: "/api/v0/result/" }}
+                      baseUrls={{
+                        tests: "tests",
+                        result: "result",
+                        api: "/api/v0/result/",
+                      }}
                       testNames={testNames}
                       shortNames={shortNames}
                       prefix={prefix}
@@ -218,7 +232,6 @@ export const Dashboard = () => {
                   </Link>
                 </div>
               </div>
-
             </div>
           </>
         )}
@@ -384,7 +397,7 @@ const nameIsGitHubRepo = (name) => {
 //
 // TODO(mfleming) Fetching the avatar url is a really quick way
 // to exhaust the GitHub API rate limit. We should cache these.
-const TestListEntry = ({ name , longName , baseUrls, testNames }) => {
+const TestListEntry = ({ name, longName, baseUrls, testNames }) => {
   const [loading, setLoading] = useState(false);
   const [imageUrl, setImageUrl] = useState(undefined);
   const [isGitHubUrl, setIsGitHubUrl] = useState(false);
@@ -417,9 +430,17 @@ const TestListEntry = ({ name , longName , baseUrls, testNames }) => {
   if (!isGitHubUrl) {
     return (
       <>
-      <div className="row justify-content-center">
-        <div className="col">{name}  <SummarizeChangePoints name={name} longName={longName} baseUrls={baseUrls} testNames={testNames} /></div>
-      </div>
+        <div className="row justify-content-center">
+          <div className="col">
+            {name}{" "}
+            <SummarizeChangePoints
+              name={name}
+              longName={longName}
+              baseUrls={baseUrls}
+              testNames={testNames}
+            />
+          </div>
+        </div>
       </>
     );
   }
@@ -439,15 +460,31 @@ const TestListEntry = ({ name , longName , baseUrls, testNames }) => {
             style={{ width: "30px", height: "30px" }}
           />
         </div>
-        <div className="col">{name}  <SummarizeChangePoints name={name}  longName={longName} baseUrls={baseUrls}  testNames={testNames} /></div>
+        <div className="col">
+          {name}{" "}
+          <SummarizeChangePoints
+            name={name}
+            longName={longName}
+            baseUrls={baseUrls}
+            testNames={testNames}
+          />
+        </div>
       </div>
     );
   } else {
     return (
       <>
-      <div className="row justify-content-center">
-        <div className="col">{name}  <SummarizeChangePoints name={name}  longName={longName} baseUrls={baseUrls}  testNames={testNames} /></div>
-      </div>
+        <div className="row justify-content-center">
+          <div className="col">
+            {name}{" "}
+            <SummarizeChangePoints
+              name={name}
+              longName={longName}
+              baseUrls={baseUrls}
+              testNames={testNames}
+            />
+          </div>
+        </div>
       </>
     );
   }
@@ -459,118 +496,132 @@ const validTestName = (name, testNames) => {
   return match.length > 0;
 };
 
-const SummarizeChangePoints = ( {longName, baseUrls, testNames} ) => {
+const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
   const [rawChanges, setRawChanges] = useState([]);
   const [sumChanges, setSumChanges] = useState(0);
   const [firstChanges, setFirstChanges] = useState("");
 
-  const fetchSummarizedData = async ( prefix ) => {
+  const fetchSummarizedData = async (prefix) => {
     console.debug("Fetching number of changes for " + prefix);
 
-    const testsToSummarize = testNames.filter((name) => {return name.startsWith(prefix)});
-      const options = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      };
+    const testsToSummarize = testNames.filter((name) => {
+      return name.startsWith(prefix);
+    });
+    const options = {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    };
 
-      //console.debug(testsToSummarize);
-    const yesterday = (new Date())-24*60*60*1000;
+    //console.debug(testsToSummarize);
+    const yesterday = new Date() - 24 * 60 * 60 * 1000;
     testsToSummarize.forEach(async (testName) => {
       const url = baseUrls.api + testName + "/changes";
       //console.debug(url);
-      caches.open("nyrkio-changes").then((cache)=>{
-        cache.match(url).then(async (response)=>{
+      caches.open("nyrkio-changes").then((cache) => {
+        cache.match(url).then(async (response) => {
           //console.debug(response);
-          if(response && response.ok &&
-             Date.parse(response.headers.get("Date")) > yesterday
-          ){
+          if (
+            response &&
+            response.ok &&
+            Date.parse(response.headers.get("Date")) > yesterday
+          ) {
             const resultData = await response.json();
-                const newobj = {};
-                newobj[url]=resultData;
-                setRawChanges((prevState) => [...prevState, newobj]);
-          }
-          else {
+            const newobj = {};
+            newobj[url] = resultData;
+            setRawChanges((prevState) => [...prevState, newobj]);
+          } else {
             const response2 = await fetch(url, options);
-            if(response2 && response2.ok){
+            if (response2 && response2.ok) {
               const resultData = response2.clone().json();
               cache.put(url, response2);
               const newobj = {};
-              newobj[url]=resultData;
+              newobj[url] = resultData;
               setRawChanges((prevState) => [...prevState, newobj]);
-            }
-            else {
-              console.error("Failed to get change point summary for " + testName + " " + url);
+            } else {
+              console.error(
+                "Failed to get change point summary for " + testName + " " + url
+              );
               console.error(response2);
             }
           }
         });
       });
-
     });
   };
 
   useEffect(() => {
-
-    const res = fetchSummarizedData(longName)
+    const res = fetchSummarizedData(longName);
 
     return () => {
       const a = 1;
       //console.log(rawChanges);
     };
-  }, [baseUrls, longName,testNames]);
+  }, [baseUrls, longName, testNames]);
 
   useEffect(() => {
     var recentDate = 0;
-    var localSum=0;
+    var localSum = 0;
     setFirstChanges("");
 
     // Remove duplicates due to multiple calls to useEffect
-    const correctRawChanges=[];
+    const correctRawChanges = [];
     const seen = [];
     //console.debug(longName);
     //console.debug(rawChanges);
-    rawChanges.forEach((obj)=>{
+    rawChanges.forEach((obj) => {
       const key = Object.keys(obj)[0];
-      if (!seen.includes(key)){
+      if (!seen.includes(key)) {
         seen.push(key);
         correctRawChanges.push(obj[key]);
       }
     });
 
-    correctRawChanges.forEach((obj)=>{
+    correctRawChanges.forEach((obj) => {
       const objname = Object.keys(obj)[0];
-      if( objname && objname.startsWith(longName) ){
-        obj[objname].forEach((testobj)=>{
+      if (objname && objname.startsWith(longName)) {
+        obj[objname].forEach((testobj) => {
           localSum = localSum + testobj.changes.length;
           //console.log(sumChanges + "  " + rawChanges.length);
-          if(testobj.time >= recentDate){
-            const testdate = new Date(testobj.time*1000);
+          if (testobj.time >= recentDate) {
+            const testdate = new Date(testobj.time * 1000);
             const newestDate = testdate.toLocaleDateString();
             //console.log(newestDate);
-            setFirstChanges( newestDate );
+            setFirstChanges(newestDate);
             //if(testdate)  setFirstChanges(testdate.toLocaleString());
             recentDate = testobj.time;
           }
         });
       }
-    setSumChanges(localSum);
-    })
-  },[rawChanges]);
+      setSumChanges(localSum);
+    });
+  }, [rawChanges]);
 
-  if(sumChanges>0 && firstChanges)
-  return (
-    <>
-    <div className="summarize-change-points" style={{position: "absolute", right:"0.5em", top:0, textAlign:"right"}}>
-    <span className="summarize-cp-sum-total">{sumChanges > 0 ? sumChanges : ""}</span>
-    <span className="summarize-cp-text summarize-cp-text-changes">&nbsp;changes,</span>
-    <br />
-    <span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span>
-    <span className="summarize-cp-first-changes">{firstChanges}</span>
-    </div>
-    </>
-  );
+  if (sumChanges > 0 && firstChanges)
+    return (
+      <>
+        <div
+          className="summarize-change-points"
+          style={{
+            position: "absolute",
+            right: "0.5em",
+            top: 0,
+            textAlign: "right",
+          }}
+        >
+          <span className="summarize-cp-sum-total">
+            {sumChanges > 0 ? sumChanges : ""}
+          </span>
+          <span className="summarize-cp-text summarize-cp-text-changes">
+            &nbsp;changes,
+          </span>
+          <br />
+          <span className="summarize-cp-text summarize-cp-text-latest">
+            latest on&nbsp;
+          </span>
+          <span className="summarize-cp-first-changes">{firstChanges}</span>
+        </div>
+      </>
+    );
 };
-
-
