@@ -1,16 +1,24 @@
 import { useEffect, useState } from "react";
-import { Button } from "react-bootstrap";
+import { dashboardTypes } from "../lib/utils";
 
 // Configure the test settings for a given test.  attributes is the attributes
 // field for the most recent test result, and is used when configuring the
 // settings for the first time.
-export const TestSettings = ({ testName, attributes }) => {
+export const TestSettings = ({ dashboardType, testName, attributes }) => {
   const [publicTest, setPublicTest] = useState(false);
   const [testConfig, setTestConfig] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  console.debug("dashboardType: " + dashboardType);
+  const fetchUrl =
+    dashboardType === dashboardTypes.ORG
+      ? "/api/v0/orgs/config/"
+      : "/api/v0/config/";
+
+  console.debug("testName: " + testName);
   const fetchData = async () => {
-    const response = await fetch("/api/v0/config/" + testName, {
+    console.debug("Fetching from " + fetchUrl + testName);
+    const response = await fetch(fetchUrl + testName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -59,7 +67,8 @@ export const TestSettings = ({ testName, attributes }) => {
     newConfig[0].public = value;
 
     console.debug("Sending new config: " + JSON.stringify(newConfig));
-    const response = await fetch("/api/v0/config/" + testName, {
+    console.debug("Sending to url: " + fetchUrl + testName);
+    const response = await fetch(fetchUrl + testName, {
       method: "POST",
       headers: {
         "Content-type": "application/json",

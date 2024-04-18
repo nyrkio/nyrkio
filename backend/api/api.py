@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-from typing import Dict, List, Optional, Any, Union
+from typing import Dict, List, Union
 
 from backend.core.core import (
     PerformanceTestResult,
@@ -10,11 +10,12 @@ from backend.core.core import (
 from backend.core.config import Config
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
-from pydantic import BaseModel, RootModel
 
 from backend.auth import auth
 from backend.api.admin import admin_router
 from backend.api.config import config_router
+from backend.api.model import TestResults
+from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.user import user_router
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
@@ -33,7 +34,7 @@ async def enable_changes(
     metrics: List[str] = [],
 ):
     store = DBStore()
-    await store.enable_changes(user, test_name, metrics)
+    await store.enable_changes(user.id, test_name, metrics)
     return {}
 
 
@@ -48,7 +49,7 @@ async def disable_changes(
             status_code=400, detail="No metrics to disable change detection for"
         )
     store = DBStore()
-    await store.disable_changes(user, test_name, metrics)
+    await store.disable_changes(user.id, test_name, metrics)
     return {}
 
 
@@ -59,10 +60,10 @@ async def changes(
     user: User = Depends(auth.current_active_user),
 ):
     store = DBStore()
-    results = await store.get_results(user, test_name)
-    disabled = await store.get_disabled_metrics(user, test_name)
+    results = await store.get_results(user.id, test_name)
+    disabled = await store.get_disabled_metrics(user.id, test_name)
 
-    config = await store.get_user_config(user)
+    config = await store.get_user_config(user.id)
     core_config = config.get("core", None)
     if core_config:
         core_config = Config(**core_config)
@@ -84,7 +85,7 @@ async def changes(
 @api_router.get("/results")
 async def results(user: User = Depends(auth.current_active_user)) -> List[Dict]:
     store = DBStore()
-    results = await store.get_test_names(user)
+    results = await store.get_test_names(user.id)
     return [{"test_name": name} for name in results]
 
 
@@ -100,12 +101,12 @@ async def get_result(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> List[Dict]:
     store = DBStore()
-    test_names = await store.get_test_names(user)
+    test_names = await store.get_test_names(user.id)
 
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    return await store.get_results(user, test_name)
+    return await store.get_results(user.id, test_name)
 
 
 @api_router.delete("/result/{test_name:path}")
@@ -115,24 +116,13 @@ async def delete_result(
     user: User = Depends(auth.current_active_user),
 ) -> List[Dict]:
     store = DBStore()
-    test_names = await store.get_test_names(user)
+    test_names = await store.get_test_names(user.id)
 
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    await store.delete_result(user, test_name, timestamp)
+    await store.delete_result(user.id, test_name, timestamp)
     return []
-
-
-class TestResult(BaseModel):
-    timestamp: int
-    metrics: List[Dict]
-    attributes: Dict
-    extra_info: Optional[Dict] = {}
-
-
-class TestResults(RootModel[Any]):
-    root: List[TestResult]
 
 
 @api_router.post("/result/{test_name:path}")
@@ -141,7 +131,7 @@ async def add_result(
 ):
     store = DBStore()
     try:
-        await store.add_results(user, test_name, data.root)
+        await store.add_results(user.id, test_name, data.root)
     except DBStoreResultExists as e:
         explanation = {
             "reason": "Result already exists for key",
@@ -212,6 +202,7 @@ app.include_router(user_router, prefix="/api/v0")
 app.include_router(admin_router, prefix="/api/v0")
 app.include_router(config_router, prefix="/api/v0")
 app.include_router(public_router, prefix="/api/v0")
+app.include_router(org_router, prefix="/api/v0")
 
 
 @app.on_event("startup")

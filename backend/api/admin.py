@@ -35,10 +35,10 @@ async def changes(test_path: str, user: User = Depends(auth.current_active_super
 
     store = DBStore()
     test_name = "/".join(test_path.split("/")[1:])
-    results = await store.get_results(user, test_name)
-    disabled = await store.get_disabled_metrics(user, test_name)
+    results = await store.get_results(user.id, test_name)
+    disabled = await store.get_disabled_metrics(user.id, test_name)
 
-    config = await store.get_user_config(user)
+    config = await store.get_user_config(user.id)
     config = config.get("core", None)
     if config:
         config = Config(**config)
@@ -63,4 +63,4 @@ async def get_result(
 
     store = DBStore()
     test_name = "/".join(test_path.split("/")[1:])
-    return await store.get_results(user, test_name)
+    return await store.get_results(user.id, test_name)

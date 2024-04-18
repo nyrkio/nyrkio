@@ -4,7 +4,7 @@ from typing import Dict, List
 from starlette.testclient import TestClient
 
 from backend.api.api import app
-from backend.api.config import extract_public_test_name
+from backend.api.public import extract_public_test_name
 
 from conftest import AuthenticatedTestClient, SuperuserClient
 
@@ -1300,7 +1300,7 @@ def test_superuser_can_see_all_test_results(client):
     response = superuser_client.get("/api/v0/admin/results")
     assert response.status_code == 200
     superuser_data = response.json()
-    assert len(superuser_data) == 2
+    assert len(superuser_data) == 4
 
     client_results = superuser_data[client.email]
     assert client_results == [{"test_name": "benchmark1"}]
@@ -1340,7 +1340,7 @@ def test_get_results_for_users_test(client):
     assert response.status_code == 200
 
     superuser_data = response.json()
-    assert len(superuser_data) == 2
+    assert len(superuser_data) == 4
 
     client_results = superuser_data[client.email]
     assert client_results == [{"test_name": "benchmark1"}]
@@ -1652,11 +1652,7 @@ def test_public_test_results(client, unauthenticated_client):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "attributes": {
-                "git_repo": "https://github.com/nyrkio/nyrkio",
-                "branch": "main",
-            },
-            "test_name": "benchmark1",
+            "test_name": "nyrkio/nyrkio/main/benchmark1",
         }
     ]
 
@@ -1728,15 +1724,6 @@ def test_only_one_user_can_make_a_test_public(client):
 
     response = client2.post("/api/v0/config/benchmark1", json=config)
     assert response.status_code == 409
-
-
-def test_extract_public_test_name():
-    config = {
-        "attributes": {"git_repo": "https://github.com/nyrkio/nyrkio", "branch": "main"}
-    }
-
-    name = extract_public_test_name(config["attributes"])
-    assert name == "nyrkio/nyrkio/main"
 
 
 def test_delete_test_config_deletes_public_test(client):
@@ -1838,11 +1825,7 @@ def test_same_test_name_different_repos(client):
     assert response.status_code == 200
     assert response.json() == [
         {
-            "attributes": {
-                "git_repo": "https://github.com/nyrkio/nyrkio2",
-                "branch": "main",
-            },
-            "test_name": "benchmark1",
+            "test_name": "nyrkio/nyrkio2/main/benchmark1",
         }
     ]
 
@@ -1891,3 +1874,71 @@ def test_extra_info(client):
     assert response.status_code == 200
     json = response.json()
     assert_response_data_matches_expected(json, data)
+
+
+def test_public_result_exists(client):
+    """Fail gracefully if a public result exists and we add a second"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [{"metric1": 1.0}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    config = [
+        {
+            "public": True,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/config/benchmark1")
+    assert response.status_code == 200
+    assert response.json()[0]["public"] is True
+
+    from backend.auth import auth
+
+    asyncio.run(auth.add_user("user2@foo.com", "foo"))
+    client2 = AuthenticatedTestClient(app)
+    client2.email = "user2@foo.com"
+    client2.login()
+
+    response = client2.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client2.post("/api/v0/config/benchmark1", json=config)
+    assert response.status_code == 409
+
+    # If the above HTTP POST failed we should not see the result in the public results
+    response = client.get("/api/v0/public/results")
+    assert response.status_code == 200
+    assert response.json() == [
+        {
+            "test_name": "nyrkio/nyrkio/main/benchmark1",
+        }
+    ]
+
+
+def test_extract_public_test_name():
+    config = {
+        "attributes": {"git_repo": "https://github.com/nyrkio/nyrkio", "branch": "main"}
+    }
+
+    name = extract_public_test_name(config["attributes"])
+    assert name == "nyrkio/nyrkio/main"

@@ -76,3 +76,23 @@ export const createShortNames = (prefix, testNames) => {
   }
   return shortNames;
 };
+
+// We have multiple kinds of dashboards, each with some different behavior.
+//
+// Organization dashboards are for viewing the results of tests that belong to
+// an organization. User dashboards are for viewing the results of tests that
+// belong to a single user. And finally public dashboards are for viewing the
+// results of tests that have been shared publicly.
+//
+// Both org and user dashboards have the ability to toggle test visibility, i.e.
+// make a test public or private. Public dashboards do not have this ability and
+// are basically read-only.
+//
+// Crucially, the API endpoints used to toggle test visibilty are different for
+// each kind of dashboard. This is why we need to know what kind of dashboard we're
+// dealing with.
+export const dashboardTypes = {
+  ORG: "org",
+  PUBLIC: "public",
+  USER: "user",
+};

@@ -22,6 +22,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { PublicDashboard } from "./components/PublicDashboard.jsx";
+import { OrgDashboard } from "./components/OrgDashboard.jsx";
 
 const Root = ({ loggedIn }) => {
   return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
@@ -48,6 +49,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
           element={<SignUpPage setLoggedIn={setLoggedIn} />}
         />
         <Route path="/public/*" element={<PublicDashboard />} />
+        <Route path="/orgs/*" element={<OrgDashboard />} />
 
         <Route
           path="/login"

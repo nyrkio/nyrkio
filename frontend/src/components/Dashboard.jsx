@@ -4,23 +4,12 @@ import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import { NoMatch } from "./NoMatch";
-import { createShortNames } from "../lib/utils";
+import { createShortNames, dashboardTypes } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
+import { SidePanel } from "./SidePanel";
 
-const SidePanel = () => {
-  const [content, setContent] = useState("");
-
-  return (
-    <div className="navbar-nav navbar-left justify-content-start col-sm-3 pe-1 p-1">
-      {/*<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">*/}
-      <Link to="/" className="nav-link">
-        My Dashboard
-      </Link>
-      <Link to="/public" className="nav-link">
-        Public Dashboards
-      </Link>
-    </div>
-  );
+const isPublicDashboard = (dashboardType) => {
+  return dashboardType === dashboardTypes.PUBLIC;
 };
 
 export const Breadcrumb = ({ testName, baseUrls }) => {
@@ -63,7 +52,7 @@ export const Breadcrumb = ({ testName, baseUrls }) => {
             <ol className="breadcrumb">
               <li className="breadcrumb-item" key="root">
                 <Link to={`${baseUrls.testRoot}`}>
-                  {baseUrls.testRootTitle}
+                  {baseUrls.breadcrumbTestRootTitle}
                 </Link>
               </li>
               {createItems()}
@@ -256,7 +245,7 @@ export const SingleResultWithTestname = ({
   testName,
   baseUrls,
   breadcrumbName,
-  isPublicDashboard,
+  dashboardType,
 }) => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
@@ -264,6 +253,8 @@ export const SingleResultWithTestname = ({
   const [notFound, setNotFound] = useState(false);
   console.log("Display data");
   console.log(displayData);
+
+  console.debug("Dashboardtype: " + dashboardType);
 
   const fetchData = async () => {
     console.debug("Fetching data for " + testName);
@@ -287,6 +278,10 @@ export const SingleResultWithTestname = ({
       },
     });
     const changeData = await changes.json();
+    if (changes.status != 200) {
+      console.error("Failed to fetch change point data: " + changes.status);
+      return;
+    }
     setChangePointData(changeData);
   };
 
@@ -328,9 +323,10 @@ export const SingleResultWithTestname = ({
         <div>Loading</div>
       ) : (
         <>
-          {!isPublicDashboard && (
+          {!isPublicDashboard(dashboardType) && (
             <div className="row">
               <TestSettings
+                dashboardType={dashboardType}
                 testName={testName}
                 attributes={
                   displayData.length > 0
@@ -385,7 +381,7 @@ export const SingleResult = () => {
       testName={testName}
       baseUrls={baseUrls}
       breadcrumbName={testName}
-      isPublicDashboard={false}
+      dashboardType={dashboardTypes.USER}
     />
   );
 };
@@ -520,7 +516,15 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
     //console.debug(testsToSummarize);
     const yesterday = new Date() - 24 * 60 * 60 * 1000;
     testsToSummarize.forEach(async (testName) => {
-      const url = baseUrls.api + testName + "/changes";
+      // TODO(mfleming) Hack alert. For public results we added
+      // the "https://github.com" prefix in PublicDashboard.jsx and need
+      // to strip it here, otherwise we'll get HTTP 404 when hitting the
+      // backend.
+      const unencodedTestName = decodeURIComponent(testName).replace(
+        "https://github.com/",
+        ""
+      );
+      const url = baseUrls.api + unencodedTestName + "/changes";
       //console.debug(url);
       caches.open("nyrkio-changes").then((cache) => {
         cache.match(url).then(async (response) => {
