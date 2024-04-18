@@ -41,7 +41,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const githubSubmit = async (e) => {
     e.preventDefault();
     console.log("Github submit");
-    const data = await fetch("https://nyrkio.com/api/v0/auth/github/authorize")
+    const data = await fetch("/api/v0/auth/github/authorize")
       .then((response) => response.json())
       .then((url) => url["authorization_url"])
       .then((url) => {

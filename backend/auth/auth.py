@@ -72,7 +72,7 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
     get_user_manager, [jwt_backend, cookie_backend]
 )
 
-REDIRECT_URI = "https://nyrkio.com/api/v0/auth/github/mycallback"
+REDIRECT_URI = SERVER_NAME + "/api/v0/auth/github/mycallback"
 auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
     fastapi_users.get_oauth_router(
