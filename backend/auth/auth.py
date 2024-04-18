@@ -302,9 +302,13 @@ async def slack_oauth(
     await store.set_user_config(updated_user.id, config)
 
 
-async def add_user(username, password):
+async def add_user(username, password, billing=None):
     user = UserCreate(
-        email=username, password=password, is_active=True, is_verified=True
+        email=username,
+        password=password,
+        is_active=True,
+        is_verified=True,
+        billing=billing,
     )
     manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
     return await manager.create(user)

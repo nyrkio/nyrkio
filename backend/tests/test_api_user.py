@@ -1,3 +1,10 @@
+import asyncio
+
+from conftest import AuthenticatedTestClient, app
+
+from backend.auth import auth
+
+
 def test_add_and_get_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
@@ -11,7 +18,7 @@ def test_add_and_get_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None}
+    assert response.json() == {**config, "core": None, "billing": None}
 
 
 def test_update_existing_user_config(client):
@@ -27,7 +34,7 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None}
+    assert response.json() == {**config, "core": None, "billing": None}
 
     new_config = {"notifiers": {"slack": False}}
     response = client.put("/api/v0/user/config", json=new_config)
@@ -35,7 +42,7 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**new_config, "core": None}
+    assert response.json() == {**new_config, "core": None, "billing": None}
 
 
 def test_user_config_set_min_magnitude_max_pvalue(client):
@@ -53,7 +60,7 @@ def test_user_config_set_min_magnitude_max_pvalue(client):
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
 
-    assert response.json() == {**config, "notifiers": None}
+    assert response.json() == {**config, "notifiers": None, "billing": None}
 
 
 def test_user_config_set_max_pvalue_invalid(client):
@@ -68,3 +75,36 @@ def test_user_config_set_max_pvalue_invalid(client):
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 400
     assert response.json() == {"detail": "max_pvalue must be less than or equal to 1.0"}
+
+
+def test_user_config_billing_plan(client):
+    """Ensure that we can get (but not write) billing plan in user config"""
+
+    billing = {"plan": "business_monthly", "session_id": "foo"}
+    asyncio.run(auth.add_user("biz_plan_user@nyrkio.com", "foo", billing=billing))
+
+    client = AuthenticatedTestClient(app)
+    client.email = "biz_plan_user@nyrkio.com"
+    client.login()
+
+    config = {
+        "billing": billing,
+    }
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+
+    json = response.json()
+    assert "billing" in json
+    assert json["billing"]["plan"] == billing["plan"]
+
+    # It should not be possible to set the billing plan via the /config endpoint
+    # because it's a read-only field.
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 400
+
+    response = client.put("/api/v0/user/config", json=config)
+    assert response.status_code == 400
+
+    del config["billing"]
+    response = client.put("/api/v0/user/config", json=config)
+    assert response.status_code == 200

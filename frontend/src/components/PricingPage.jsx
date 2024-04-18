@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export const PricingPage = () => {
+export const PricingPage = ({ loggedIn }) => {
   const businessPriceFloor = 10;
   const businessPricePerHead = 20;
   const enterprisePriceFloor = 40;
@@ -376,26 +376,46 @@ export const PricingPage = () => {
                   <li>Support for teams</li>
                   <li>{busHours} cpu-hours/month*</li>
                 </ul>
-                <form action="/create-checkout-session" method="POST">
-                  {/* Add a hidden field with the lookup_key of your Price */}
-                  <input
-                    type="hidden"
-                    name="lookup_key"
-                    value="business_monthly"
-                  />
+                {loggedIn ? (
+                  <form
+                    action="/api/v0/billing/create-checkout-session"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value={
+                        annualDiscount ? "business_yearly" : "business_monthly"
+                      }
+                    />
+                    <input type="hidden" name="quantity" value={total} />
+                    <button
+                      id="checkout-and-portal-button"
+                      type="submit"
+                      className="w-100 btn btn-lg btn-success"
+                      onClick={(e) => {
+                        if (total <= 0) {
+                          alert(
+                            "Please enter number of employees in the company."
+                          );
+                          e.preventDefault();
+                          return false;
+                        }
+                      }}
+                    >
+                      Get started
+                    </button>
+                  </form>
+                ) : (
                   <button
-                    id="checkout-and-portal-button"
-                    type="submit"
+                    type="button"
                     className="w-100 btn btn-lg btn-success"
                   >
-                    Get started
+                    <a className="btn-link" href="/signup">
+                      Sign up
+                    </a>
                   </button>
-                </form>
-                {/* <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrkio.com">
-                    Contact us
-                  </a>
-                </button> */}
+                )}
               </div>
             </div>
           </div>
@@ -417,23 +437,68 @@ export const PricingPage = () => {
                   <li>24/7 support</li>
                   <li>{entHours} cpu-hours/month*</li>
                 </ul>
-                <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrkio.com">
-                    Contact us
-                  </a>
-                </button>
+                {loggedIn ? (
+                  <form
+                    action="/api/v0/billing/create-checkout-session"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value={
+                        annualDiscount
+                          ? "enterprise_yearly"
+                          : "enterprise_monthly"
+                      }
+                    />
+                    <input type="hidden" name="quantity" value={total} />
+                    <button
+                      id="checkout-and-portal-button"
+                      type="submit"
+                      onClick={(e) => {
+                        if (total <= 0) {
+                          alert(
+                            "Please enter number of employees in the company."
+                          );
+                          e.preventDefault();
+                          return false;
+                        }
+                      }}
+                      className="w-100 btn btn-lg btn-success"
+                    >
+                      Get started
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="/signup">
+                      Sign up
+                    </a>
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-          <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
-             <div className="row">
-              <div className="col col-xs-8" id="annual_discount_label">
-                <div className="form-check form-switch">
-                  <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchAnnual" onChange={updateDiscount} />
-                  <label className="form-check-label" htmlFor="flexSwitchAnnual">Save {annualSavingsPercent} % by paying for the full year up front! <AnnualSavingsEuro /></label>
-                </div>
+        <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
+          <div className="row">
+            <div className="col col-xs-8" id="annual_discount_label">
+              <div className="form-check form-switch">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="flexSwitchAnnual"
+                  onChange={updateDiscount}
+                />
+                <label className="form-check-label" htmlFor="flexSwitchAnnual">
+                  Save {annualSavingsPercent} % by paying for the full year up
+                  front! <AnnualSavingsEuro />
+                </label>
               </div>
             </div>
           </div>

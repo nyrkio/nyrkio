@@ -24,9 +24,14 @@ class Core(BaseModel):
     max_pvalue: float
 
 
+class Billing(BaseModel):
+    plan: str
+
+
 class UserConfig(BaseModel):
     notifiers: Optional[Notifiers] = None
     core: Optional[Core] = None
+    billing: Optional[Billing] = None
 
 
 def validate_config(config: UserConfig):
@@ -36,11 +41,17 @@ def validate_config(config: UserConfig):
             status_code=400, detail="max_pvalue must be less than or equal to 1.0"
         )
 
+    if config.billing is not None:
+        raise HTTPException(status_code=400, detail="Cannot set billing plan")
+
 
 @user_router.get("/config")
 async def get_user_config(user: User = Depends(auth.current_active_user)):
     store = DBStore()
     config = await store.get_user_config(user.id)
+
+    config["billing"] = {"plan": user.billing["plan"]} if user.billing else None
+
     return config
 
 

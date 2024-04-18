@@ -7,7 +7,7 @@ import { is } from "unist-util-is";
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   var username = null;
-  if(localStorage.getItem("loggedIn") == "true"){
+  if (localStorage.getItem("loggedIn") == "true") {
     username = localStorage.getItem("username");
   }
 
@@ -55,19 +55,22 @@ export const UserMenu = ({ setLoggedIn }) => {
       <Dropdown.Menu>
         {isAdmin ? (
           <Dropdown.Item href="/admin">
-              <span className="bi bi-box-arrow-up-right"></span> Admin
+            <span className="bi bi-box-arrow-up-right"></span> Admin
           </Dropdown.Item>
         ) : (
           <></>
         )}
         <Dropdown.Item href="/user/settings">
-            <span className="bi bi-person-circle"></span> User Settings
+          <span className="bi bi-person-circle"></span> User Settings
         </Dropdown.Item>
 
+        <Dropdown.Item href="/billing">
+          <span className="bi bi-credit-card"></span> Billing
+        </Dropdown.Item>
         <Dropdown.Divider />
 
         <Dropdown.Item onClick={handleLogoutClick}>
-            <span className="bi bi-box-arrow-right"></span> Log Out
+          <span className="bi bi-box-arrow-right"></span> Log Out
         </Dropdown.Item>
       </Dropdown.Menu>
     </Dropdown>

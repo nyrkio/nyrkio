@@ -412,6 +412,7 @@ def test_org_config(gh_client):
             "max_pvalue": 0.05,
         },
         "notifiers": None,
+        "billing": None,
     }
 
     response = gh_client.post("/api/v0/orgs/org/nyrkio", json=data)
