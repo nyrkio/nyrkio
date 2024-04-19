@@ -49,6 +49,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         window.location.href = url;
         setLoggedIn(true);
         localStorage.setItem("loggedIn", "true");
+        posthog.capture("login", { property: username });
       })
       .catch((error) => console.log(error));
   };
