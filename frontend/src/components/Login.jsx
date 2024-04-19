@@ -124,6 +124,7 @@ export const LogOut = ({ setLoggedIn }) => {
     console.log("Setting logged in to false");
     setLoggedIn(false);
     localStorage.setItem("loggedIn", "false");
+    posthog.reset();
   };
   return (
     <>
