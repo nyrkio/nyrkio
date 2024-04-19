@@ -105,7 +105,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
               </div>
             </div>
             <div className="form-text">
-              Don't have an account? Sign up <a href="/signup">here</a>
+              Don't have an account? <a href="/signup">Sign up here</a>
             </div>
             <div className="text-center mt-2">
               <button type="submit" className="btn btn-success">
