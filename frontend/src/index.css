@@ -46,6 +46,15 @@
   --bs-success: var(--nyrkio-horn-light-brown);
 }
 
+.alert-warning {
+  color: var(--nyrkio-bear-brown);
+  background-color: var(--nyrkio-light-gray3);
+  border-color: var(--nyrkio-bear-brown);
+}
+.alert-danger a {
+  color: var(--nyrkio-tattoo-red);
+}
+
 .nyrkio-accent {
   color: var(--nyrkio-tattoo-red);
 }
