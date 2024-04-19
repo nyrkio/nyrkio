@@ -140,14 +140,11 @@ export const LoginButton = ({ loggedIn, setLoggedIn }) => {
       <Link
         to="/login"
         className="btn btn-success"
-        loggedIn={loggedIn}
-        setLoggedIn={setLoggedIn}
+        loggedin={loggedIn}
+        setloggedin={setLoggedIn}
       >
         Log In
       </Link>
-      {/* <a href="/foobar" className="btn btn-success" type="submit">
-          Sign Up
-        </a> */}
     </>
   );
 };
