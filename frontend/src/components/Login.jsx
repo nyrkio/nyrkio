@@ -2,9 +2,25 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import posthog from "posthog-js";
 
+
+
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
+  const [errorText, setErrorText] = useState("");
+
+  const ErrorMessage = () => {
+    if ( errorText ) {
+      return (
+        <>
+          <div className="alert alert-warning mt-3" role="alert">
+            { errorText }
+          </div>
+        </>
+      );
+    }
+    return "";
+  };
 
   const navigate = useNavigate();
   const authSubmit = async (e) => {
@@ -21,20 +37,43 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       },
       body: credentialsData,
     })
-      .then((response) => response.json())
-      .then((body) => {
-        setLoggedIn(true);
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("username", username);
-        localStorage.setItem("token", body["access_token"]);
-        posthog.capture("login", { property: username });
-        try {
-          navigate("/");
-        } catch (error) {
-          console.log(error);
+      .then((response) => {
+        if(response.ok){
+          return response.json();
+        }
+        else {
+          console.error("Authentication to Nyrkiö.com failed: " +
+                        response.status + " " + response.statusText);
+          setErrorText("Authentication to Nyrkiö.com failed! ("
+                       + response.status + " " + response.statusText + ")");
+          setLoggedIn(false);
+          return false;
         }
       })
-      .catch((error) => console.log(error));
+      .then((body) => {
+          if(!body){
+            return;
+          }
+          console.log("Logged in. (" + username + ")");
+          setErrorText("");
+          setLoggedIn(true);
+
+          localStorage.setItem("loggedIn", "true");
+          localStorage.setItem("username", username);
+          localStorage.setItem("token", body["access_token"]);
+
+          posthog.capture("login", { property: username });
+          try {
+            navigate("/");
+          } catch (error) {
+            console.log(error);
+          }
+
+      })
+      .catch((error) => {
+        console.log(error)
+      }
+    );
   };
 
   // TODO (mfleming) Move to lib
@@ -105,7 +144,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
               </div>
             </div>
             <div className="form-text">
-              Don't have an account? Sign up <a href="/signup">here</a>
+              Don't have an account? <a href="/signup">Sign up here</a>
             </div>
             <div className="text-center mt-2">
               <button type="submit" className="btn btn-success">
@@ -114,6 +153,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </div>
           </form>
         </div>
+            <ErrorMessage />
       </div>
     </div>
   );
@@ -140,14 +180,11 @@ export const LoginButton = ({ loggedIn, setLoggedIn }) => {
       <Link
         to="/login"
         className="btn btn-success"
-        loggedIn={loggedIn}
-        setLoggedIn={setLoggedIn}
+        loggedin={loggedIn}
+        setloggedin={setLoggedIn}
       >
         Log In
       </Link>
-      {/* <a href="/foobar" className="btn btn-success" type="submit">
-          Sign Up
-        </a> */}
     </>
   );
 };
