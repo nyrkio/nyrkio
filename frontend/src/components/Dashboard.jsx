@@ -527,6 +527,7 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
 
     //console.debug(testsToSummarize);
     const yesterday = new Date() - 24 * 60 * 60 * 1000;
+    const ten_minutes = new Date() - 10*60*1000;
     testsToSummarize.forEach(async (testName) => {
       // TODO(mfleming) Hack alert. For public results we added
       // the "https://github.com" prefix in PublicDashboard.jsx and need
@@ -544,7 +545,7 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
           if (
             response &&
             response.ok &&
-            Date.parse(response.headers.get("Date")) > yesterday
+            Date.parse(response.headers.get("Date")) > ten_minutes //yesterday
           ) {
             const resultData = await response.json();
             const newobj = {};
@@ -643,4 +644,6 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
         </div>
       </>
     );
+  else
+    return (<span className="summarize-cp-no-changes"></span>);
 };
