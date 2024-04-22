@@ -69,7 +69,9 @@ async def changes(
     core_config = await _get_user_config(user.id)
     config = await store.get_user_config(user.id)
     notifiers = await _get_notifiers(notify, config, user)
-    return await calc_changes(test_name, results, disabled, core_config, notifiers, user)
+    return await calc_changes(
+        test_name, results, disabled, core_config, notifiers, user
+    )
 
 
 # @api_router.get("/result/{test_name_prefix:path}/summary")
@@ -96,7 +98,6 @@ async def changes(
 #     for test_name in subtree_test_names:
 #         change_points = await calc_changes(test_name, results, core_config=core_config)
 #         subtree_changes[test_name] = change_points
-
 
 
 @api_router.get("/results")
@@ -172,11 +173,12 @@ async def add_result(
     # return {}
 
 
-async def cache_changes(changes: Dict[str, AnalyzedSeries],
-                             user: User,
-                             series: PerformanceTestResultSeries):
+async def cache_changes(
+    changes: Dict[str, AnalyzedSeries], user: User, series: PerformanceTestResultSeries
+):
     store = DBStore()
     await store.persist_change_points(changes, user.id, series.get_series_id())
+
 
 async def get_cached_or_calc_changes(user: User, series: PerformanceTestResultSeries):
     if user is None:
@@ -195,12 +197,13 @@ async def get_cached_or_calc_changes(user: User, series: PerformanceTestResultSe
         await cache_changes(changes, user, series)
     return changes
 
+
 def _build_result_series(test_name, results, disabled=None, core_config=None):
     series = PerformanceTestResultSeries(test_name, core_config)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.
-    last_mod_timestamps = [datetime(1970,1,1,0,0,0,0)]
+    last_mod_timestamps = [datetime(1970, 1, 1, 0, 0, 0, 0)]
     for r in results:
         metrics = []
         for m in r["metrics"]:
@@ -219,6 +222,7 @@ def _build_result_series(test_name, results, disabled=None, core_config=None):
 
     series.touch(max(last_mod_timestamps))
     return series
+
 
 async def calc_changes(
     test_name, results, disabled=None, core_config=None, notifiers=None, user=None
@@ -265,6 +269,7 @@ async def do_db():
 
     await do_on_startup()
 
+
 async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> list:
     notifiers = []
     if notify:
@@ -277,6 +282,7 @@ async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> 
             channel = slack["channel"]
             notifiers.append(SlackNotifier(url, [channel]))
     return notifiers
+
 
 async def _get_user_config(user_id: str):
     store = DBStore()

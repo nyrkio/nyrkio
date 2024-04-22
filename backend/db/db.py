@@ -371,7 +371,9 @@ class DBStore(object):
             # pushed into the MongoDB query.
             if test_name_prefix:
                 prfx_len = len(test_name_prefix)
-                test_names = list(filter(lambda name: name[:prfx_len] == test_name_prefix, test_names))
+                test_names = list(
+                    filter(lambda name: name[:prfx_len] == test_name_prefix, test_names)
+                )
 
             return test_names
 
@@ -617,10 +619,12 @@ class DBStore(object):
             .to_list(None)
         )
 
-    async def persist_change_points(self,
-                                    change_points: Dict[str, AnalyzedSeries],
-                                    id: str,
-                                    series_id_tuple: Tuple[str, float, float, Any]):
+    async def persist_change_points(
+        self,
+        change_points: Dict[str, AnalyzedSeries],
+        id: str,
+        series_id_tuple: Tuple[str, float, float, Any],
+    ):
         change_points_json = {}
         for metric_name, analyzed_series in change_points.items():
             assert analyzed_series.test_name() == series_id_tuple[0]
@@ -628,41 +632,37 @@ class DBStore(object):
 
         primary_key = OrderedDict(
             {
-
                 "user_id": id,
                 "test_name": series_id_tuple[0],
                 "max_pvalue": series_id_tuple[1],
-                "min_magnitude": series_id_tuple[2]
+                "min_magnitude": series_id_tuple[2],
             }
         )
         series_last_modified = series_id_tuple[3]
         doc = {
             "_id": primary_key,
             "series_last_modified": series_last_modified,
-            "change_points": change_points_json
+            "change_points": change_points_json,
         }
-
 
         collection = self.db.change_points
         await collection.update_one({"_id": primary_key}, {"$set": doc}, upsert=True)
 
-    async def get_change_points(self, id: str, series_id_tuple: Tuple[str, float, float, Any]):
+    async def get_change_points(
+        self, id: str, series_id_tuple: Tuple[str, float, float, Any]
+    ):
         collection = self.db.change_points
 
         primary_key = OrderedDict(
             {
-
                 "user_id": id,
                 "test_name": series_id_tuple[0],
                 "max_pvalue": series_id_tuple[1],
-                "min_magnitude": series_id_tuple[2]
+                "min_magnitude": series_id_tuple[2],
             }
         )
 
-        results = (
-            await collection.find( {"_id": primary_key} )
-            .to_list(None)
-        )
+        results = await collection.find({"_id": primary_key}).to_list(None)
         assert len(results) <= 1
 
         if len(results) == 0:
@@ -670,7 +670,10 @@ class DBStore(object):
             return None
 
         doc = results[0]
-        if not ( "series_last_modified" in doc and isinstance(doc["series_last_modified"], datetime) ):
+        if not (
+            "series_last_modified" in doc
+            and isinstance(doc["series_last_modified"], datetime)
+        ):
             raise DBStoreMissingRequiredKeys()
 
         if doc["series_last_modified"] < series_id_tuple[3]:
@@ -680,6 +683,7 @@ class DBStore(object):
             return None
 
         return doc
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

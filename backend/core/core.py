@@ -87,7 +87,9 @@ class PerformanceTestResultSeries:
 
         Caching pre-computed change points depends on this.
         """
-        self._last_modified = datetime.now(tz=timezone.utc) if timestamp is None else timestamp
+        self._last_modified = (
+            datetime.now(tz=timezone.utc) if timestamp is None else timestamp
+        )
 
     def get_series_id(self):
         """
@@ -97,7 +99,12 @@ class PerformanceTestResultSeries:
         are valid for this series, or whether we need to invalidate cache and re-compute cp's for
         this series.
         """
-        return (self.name, self.config.max_pvalue, self.config.min_magnitude, self.last_modified())
+        return (
+            self.name,
+            self.config.max_pvalue,
+            self.config.min_magnitude,
+            self.last_modified(),
+        )
 
     def add_result(self, result: PerformanceTestResult):
         """
@@ -154,7 +161,6 @@ class PerformanceTestResultSeries:
 
         return data
 
-
     async def calculate_changes(self, notifiers=None):
         change_points = await self.calculate_change_points()
         reports = await self.produce_reports(change_points, notifiers)
@@ -187,15 +193,13 @@ class PerformanceTestResultSeries:
             options.max_pvalue = self.config.max_pvalue
 
             analyzed_series = series.analyze(options)
-            all_change_points[metric_name]=analyzed_series
+            all_change_points[metric_name] = analyzed_series
 
         return all_change_points
 
-
-    async def produce_reports(self,
-                               all_change_points: Dict[str, AnalyzedSeries],
-                               notifiers: list) -> list:
-
+    async def produce_reports(
+        self, all_change_points: Dict[str, AnalyzedSeries], notifiers: list
+    ) -> list:
         reports = []
         for metric_name, analyzed_series in all_change_points.items():
             change_points = analyzed_series.change_points_by_time
