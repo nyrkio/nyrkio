@@ -68,8 +68,8 @@ const LearnMore = () => {
 const FeatureBanner1 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-light">
-      <div className="row row-cols-lg-2 row-cols-1 justify-content-center">
-        <div className="col text-start align-text-bottom align-self-center">
+      <div className="row justify-content-center">
+        <div className="col-md-4 col-sm-12 text-start align-text-bottom align-self-center">
           <p>
             Even the smallest performance changes can have a big impact on your
             users. Nyrkiö uses change point detection to identify every change
@@ -82,7 +82,7 @@ const FeatureBanner1 = () => {
             gain.
           </p>
         </div>
-        <div className="col align-items-end justify-content-end">
+        <div className="col-md-4 col-sm-12 align-items-end justify-content-end">
           <img
             style={{
               width: "100%",
@@ -100,13 +100,13 @@ const FeatureBanner1 = () => {
 
 const FeatureBanner2 = () => {
   return (
-    <div className="container-fluid w-100 text-center bg-nyrkio-dark-gray bg-dark">
-      <div className="row row-cols-lg-2 row-cols-1 text-end justify-content-center p-5">
-        <div className="col align-self-center">
-          <div className="text-center p-2">
+    <div className="container-fluid p-5 text-center bg-nyrkio-dark-gray bg-dark">
+      <div className="row text-end justify-content-center pt-5">
+        <div className="col-md-4 col-sm-12 align-self-center">
+          <div className="row text-center">
             <h2>Integrate with your CI/CD</h2>
           </div>
-          <div className="text-start p-3">
+          <div className="row text-start">
             <p>
               Integrate Nyrkiö with your CI/CD pipeline to ensure that
               performance changes are caught before they reach production.
@@ -118,7 +118,7 @@ const FeatureBanner2 = () => {
             </p>
           </div>
         </div>
-        <div className="col p-3">
+        <div className="col-md-5 col-sm-12">
           <img
             style={{
               width: "100%",
@@ -130,8 +130,8 @@ const FeatureBanner2 = () => {
           />
         </div>
       </div>
-      <div className="row row-cols-lg-2 row-cols-1 text-center justify-content-center py-5">
-        <div className="col align-items-center p-5">
+      <div className="row text-center justify-content-center py-5">
+        <div className="col-md-5 col-sm-12 align-items-center">
           <img
             style={{
               width: "100%",
@@ -142,7 +142,7 @@ const FeatureBanner2 = () => {
             alt="GitHub commit"
           />
         </div>
-        <div className="col text-start align-self-center p-5">
+        <div className="col-md-4 col-sm-12 text-start align-self-center pt-3">
           <h2>Identify the exact commit</h2>
           <p>
             Quickly identity the commit that introduced the performance change
