@@ -46,15 +46,21 @@ export const Breadcrumb = ({ testName, baseUrls }) => {
 
   return (
     <>
-      <nav className="navbar navbar-expand-lg">
+      <nav className="navbar col-xs-12 col-lg-11 col-xl-10">
         <div className="container-fluid breadcrumb-wrapper">
           <nav aria-label="breadcrumb">
             <ol className="breadcrumb">
+              {console.log(baseUrls.breadCrumbtestRootTitle)}
+
+            {baseUrls.breadcrumbTestRootTitle ?
               <li className="breadcrumb-item" key="root">
                 <Link to={`${baseUrls.testRoot}`}>
                   {baseUrls.breadcrumbTestRootTitle}
                 </Link>
               </li>
+            :
+              <span></span>
+              }
               {createItems()}
             </ol>
           </nav>
@@ -185,17 +191,16 @@ export const Dashboard = () => {
 
   return (
     <>
-      <SidePanel />
       <Breadcrumb
         testName={prefix}
         baseUrls={{ tests: "tests", testRoot: "/", testRootTitle: "Tests" }}
       />
-      <div className="container mt-5 text-center benchmark-select">
+      <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
         {loading ? (
           <div>Loading</div>
         ) : (
           <>
-            <div className="container col-10">
+            <div className="container-fluid">
               <div className="card">
                 <div className="card-header">Please select a test</div>
                 <div className="card-body">
@@ -323,8 +328,15 @@ export const SingleResultWithTestname = ({
         <div>Loading</div>
       ) : (
         <>
+          <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
+          <div className="container">
+            <div className="row justify-content-center">
+              <ChangePointSummaryTable changeData={changePointData} />
+            </div>
+
           {!isPublicDashboard(dashboardType) && (
-            <div className="row">
+            <div className="row mt-5">
+              <p className="text-center small mb-1">Publish test results</p>
               <TestSettings
                 dashboardType={dashboardType}
                 testName={testName}
@@ -336,11 +348,8 @@ export const SingleResultWithTestname = ({
               />
             </div>
           )}
-          <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
-          <div className="container">
-            <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} />
-            </div>
+
+
             <div className="row">
               {unique.map((metric) => {
                 return (
