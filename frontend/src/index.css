@@ -325,22 +325,6 @@ button:focus-visible {
   color: var(--nyrkio-tattoo-red);
 }
 
-@keyframes fade-in-animation {
-  from {opacity: 0;}
-  to {opacity: 0.9;}
-}
-
-.navbar-left .nav-link-frontpage {
-  animation-name: fade-in-animation;
-  animation-duration: 20s;
-  font-size: small;
-  line-height: 0.5em;
-  color: var(--nyrkio-horn-light-brown);
-}
-
-#sidepanel .navbar-left a.nav-link-frontpage{
-  color: var(--nyrkio-text);
-}
 
 
 

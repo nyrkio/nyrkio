@@ -52,23 +52,25 @@ const FrontPageSidePanel = ({ loggedIn }) => {
       </>
     );
   }
+  // The default front page has no menu for visual reasons.
+  // Login button is on the top right, which is the most important element.
   else {
     return (
-      <>
-        <Link to="/login" className="nav-link nav-link-frontpage">
-          Login
-        </Link>
-        <Link to="/public" className="nav-link nav-link-frontpage">
-          Public Dashboards
-        </Link>
-      </>
+      <></>
     );
   }
 };
 
 const ProductSidePanel = ({ loggedIn }) => {
     return (
-      <></>
+      <>
+        <Link to="/product" className="nav-link">
+          Nyrkiö Change Detection
+        </Link>
+        <Link to="/public" className="nav-link">
+          Public Dashboards<br /> from other users
+        </Link>
+      </>
     );
 };
 const PricingSidePanel = ({ loggedIn }) => {
