@@ -270,7 +270,7 @@ button:focus-visible {
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--nyrkio-text);
-    background-color: #394022;
+    background-color: var(--nyrkio-arrow-brown);
   }
   button {
     background-color: var(--nyrkio-tattoo-red);
