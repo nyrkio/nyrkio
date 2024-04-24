@@ -1,10 +1,12 @@
+import headShot from "../../static/people/Henrik-600x800.jpg";
+
 export const HenrikCard = () => {
   return (
             <div className="row row-cols-1 row-cols-md-2">
             <div className="col">
             <div className="card m-3 rounded-3 shadow people-card">
               <div className="card-header p-5 justify-content-center text-center">
-                <img src="/src/static/people/Henrik-600x800.jpg" alt="Head shot"
+                <img src={headShot} alt="Head shot"
                      className="rounded-3"/>
                 <h4 className="my-2">Henrik Ingo</h4>
                 <p>CEO</p>
