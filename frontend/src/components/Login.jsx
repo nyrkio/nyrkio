@@ -88,6 +88,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         window.location.href = url;
         setLoggedIn(true);
         localStorage.setItem("loggedIn", "true");
+        posthog.capture("login", { property: username });
       })
       .catch((error) => console.log(error));
   };
@@ -164,6 +165,7 @@ export const LogOut = ({ setLoggedIn }) => {
     console.log("Setting logged in to false");
     setLoggedIn(false);
     localStorage.setItem("loggedIn", "false");
+    posthog.reset();
   };
   return (
     <>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import posthog from "posthog-js";
 
 export const SignUpPage = ({ setLoggedIn }) => {
   const formState = {
@@ -62,6 +63,7 @@ export const SignUpPage = ({ setLoggedIn }) => {
         window.location.href = url;
         setLoggedIn(true);
         localStorage.setItem("loggedIn", "true");
+        posthog.capture("user_signed_up", { signup_type: "github" });
       })
       .catch((error) => console.log(error));
   };
@@ -136,6 +138,7 @@ export const SignUpPage = ({ setLoggedIn }) => {
       </div>
     );
   } else {
+    posthog.capture("user_signed_up", { signup_type: "email" });
     return (
       <div className="container">
         <div className="row mt-5 justify-content-center">
