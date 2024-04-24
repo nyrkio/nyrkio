@@ -17,9 +17,9 @@ export const ServicesPage = ({ loggedIn }) => {
           </div>
         </div>
 
-        <div className="consulting-packages row row-cols-1 row-cols-xl-2 row-cols-xxl-3 text-center justify-content-center">
+        <div className="consulting-packages row row-cols-1 row-cols-xl-2 row-cols-xxl-3">
           <div className="col">
-            <div className="card mb-1 rounded-3 shadow-sm m-2">
+            <div className="card mb-1 rounded-3 shadow-sm m-2 text-center justify-content-center">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Status Check</h4>
               </div>
@@ -76,7 +76,7 @@ export const ServicesPage = ({ loggedIn }) => {
             </div>
 
           <div className="col">
-            <div className="card mb-1 rounded-3 shadow-sm m-2">
+            <div className="card mb-1 rounded-3 shadow-sm m-2 text-center justify-content-center">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Change Detection Kickstart</h4>
               </div>
@@ -134,7 +134,7 @@ export const ServicesPage = ({ loggedIn }) => {
 
 
           <div className="col">
-            <div className="card mb-1 rounded-3 shadow-sm m-2">
+            <div className="card mb-1 rounded-3 shadow-sm m-2 text-center justify-content-center">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Automated Benchmarking</h4>
               </div>
@@ -194,9 +194,9 @@ export const ServicesPage = ({ loggedIn }) => {
           </div>
         </div>
 
-        <div className="consulting-packages row row-cols-1 row-cols-xl-2 row-cols-xxl-3 text-center justify-content-center">
+        <div className="consulting-packages row row-cols-1 row-cols-xl-2 row-cols-xxl-3">
           <div className="col">
-            <div className="card mb-1 rounded-3 shadow-sm m-2">
+            <div className="card mb-1 rounded-3 shadow-sm m-2 text-center justify-content-center">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Analyze &amp; Fix Perf problems</h4>
               </div>
@@ -233,7 +233,7 @@ export const ServicesPage = ({ loggedIn }) => {
             </div>
 
           <div className="col">
-            <div className="card mb-1 rounded-3 shadow-sm m-2">
+            <div className="card mb-1 rounded-3 shadow-sm m-2 text-center justify-content-center">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Faster CI</h4>
               </div>
