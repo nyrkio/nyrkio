@@ -21,7 +21,7 @@ export const SidePanel = ({ loggedIn }) => {
         <Route path="/pricing" element={<PricingSidePanel  loggedIn={loggedIn} />} />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
         <Route path="/legend" element={<AboutSidePanel  loggedIn={loggedIn} />} />
-        <Route path="/about*" element={<AboutSidePanel  loggedIn={loggedIn} />} />
+        <Route path="/about/*" element={<AboutSidePanel  loggedIn={loggedIn} />} />
         <Route path="/signup" element={<LoginSidePanel  loggedIn={loggedIn} />} />
         <Route path="/login" element={<LoginSidePanel  loggedIn={loggedIn} />} />
       </Routes>
@@ -62,6 +62,7 @@ const FrontPageSidePanel = ({ loggedIn }) => {
 };
 
 const ProductSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-product");
     return (
       <>
         <Link to="/product" className="nav-link">
@@ -80,6 +81,7 @@ const PricingSidePanel = ({ loggedIn }) => {
 };
 
 const DocsSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-docs");
 
   return (
     <>
@@ -93,10 +95,11 @@ const DocsSidePanel = ({ loggedIn }) => {
   );
 };
 const AboutSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-about");
     return (
       <>
         <Link to="/about" className="nav-link">
-          About Nyrkiö
+          About Us
         </Link>
         <Link to="/legend" className="nav-link">
           The Legend of Nyyrikki
@@ -105,6 +108,7 @@ const AboutSidePanel = ({ loggedIn }) => {
     );
 };
 const LoginSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-login");
     return (
       <>
         <Link to="/login" className="nav-link nav-link-login">

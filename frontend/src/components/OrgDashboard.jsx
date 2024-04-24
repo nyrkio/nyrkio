@@ -10,6 +10,8 @@ export const OrgDashboard = () => {
   const [prefix, setPrefix] = useState(undefined);
   const [orgData, setOrgData] = React.useState([]);
 
+  document.body.classList.add("section-dashboards");
+
   const fetchOrgs = async () => {
     const response = await fetch("/api/v0/orgs/results", {
       headers: {

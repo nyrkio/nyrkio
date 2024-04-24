@@ -134,6 +134,9 @@ export const Dashboard = () => {
   const location = useLocation();
   var prefix;
 
+  document.body.classList.add("section-dashboards");
+
+
   // Remove /tests/ from the beginning of the path
   if (location.pathname.startsWith("/tests/")) {
     prefix = location.pathname.substring(7);

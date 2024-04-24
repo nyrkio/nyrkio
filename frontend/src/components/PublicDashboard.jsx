@@ -9,6 +9,8 @@ export const PublicDashboard = () => {
   const [prefix, setPrefix] = useState(undefined);
   const [publicData, setPublicData] = React.useState([]);
 
+  document.body.classList.add("section-dashboards");
+
   const fetchPublicTests = async () => {
     const response = await fetch("/api/v0/public/results");
     const publicData = await response.json();
