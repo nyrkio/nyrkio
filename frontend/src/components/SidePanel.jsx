@@ -21,7 +21,7 @@ export const SidePanel = ({ loggedIn }) => {
         <Route path="/pricing" element={<PricingSidePanel  loggedIn={loggedIn} />} />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
         <Route path="/legend" element={<AboutSidePanel  loggedIn={loggedIn} />} />
-        <Route path="/about*" element={<AboutSidePanel  loggedIn={loggedIn} />} />
+        <Route path="/about/*" element={<AboutSidePanel  loggedIn={loggedIn} />} />
         <Route path="/signup" element={<LoginSidePanel  loggedIn={loggedIn} />} />
         <Route path="/login" element={<LoginSidePanel  loggedIn={loggedIn} />} />
       </Routes>
@@ -52,23 +52,26 @@ const FrontPageSidePanel = ({ loggedIn }) => {
       </>
     );
   }
+  // The default front page has no menu for visual reasons.
+  // Login button is on the top right, which is the most important element.
   else {
     return (
-      <>
-        <Link to="/login" className="nav-link nav-link-frontpage">
-          Login
-        </Link>
-        <Link to="/public" className="nav-link nav-link-frontpage">
-          Public Dashboards
-        </Link>
-      </>
+      <></>
     );
   }
 };
 
 const ProductSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-product");
     return (
-      <></>
+      <>
+        <Link to="/product" className="nav-link">
+          Nyrkiö Change Detection
+        </Link>
+        <Link to="/public" className="nav-link">
+          Public Dashboards<br /> from other users
+        </Link>
+      </>
     );
 };
 const PricingSidePanel = ({ loggedIn }) => {
@@ -78,6 +81,7 @@ const PricingSidePanel = ({ loggedIn }) => {
 };
 
 const DocsSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-docs");
 
   return (
     <>
@@ -91,10 +95,11 @@ const DocsSidePanel = ({ loggedIn }) => {
   );
 };
 const AboutSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-about");
     return (
       <>
         <Link to="/about" className="nav-link">
-          About Nyrkiö
+          About Us
         </Link>
         <Link to="/legend" className="nav-link">
           The Legend of Nyyrikki
@@ -103,6 +108,7 @@ const AboutSidePanel = ({ loggedIn }) => {
     );
 };
 const LoginSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-login");
     return (
       <>
         <Link to="/login" className="nav-link nav-link-login">

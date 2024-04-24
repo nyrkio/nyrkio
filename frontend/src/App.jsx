@@ -13,6 +13,7 @@ import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
+import { AboutPage } from "./components/AboutPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
@@ -60,6 +61,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               path="/pricing"
               element={<PricingPage loggedIn={loggedIn} />}
             />
+            <Route path="/about" element={<AboutPage />} />
             <Route path="/legend" element={<LegendPage />} />
             <Route
               path="/signup"
@@ -67,7 +69,6 @@ function MainApp({ loggedIn, setLoggedIn }) {
             />
             <Route path="/public/*" element={<PublicDashboard />} />
             <Route path="/orgs/*" element={<OrgDashboard />} />
-
             <Route
               path="/login"
               element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}

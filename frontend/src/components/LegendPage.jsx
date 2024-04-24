@@ -162,7 +162,7 @@ export const LegendPage = () => {
             </p>
           </div>
 
-          <div className="row col-xl-10 mt-4" className="nyyrikki-last-text">
+          <div className="row col-xl-10 mt-4 nyyrikki-last-text">
             <img
               src="https://nyrkio.com/p/nyyrikki/nyyrikki-horn2.png"
               className="nyyrikki-horn-right"

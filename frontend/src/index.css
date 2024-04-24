@@ -92,6 +92,7 @@ body.nyyrikki-banner-right {
   background-opacity: 0.5;
 }
 
+body.section-about,
 body.nyyrikki-banner-right-bw,
 main .nyyrikki-banner-right-bw {
   background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-medium-outline.png);
@@ -106,6 +107,18 @@ img.nyyrikki-original-art {
   max-width: 90%;
   max-height: 110vh;
 }
+
+
+body.section-about .footer {
+  background-image: url(/src/static/36215479721_4beda5c4ae_k.jpg);
+  background-repeat: no-repeat;
+  background-attachment: scroll;
+  background-position: center;
+  background-size: cover;
+  background-opacity: 0.5;
+  height: 600px;
+}
+
 
 body #root div.container-fluid {
   padding-left: 0px;
@@ -325,22 +338,6 @@ button:focus-visible {
   color: var(--nyrkio-tattoo-red);
 }
 
-@keyframes fade-in-animation {
-  from {opacity: 0;}
-  to {opacity: 0.9;}
-}
-
-.navbar-left .nav-link-frontpage {
-  animation-name: fade-in-animation;
-  animation-duration: 20s;
-  font-size: small;
-  line-height: 0.5em;
-  color: var(--nyrkio-horn-light-brown);
-}
-
-#sidepanel .navbar-left a.nav-link-frontpage{
-  color: var(--nyrkio-text);
-}
 
 
 
@@ -782,4 +779,10 @@ input[type="range"].nyrkio-slider::-webkit-slider-runnable-track {
 .form-check-input:checked {
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-tattoo-red);
+}
+
+div.card.people-card .card-header img {
+  max-width: 100%;
+  max-height: 26em;
+
 }
