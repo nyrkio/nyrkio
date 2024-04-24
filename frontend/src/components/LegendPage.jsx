@@ -8,17 +8,17 @@ export const LegendPage = () => {
   return (
     <>
       <div className="container nyyrikki-legend">
-        <div className="row mt-8 p-5">
-          <h1 class="font-weight-bolder text-center nyrkio-accent-dark">
+        <div className="row col-xl-10 mt-8 p-5">
+          <h1 className="font-weight-bolder text-center nyrkio-accent-dark mb-5">
             Nyyrikki
           </h1>
-          <h2 class="text-center nyrkio-accent-dark">The legend</h2>
+          <h2 className="text-center nyrkio-accent-dark">The legend</h2>
         </div>
-        <div class="row col-lg-12 mt-8">
+        <div className="row col-xl-10 mt-8">
           <h3>A spirit has many names</h3>
           <p>
             Nyrkiö is one of the many names of{" "}
-            <span class="nyrkio-accent-dark">Nyyrikki</span>, the ancient spirit
+            <span className="nyrkio-accent-dark">Nyyrikki</span>, the ancient spirit
             of hunting of the Finnish and Karelian conifer forests. They are the
             son of Tapio, the king of the forest, and Mielikki the protective
             and kind mother of the forest kingdom. They also have a sister,
@@ -32,12 +32,12 @@ export const LegendPage = () => {
             passing on the sea. It is also where their ancestors are buried. The
             trees and animals all have a spirit of their own, and humans hug the
             trees and even bid them offerings when entering the forest. Or{" "}
-            <span class="nyrkio-accent-dark">Tapiola</span> - the reigns of
+            <span className="nyrkio-accent-dark">Tapiola</span> - the reigns of
             Tapio.
           </p>
           <p>
             Nyrkiö is known under many names beyond just{" "}
-            <span class="nyrkio-accent-dark">Nyyrikki</span>. A Latin manuscript
+            <span className="nyrkio-accent-dark">Nyyrikki</span>. A Latin manuscript
             uses the variant <em>Nyrckes</em>, which hence can be thought of as
             the international variation of the name. Although in most songs
             Nyyrikki is introduced as the <em>son</em> of Tapio, they are
@@ -49,9 +49,9 @@ export const LegendPage = () => {
               singular they
             </a>{" "}
             as the pronoun when referring to{" "}
-            <span class="nyrkio-accent-dark">Nyyrikki</span>. This is of course
+            <span className="nyrkio-accent-dark">Nyyrikki</span>. This is of course
             purely as guidance for our international readers, as{" "}
-            <span class="nyrkio-accent-dark">Nyyrikki</span> themselves remains
+            <span className="nyrkio-accent-dark">Nyyrikki</span> themselves remains
             blissfully unaware of gendered pronouns...{" "}
             <a href="https://finland.fi/han/article/">
               Finnish and Finno-Ugric languages don't have them
@@ -59,7 +59,7 @@ export const LegendPage = () => {
             .
           </p>
 
-          <div class="row mt-4 my-sm-4 text-center ">
+          <div className="row mt-4 my-sm-4 text-center ">
             <center>
               <img
                 src="https://nyrkio.com/p/nyyrikki/nyyrikki-low-res.png"
@@ -77,7 +77,7 @@ export const LegendPage = () => {
             </p>
           </div>
 
-          <div class="row col-lg-12 mt-4">
+          <div className="row col-xl-10 mt-4">
             <h3>The spirit of hunters</h3>
             <p>
               In the ancient Fenno-Ugric world, each place and thing has its own
@@ -90,12 +90,12 @@ export const LegendPage = () => {
             </p>
             <p>
               And in that kingdom,{" "}
-              <span class="nyrkio-accent-dark">Nyyrikki</span> is assigned the
+              <span className="nyrkio-accent-dark">Nyyrikki</span> is assigned the
               caretaker role for small game, in particular the squirrels.
             </p>
             <p>
               While seemingly a lesser task in the family*,{" "}
-              <span class="nyrkio-accent-dark">Nyyrikki</span> is known to be a
+              <span className="nyrkio-accent-dark">Nyyrikki</span> is known to be a
               loyal and committed guardian spirit, caring well for their
               creatures. And so it was the case, that eventually the small
               squirrels, and particularly their skin, was considered the most
@@ -109,7 +109,7 @@ export const LegendPage = () => {
             <p>
               When entering the forest, a hunter should sing a suitable song**
               or poem, essentially a long form spell, to appease the hunter
-              spirit <span class="nyrkio-accent-dark">Nyyrikki</span>.
+              spirit <span className="nyrkio-accent-dark">Nyyrikki</span>.
             </p>
 
             <blockquote>
@@ -150,19 +150,19 @@ export const LegendPage = () => {
             </blockquote>
           </div>
 
-          <div class="row col-lg-12 mt-4">
+          <div className="row col-xl-10 mt-4">
             <p>
               When properly summonned, a hunter could then expect{" "}
-              <span class="nyrkio-accent-dark">Nyyrikki</span> to reveal a
+              <span className="nyrkio-accent-dark">Nyyrikki</span> to reveal a
               squirrel or some other pray up on a branch. And{" "}
-              <span class="nyrkio-accent-dark">Nyyrikki</span> will also put
-              some <span class="nyrkio-accent-dark">markers</span> in front of
+              <span className="nyrkio-accent-dark">Nyyrikki</span> will also put
+              some <span className="nyrkio-accent-dark">markers</span> in front of
               the hunter, so that they will see a clear path out of the dark
               forests.
             </p>
           </div>
 
-          <div class="row col-lg-12 mt-4" className="nyyrikki-last-text">
+          <div className="row col-xl-10 mt-4" className="nyyrikki-last-text">
             <img
               src="https://nyrkio.com/p/nyyrikki/nyyrikki-horn2.png"
               className="nyyrikki-horn-right"
@@ -175,7 +175,7 @@ export const LegendPage = () => {
             </p>
           </div>
 
-          <div class="row col-lg-12 mt-12">
+          <div className="row col-xl-10 mt-12">
             <p>
               <small>
                 *) ...much like being on the Quality &amp; Performance team, you
@@ -199,7 +199,7 @@ export const LegendPage = () => {
             </p>
           </div>
 
-          <div class="row col-lg-12 mt-8">
+          <div className="row col-xl-10 mt-8">
             <h2>Bibliography</h2>
             <ol>
               <li>
@@ -233,7 +233,7 @@ export const LegendPage = () => {
             </p>
             <p>
               The instrument used is a{" "}
-              <span class="nyrkio-accent-dark">kantele</span>, a five string
+              <span className="nyrkio-accent-dark">kantele</span>, a five string
               harp. In the epic it is used by the powerful sorcerer{" "}
               <strong>Väinämöinen</strong> himself to cast - sing - his spells.
             </p>

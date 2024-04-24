@@ -5,23 +5,6 @@ import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import introDoc from "../docs/intro.md";
 
-export const SidePanel = () => {
-  const [content, setContent] = useState("");
-
-  return (
-    <div className="navbar-nav navbar-left justify-content-start col-sm-3 pe-3 p-3">
-      {/*<div class="col-auto col-md-3 col-xl-2 px-sm-2 px-0">*/}
-      <h3>Docs</h3>
-      <Link to="/docs/getting-started" className="nav-link">
-        Getting started
-      </Link>
-      <div className="nav-link">
-        <a href="/openapi">API</a>
-      </div>
-    </div>
-  );
-};
-
 const revealToken = (ev) => {
   //console.log(ev);
   const target = ev.target;
@@ -50,7 +33,7 @@ const getMyLoggedInToken = () => {
     return (
 
     <>
-      <div id="get-jwt-token">
+      <div id="get-jwt-token" className="p-5">
       <Link to="/" className="text-right" onClick={revealToken}>
       <span title="Click here to get your current JWT token..."
             className="get-jwt-token bi bi-envelope"></span>
@@ -76,11 +59,7 @@ export const Docs = () => {
 
   return (
     <>
-      <div className="container-fluid">
-        <div className="row flex-nowrap">
-          <SidePanel />
-          <div className="row">
-            <div className="col-sm-9 p-5">
+        <div className="row mt-4 m-2 p-0 col-lg-10">
               {getMyLoggedInToken()}
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
@@ -102,10 +81,7 @@ export const Docs = () => {
                   },
                 }}
               />
-            </div>
           </div>
-        </div>
-      </div>
     </>
   );
 };

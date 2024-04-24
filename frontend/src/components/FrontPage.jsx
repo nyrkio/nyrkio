@@ -22,8 +22,8 @@ const Banner = () => {
 
 const FeatureHighlight = () => {
   return (
-    <div className="row">
-      <div className="col-sm-4">
+    <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
+      <div className="col">
         <h3>Shift left</h3>
         <p>
           Performance regressions are often only discovered during later stages
@@ -34,7 +34,7 @@ const FeatureHighlight = () => {
           as soon as they're committed.
         </p>
       </div>
-      <div className="col-sm-4">
+      <div className="col">
         <h3>Automate analysis</h3>
         <p>
           Avoid the tedious work of checking performance dashboards by hand.
@@ -42,7 +42,7 @@ const FeatureHighlight = () => {
           change is detected.
         </p>
       </div>
-      <div className="col-sm-4">
+      <div className="col">
         <h3>State of the art</h3>
         <p>
           Change point detection is state of the art technology for detecting
@@ -162,9 +162,10 @@ const FeatureBanner2 = () => {
 export const FrontPage = () => {
   return (
     <>
-      <div className="frontpage container my-5 text-center">
+      <div className="frontpage container-fluid text-center w-100">
+      <div className="container-fluid text-center w-100">
         <Banner />
-        <div className="padding-block "></div>
+        <div className="padding-block frontpage-triplet"></div>
         <FeatureHighlight />
         <button className="btn btn-success">
           <a className="btn-link" href="/signup">
@@ -179,7 +180,7 @@ export const FrontPage = () => {
       <div className="padding-block "></div>
       <FeatureBanner2 />
       <LearnMore />
-      <></>
+      </div>
     </>
   );
 };

@@ -8,14 +8,13 @@ export const ProductPage = () => {
 
   return (
     <>
-      <div className="container">
-        <div className="row mt-8 p-5">
+        <div className="row mt-8 p-5 col-md-10">
           <h1 className="font-weight-bolder text-center">
             Detecting performance regressions
           </h1>
           <h4 className="text-center">The hard way vs the smart way</h4>
         </div>
-        <div className="row col-md-10 offset-md-1">
+        <div className="row p-2 col-md-10">
           <h3>Left shift performance</h3>
           <p>The word on the quality engineering streets is left shifting.</p>
           <p>
@@ -38,8 +37,8 @@ export const ProductPage = () => {
 
           <p>What should you do with the results???</p>
         </div>
-        <div className="row col-md-10 offset-md-1">
-          <div className="col">
+        <div className="row p-2 col-md-10">
+          <div className="col-xl-4 col-xs-12 p-2">
             <h3>The hard way</h3>
             <p>
               Unlike unit and other correctness tests, the result of a
@@ -58,16 +57,17 @@ export const ProductPage = () => {
             </p>
           </div>
 
-          <div className="col mt-4">
-            <img style={{ height: "300px" }} src={grafanaDashboard} />
+          <div className="col-xl-6 col-xs-12 p-2">
             <center>
+              <img style={{ height: "300px" }} src={grafanaDashboard} />
+              <br/>
               <a href="https://en.wikipedia.org/wiki/Grafana#/media/File:Grafana_dashboard.png">
                 Image Credit: LinuxScreenshots @ Flickr
               </a>
             </center>
           </div>
         </div>
-        <div className="row col-md-10 offset-md-1">
+        <div className="row p-0 col-md-10">
           <p>
             The naive way would then be to automate a simple{" "}
             <i>threshold based</i> comparison. If the result today is lower than
@@ -87,16 +87,17 @@ export const ProductPage = () => {
             stands out.
           </p>
         </div>
-        <div className="row col-md-10 offset-md-1">
-          <div className="col">
-            <img src={image1} />
+        <div className="row col-md-10 col-xs-12 p-0">
+          <div className="col-xl-6 col-xs-12 p-2">
             <center>
+            <img src={image1} />
+              <br />
               <a href="https://www.flickr.com/photos/nenadstojkovic/50776727286/in/photolist-2kmXZZh-2mH2tsd-pNfG3r-9uaRmj-2m2cAtk-9o1FrD-2jJWW3T-2m4h9Tb-2joPwMv-p8adfb-pYmu5c-r5npnH-8jZGvy-pYrWxE-2m4GHWZ-CWBUK-pMyb4h-p89RRf-pYmd5g-2jJzX3w-pMY8PF-pYm1VH-2iocoyX-p8Eqfz-SRBJEv-p86duC-cp4eam-2joSi9a-8jZGjw-q5oEHM-q5n1fM-9GRwgf-5aMM2S-7Jw8UW-2UNrAs-6z4cGN-q5dA7i-p8CoLr-aLDiFR-4ZvDHZ-9anpxd-9STgSK-9dFg7Z-66XZaq-aYmSAK-2muF9rF-2kQVQ5M-4aCLL-2kQVVoF-2kQVqYP">
                 Image Credit: Nenad Stojkovic @ Flickr
               </a>
             </center>
           </div>
-          <div className="col">
+          <div className="col-xl-6 col-xs-12 p-2">
             <p>
               So what should the automated check do? If a result is now 6% lower
               than last week, should the build be marked failed or not? That
@@ -115,8 +116,7 @@ export const ProductPage = () => {
             </p>
           </div>
         </div>
-        <div className="row col-md-10 offset-md-1">
-          <div className="col">
+        <div className="row col-md-10 col-xs-12">
             <h3>More than one way...</h3>
             <p>
               Applying math to the problem can help. Some obvious ideas are to
@@ -138,9 +138,8 @@ export const ProductPage = () => {
               introduced, it is unable to identify a specific commit that causes
               the regression.
             </p>
-          </div>
         </div>
-        <div className="row col-md-10 offset-md-1">
+        <div className="row col-md-10 p-2">
           <div className="col">
             <h3 className="nyrkio-accent">The smart way</h3>
 
@@ -150,16 +149,15 @@ export const ProductPage = () => {
               superior to all of the above methods.
             </p>
 
-            </div>
+          </div>
 
-            <div className="col nyrkio-logo-productpage text-center">
+          <div className="col nyrkio-logo-productpage text-center">
             <Logo />
-            </div>
+          </div>
 
         </div>
-        <div className="row col-md-10 offset-md-1">
+        <div className="row col-md-10 p-2">
           <div className="col">
-
             <p>
               Between the two of us we have over 20 years of experience
               benchmarking and performance tuning the kernel and open source
@@ -173,24 +171,15 @@ export const ProductPage = () => {
               regressions and improvements with minimal human effort (per
               build).
             </p>
-
-            <p>
-              Nyrkiö is based on work done at{" "}
-              <a href="https://github.com/mongodb/signal-processing-algorithms">
-                MongoDB
-              </a>{" "}
-              and <a href="https://github.com/datastax-labs/hunter">Datastax</a>{" "}
-              performance engineering teams since 2015,and graciously open
-              sourced by both companies for the benefit of all of us. For
-              example{" "}
-              <a href="https://netflixtechblog.com/fixing-performance-regressions-before-they-happen-eab2602b86fe">
-                Netflix also uses the same library in their performance testing
-              </a>
-              .
-            </p>
           </div>
         </div>
-        <div className="row mt-4 text-center">
+        <div className="row col-md-10 p-2">
+          <div className="col">
+            <h3>Watch Nyrkiö users in action</h3>
+          </div>
+        </div>
+        <div className="row col-md-10 p-5">
+          <div className="col">
           <center>
             <img
               style={{
@@ -201,6 +190,13 @@ export const ProductPage = () => {
               src={tigerbeetle}
             />
           </center>
+          </div>
+        </div>
+        <div className="row col-md-10 p-2">
+          <div className="col">
+            <p>Some Nyrkiö users have chosen to <a href="/public">publish their performance testing results</a>.
+              This way anyone can verify the performance of their software.</p>
+          </div>
         </div>
         <div className="row col-md-10 offset-md-1 mt-5">
           <p>
@@ -221,17 +217,29 @@ export const ProductPage = () => {
           <p>&nbsp;</p>
 
         </div>
-        <div className="row col-md-10 offset-md-1">
-          <h3>Watch Nyrkiö users in action</h3>
-          <p>Some Nyrkiö users have chosen to <a href="/public">publish their performance testing results</a>.
-             This way anyone can verify the performance of their software.</p>
-
-          <p>To see Nyrkiö in action and what it can do for you:<br />
-             <a href="/public">More public test results from other Nyrkiö users...</a>
-          </p>
-
+        <div className="row col-md-10 p-2">
+          <div className="col">
+            <h3>Open Source Roots and a Decade in Production</h3>
+            <p>
+              Nyrkiö is based on work done at{" "}
+              <a href="https://github.com/mongodb/signal-processing-algorithms">
+                MongoDB
+              </a>{" "}
+              and <a href="https://github.com/datastax-labs/hunter">Datastax</a>{" "}
+              performance engineering teams since 2015,and graciously open
+              sourced by both companies for the benefit of all of us. In the past years a small
+              community of practitioners have grown around the open source project. For
+              example{" "}
+              <a href="https://netflixtechblog.com/fixing-performance-regressions-before-they-happen-eab2602b86fe">
+                Netflix also uses the same library in their performance testing
+              </a>, as well as Confluent and Hazelcast...
+            </p>
+            <p>And with Nyrkiö, we aim to make this knowledge and tooling readily available to
+               every software engineer. It is time for automated performance testing to go mainstream!</p>
+          </div>
         </div>
         <div className="row col-md-10 offset-md-1">
+          <div className="col">
           <h3>Technical Articles</h3>
           <p>
             The articles below explain in detail why change detection algorithms

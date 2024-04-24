@@ -345,9 +345,9 @@ export const PricingPage = () => {
         <NoticeTotalLarge />
         <NoticeEngineeringSmall />
 
-        <div className="nyrkio-plans row row-cols-1 row-cols-md-3 text-center justify-content-center">
+        <div className="nyrkio-plans row row-cols-1 row-cols-lg-3 text-center justify-content-center">
           <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm">
+            <div className="card mb-4 rounded-3 shadow-sm m-4">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Free</h4>
               </div>
@@ -371,7 +371,7 @@ export const PricingPage = () => {
           </div>
 
           <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm border-success">
+            <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Business</h4>
               </div>
@@ -397,7 +397,7 @@ export const PricingPage = () => {
           </div>
 
           <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm">
+            <div className="card mb-4 rounded-3 shadow-sm m-4">
               <div className="card-header py-3 text-bg-primary">
                 <h4 className="my-0 fw-normal">Enterprise</h4>
               </div>
@@ -423,9 +423,9 @@ export const PricingPage = () => {
           </div>
         </div>
 
-          <div className="p-3 calculator calculator-annual rounded-3 shadow-sm">
-             <div className="row mb-3">
-              <div className="col col-md-12" id="employees_engineering_label">
+          <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
+             <div className="row">
+              <div className="col col-xs-8" id="annual_discount_label">
                 <div className="form-check form-switch">
                   <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchAnnual" onChange={updateDiscount} />
                   <label className="form-check-label" htmlFor="flexSwitchAnnual">Save {annualSavingsPercent} % by paying for the full year up front! <AnnualSavingsEuro /></label>
@@ -451,10 +451,10 @@ export const PricingPage = () => {
             <table className="table text-center pricing-table">
               <thead>
                 <tr>
-                  <th style={{ width: "34%" }}></th>
-                  <th style={{ width: "22%" }}>Free</th>
-                  <th style={{ width: "22%" }}>Business</th>
-                  <th style={{ width: "22%" }}>Enterprise</th>
+                  <th style={{ width: "30%" }}></th>
+                  <th style={{ width: "20%" }}>Free</th>
+                  <th style={{ width: "20%" }}>Business</th>
+                  <th style={{ width: "20%" }}>Enterprise</th>
                 </tr>
               </thead>
               <tbody>

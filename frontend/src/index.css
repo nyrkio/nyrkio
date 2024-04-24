@@ -76,6 +76,12 @@ body {
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
+
+.row {
+  margin-left:0;
+  margin-right:0;
+}
+
 div.nyyrikki-banner-right,
 body.nyyrikki-banner-right {
   background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-banner.png);
@@ -99,6 +105,23 @@ main .nyyrikki-banner-right-bw {
 img.nyyrikki-original-art {
   max-width: 90%;
   max-height: 110vh;
+}
+
+body #root div.container-fluid {
+  padding-left: 0px;
+  padding-right: 0px;
+}
+#main-content,
+#main-content div {
+  margin-left: 0px;
+  margin-right: 0px;
+  padding-left: 0px;
+}
+#main-content div {
+  padding-right: 0px;
+}
+#main-content {
+  padding-right: 0px;
 }
 
 div.frontpage div.nyrkio-logo {
@@ -132,6 +155,7 @@ img.tb-logo {
   margin-top: 2em;
   margin-bottom: 2em;
 }
+
 
 div.container.nyyrikki-legend .nyyrikki-last-text {
   margin-bottom: 300px;
@@ -251,7 +275,7 @@ button:focus-visible {
 .navbar-top {
   border-bottom: 1px solid var(--nyrkio-light-gray2);
   background-color: transparent;
-  margin-bottom: 1em;
+  margin-bottom: 0.5em;
 }
 
 .border-top {
@@ -260,14 +284,22 @@ button:focus-visible {
   color: black;
 }
 
+#sidepanel,
+#sidepanel .navbar-left {
+  padding-right: 0px;
+}
+
 .navbar-left.navbar-nav .nav-link,
 .navbar-light .navbar-nav .nav-link {
   display: block;
   padding: 0.5rem 1rem;
-  color: var(--nyrkio-tattoo-red);
   text-decoration: none;
   transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
+}
+
+.navbar-light .navbar-nav .nav-link {
+  color: var(--nyrkio-tattoo-red);
 }
 
 .navbar-light .navbar-nav .nav-link:hover {
@@ -288,6 +320,29 @@ button:focus-visible {
   margin: 0px;
   padding-right: 0.5em;
 }
+
+.navbar-left.navbar-nav a.nav-link {
+  color: var(--nyrkio-tattoo-red);
+}
+
+@keyframes fade-in-animation {
+  from {opacity: 0;}
+  to {opacity: 0.9;}
+}
+
+.navbar-left .nav-link-frontpage {
+  animation-name: fade-in-animation;
+  animation-duration: 20s;
+  font-size: small;
+  line-height: 0.5em;
+  color: var(--nyrkio-horn-light-brown);
+}
+
+#sidepanel .navbar-left a.nav-link-frontpage{
+  color: var(--nyrkio-text);
+}
+
+
 
 .btn-success {
   color: var(--nyrkio-light-gray3);
@@ -409,7 +464,6 @@ ol.breadcrumb {
 
 div.card div.card-header:first-child,
 div.card div.card-header {
-  width: 100%;
   color: var(--bs-heading-color);
   background-color: var(--nyrkio-active);
   border-color: 1px solid var(--nyrkio-border);
@@ -624,8 +678,7 @@ div.card div.card-header {
 
 
 .nyrkio-pricing .calculator-annual {
-  margin-top:5em;
-  margin-bottom:5em;
+  background-color: var(--bs-light);
 }
 .nyrkio-pricing .calculator-annual div {
   text-align: left;

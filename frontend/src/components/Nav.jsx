@@ -41,7 +41,7 @@ const NavigationItems = () => {
           <li className="nav-item">
             {/* This should eventually link to a page about the company, and the nyyrikki legend is a subpage of that.*/}
             <a className="nav-link" href="/legend" title="About Nyrkiö">
-              Legend
+              About
             </a>
           </li>
         </ul>
@@ -52,8 +52,8 @@ const NavigationItems = () => {
 
 export const NavHeader = ({ loggedIn, setLoggedIn }) => {
   return (
-    <nav className="navbar navbar-light navbar-expand-lg navbar-top">
-      <div className="container-fluid">
+    <nav className="navbar navbar-light navbar-expand-sm navbar-top">
+      <div className="container-fluid m-1">
         <NavigationItems />
         {loggedIn ? (
           <>

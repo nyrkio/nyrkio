@@ -10,6 +10,7 @@ import { Login } from "./components/Login.jsx";
 import { Dashboard, SingleResult } from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
+import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
@@ -24,12 +25,12 @@ import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { PublicDashboard } from "./components/PublicDashboard.jsx";
 import { OrgDashboard } from "./components/OrgDashboard.jsx";
 
-const Root = ({ loggedIn }) => {
-  return <>{loggedIn ? <Dashboard /> : <FrontPage />}</>;
-};
-
 function MainApp({ loggedIn, setLoggedIn }) {
   let location = useLocation();
+
+  const Nothing = () => {
+    return (<></>);
+  }
 
   React.useEffect(() => {
     posthog.capture("$pageview");
@@ -38,8 +39,14 @@ function MainApp({ loggedIn, setLoggedIn }) {
   return (
     <>
       <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      <div className="container-fluid h-100 row">
+      <div className="col-sm-12 col-md-3 col-xl-2" id="sidepanel">
+          <SidePanel loggedIn={loggedIn} />
+      </div>
+      <div className="col-sm-12 col-md-9 col-xl-10 container-fluid" id="main-content">
       <Routes>
-        <Route path="/" element={<Root loggedIn={loggedIn} />} />
+        <Route path="/" element={loggedIn ? <Dashboard /> : <Nothing />} />
+        <Route path="/frontpage" element={<Nothing />} />
         <Route path="/tests/*" element={<Dashboard loggedIn={loggedIn} />} />
         <Route path="/product" element={<ProductPage />} />
         <Route path="/pricing" element={<PricingPage />} />
@@ -61,8 +68,17 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <Route path="/admin/*" element={<AdminDashboard />} />
         <Route path="*" element={<NoMatch />} />
       </Routes>
+      </div>
+      <div className="col-sm-12 container-fluid" id="main-content2">
+      <Routes>
+        <Route path="/" element={loggedIn ? <Nothing /> : <FrontPage /> } />
+        <Route path="/frontpage" element={<FrontPage />} />
+        <Route path="*" element={<Nothing />} />
+      </Routes>
+      </div>
       <ScrollToTop />
       <Footer />
+      </div>
     </>
   );
 }
