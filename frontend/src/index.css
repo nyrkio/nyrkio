@@ -781,9 +781,8 @@ input[type="range"].nyrkio-slider::-webkit-slider-runnable-track {
   border-color: var(--nyrkio-tattoo-red);
 }
 
+div.card.people-card .card-header img {
+  max-width: 100%;
+  max-height: 26em;
 
-div.card.people-card .card-header,
-div.card.people-card .card-body {
-  height: 600px;
-  min-height: 600px;
 }

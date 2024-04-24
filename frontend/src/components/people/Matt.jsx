@@ -1,19 +1,17 @@
 export const MattCard = () => {
   return (
-            <div className="row row-cols-2">
+            <div className="row row-cols-1 row-cols-md-2">
             <div className="col">
             <div className="card m-3 rounded-3 shadow people-card">
-              <div className="card-header p-3">
+              <div className="card-header p-5 justify-content-center text-center">
                 <img src="/src/static/people/Matt-600x800.jpg" alt="Head shot"
-                     className="w-100 rounded-3 "/>
-                <h4 className="my-0 fw-normal">Matt Fleming</h4>
+                     className="rounded-3"/>
+                <h4 className="my-2">Matt Fleming</h4>
                 <p>CTO</p>
               </div>
               </div>
             </div>
-            <div className="col">
-            <div className="card m-3 rounded-3 shadow people-card">
-              <div className="card-body p-3 justify-content-center text-justify h-100">
+            <div className="col p-4">
               <p>Matt has worked most of his career with the Linux kernel, including as the subsystem
               maintainer while at Intel. During his years at Suse,
               he became a well known authority on Linux performance.</p>
@@ -27,8 +25,6 @@ export const MattCard = () => {
               our customers helping them on their journey to automate performance testing in nightly builds,
               Continuous Integration and Pull Requests.
               </p>
-              </div>
-              </div>
             </div>
           </div>
   );

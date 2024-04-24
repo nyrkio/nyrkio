@@ -34,7 +34,6 @@ export const AboutPage = () => {
           <p>For legal and tax purposes, Nyrkiö Oy is headquartered in Järvenpää, Finland.</p>
           <p>Matt lives and works out of Halifax, United Kingdom.</p>
           <p><a href="/contact">Contact us...</a></p>
-          <YoutubeEmbed embedId={"v1Cu5LUWTpw"} />
           <h2>How</h2>
           <p>We've been privileged to work on the major open source projects of our lifetime: Linux,
           MySQL, MongoDB, Cassandra... and so many smaller projects and utilities! Nyrkiö is no
