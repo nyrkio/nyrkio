@@ -267,6 +267,20 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.nyrkio-services .card p {
+  font-weight: bold;
+
+}
+
+.nyrkio-services .card ul {
+  text-align: left;
+  margin-left: 2em;
+  margin-right: 1em;
+}
+.nyrkio-services .card li {
+  list-style-type: disc;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: var(--nyrkio-text);

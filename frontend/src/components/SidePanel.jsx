@@ -18,7 +18,7 @@ export const SidePanel = ({ loggedIn }) => {
 
         <Route path="/product" element={<ProductSidePanel  loggedIn={loggedIn} />} />
         <Route path="/product/*" element={<ProductSidePanel  loggedIn={loggedIn} />} />
-        <Route path="/pricing" element={<PricingSidePanel  loggedIn={loggedIn} />} />
+        <Route path="/services" element={<ServicesSidePanel  loggedIn={loggedIn} />} />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
         <Route path="/legend" element={<AboutSidePanel  loggedIn={loggedIn} />} />
         <Route path="/about/*" element={<AboutSidePanel  loggedIn={loggedIn} />} />
@@ -68,13 +68,17 @@ const ProductSidePanel = ({ loggedIn }) => {
         <Link to="/product" className="nav-link">
           Nyrkiö Change Detection
         </Link>
+        <Link to="/pricing" className="nav-link">
+          Subscription levels
+        </Link>
         <Link to="/public" className="nav-link">
           Public Dashboards<br /> from other users
         </Link>
       </>
     );
 };
-const PricingSidePanel = ({ loggedIn }) => {
+const ServicesSidePanel = ({ loggedIn }) => {
+    document.body.classList.add("section-services");
     return (
       <></>
     );
