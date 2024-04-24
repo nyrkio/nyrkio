@@ -1,21 +1,16 @@
-import { useState } from "react";
 import { Link } from "react-router-dom";
 import { SampleData } from "./SampleData";
 import tigerbeetle from "../static/tigerbeetle-change-points.png";
-import github from "../static/github.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
-import { Logo } from "./Logo"
+import { Logo } from "./Logo";
 
 const Banner = () => {
   return (
     <div className="container-fluid text-center nyrkio-title">
-      <Logo color="Brown" filetype="png"/>
+      <Logo color="Brown" filetype="png" />
       <h1>For Faster Software</h1>
-      <h5>
-        Harness the power of
-        change point detection
-      </h5>
+      <h5>Harness the power of change point detection</h5>
     </div>
   );
 };
@@ -62,6 +57,21 @@ const LearnMore = () => {
         <Link to="/product">Read about the product here</Link>
       </div>
     </div>
+  );
+};
+
+const DemoVideo = () => {
+  return (
+    <iframe
+      width="560"
+      height="315"
+      src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
+      title="YouTube video player"
+      frameBorder="0"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+      referrerPolicy="strict-origin-when-cross-origin"
+      allowfullscreen
+    ></iframe>
   );
 };
 
@@ -163,23 +173,25 @@ export const FrontPage = () => {
   return (
     <>
       <div className="frontpage container-fluid text-center w-100">
-      <div className="container-fluid text-center w-100">
-        <Banner />
-        <div className="padding-block frontpage-triplet"></div>
-        <FeatureHighlight />
-        <button className="btn btn-success">
-          <a className="btn-link" href="/signup">
-            Sign up
-          </a>
-        </button>
-      </div>
-      <div className="padding-block "></div>
-      <FeatureBanner1 />
-      <div className="padding-block-sm "></div>
-      <SampleData />
-      <div className="padding-block "></div>
-      <FeatureBanner2 />
-      <LearnMore />
+        <div className="container-fluid text-center w-100">
+          <Banner />
+          <div className="padding-block frontpage-triplet"></div>
+          <DemoVideo />
+          <div className="padding-block frontpage-triplet"></div>
+          <FeatureHighlight />
+          <button className="btn btn-success">
+            <a className="btn-link" href="/signup">
+              Sign up
+            </a>
+          </button>
+        </div>
+        <div className="padding-block "></div>
+        <FeatureBanner1 />
+        <div className="padding-block-sm "></div>
+        <SampleData />
+        <div className="padding-block "></div>
+        <FeatureBanner2 />
+        <LearnMore />
       </div>
     </>
   );
