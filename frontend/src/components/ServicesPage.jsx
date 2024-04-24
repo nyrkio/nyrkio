@@ -153,10 +153,110 @@ export const ServicesPage = ({ loggedIn }) => {
               </div>
               </div>
             </div>
+
+
+          <div className="col">
+            <div className="card mb-1 rounded-3 shadow-sm m-2">
+              <div className="card-header py-3">
+                <h4 className="my-0 fw-normal">Automated Benchmarking</h4>
+              </div>
+              <div className="card-body">
+                <div className="card-body-text">
+                <p>Your starting point</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>You're not yet running benchmarks automated, as part of Continuous Integration workflow</li>
+                  <li>You risk delayed releases or unhappy customers when performance regressions are released into production</li>
+                </ul>
+                <p>The engagement</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>2-12 weeks, based on initial scoping interview</li>
+                  <li>A Nyrkiö performance expert will implement your first benchmark(s)</li>
+                  <li>Make the benchmarks run automatically as part of your CI, using elastic cloud infrastructure</li>
+                  <li>Configure the benchmark infrastructure for minimal noise, maximum repeatability</li>
+                  <li>Analyze results with Nyrkiö Change Detection</li>
+                  <li>Configure automated alerting (Slack or Email) in case performance regressions are detected</li>
+                </ul>
+                <p>Deliverables</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>A working perf testing workflow of nightly builds</li>
+                  <li>One or more benchmarks relevant to your end user workloads</li>
+                </ul>
+                <p>Note: Requires a suitable <a href="pricing">Nyrkiö subscription</a>.</p>
+                </div>
+                  <button
+                    htmlstyle="background-color: white;"
+                    type="button"
+                    className="w-100 btn btn-lg btn-success disabled-empty-space"
+                  >
+                    <a className="btn-link" href="."
+                    htmlstyle="background-color: white;"
+                    >X
+                    </a>
+                  </button>
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="mailto:sales@nyrkio.com?subject=Order: Nyrkiö Automated Benchmarking Introduction">
+                      Email us
+                    </a>
+                  </button>
+              </div>
+              </div>
+            </div>
           </div>
 
 
+        <div className="justify-content-center col-xl-12 mt-8 p-5">
+            <h2 className="text-center">General Performance and Test Automation</h2>
+            <div className="p-1 mt-4">
+              <p>We have deep experience diagnosing and fixing complex scaling problems found in
+              distributed systems.</p>
+              <p>The following are examples of consulting we have delivered:</p>
           </div>
+        </div>
+
+        <div className="consulting-packages row row-cols-1 row-cols-xl-2 row-cols-xxl-3 text-center justify-content-center">
+          <div className="col">
+            <div className="card mb-1 rounded-3 shadow-sm m-2">
+              <div className="card-header py-3">
+                <h4 className="my-0 fw-normal">Analyze and Fix Performance problems</h4>
+              </div>
+              <div className="card-body">
+                <div className="card-body-text">
+                <p>Your starting point</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>Your customer has reported an issue with performance, scaling, or similar</li>
+                  <li>You and your team are struggling to find the root cause; or...</li>
+                  <li>The problem is in a component or programming language your team doesn't have the required competence in</li>
+                  <li>You are losing deals or renewals due to performance and need to improve quickly</li>
+                </ul>
+                <p>The engagement</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>Typically time and materials based engagement with your team to help analyze and fix the reported problem</li>
+                </ul>
+                <p>Deliverables</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>A patch or Pull Request that resolves the issue</li>
+                  <li>Producing a new release of your product that includes the fix, is out of scope for the engagement</li>
+                  <li>Upgrading and supporting systems at your end customer is likewise out of scope for the engagement</li>
+                </ul>
+                </div>
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="mailto:sales@nyrkio.com?subject=Order: Performance Status Check">
+                      Email us
+                    </a>
+                  </button>
+              </div>
+              </div>
+            </div>
+
+
+        </div>
+      </div>
 
     </>
   );

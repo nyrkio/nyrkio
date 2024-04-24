@@ -276,6 +276,11 @@ button:focus-visible {
   font-weight: bold;
 
 }
+.nyrkio-services .card button.disabled-empty-space {
+  background-color: transparent;
+  color: transparent;
+  border: none;
+}
 
 .nyrkio-services .card ul {
   text-align: left;
