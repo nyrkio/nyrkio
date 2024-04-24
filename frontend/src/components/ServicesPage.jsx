@@ -198,7 +198,7 @@ export const ServicesPage = ({ loggedIn }) => {
           <div className="col">
             <div className="card mb-1 rounded-3 shadow-sm m-2">
               <div className="card-header py-3">
-                <h4 className="my-0 fw-normal">Analyze and Fix Performance problems</h4>
+                <h4 className="my-0 fw-normal">Analyze &amp; Fix Perf problems</h4>
               </div>
               <div className="card-body">
                 <div className="card-body-text">
@@ -232,6 +232,39 @@ export const ServicesPage = ({ loggedIn }) => {
               </div>
             </div>
 
+          <div className="col">
+            <div className="card mb-1 rounded-3 shadow-sm m-2">
+              <div className="card-header py-3">
+                <h4 className="my-0 fw-normal">Faster CI</h4>
+              </div>
+              <div className="card-body">
+                <div className="card-body-text">
+                <p>Your starting point</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>Your Automated testing is taking hours</li>
+                  <li>This hurts productivity as developers are frequently waiting for tests to complete</li>
+                </ul>
+                <p>The engagement</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>We work on making your testing faster, or parallelizing your CI workflow, so that the total runtime is shortened.</li>
+                </ul>
+                <p>Deliverables</p>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li>A typical goal might be to cut your build completion time in half</li>
+                  <li>Alternatively we can agree on a specific goal, like 30 or 60 minutes</li>
+                </ul>
+                </div>
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="mailto:sales@nyrkio.com?subject=Order: Faster CI">
+                      Email us
+                    </a>
+                  </button>
+              </div>
+              </div>
+            </div>
 
         </div>
       </div>
