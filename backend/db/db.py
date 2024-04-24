@@ -22,6 +22,7 @@ class OAuthAccount(BaseOAuthAccount):
 class User(BeanieBaseUser, Document):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    billing: Optional[Dict[str, str]] = Field(None)
 
 
 async def get_user_db():
@@ -31,16 +32,19 @@ async def get_user_db():
 class UserRead(schemas.BaseUser[PydanticObjectId]):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    billing: Optional[Dict[str, str]] = Field(None)
 
 
 class UserCreate(schemas.BaseUserCreate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    billing: Optional[Dict[str, str]] = Field(None)
 
 
 class UserUpdate(schemas.BaseUserUpdate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
+    billing: Optional[Dict[str, str]] = Field(None)
 
 
 class ConnectionStrategy(ABC):

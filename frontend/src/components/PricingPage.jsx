@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
-export const PricingPage = () => {
+export const PricingPage = ({ loggedIn }) => {
   const businessPriceFloor = 10;
   const businessPricePerHead = 20;
   const enterprisePriceFloor = 40;
@@ -14,7 +14,9 @@ export const PricingPage = () => {
   const cut1 = 100;
   const [annualDiscount, setAnnualDiscount] = useState(false);
   const [annualSavingsPercent, setAnnualSavingsPercent] = useState(20);
-  const [annualSavingsEuro, setAnnualSavingsEuro] = useState(enterprisePrice*12*(annualSavingsPercent/100));
+  const [annualSavingsEuro, setAnnualSavingsEuro] = useState(
+    enterprisePrice * 12 * (annualSavingsPercent / 100)
+  );
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
   const [eng, setEng] = useState(0);
@@ -38,7 +40,6 @@ export const PricingPage = () => {
   };
   const getEntPrice = (total) => {
     var e;
-
 
     if (total < cut1) {
       e = Math.max(
@@ -89,15 +90,15 @@ export const PricingPage = () => {
 
   const updateDiscount = () => {
     const widget = document.getElementById("flexSwitchAnnual");
-    if(widget){
+    if (widget) {
       setAnnualDiscount(widget.checked);
     }
-  }
+  };
 
   const priceCalculator = (sourceElement) => {
     const localTotal = document.getElementById("employees_total").value;
     setTotal(document.getElementById("employees_total").value);
-    setEng( document.getElementById("employees_engineering").value );
+    setEng(document.getElementById("employees_engineering").value);
     var b = getBusPrice(localTotal);
     var e = getEntPrice(localTotal);
 
@@ -108,119 +109,107 @@ export const PricingPage = () => {
 
     setBusHours(getBusHours(b));
     setEntHours(getEntHours(e));
-    if(e){
-      setAnnualSavingsEuro(e*12*(annualSavingsPercent/100));
-    }
-    else {
+    if (e) {
+      setAnnualSavingsEuro(e * 12 * (annualSavingsPercent / 100));
+    } else {
       setAnnualSavingsEuro(null);
     }
     return true;
   };
 
   const BusinessPrice = () => {
-    if(businessPrice===null){
-      return (
-        <>
-        Call us
-        </>
-      );
+    if (businessPrice === null) {
+      return <>Call us</>;
     }
-    if(annualDiscount) {
+    if (annualDiscount) {
       return (
         <>
-        {businessPrice*12*(1-annualSavingsPercent/100)} <small className="text-body-secondary fw-light"> €/yr</small>
+          {businessPrice * 12 * (1 - annualSavingsPercent / 100)}{" "}
+          <small className="text-body-secondary fw-light"> €/yr</small>
         </>
       );
-    }
-    else {
+    } else {
       return (
         <>
-        {businessPrice} <small className="text-body-secondary fw-light"> €/mo</small>
+          {businessPrice}{" "}
+          <small className="text-body-secondary fw-light"> €/mo</small>
         </>
       );
-
     }
   };
 
   const EnterprisePrice = () => {
-    if(enterprisePrice===null){
-      return (
-        <>
-        Call us
-        </>
-      );
+    if (enterprisePrice === null) {
+      return <>Call us</>;
     }
-    if(annualDiscount) {
+    if (annualDiscount) {
       return (
         <>
-        {enterprisePrice*12*(1-annualSavingsPercent/100)} <small className="text-body-secondary fw-light"> €/yr</small>
+          {enterprisePrice * 12 * (1 - annualSavingsPercent / 100)}{" "}
+          <small className="text-body-secondary fw-light"> €/yr</small>
         </>
       );
-    }
-    else {
+    } else {
       return (
         <>
-        {enterprisePrice} <small className="text-body-secondary fw-light"> €/mo</small>
+          {enterprisePrice}{" "}
+          <small className="text-body-secondary fw-light"> €/mo</small>
         </>
       );
-
     }
   };
 
-
   const AnnualSavingsEuro = () => {
-    if(annualSavingsEuro===null){
+    if (annualSavingsEuro === null) {
       return "";
-    }
-    else {
+    } else {
       return (
         <>
-        That's {annualSavingsEuro} € for you! (For Enterprise subscription).
-      </>
-      )
-
+          That's {annualSavingsEuro} € for you! (For Enterprise subscription).
+        </>
+      );
     }
   };
 
   const NoticeEngineeringSmall = () => {
-
     //console.debug("If Engineering dept isn't 25-50% of total employees, give custom price after talking to them.")
-    if (eng>0 && total > 0
-        && eng / total<0.25
-        && total < 1000){
-      console.debug("Small engineering dept -> custom price notice")
+    if (eng > 0 && total > 0 && eng / total < 0.25 && total < 1000) {
+      console.debug("Small engineering dept -> custom price notice");
       return (
-          <>
+        <>
           <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
-            <p>Note: Our list price may not be perfect for your organization. Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+            <p>
+              Note: Our list price may not be perfect for your organization.
+              Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can
+              discuss a more suitable pricing level. We want to ensure Nyrkiö is
+              a good fit for projects large and small.
+            </p>
           </div>
-          </>
+        </>
       );
-    }
-    else {
-      return (
-        <></>
-      );
+    } else {
+      return <></>;
     }
   };
 
   const NoticeTotalLarge = () => {
-
     //console.debug("If Engineering dept isn't 25-50% of total employees, give custom price after talking to them.")
-    if (total > 999){
-      console.debug("Large total -> custom price notice")
+    if (total > 999) {
+      console.debug("Large total -> custom price notice");
       return (
-          <>
+        <>
           <div className="nyrkio-pricing-note nyrkio-pricing-engineering-small">
-            <p>Note: Our list price may not be perfect for your organization. Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can discuss a more suitable pricing level. We want to ensure Nyrkiö is a good fit for projects large and small.</p>
+            <p>
+              Note: Our list price may not be perfect for your organization.
+              Please <a href="mailto:sales@nyrkio.com">contact us</a> so we can
+              discuss a more suitable pricing level. We want to ensure Nyrkiö is
+              a good fit for projects large and small.
+            </p>
           </div>
-          </>
+        </>
       );
-    }
-    else {
-      return (
-        <></>
-      );
+    } else {
+      return <></>;
     }
   };
 
@@ -387,11 +376,46 @@ export const PricingPage = () => {
                   <li>Support for teams</li>
                   <li>{busHours} cpu-hours/month*</li>
                 </ul>
-                <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrkio.com">
-                    Contact us
-                  </a>
-                </button>
+                {loggedIn ? (
+                  <form
+                    action="/api/v0/billing/create-checkout-session"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value={
+                        annualDiscount ? "business_yearly" : "business_monthly"
+                      }
+                    />
+                    <input type="hidden" name="quantity" value={total} />
+                    <button
+                      id="checkout-and-portal-button"
+                      type="submit"
+                      className="w-100 btn btn-lg btn-success"
+                      onClick={(e) => {
+                        if (total <= 0) {
+                          alert(
+                            "Please enter number of employees in the company."
+                          );
+                          e.preventDefault();
+                          return false;
+                        }
+                      }}
+                    >
+                      Get started
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="/signup">
+                      Sign up
+                    </a>
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -413,26 +437,72 @@ export const PricingPage = () => {
                   <li>24/7 support</li>
                   <li>{entHours} cpu-hours/month*</li>
                 </ul>
-                <button type="button" className="w-100 btn btn-lg btn-success">
-                  <a className="btn-link" href="mailto:founders@nyrkio.com">
-                    Contact us
-                  </a>
-                </button>
+                {loggedIn ? (
+                  <form
+                    action="/api/v0/billing/create-checkout-session"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value={
+                        annualDiscount
+                          ? "enterprise_yearly"
+                          : "enterprise_monthly"
+                      }
+                    />
+                    <input type="hidden" name="quantity" value={total} />
+                    <button
+                      id="checkout-and-portal-button"
+                      type="submit"
+                      onClick={(e) => {
+                        if (total <= 0) {
+                          alert(
+                            "Please enter number of employees in the company."
+                          );
+                          e.preventDefault();
+                          return false;
+                        }
+                      }}
+                      className="w-100 btn btn-lg btn-success"
+                    >
+                      Get started
+                    </button>
+                  </form>
+                ) : (
+                  <button
+                    type="button"
+                    className="w-100 btn btn-lg btn-success"
+                  >
+                    <a className="btn-link" href="/signup">
+                      Sign up
+                    </a>
+                  </button>
+                )}
               </div>
             </div>
           </div>
         </div>
 
-          <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
-             <div className="row">
-              <div className="col col-xs-8" id="annual_discount_label">
-                <div className="form-check form-switch">
-                  <input className="form-check-input" type="checkbox" role="switch" id="flexSwitchAnnual" onChange={updateDiscount} />
-                  <label className="form-check-label" htmlFor="flexSwitchAnnual">Save {annualSavingsPercent} % by paying for the full year up front! <AnnualSavingsEuro /></label>
-                </div>
+        <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
+          <div className="row">
+            <div className="col col-xs-8" id="annual_discount_label">
+              <div className="form-check form-switch">
+                <input
+                  className="form-check-input"
+                  type="checkbox"
+                  role="switch"
+                  id="flexSwitchAnnual"
+                  onChange={updateDiscount}
+                />
+                <label className="form-check-label" htmlFor="flexSwitchAnnual">
+                  Save {annualSavingsPercent} % by paying for the full year up
+                  front! <AnnualSavingsEuro />
+                </label>
               </div>
             </div>
           </div>
+        </div>
 
         <p>
           *){" "}

@@ -52,11 +52,14 @@ class AuthenticatedTestClient(TestClient):
         return super().get(*args, **dict(kwargs, headers=self.headers))
 
     def post(self, *args, **kwargs):
-        assert (
-            "headers" not in kwargs.keys()
-        ), "Cannot pass headers explicitly to AuthenicatedTestClient.get()"
         assert self.headers, "You must call login() first"
-        return super().post(*args, **dict(kwargs, headers=self.headers))
+
+        if "headers" in kwargs:
+            kwargs["headers"] = {**self.headers, **kwargs["headers"]}
+        else:
+            kwargs["headers"] = self.headers
+
+        return super().post(*args, **dict(kwargs))
 
 
 class SuperuserClient(AuthenticatedTestClient):
