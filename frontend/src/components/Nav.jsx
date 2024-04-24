@@ -39,7 +39,7 @@ const NavigationItems = () => {
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="/aboutus" title="About Nyrkiö">
+            <a className="nav-link" href="/about" title="About Nyrkiö">
               About
             </a>
           </li>
