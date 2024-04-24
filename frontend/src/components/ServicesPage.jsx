@@ -45,7 +45,6 @@ export const ServicesPage = ({ loggedIn }) => {
                   <li>Suggested improvements</li>
                 </ul>
                 </div>
-                {loggedIn ? (
                   <form
                     action="/api/v0/billing/create-checkout-session"
                     method="POST"
@@ -64,16 +63,6 @@ export const ServicesPage = ({ loggedIn }) => {
                       Order online
                     </button>
                   </form>
-                ) : (
-                  <button
-                    type="button"
-                    className="w-100 btn btn-lg btn-success"
-                  >
-                    <a className="btn-link" href="/signup">
-                      Order online
-                    </a>
-                  </button>
-                )}
                   <button
                     type="button"
                     className="w-100 btn btn-lg btn-success"
@@ -113,7 +102,6 @@ export const ServicesPage = ({ loggedIn }) => {
                 </ul>
                 <p>Note: Requires a suitable <a href="pricing">Nyrkiö subscription</a>.</p>
                 </div>
-                {loggedIn ? (
                   <form
                     action="/api/v0/billing/create-checkout-session"
                     method="POST"
@@ -132,16 +120,6 @@ export const ServicesPage = ({ loggedIn }) => {
                       Order online
                     </button>
                   </form>
-                ) : (
-                  <button
-                    type="button"
-                    className="w-100 btn btn-lg btn-success"
-                  >
-                    <a className="btn-link" href="/signup">
-                      Order online
-                    </a>
-                  </button>
-                )}
                   <button
                     type="button"
                     className="w-100 btn btn-lg btn-success"
