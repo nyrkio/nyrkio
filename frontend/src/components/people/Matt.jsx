@@ -13,9 +13,9 @@ export const MattCard = () => {
             </div>
             <div className="col p-4">
               <p>Matt has worked most of his career with the Linux kernel, including as the subsystem
-              maintainer while at Intel. During his years at Suse,
+              maintainer while employed at Intel and SUSE. During his years at SUSE,
               he became a well known authority on Linux performance.</p>
-              <p>Due to his performance work at Suse, Matt was an early reader of the
+              <p>Due to his performance work at SUSE, Matt was an early reader of the
               change detection paper Henrik had co-authored, and this is how the founders met.
               Soon after Matt joined Henrik at Datastax, where he worked on analyzing and solving
               scaling issues reported by the largest customers, and eventually lead the entire core
