@@ -16,6 +16,7 @@ import { ProductPage } from "./components/ProductPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
+import { ServicesPage } from "./components/ServicesPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
@@ -60,6 +61,10 @@ function MainApp({ loggedIn, setLoggedIn }) {
             <Route
               path="/pricing"
               element={<PricingPage loggedIn={loggedIn} />}
+            />
+            <Route
+              path="/services"
+              element={<ServicesPage loggedIn={loggedIn} />}
             />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/legend" element={<LegendPage />} />
