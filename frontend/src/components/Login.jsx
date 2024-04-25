@@ -2,19 +2,17 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import posthog from "posthog-js";
 
-
-
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
   const [password, setPassword] = useState();
   const [errorText, setErrorText] = useState("");
 
   const ErrorMessage = () => {
-    if ( errorText ) {
+    if (errorText) {
       return (
         <>
           <div className="alert alert-warning mt-3" role="alert">
-            { errorText }
+            {errorText}
           </div>
         </>
       );
@@ -38,42 +36,48 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       body: credentialsData,
     })
       .then((response) => {
-        if(response.ok){
+        if (response.ok) {
           return response.json();
-        }
-        else {
-          console.error("Authentication to Nyrkiö.com failed: " +
-                        response.status + " " + response.statusText);
-          setErrorText("Authentication to Nyrkiö.com failed! ("
-                       + response.status + " " + response.statusText + ")");
+        } else {
+          console.error(
+            "Authentication to Nyrkiö.com failed: " +
+              response.status +
+              " " +
+              response.statusText
+          );
+          setErrorText(
+            "Authentication to Nyrkiö.com failed! (" +
+              response.status +
+              " " +
+              response.statusText +
+              ")"
+          );
           setLoggedIn(false);
           return false;
         }
       })
       .then((body) => {
-          if(!body){
-            return;
-          }
-          console.log("Logged in. (" + username + ")");
-          setErrorText("");
-          setLoggedIn(true);
+        if (!body) {
+          return;
+        }
+        console.log("Logged in. (" + username + ")");
+        setErrorText("");
+        setLoggedIn(true);
 
-          localStorage.setItem("loggedIn", "true");
-          localStorage.setItem("username", username);
-          localStorage.setItem("token", body["access_token"]);
+        localStorage.setItem("loggedIn", "true");
+        localStorage.setItem("username", username);
+        localStorage.setItem("token", body["access_token"]);
 
-          posthog.capture("login", { property: username });
-          try {
-            navigate("/");
-          } catch (error) {
-            console.log(error);
-          }
-
+        posthog.capture("login", { property: username });
+        try {
+          navigate("/");
+        } catch (error) {
+          console.log(error);
+        }
       })
       .catch((error) => {
-        console.log(error)
-      }
-    );
+        console.log(error);
+      });
   };
 
   // TODO (mfleming) Move to lib
@@ -86,12 +90,26 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       .then((url) => {
         console.log(url);
         window.location.href = url;
-        setLoggedIn(true);
-        localStorage.setItem("loggedIn", "true");
-        posthog.capture("login", { property: username });
       })
       .catch((error) => console.log(error));
   };
+
+  // If we were redirected here by the Github OAuth flow, we need to stash the
+  // username and navigate to the home page.
+  const query = new URLSearchParams(window.location.search);
+  if (query.get("gh_login") === "success") {
+    const username = query.get("username");
+    setLoggedIn(true);
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", username);
+    posthog.capture("login", { property: username });
+
+    try {
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <div className="container">
@@ -154,7 +172,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </div>
           </form>
         </div>
-            <ErrorMessage />
+        <ErrorMessage />
       </div>
     </div>
   );
