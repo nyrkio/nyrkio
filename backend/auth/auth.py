@@ -322,3 +322,8 @@ async def get_user_by_email(email):
 async def get_user(id):
     manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
     return await manager.get(id)
+
+
+@auth_router.post("/token")
+async def gen_token(user: User = Depends(current_active_user)):
+    return await jwt_backend.login(get_jwt_strategy(), user)
