@@ -69,7 +69,7 @@ const ProductSidePanel = ({ loggedIn }) => {
           Nyrkiö Change Detection
         </Link>
         <Link to="/pricing" className="nav-link">
-          Subscription levels
+          Pricing
         </Link>
         <Link to="/public" className="nav-link">
           Public Dashboards<br /> from other users
