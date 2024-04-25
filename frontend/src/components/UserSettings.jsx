@@ -2,6 +2,7 @@ import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { throttle } from "../lib/utils";
+import { Modal } from "react-bootstrap";
 
 export const UserSettings = () => {
   return (
@@ -9,6 +10,97 @@ export const UserSettings = () => {
       <div className="container">
         <HunterSettings />
         <SlackSettings />
+        <ApiKey />
+      </div>
+    </>
+  );
+};
+
+const ApiKey = () => {
+  const [apiKey, setApiKey] = useState("");
+  const [show, setShow] = useState(false);
+  const [buttonText, setButtonText] = useState("Copy");
+
+  const generateApiKey = async () => {
+    setShow(true);
+    const response = await fetch("/api/v0/auth/token", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status !== 200) {
+      console.error("Failed to generate API key");
+      console.log(response);
+      setApiKey(
+        "Failed to generate API key: " +
+          response.status +
+          " " +
+          response.statusText
+      );
+    } else {
+      const data = await response.json();
+      setApiKey(data.access_token);
+    }
+  };
+
+  const handleButtonClick = () => {
+    navigator.clipboard.writeText(apiKey);
+    setButtonText("Copied!");
+  };
+
+  const handleModalClose = () => {
+    setShow(false);
+    setButtonText("Copy");
+  };
+
+  return (
+    <>
+      <Modal show={show} onHide={handleModalClose} size="lg">
+        <Modal.Header closeButton>
+          <Modal.Title>API key</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>Your API key is:</p>
+          <div className="row">
+            <div className="col">
+              <input
+                type="text"
+                value={apiKey}
+                readOnly
+                className="form-control"
+              />
+            </div>
+            <div className="g-0 col-1">
+              <button onClick={handleButtonClick} className="btn btn-success">
+                {buttonText}
+              </button>
+            </div>
+          </div>
+        </Modal.Body>
+      </Modal>
+
+      <div className="row pt-5 justify-content-center">
+        <div className="col-md-8">
+          <div className="card">
+            <div className="card-header">API keys</div>
+            <div className="card-body"></div>
+            <div className="row">
+              <b>
+                Please make a copy of your generated API key. It cannot be
+                retrieved after closing the dialog.
+              </b>
+            </div>
+            <div className="row p-2">
+              <div className="col-6">
+                <button className="btn btn-success" onClick={generateApiKey}>
+                  Generate API key
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
@@ -43,7 +135,6 @@ const HunterSettings = () => {
     } else console.debug(response);
 
     caches.delete("nyrkio-changes");
-
   };
 
   const saveHunterSettings = throttle(saveHunterSettingsReal, 1000);

@@ -1870,3 +1870,14 @@ def test_extract_public_test_name():
 
     name = extract_public_test_name(config["attributes"])
     assert name == "nyrkio/nyrkio/main"
+
+
+def test_auth_user_generate_token(client):
+    """Ensure that a user can generate a new token"""
+    client.login()
+
+    response = client.post("/api/v0/auth/token")
+    assert response.status_code == 200
+    token = response.json()
+    assert "access_token" in token
+    assert token["token_type"] == "bearer"
