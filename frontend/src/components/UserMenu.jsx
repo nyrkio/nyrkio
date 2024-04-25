@@ -1,8 +1,6 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { Link } from "react-router-dom";
-import { is } from "unist-util-is";
 
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -39,8 +37,10 @@ export const UserMenu = ({ setLoggedIn }) => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    if (response.status !== 200) {
-      console.error("Failed to log out");
+    if (response.status !== 200 && response.status !== 204) {
+      console.error(
+        "Failed to log out: " + response.status + " " + response.statusText
+      );
     }
     setLoggedIn(false);
     localStorage.setItem("loggedIn", "false");
