@@ -23,8 +23,18 @@ class BillingInfo(BaseModel):
 
 @billing_router.post("/create-checkout-session")
 async def create_checkout_session(
-    lookup_key: Annotated[str, Form()], quantity: Annotated[int, Form()]
+    mode: str, lookup_key: Annotated[str, Form()], quantity: Annotated[int, Form()]
 ):
+    if mode != "subscription" and mode != "payment":
+        logging.error(f"Invalid checkout mode: {mode}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid checkout mode, expected 'subscription' or 'payment'",
+        )
+
+    if mode == "payment":
+        quantity = 1
+
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
@@ -35,7 +45,7 @@ async def create_checkout_session(
                     "quantity": quantity,
                 }
             ],
-            mode="subscription",
+            mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
         )
