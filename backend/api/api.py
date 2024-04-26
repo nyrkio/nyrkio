@@ -114,6 +114,13 @@ async def delete_results(user: User = Depends(auth.current_active_user)) -> List
     return []
 
 
+def _strip_last_modified(results):
+    for r in results:
+        if "last_modified" in r:
+            del r["last_modified"]
+    return results
+
+
 @api_router.get("/result/{test_name:path}")
 async def get_result(
     test_name: str, user: User = Depends(auth.current_active_user)
@@ -124,7 +131,7 @@ async def get_result(
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    return await store.get_results(user.id, test_name)
+    return _strip_last_modified(await store.get_results(user.id, test_name))
 
 
 @api_router.delete("/result/{test_name:path}")

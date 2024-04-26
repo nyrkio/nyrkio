@@ -162,7 +162,7 @@ class PerformanceTestResultSeries:
         return data
 
     async def calculate_changes(self, notifiers=None):
-        change_points = await self.calculate_change_points()
+        change_points = self.calculate_change_points()
         reports = await self.produce_reports(change_points, notifiers)
         return reports
 

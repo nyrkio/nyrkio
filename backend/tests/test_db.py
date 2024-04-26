@@ -64,6 +64,9 @@ def test_add_single_result():
     ]
     asyncio.run(store.add_results(user.id, "benchmark1", results))
     response = asyncio.run(store.get_results(user.id, "benchmark1"))
+    # get_results should return the last_modified field, but its content isn't constant
+    # so we remove it from the assertion. (So this is instead of mocking...)
+    del response[0]["last_modified"]
     assert results == response
 
 
@@ -129,6 +132,9 @@ def test_default_data_for_new_user():
     # Lookup the data for benchmark1
     results = asyncio.run(store.get_results(user.id, "default_benchmark"))
     assert len(results) == 1
+    # get_results should return the last_modified field, but its content isn't constant
+    # so we remove it from the assertion. (So this is instead of mocking...)
+    del results[0]["last_modified"]
     assert results == [MockDBStrategy.DEFAULT_DATA]
 
 
@@ -558,6 +564,9 @@ def test_delete_result():
     asyncio.run(store.add_results(user.id, test_name, results))
 
     response = asyncio.run(store.get_results(user.id, test_name))
+    # get_results should return the last_modified field, but its content isn't constant
+    # so we remove it from the assertion. (So this is instead of mocking...)
+    del response[0]["last_modified"]
     assert response == results
 
     asyncio.run(store.delete_result(user.id, test_name, None))
@@ -599,6 +608,9 @@ def test_delete_result_by_org():
     asyncio.run(store.add_results(org_id, test_name, results))
 
     response = asyncio.run(store.get_results(org_id, test_name))
+    # get_results should return the last_modified field, but its content isn't constant
+    # so we remove it from the assertion. (So this is instead of mocking...)
+    del response[0]["last_modified"]
     assert response == results
 
     asyncio.run(store.delete_result(org_id, test_name, None))

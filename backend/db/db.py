@@ -458,6 +458,8 @@ class DBStore(object):
         """
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
+        # For default data we don't use caching and nobody needs last_modified
+        exclude_projection["last_modified"] = 0
 
         # TODO(matt) We should read results in batches, not all at once
         default_data = self.db.default_data

@@ -69,7 +69,10 @@ def test_add_result(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -97,7 +100,10 @@ def test_add_multiple_test_results_at_once(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -106,7 +112,10 @@ def test_add_multiple_test_results_at_once(client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -134,7 +143,10 @@ def test_add_multiple_tests(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -165,7 +177,10 @@ def test_delete_all_user_results(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -174,7 +189,10 @@ def test_delete_all_user_results(client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -207,7 +225,10 @@ def test_delete_single_result(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -216,7 +237,10 @@ def test_delete_single_result(client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 2.0, "metric2": 3.0}],
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -225,7 +249,10 @@ def test_delete_single_result(client):
         },
         {
             "timestamp": 3,
-            "metrics": [{"metric1": 3.0, "metric2": 4.0}],
+            "metrics": [
+                {"name": "metric1", "value": 3.0, "unit": "ms"},
+                {"name": "metric2", "value": 4.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -437,7 +464,9 @@ def test_disable_change_detection_for_metric(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert not data["benchmark1"]
+    assert data["benchmark1"]
+    assert len(data["benchmark1"][0]["changes"]) == 1
+    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
 
 
 def test_disable_and_reenable_changes_for_metrics(client):
@@ -508,7 +537,9 @@ def test_disable_and_reenable_changes_for_metrics(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert not data["benchmark1"]
+    assert data["benchmark1"]
+    assert len(data["benchmark1"][0]["changes"]) == 1
+    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
 
     # Re-enable change detection for metric2
     response = client.post("/api/v0/result/benchmark1/changes/enable", json=["metric2"])
@@ -602,7 +633,9 @@ def test_enable_change_for_empty_metrics_succeeds(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert not data["benchmark1"]
+    assert data["benchmark1"]
+    assert len(data["benchmark1"][0]["changes"]) == 1
+    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
 
     # enable change detection for all metrics
     response = client.post("/api/v0/result/benchmark1/changes/enable", json=[])
@@ -852,7 +885,10 @@ def test_create_test_result_with_slash_separator(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -875,7 +911,10 @@ def test_create_test_result_with_slash_separator_and_get_all_results(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1013,7 +1052,9 @@ def test_disable_changes_for_test_with_slashes(client):
     json = response.json()
     assert json
     assert "benchmark1/test" in json
-    assert not json["benchmark1/test"]
+    assert json["benchmark1/test"]
+    assert len(json["benchmark1/test"][0]["changes"]) == 1
+    assert json["benchmark1/test"][0]["changes"][0]["forward_change_percent"] == 900.0
 
 
 def test_disable_reenable_changes_for_test_with_slashes(client):
@@ -1081,7 +1122,9 @@ def test_disable_reenable_changes_for_test_with_slashes(client):
     json = response.json()
     assert json
     assert "benchmark1/test" in json
-    assert not json["benchmark1/test"]
+    assert json["benchmark1/test"]
+    assert len(json["benchmark1/test"][0]["changes"]) == 1
+    assert json["benchmark1/test"][0]["changes"][0]["forward_change_percent"] == 900.0
 
     # Re-enable change detection for metric2
     response = client.post(
@@ -1106,7 +1149,10 @@ def test_delete_test_name_with_slashes(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1212,7 +1258,10 @@ def test_superuser_can_see_all_test_results(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1249,7 +1298,10 @@ def test_get_results_for_users_test(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1331,7 +1383,10 @@ def test_mark_results_as_public(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1372,7 +1427,10 @@ def test_results_have_no_config_by_default(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1396,7 +1454,10 @@ def test_mark_results_as_private(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1550,7 +1611,10 @@ def test_public_test_results(client, unauthenticated_client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1615,7 +1679,10 @@ def test_only_one_user_can_make_a_test_public(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1689,7 +1756,10 @@ def test_same_test_name_different_repos(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -1698,7 +1768,10 @@ def test_same_test_name_different_repos(client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio2",
                 "branch": "main",
@@ -1771,7 +1844,10 @@ def test_extra_info(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -1811,7 +1887,9 @@ def test_public_result_exists(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
