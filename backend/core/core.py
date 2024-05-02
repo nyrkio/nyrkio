@@ -1,15 +1,15 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timezone
 import json
-from typing import List
+from typing import List, Dict
 import httpx
 import logging
 from sortedcontainers import SortedList
 
 from hunter.report import Report, ReportType
-from hunter.series import Series, AnalysisOptions
+from hunter.series import Series, AnalysisOptions, AnalyzedSeries
 
 from backend.core.sieve import sieve_cache
 from backend.core.config import Config
@@ -69,11 +69,42 @@ class PerformanceTestResultSeries:
     def __init__(self, name, config=None):
         self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
+        self._last_modified = datetime.now(tz=timezone.utc)
 
         if not config:
             config = Config()
 
         self.config = config
+
+    def last_modified(self):
+        return self._last_modified
+
+    def touch(self, timestamp=None):
+        """
+        Used to identify a specific Series.
+
+        Should be called whenever a result is added, updated or deleted.
+
+        Caching pre-computed change points depends on this.
+        """
+        self._last_modified = (
+            datetime.now(tz=timezone.utc) if timestamp is None else timestamp
+        )
+
+    def get_series_id(self):
+        """
+        Return an id that can be used to compare this series to others.
+
+        In particular, we want to assert with reasonable certainty whether some cached change points
+        are valid for this series, or whether we need to invalidate cache and re-compute cp's for
+        this series.
+        """
+        return (
+            self.name,
+            self.config.max_pvalue,
+            self.config.min_magnitude,
+            self.last_modified(),
+        )
 
     def add_result(self, result: PerformanceTestResult):
         """
@@ -87,6 +118,7 @@ class PerformanceTestResultSeries:
         if result in self.results:
             raise PerformanceTestResultExistsError()
 
+        self.touch()
         self.results.add(result)
 
     def delete_result(self, timestamp):
@@ -95,6 +127,7 @@ class PerformanceTestResultSeries:
 
         If the result does not exist, do nothing.
         """
+        self.touch()
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
     class SingleMetricSeries:
@@ -104,37 +137,47 @@ class PerformanceTestResultSeries:
             self.metric_unit = None
             self.metric_data = []
 
-        def add_result(self, timestamp, metric, attributes):
+        def add_result(self, timestamp, result_metric, attributes):
             self.timestamps.append(timestamp)
-            self.metric_unit = metric.unit
-            self.metric_data.append(metric.value)
+            self.metric_unit = result_metric.unit
+            self.metric_name = result_metric.name
+            self.metric_data.append(result_metric.value)
             for k, v in attributes.items():
                 self.attributes[k].append(v)
 
-    async def calculate_changes(self, notifiers=None):
+    def per_metric_series(self) -> Dict[str, SingleMetricSeries]:
         # TODO(mfleming) Instead of building this dict here we should refactor
         # PerformanceTestResultSeries to store the data in this way, i.e. by
         # metric name, when we add results.
         data = {}
         for r in self.results:
-            for m in r.metrics:
-                if m.name not in data:
-                    s = data[m.name] = PerformanceTestResultSeries.SingleMetricSeries()
+            for rm in r.metrics:
+                if rm.name not in data:
+                    s = data[rm.name] = PerformanceTestResultSeries.SingleMetricSeries()
                 else:
-                    s = data[m.name]
+                    s = data[rm.name]
 
-                s.add_result(r.timestamp, m, r.attributes)
+                s.add_result(r.timestamp, rm, r.attributes)
 
+        return data
+
+    async def calculate_changes(self, notifiers=None):
+        change_points = self.calculate_change_points()
+        reports = await self.produce_reports(change_points, notifiers)
+        return reports
+
+    def calculate_change_points(self) -> Dict[str, AnalyzedSeries]:
+        data = self.per_metric_series()
         # Hunter has the ability to analyze multiple series at once but requires
         # that all series have the same number of data points (timestamps,
         # metric values, etc).  This isn't always true for us, for example when
         # a user only recently started collecting data for a new metric. So we
         # analyze each series separately.
-        reports = []
-        for name, m in data.items():
+        all_change_points = {}
+        for metric_name, m in data.items():
             metric_timestamps = m.timestamps
-            metric_units = {name: m.metric_unit}
-            metric_data = {name: m.metric_data}
+            metric_units = {metric_name: m.metric_unit}
+            metric_data = {metric_name: m.metric_data}
             attributes = m.attributes
             series = Series(
                 self.name,
@@ -150,8 +193,17 @@ class PerformanceTestResultSeries:
             options.max_pvalue = self.config.max_pvalue
 
             analyzed_series = series.analyze(options)
+            all_change_points[metric_name] = analyzed_series
+
+        return all_change_points
+
+    async def produce_reports(
+        self, all_change_points: Dict[str, AnalyzedSeries], notifiers: list
+    ) -> list:
+        reports = []
+        for metric_name, analyzed_series in all_change_points.items():
             change_points = analyzed_series.change_points_by_time
-            report = GitHubReport(m, change_points)
+            report = GitHubReport(analyzed_series.metric(metric_name), change_points)
             produced_report = await report.produce_report(self.name, ReportType.JSON)
             reports.append(json.loads(produced_report))
 

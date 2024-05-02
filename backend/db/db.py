@@ -2,9 +2,10 @@
 
 from abc import abstractmethod, ABC
 from collections import OrderedDict
+from datetime import datetime, timezone
 import logging
 import os
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
@@ -13,6 +14,8 @@ from beanie import Document, PydanticObjectId, init_beanie
 from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
 from fastapi_users import schemas
 from pydantic import Field
+
+from hunter.series import AnalyzedSeries
 
 
 class OAuthAccount(BaseOAuthAccount):
@@ -253,6 +256,7 @@ class DBStore(object):
           id -> The ID of the user who created the document. Can also be a GitHub org ID
           version -> The version of the schema for the document
           test_name -> The name of the test
+          last_modified -> UTC timestamp. Used to reference a specific Series matched with pre-computed change points.
 
         We also build a primary key from the git_repo, branch, git_commit,
         test_name, timestamp, and user ID. If any of the keys are missing,
@@ -300,6 +304,7 @@ class DBStore(object):
         d["user_id"] = id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
+        d["last_modified"] = datetime.now(tz=timezone.utc)
         return d
 
     async def add_results(self, id: Any, test_name: str, results: List[Dict]):
@@ -335,6 +340,7 @@ class DBStore(object):
         test_results = self.db.test_results
 
         # Strip out the internal keys
+        # Note: last_modified is returned to the caller, but not to the user / not to HTTP
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
@@ -348,16 +354,29 @@ class DBStore(object):
 
         return results
 
-    async def get_test_names(self, id: Any = None) -> Any:
+    async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
         Get a list of all test names for a given user. If id is None then
         return a dictionary of all test names for all users.
+
+        If test_name_prefix is specified, returns the subset of names (paths, really) where the
+        beginning of the test name matches the test_name_prefix.
 
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
         if id:
-            return await test_results.distinct("test_name", {"user_id": id})
+            test_names = await test_results.distinct("test_name", {"user_id": id})
+            # TODO: I was just refactoring existing code here, but the below could actually be
+            # pushed into the MongoDB query.
+            if test_name_prefix:
+                prfx_len = len(test_name_prefix)
+                test_names = list(
+                    filter(lambda name: name[:prfx_len] == test_name_prefix, test_names)
+                )
+
+            return test_names
+
         else:
             results = await test_results.aggregate(
                 [
@@ -439,6 +458,8 @@ class DBStore(object):
         """
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
+        # For default data we don't use caching and nobody needs last_modified
+        exclude_projection["last_modified"] = 0
 
         # TODO(matt) We should read results in batches, not all at once
         default_data = self.db.default_data
@@ -500,7 +521,7 @@ class DBStore(object):
             "metric_name", {"user_id": id, "test_name": test_name}
         )
 
-    async def get_user_config(self, id: Any):
+    async def get_user_config(self, user_id: Any):
         """
         Get the user's (or organization) configuration.
 
@@ -508,7 +529,7 @@ class DBStore(object):
         """
         exclude_projection = {"_id": 0, "user_id": 0}
         user_config = self.db.user_config
-        config = await user_config.find_one({"user_id": id}, exclude_projection)
+        config = await user_config.find_one({"user_id": user_id}, exclude_projection)
 
         return config if config else {}
 
@@ -599,6 +620,71 @@ class DBStore(object):
             .sort("attributes, test_name")
             .to_list(None)
         )
+
+    async def persist_change_points(
+        self,
+        change_points: Dict[str, AnalyzedSeries],
+        id: str,
+        series_id_tuple: Tuple[str, float, float, Any],
+    ):
+        change_points_json = {}
+        for metric_name, analyzed_series in change_points.items():
+            assert analyzed_series.test_name() == series_id_tuple[0]
+            change_points_json[metric_name] = analyzed_series.to_json()
+
+        primary_key = OrderedDict(
+            {
+                "user_id": id,
+                "test_name": series_id_tuple[0],
+                "max_pvalue": series_id_tuple[1],
+                "min_magnitude": series_id_tuple[2],
+            }
+        )
+        series_last_modified = series_id_tuple[3]
+        doc = {
+            "_id": primary_key,
+            "series_last_modified": series_last_modified,
+            "change_points": change_points_json,
+        }
+
+        collection = self.db.change_points
+        await collection.update_one({"_id": primary_key}, {"$set": doc}, upsert=True)
+
+    async def get_change_points(
+        self, id: str, series_id_tuple: Tuple[str, float, float, Any]
+    ):
+        collection = self.db.change_points
+
+        primary_key = OrderedDict(
+            {
+                "user_id": id,
+                "test_name": series_id_tuple[0],
+                "max_pvalue": series_id_tuple[1],
+                "min_magnitude": series_id_tuple[2],
+            }
+        )
+
+        results = await collection.find({"_id": primary_key}).to_list(None)
+        assert len(results) <= 1
+
+        if len(results) == 0:
+            # Nothing was cached
+            return None
+
+        doc = results[0]
+        if not (
+            "series_last_modified" in doc
+            and isinstance(doc["series_last_modified"], datetime)
+        ):
+            raise DBStoreMissingRequiredKeys()
+
+        if doc["series_last_modified"] < series_id_tuple[3]:
+            # Cached result is outdated
+            # TODO(henrik): Maybe log something? This should mostly not happen and will require
+            # cleanup if it does a lot.
+            return None
+
+        return doc
 
 
 # Will be patched by conftest.py if we're running tests

@@ -1,6 +1,7 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 from typing import Dict, List, Union
+from datetime import datetime
 
 from backend.core.core import (
     PerformanceTestResult,
@@ -21,6 +22,8 @@ from backend.api.public import public_router
 from backend.api.user import user_router
 from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
 from backend.notifiers.slack import SlackNotifier
+
+from hunter.series import AnalyzedSeries
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -63,24 +66,38 @@ async def changes(
     store = DBStore()
     results = await store.get_results(user.id, test_name)
     disabled = await store.get_disabled_metrics(user.id, test_name)
-
+    core_config = await _get_user_config(user.id)
     config = await store.get_user_config(user.id)
-    core_config = config.get("core", None)
-    if core_config:
-        core_config = Config(**core_config)
+    notifiers = await _get_notifiers(notify, config, user)
+    return await calc_changes(
+        test_name, results, disabled, core_config, notifiers, user
+    )
 
-    notifiers = []
-    if notify:
-        slack = config.get("slack", {})
-        if slack and slack.get("channel"):
-            if not user.slack:
-                raise HTTPException(status_code=400, detail="Slack not configured")
 
-            url = user.slack["incoming_webhook"]["url"]
-            channel = slack["channel"]
-            notifiers.append(SlackNotifier(url, [channel]))
-
-    return await calc_changes(test_name, results, disabled, core_config, notifiers)
+# @api_router.get("/result/{test_name_prefix:path}/summary")
+# async def get_subtree_summary(
+#     test_name_prefix: str, user: User = Depends(auth.current_active_user)
+# ) -> Dict:
+#     """
+#     Get all change points for all test results that are in the sub-tree of `test_name_prefix` and
+#     return a summary of that data.
+#
+#     The UI would use this information to show something like "project: 57 change points, the latest
+#     on 2024-04-20".
+#
+#     Note that for this feature we have added pre-computation and storage of change points.
+#     Without such pre-compute, we would here constantly be re-computing all test results of the user!
+#     """
+#     subtree_test_names = await store.get_test_names(user.id, test_name_prefix)
+#
+#     if not subtree_test_names:
+#         raise HTTPException(status_code=404, detail="Not Found")
+#
+#     core_config = await _get_user_config(user.id)
+#
+#     for test_name in subtree_test_names:
+#         change_points = await calc_changes(test_name, results, core_config=core_config)
+#         subtree_changes[test_name] = change_points
 
 
 @api_router.get("/results")
@@ -97,6 +114,13 @@ async def delete_results(user: User = Depends(auth.current_active_user)) -> List
     return []
 
 
+def _strip_last_modified(results):
+    for r in results:
+        if "last_modified" in r:
+            del r["last_modified"]
+    return results
+
+
 @api_router.get("/result/{test_name:path}")
 async def get_result(
     test_name: str, user: User = Depends(auth.current_active_user)
@@ -107,7 +131,7 @@ async def get_result(
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    return await store.get_results(user.id, test_name)
+    return _strip_last_modified(await store.get_results(user.id, test_name))
 
 
 @api_router.delete("/result/{test_name:path}")
@@ -149,16 +173,44 @@ async def add_result(
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail="Invalid data")
-    return {}
+
+    # Compute the change points and persist the result so they are cheap to GET later.
+    # Since we compute them after POSTing them, may as well return the results to the user.
+    return await changes(test_name, notify=1, user=user)
+    # return {}
 
 
-async def calc_changes(
-    test_name, results, disabled=None, core_config=None, notifiers=None
+async def cache_changes(
+    changes: Dict[str, AnalyzedSeries], user: User, series: PerformanceTestResultSeries
 ):
+    store = DBStore()
+    await store.persist_change_points(changes, user.id, series.get_series_id())
+
+
+async def get_cached_or_calc_changes(user: User, series: PerformanceTestResultSeries):
+    if user is None:
+        # We only cache change points for logged in users
+        return series.calculate_change_points()
+
+    store = DBStore()
+    cached_cp = await store.get_change_points(user.id, series.get_series_id())
+    changes = {}
+    if cached_cp is not None:
+        for metric_name, analyzed_json in cached_cp["change_points"].items():
+            changes[metric_name] = AnalyzedSeries.from_json(analyzed_json)
+
+    else:
+        changes = series.calculate_change_points()
+        await cache_changes(changes, user, series)
+    return changes
+
+
+def _build_result_series(test_name, results, disabled=None, core_config=None):
     series = PerformanceTestResultSeries(test_name, core_config)
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.
+    last_mod_timestamps = [datetime(1970, 1, 1, 0, 0, 0, 0)]
     for r in results:
         metrics = []
         for m in r["metrics"]:
@@ -168,13 +220,24 @@ async def calc_changes(
 
             rm = ResultMetric(name=m["name"], unit=m["unit"], value=m["value"])
             metrics.append(rm)
+            last_mod_timestamps.append(r["last_modified"])
 
         result = PerformanceTestResult(
             timestamp=r["timestamp"], metrics=metrics, attributes=r["attributes"]
         )
         series.add_result(result)
 
-    return await series.calculate_changes(notifiers)
+    series.touch(max(last_mod_timestamps))
+    return series
+
+
+async def calc_changes(
+    test_name, results, disabled=None, core_config=None, notifiers=None, user=None
+):
+    series = _build_result_series(test_name, results, disabled, core_config)
+    changes = await get_cached_or_calc_changes(user, series)
+    reports = await series.produce_reports(changes, notifiers)
+    return reports
 
 
 @api_router.get("/default/results")
@@ -212,3 +275,26 @@ async def do_db():
     from backend.db.db import do_on_startup
 
     await do_on_startup()
+
+
+async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> list:
+    notifiers = []
+    if notify:
+        slack = config.get("slack", {})
+        if slack and slack.get("channel"):
+            if not user.slack:
+                raise HTTPException(status_code=400, detail="Slack not configured")
+
+            url = user.slack["incoming_webhook"]["url"]
+            channel = slack["channel"]
+            notifiers.append(SlackNotifier(url, [channel]))
+    return notifiers
+
+
+async def _get_user_config(user_id: str):
+    store = DBStore()
+    config = await store.get_user_config(user_id)
+    core_config = config.get("core", None)
+    if core_config:
+        core_config = Config(**core_config)
+    return core_config
