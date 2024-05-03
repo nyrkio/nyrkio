@@ -55,24 +55,21 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    results = await store.get_results(org["id"], test_name)
-    disabled = await store.get_disabled_metrics(org["id"], test_name)
-
-    config = await store.get_user_config(org["id"])
+    config, _ = await store.get_user_config(org["id"])
     core_config = config.get("core", None)
     if core_config:
         core_config = Config(**core_config)
 
     from backend.api.api import calc_changes
 
-    return await calc_changes(test_name, results, disabled, core_config, [])
+    return await calc_changes(test_name, org["id"])
 
 
 @org_router.get("/result/{test_name:path}")
 async def results(
     test_name: str,
     user: User = Depends(auth.current_active_user),
-) -> List[Dict]:
+) -> Union[List[Dict], List]:
     user_orgs = get_user_orgs(user)
     org = get_org_with_raise(user_orgs, test_name.split("/")[0])
     store = DBStore()
@@ -81,7 +78,8 @@ async def results(
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    return await store.get_results(org["id"], test_name)
+    results, _ = await store.get_results(org["id"], test_name)
+    return results if results else []
 
 
 @org_router.post("/result/{test_name:path}")
@@ -176,7 +174,7 @@ async def set_config(
     conf["test_name"] = test_name
     name = build_public_test_name(conf)
 
-    public_tests = await store.get_public_results()
+    public_tests, meta = await store.get_public_results()
     public_test_names = [build_public_test_name(p) for p in public_tests]
 
     if conf["public"] and name in public_test_names:
@@ -201,7 +199,7 @@ async def get_config(
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    config = await store.get_test_config(org_id, test_name)
+    config, _ = await store.get_test_config(org_id, test_name)
     return config
 
 
@@ -233,7 +231,7 @@ async def get_org_config(
     org = get_org_with_raise(user_orgs, org_name)
 
     store = DBStore()
-    config = await store.get_user_config(org["id"])
+    config, _ = await store.get_user_config(org["id"])
     return config
 
 

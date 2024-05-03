@@ -1,7 +1,6 @@
 from typing import Dict, List
 from fastapi import APIRouter, HTTPException
 
-from backend.core.config import Config
 from backend.db.db import DBStore
 
 """
@@ -33,8 +32,10 @@ public_router = APIRouter(prefix="/public")
 @public_router.get("/results")
 async def results() -> List[Dict]:
     store = DBStore()
-    results = await store.get_public_results()
-    return [{"test_name": build_public_test_name(r)} for r in results]
+    data, meta = await store.get_public_results()
+    if not data:
+        return []
+    return [{"test_name": build_public_test_name(r)} for r in data]
 
 
 @public_router.get("/result/{test_name:path}/changes")
@@ -44,21 +45,15 @@ async def changes(test_name: str):
     if not test_entry:
         raise HTTPException(status_code=404, detail="No such test exists")
 
-    id = test_entry["user_id"]
-    if is_user_id(id):
+    user_id = test_entry["user_id"]
+    if is_user_id(user_id):
         test_name = test_entry["test_name"]
 
-    results = await store.get_results(id, test_name)
-    disabled = await store.get_disabled_metrics(id, test_name)
-
-    config = await store.get_user_config(id)
-    core_config = config.get("core", None)
-    if core_config:
-        core_config = Config(**core_config)
+    config, _ = await store.get_user_config(user_id)
 
     from backend.api.api import calc_changes
 
-    return await calc_changes(test_name, results, disabled, core_config, [])
+    return await calc_changes(test_name, user_id)
 
 
 @public_router.get("/result/{test_name:path}")
@@ -72,11 +67,14 @@ async def get_result(test_name: str) -> List[Dict]:
     if is_user_id(id):
         test_name = test_entry["test_name"]
 
-    return await store.get_results(id, test_name)
+    data, _ = await store.get_results(id, test_name)
+    return data
 
 
+# TODO(Henrik): Add a query to `store` where we use test_name in the query, not here
 async def lookup_public_test(store, test_name):
-    results = await store.get_public_results()
+    results, _ = await store.get_public_results()
+    print(results)
     for r in results:
         if build_public_test_name(r) == test_name:
             return r

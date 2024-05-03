@@ -5,7 +5,7 @@ from collections import OrderedDict
 from datetime import datetime, timezone
 import logging
 import os
-from typing import Dict, List, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Union, Optional, Any
 
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
@@ -57,6 +57,9 @@ class ConnectionStrategy(ABC):
 
     async def init_db(self):
         pass
+
+
+NULL_DATETIME = datetime(1970, 1, 1, 0, 0, 0, 0)
 
 
 class MongoDBStrategy(ConnectionStrategy):
@@ -304,7 +307,7 @@ class DBStore(object):
         d["user_id"] = id
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
-        d["last_modified"] = datetime.now(tz=timezone.utc)
+        d["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
         return d
 
     async def add_results(self, id: Any, test_name: str, results: List[Dict]):
@@ -330,17 +333,18 @@ class DBStore(object):
 
                 raise DBStoreResultExists(duplicate_key)
 
-    async def get_results(self, id: Any, test_name: str) -> List[Dict]:
+    async def get_results(
+        self, id: Any, test_name: str
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Retrieve test results for a given user and test name. The results are
         guaranteed to be sorted by timestamp in ascending order.
 
-        If no results are found, return an empty list.
+        If no results are found, return (None,None).
         """
         test_results = self.db.test_results
 
         # Strip out the internal keys
-        # Note: last_modified is returned to the caller, but not to the user / not to HTTP
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
@@ -352,7 +356,7 @@ class DBStore(object):
             .to_list(None)
         )
 
-        return results
+        return separate_meta(results)
 
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
@@ -443,7 +447,7 @@ class DBStore(object):
         test_name = default_results[0]["test_name"]
         await self.add_results(user.id, test_name, default_results)
 
-    async def get_default_test_names(self):
+    async def get_default_test_names(self) -> List[str]:
         """
         Get a list of all test names for the default data.
 
@@ -452,19 +456,17 @@ class DBStore(object):
         default_data = self.db.default_data
         return await default_data.distinct("test_name")
 
-    async def get_default_data(self, test_name):
+    async def get_default_data(self, test_name) -> Tuple[List[Dict], List[Dict]]:
         """
         Get the default data for a new user.
         """
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
-        # For default data we don't use caching and nobody needs last_modified
-        exclude_projection["last_modified"] = 0
 
         # TODO(matt) We should read results in batches, not all at once
         default_data = self.db.default_data
         cursor = default_data.find({"test_name": test_name}, exclude_projection)
-        return await cursor.sort("timestamp").to_list(None)
+        return separate_meta(await cursor.sort("timestamp").to_list(None))
 
     #
     # Change detection can be disabled for metrics on a per-user (or per-org),
@@ -521,7 +523,7 @@ class DBStore(object):
             "metric_name", {"user_id": id, "test_name": test_name}
         )
 
-    async def get_user_config(self, user_id: Any):
+    async def get_user_config(self, user_id: Any) -> Tuple[Dict, Dict]:
         """
         Get the user's (or organization) configuration.
 
@@ -530,8 +532,10 @@ class DBStore(object):
         exclude_projection = {"_id": 0, "user_id": 0}
         user_config = self.db.user_config
         config = await user_config.find_one({"user_id": user_id}, exclude_projection)
-
-        return config if config else {}
+        if config:
+            return separate_meta(config)
+        else:
+            return {}, None
 
     async def set_user_config(self, id: Any, config: Dict):
         """
@@ -541,7 +545,9 @@ class DBStore(object):
         ensure that the configuration is valid.
         """
         user_config = self.db.user_config
-        await user_config.update_one({"user_id": id}, {"$set": config}, upsert=True)
+        editable = dict(config)
+        editable["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
+        await user_config.update_one({"user_id": id}, {"$set": editable}, upsert=True)
 
     async def delete_user_config(self, id: Any):
         """
@@ -552,11 +558,11 @@ class DBStore(object):
         user_config = self.db.user_config
         await user_config.delete_one({"user_id": id})
 
-    async def get_test_config(self, id: Any, test_name: str) -> List[Dict]:
+    async def get_test_config(self, id: Any, test_name: str) -> Tuple[Dict, Dict]:
         """
         Get the test's configuration.
 
-        If the test has no configuration, return an empty list.
+        If the test has no configuration, return (None,None).
         """
         exclude_projection = {"_id": 0, "test_name": 0, "user_id": 0}
         test_config = self.db.test_config
@@ -564,7 +570,8 @@ class DBStore(object):
             {"user_id": id, "test_name": test_name}, exclude_projection
         ).to_list(None)
 
-        return config if config else []
+        print(config)
+        return separate_meta(config)
 
     async def set_test_config(self, id: Any, test_name: str, config: List[Dict]):
         """
@@ -592,6 +599,7 @@ class DBStore(object):
             c["_id"] = primary_key
             c["user_id"] = id
             c["test_name"] = test_name
+            c["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
             internal_configs.append(c)
 
         # Perform an upsert
@@ -607,7 +615,7 @@ class DBStore(object):
         test_config = self.db.test_config
         await test_config.delete_many({"user_id": id, "test_name": test_name})
 
-    async def get_public_results(self) -> List[Dict]:
+    async def get_public_results(self) -> Tuple[List[Dict], List[Dict]]:
         """
         Get all public results.
 
@@ -615,11 +623,12 @@ class DBStore(object):
         """
         test_configs = self.db.test_config
         exclude_projection = {"_id": 0}
-        return (
+        results = (
             await test_configs.find({"public": True}, exclude_projection)
             .sort("attributes, test_name")
             .to_list(None)
         )
+        return separate_meta(results)
 
     async def persist_change_points(
         self,
@@ -643,7 +652,7 @@ class DBStore(object):
         series_last_modified = series_id_tuple[3]
         doc = {
             "_id": primary_key,
-            "series_last_modified": series_last_modified,
+            "meta": {"last_modified": series_last_modified},
             "change_points": change_points_json,
         }
 
@@ -652,7 +661,7 @@ class DBStore(object):
 
     async def get_change_points(
         self, id: str, series_id_tuple: Tuple[str, float, float, Any]
-    ):
+    ) -> Tuple[List[Dict], List[Dict]]:
         collection = self.db.change_points
 
         primary_key = OrderedDict(
@@ -669,22 +678,20 @@ class DBStore(object):
 
         if len(results) == 0:
             # Nothing was cached
-            return None
+            return None, None
 
-        doc = results[0]
-        if not (
-            "series_last_modified" in doc
-            and isinstance(doc["series_last_modified"], datetime)
+        data, meta = separate_meta(results[0])
+
+        # Changing pvalue or any other parameter of the algorithm invalidates the user's cache
+        user_config, user_meta = await self.get_user_config(id)
+        if (
+            meta is None
+            or user_meta is None
+            or meta["last_modified"] < user_meta["last_modified"]
         ):
-            raise DBStoreMissingRequiredKeys()
+            return [], []
 
-        if doc["series_last_modified"] < series_id_tuple[3]:
-            # Cached result is outdated
-            # TODO(henrik): Maybe log something? This should mostly not happen and will require
-            # cleanup if it does a lot.
-            return None
-
-        return doc
+        return data, meta
 
 
 # Will be patched by conftest.py if we're running tests
@@ -696,3 +703,39 @@ async def do_on_startup():
     strategy = MockDBStrategy() if _TESTING else MongoDBStrategy()
     store.setup(strategy)
     await store.startup()
+
+
+def separate_meta(doc: Union[Dict, List[Dict]]) -> None:
+    """
+    Split user data and metadata fields and return both.
+
+    The metadata part contains fields that shouldn't be returned outside the HTTP API. (api.py)
+    """
+    if isinstance(doc, list):
+        if len(doc) == 0:
+            return [], []
+
+        d = dict(doc[-1])  # copy the dict
+        _validate_meta(d)
+        m = d["meta"]
+        del d["meta"]
+        if len(doc) > 1:
+            data, meta = separate_meta(doc[:-1])
+            data.append(d), meta.append(m)
+            return data, meta
+        else:
+            return [d], [m]
+
+    _validate_meta(dict(doc))
+    meta = doc["meta"]
+    del doc["meta"]
+    return doc, meta
+
+
+def _validate_meta(doc: Union[dict, list]) -> None:
+    if not (
+        "meta" in doc
+        and "last_modified" in doc["meta"]
+        and isinstance(doc["meta"]["last_modified"], datetime)
+    ):
+        raise DBStoreMissingRequiredKeys(["meta.last_modified"])

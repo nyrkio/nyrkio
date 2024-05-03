@@ -13,6 +13,7 @@ from hunter.series import Series, AnalysisOptions, AnalyzedSeries
 
 from backend.core.sieve import sieve_cache
 from backend.core.config import Config
+from backend.db.db import NULL_DATETIME
 
 """
 This is a description of the core logic of Nyrkiö. It is written in such a way
@@ -59,17 +60,24 @@ class ResultMetric:
 
 
 class PerformanceTestResult:
-    def __init__(self, timestamp, metrics: List[ResultMetric], attributes):
+    def __init__(
+        self, timestamp, metrics: List[ResultMetric], attributes, last_modified=None
+    ):
         self.timestamp = timestamp
         self.metrics = metrics
         self.attributes = attributes
+
+        if last_modified is None:
+            last_modified = datetime.now(tz=timezone.utc)
+        if not isinstance(last_modified, datetime):
+            raise ValueError("last_modified must be of type datetime.")
+        self._last_modified = last_modified
 
 
 class PerformanceTestResultSeries:
     def __init__(self, name, config=None):
         self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
-        self._last_modified = datetime.now(tz=timezone.utc)
 
         if not config:
             config = Config()
@@ -77,19 +85,10 @@ class PerformanceTestResultSeries:
         self.config = config
 
     def last_modified(self):
-        return self._last_modified
+        if not self.results:
+            return NULL_DATETIME
 
-    def touch(self, timestamp=None):
-        """
-        Used to identify a specific Series.
-
-        Should be called whenever a result is added, updated or deleted.
-
-        Caching pre-computed change points depends on this.
-        """
-        self._last_modified = (
-            datetime.now(tz=timezone.utc) if timestamp is None else timestamp
-        )
+        return max([result._last_modified for result in self.results])
 
     def get_series_id(self):
         """
@@ -118,7 +117,6 @@ class PerformanceTestResultSeries:
         if result in self.results:
             raise PerformanceTestResultExistsError()
 
-        self.touch()
         self.results.add(result)
 
     def delete_result(self, timestamp):
@@ -127,7 +125,6 @@ class PerformanceTestResultSeries:
 
         If the result does not exist, do nothing.
         """
-        self.touch()
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
     class SingleMetricSeries:
