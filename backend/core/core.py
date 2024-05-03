@@ -209,6 +209,12 @@ class GitHubRateLimitExceededError(Exception):
         return f"GitHub API rate limit exceeded: {self.used}/{self.limit} reqs used. Resets at {timestamp}"
 
 
+# If we hit the GitHub API rate limit, we should stop fetching for a while
+# before retrying. This is a simple way to avoid hammering the API.
+#
+# The timestamp represents the time at which we should re-enable fetching.
+GH_FETCH_RESET_TIMESTAMP = 0
+
 # The assumption is that the first line of a commit message is typically 80
 # characters or less. So storing 16K entries means this cache will use about
 # 1.2MiB of memory. This is an important cache.
@@ -223,8 +229,13 @@ async def cached_get(repo, commit):
 
     On cache miss, if the HTTP request fails then nothing is added to the cache.
 
-    If we exceed the GitHub API rate limit, raise a GitHubRateLimitExceededError.
+    If we exceed the GitHub API rate limit, raise a GitHubRateLimitExceededError and
+    disable fetching until the rate limit resets.
     """
+    global GH_FETCH_RESET_TIMESTAMP
+    if GH_FETCH_RESET_TIMESTAMP > datetime.now().timestamp():
+        return
+
     commit_msg = None
     client = httpx.AsyncClient()
     response = await client.get(f"https://api.github.com/repos/{repo}/commits/{commit}")
@@ -243,6 +254,7 @@ async def cached_get(repo, commit):
             used = response.headers.get("x-ratelimit-used")
             limit = response.headers.get("x-ratelimit-limit")
             reset = response.headers.get("x-ratelimit-reset")
+            GH_FETCH_RESET_TIMESTAMP = int(reset)
             raise GitHubRateLimitExceededError(used, limit, reset)
 
     return commit_msg
