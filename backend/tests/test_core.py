@@ -147,9 +147,13 @@ def test_github_message():
         "branch": "master",
     }
     try:
-        asyncio.run(GitHubReport.add_github_commit_msg(attr))
+        updated = asyncio.run(GitHubReport.add_github_commit_msg(attr))
     except GitHubRateLimitExceededError as e:
         pytest.skip(str(e))
+
+    if not updated:
+        pytest.skip("GitHub API rate limit exceeded.")
+
     assert "commit_msg" in attr
     assert attr["commit_msg"] == "Linux 6.7"
 
@@ -257,9 +261,12 @@ def test_github_message_cache():
     # https://docs.github.com/en/rest/using-the-rest-api/rate-limits-for-the-rest-api?apiVersion=2022-11-28#primary-rate-limit-for-unauthenticated-users
     for i in range(1, 120):
         try:
-            asyncio.run(GitHubReport.add_github_commit_msg(attr))
+            updated = asyncio.run(GitHubReport.add_github_commit_msg(attr))
         except GitHubRateLimitExceededError as e:
             pytest.skip(str(e))
+
+        if not updated:
+            pytest.skip("GitHub API rate limit exceeded")
 
         assert "commit_msg" in attr
         assert attr["commit_msg"] == "Linux 6.7"
