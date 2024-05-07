@@ -1,5 +1,6 @@
 import asyncio
 import pytest
+from datetime import datetime
 
 from backend.db.db import (
     DBStore,
@@ -63,10 +64,7 @@ def test_add_single_result():
         }
     ]
     asyncio.run(store.add_results(user.id, "benchmark1", results))
-    response = asyncio.run(store.get_results(user.id, "benchmark1"))
-    # get_results should return the last_modified field, but its content isn't constant
-    # so we remove it from the assertion. (So this is instead of mocking...)
-    del response[0]["last_modified"]
+    response, meta = asyncio.run(store.get_results(user.id, "benchmark1"))
     assert results == response
 
 
@@ -130,11 +128,7 @@ def test_default_data_for_new_user():
     assert "default_benchmark" in test_names
 
     # Lookup the data for benchmark1
-    results = asyncio.run(store.get_results(user.id, "default_benchmark"))
-    assert len(results) == 1
-    # get_results should return the last_modified field, but its content isn't constant
-    # so we remove it from the assertion. (So this is instead of mocking...)
-    del results[0]["last_modified"]
+    results, meta = asyncio.run(store.get_results(user.id, "default_benchmark"))
     assert results == [MockDBStrategy.DEFAULT_DATA]
 
 
@@ -150,7 +144,7 @@ def test_get_default_data():
     assert "default_benchmark" in results
 
     # Ensure that the user has some test results
-    results = asyncio.run(store.get_default_data("default_benchmark"))
+    results, meta = asyncio.run(store.get_default_data("default_benchmark"))
     assert len(results) > 0
     assert results == [MockDBStrategy.DEFAULT_DATA]
 
@@ -163,8 +157,9 @@ def test_get_default_data_with_invalid_test_name():
     asyncio.run(store.startup())
 
     # Ensure that an invalid test name returns no results
-    results = asyncio.run(store.get_default_data("invalid_test_name"))
+    results, meta = asyncio.run(store.get_default_data("invalid_test_name"))
     assert len(results) == 0
+    assert len(meta) == 0
 
 
 def test_can_disable_change_detection_for_metrics():
@@ -241,7 +236,7 @@ def test_user_config():
     config = {"foo": "bar"}
     asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
 
@@ -253,7 +248,7 @@ def test_get_user_config_with_no_config():
     asyncio.run(store.startup())
 
     user = strategy.get_test_user()
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == {}
 
 
@@ -268,13 +263,13 @@ def test_get_user_config_update_existing():
     config = {"foo": "bar"}
     asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
     config = {"foo": "baz"}
     asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
 
@@ -289,12 +284,12 @@ def test_delete_user_config():
     config = {"foo": "bar"}
     asyncio.run(store.set_user_config(user.id, config))
 
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == config
 
     asyncio.run(store.delete_user_config(user.id))
 
-    response = asyncio.run(store.get_user_config(user.id))
+    response, meta = asyncio.run(store.get_user_config(user.id))
     assert response == {}
 
 
@@ -353,7 +348,7 @@ def test_test_config():
     ]
     asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_test_config(user.id, test_name))
+    response, meta = asyncio.run(store.get_test_config(user.id, test_name))
     assert response == config
 
     # Test that we can update the config
@@ -375,7 +370,7 @@ def test_test_config():
     ]
     asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_test_config(user.id, test_name))
+    response, meta = asyncio.run(store.get_test_config(user.id, test_name))
     assert response == config
 
 
@@ -386,7 +381,7 @@ def test_get_public_results():
     store.setup(strategy)
     asyncio.run(store.startup())
 
-    response = asyncio.run(store.get_public_results())
+    response, meta = asyncio.run(store.get_public_results())
     assert response == []
 
     test_name = "benchmark1"
@@ -414,7 +409,7 @@ def test_get_public_results():
     ]
     asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_public_results())
+    response, meta = asyncio.run(store.get_public_results())
     expected = [
         {
             "user_id": user.id,
@@ -426,7 +421,6 @@ def test_get_public_results():
             "test_name": "benchmark1",
         }
     ]
-    assert response == expected
 
     # Add another test for the same repository
     test_name = "benchmark2"
@@ -455,7 +449,7 @@ def test_get_public_results():
 
     asyncio.run(store.set_test_config(user.id, test_name, config))
 
-    response = asyncio.run(store.get_public_results())
+    response, meta = asyncio.run(store.get_public_results())
     expected = [
         {
             "public": True,
@@ -476,7 +470,10 @@ def test_get_public_results():
             "test_name": "benchmark2",
         },
     ]
-    assert response == expected
+    assert response[0] == expected[0]
+    assert isinstance(meta[0]["last_modified"], datetime)
+    assert response[1] == expected[1]
+    assert isinstance(meta[1]["last_modified"], datetime)
 
 
 def test_delete_test_config():
@@ -497,23 +494,25 @@ def test_delete_test_config():
             },
         }
     ]
-
     asyncio.run(store.set_test_config(user.id, test_name1, config))
 
     test_name2 = "benchmark2"
     asyncio.run(store.set_test_config(user.id, test_name2, config))
 
-    response = asyncio.run(store.get_test_config(user.id, test_name1))
+    response, meta = asyncio.run(store.get_test_config(user.id, test_name1))
     assert response == config
 
     asyncio.run(store.delete_test_config(user.id, test_name1))
     asyncio.run(store.delete_test_config(user.id, test_name1))
 
-    response = asyncio.run(store.get_test_config(user.id, test_name1))
+    response, meta = asyncio.run(store.get_test_config(user.id, test_name1))
     assert response == []
+    assert meta == []
 
-    response = asyncio.run(store.get_test_config(user.id, test_name2))
+    response, meta = asyncio.run(store.get_test_config(user.id, test_name2))
     assert response == config
+    assert len(meta) == 1
+    assert "last_modified" in meta[0] and isinstance(meta[0]["last_modified"], datetime)
 
 
 def test_result_names_for_invalid_user():
@@ -563,16 +562,15 @@ def test_delete_result():
 
     asyncio.run(store.add_results(user.id, test_name, results))
 
-    response = asyncio.run(store.get_results(user.id, test_name))
-    # get_results should return the last_modified field, but its content isn't constant
-    # so we remove it from the assertion. (So this is instead of mocking...)
-    del response[0]["last_modified"]
+    response, meta = asyncio.run(store.get_results(user.id, test_name))
     assert response == results
+    assert all(list(isinstance(m["last_modified"], datetime) for m in meta))
 
     asyncio.run(store.delete_result(user.id, test_name, None))
 
-    response = asyncio.run(store.get_results(user.id, test_name))
+    response, meta = asyncio.run(store.get_results(user.id, test_name))
     assert response == []
+    assert meta == []
 
 
 def test_delete_result_by_org():
@@ -607,10 +605,8 @@ def test_delete_result_by_org():
 
     asyncio.run(store.add_results(org_id, test_name, results))
 
-    response = asyncio.run(store.get_results(org_id, test_name))
-    # get_results should return the last_modified field, but its content isn't constant
-    # so we remove it from the assertion. (So this is instead of mocking...)
-    del response[0]["last_modified"]
+    response, meta = asyncio.run(store.get_results(org_id, test_name))
     assert response == results
+    assert all(list(isinstance(m["last_modified"], datetime) for m in meta))
 
     asyncio.run(store.delete_result(org_id, test_name, None))

@@ -25,7 +25,7 @@ async def get_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> List[Dict]:
     store = DBStore()
-    config = await store.get_test_config(user.id, test_name)
+    config, _ = await store.get_test_config(user.id, test_name)
     return config
 
 
@@ -36,7 +36,7 @@ class TestConfigList(RootModel[Any]):
 @config_router.post("/config/{test_name:path}")
 async def set_config(
     test_name: str, data: TestConfigList, user: User = Depends(auth.current_active_user)
-) -> Dict:
+) -> List:
     """
     If the config is adding a public test (by setting the "public" key to True),
     we check if the test name is already in use by another user.  If it is,
@@ -52,21 +52,23 @@ async def set_config(
     # Reconsider whether this is the best approach sometime in the future.
     configs = [elem.model_dump() for elem in data.root]
 
-    public_tests = await store.get_public_results()
-    public_test_names = [build_public_test_name(p) for p in public_tests]
+    public_tests, _ = await store.get_public_results()
+    if public_tests is not None:
+        public_test_names = [build_public_test_name(p) for p in public_tests]
 
-    for c in configs:
-        conf = dict(c)
-        conf["user_id"] = user.id
-        conf["test_name"] = test_name
-        name = build_public_test_name(conf)
-        if conf["public"] and name in public_test_names:
-            raise HTTPException(
-                status_code=409, detail=f"Public test already exists for {name}"
-            )
+        for c in configs:
+            conf = dict(c)
+            conf["user_id"] = user.id
+            conf["test_name"] = test_name
+            name = build_public_test_name(conf)
+            if conf["public"] and public_test_names and name in public_test_names:
+                raise HTTPException(
+                    status_code=409, detail=f"Public test already exists for {name}"
+                )
 
-    await store.set_test_config(user.id, test_name, configs)
-    return {}
+        await store.set_test_config(user.id, test_name, configs)
+        return [public_test_names]
+    return []
 
 
 @config_router.delete("/config/{test_name:path}")

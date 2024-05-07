@@ -1,7 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
-
+import logging
 from typing import Dict, List, Union
-from datetime import datetime
 
 from backend.core.core import (
     PerformanceTestResult,
@@ -20,7 +19,13 @@ from backend.api.model import TestResults
 from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.user import user_router
-from backend.db.db import DBStoreMissingRequiredKeys, DBStoreResultExists, User, DBStore
+from backend.db.db import (
+    DBStoreMissingRequiredKeys,
+    DBStoreResultExists,
+    User,
+    DBStore,
+    NULL_DATETIME,
+)
 from backend.notifiers.slack import SlackNotifier
 
 from hunter.series import AnalyzedSeries
@@ -64,14 +69,9 @@ async def changes(
     user: User = Depends(auth.current_active_user),
 ):
     store = DBStore()
-    results = await store.get_results(user.id, test_name)
-    disabled = await store.get_disabled_metrics(user.id, test_name)
-    core_config = await _get_user_config(user.id)
-    config = await store.get_user_config(user.id)
+    config, config_meta = await store.get_user_config(user.id)
     notifiers = await _get_notifiers(notify, config, user)
-    return await calc_changes(
-        test_name, results, disabled, core_config, notifiers, user
-    )
+    return await calc_changes(test_name, user.id, notifiers)
 
 
 # @api_router.get("/result/{test_name_prefix:path}/summary")
@@ -114,13 +114,6 @@ async def delete_results(user: User = Depends(auth.current_active_user)) -> List
     return []
 
 
-def _strip_last_modified(results):
-    for r in results:
-        if "last_modified" in r:
-            del r["last_modified"]
-    return results
-
-
 @api_router.get("/result/{test_name:path}")
 async def get_result(
     test_name: str, user: User = Depends(auth.current_active_user)
@@ -131,7 +124,9 @@ async def get_result(
     if not list(filter(lambda name: name == test_name, test_names)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    return _strip_last_modified(await store.get_results(user.id, test_name))
+    results, _ = await store.get_results(user.id, test_name)
+
+    return results
 
 
 @api_router.delete("/result/{test_name:path}")
@@ -155,6 +150,7 @@ async def add_result(
     test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
 ):
     store = DBStore()
+
     try:
         await store.add_results(user.id, test_name, data.root)
     except DBStoreResultExists as e:
@@ -177,42 +173,64 @@ async def add_result(
     # Compute the change points and persist the result so they are cheap to GET later.
     # Since we compute them after POSTing them, may as well return the results to the user.
     return await changes(test_name, notify=1, user=user)
-    # return {}
 
 
 async def cache_changes(
-    changes: Dict[str, AnalyzedSeries], user: User, series: PerformanceTestResultSeries
+    cp: Dict[str, AnalyzedSeries], user_id: str, series: PerformanceTestResultSeries
 ):
     store = DBStore()
-    await store.persist_change_points(changes, user.id, series.get_series_id())
+    await store.persist_change_points(cp, user_id, series.get_series_id())
 
 
-async def get_cached_or_calc_changes(user: User, series: PerformanceTestResultSeries):
-    if user is None:
+async def get_cached_or_calc_changes(user_id, series):
+    if user_id is None:
         # We only cache change points for logged in users
         return series.calculate_change_points()
 
     store = DBStore()
-    cached_cp = await store.get_change_points(user.id, series.get_series_id())
-    changes = {}
-    if cached_cp is not None:
-        for metric_name, analyzed_json in cached_cp["change_points"].items():
-            changes[metric_name] = AnalyzedSeries.from_json(analyzed_json)
+    cached_cp, meta = await store.get_change_points(user_id, series.get_series_id())
+    cp = {}
+    if cached_cp is not None and series.results:
+        # Metrics may have been disabled or enabled after they were cached.
+        # If so, invalidate the entire result and start over.
+        series_metric_names = set([m.name for m in series.results[0].metrics])
+        cached_metric_names = set([o.keys() for o in cached_cp])
+        if series_metric_names == cached_metric_names:
+            for metric_name, analyzed_json in cached_cp["change_points"].items():
+                cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
 
-    else:
-        changes = series.calculate_change_points()
-        await cache_changes(changes, user, series)
+            return cp
+
+    # "else"
+    # Cached change points not found or have expired, (re)compute from start:
+    changes = series.calculate_change_points()
+    await cache_changes(changes, user_id, series)
     return changes
 
 
-def _build_result_series(test_name, results, disabled=None, core_config=None):
+def _build_result_series(
+    test_name, results, results_meta=None, disabled=None, core_config=None
+):
     series = PerformanceTestResultSeries(test_name, core_config)
+
+    if results_meta is None:
+        results_meta = [{"last_modified": NULL_DATETIME}] * len(results)
+
+    if isinstance(results, list):
+        results_with_meta = list(zip(results, results_meta))
+    else:
+        results_with_meta = list((results, results_meta))
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.
-    last_mod_timestamps = [datetime(1970, 1, 1, 0, 0, 0, 0)]
-    for r in results:
+    # Henrik: I'm pretty sure there exists a Mongodb aggregation query that would do this while
+    # fetching the data. Using $lookup and $push.
+    for r, meta in results_with_meta:
         metrics = []
+
+        if "metrics" not in r:
+            logging.error(f"Missing metrics in result: {r}")
+
         for m in r["metrics"]:
             # Metrics can opt out of change detection
             if disabled and m["name"] in disabled:
@@ -220,22 +238,34 @@ def _build_result_series(test_name, results, disabled=None, core_config=None):
 
             rm = ResultMetric(name=m["name"], unit=m["unit"], value=m["value"])
             metrics.append(rm)
-            last_mod_timestamps.append(r["last_modified"])
 
         result = PerformanceTestResult(
-            timestamp=r["timestamp"], metrics=metrics, attributes=r["attributes"]
+            timestamp=r["timestamp"],
+            metrics=metrics,
+            attributes=r["attributes"],
+            last_modified=meta["last_modified"],
         )
         series.add_result(result)
 
-    series.touch(max(last_mod_timestamps))
     return series
 
 
-async def calc_changes(
-    test_name, results, disabled=None, core_config=None, notifiers=None, user=None
-):
-    series = _build_result_series(test_name, results, disabled, core_config)
-    changes = await get_cached_or_calc_changes(user, series)
+async def calc_changes(test_name, user_id=None, notifiers=None):
+    store = DBStore()
+    series = None
+
+    if user_id is None:
+        results, results_meta = await store.get_default_data(test_name)
+        series = _build_result_series(test_name, results, results_meta)
+    else:
+        results, results_meta = await store.get_results(user_id, test_name)
+        disabled = await store.get_disabled_metrics(user_id, test_name)
+        core_config = await _get_user_config(user_id)
+        series = _build_result_series(
+            test_name, results, results_meta, disabled, core_config
+        )
+
+    changes = await get_cached_or_calc_changes(user_id, series)
     reports = await series.produce_reports(changes, notifiers)
     return reports
 
@@ -249,14 +279,13 @@ async def default_results() -> List[str]:
 @api_router.get("/default/result/{test_name}")
 async def default_result(test_name: str) -> List[Dict]:
     store = DBStore()
-    return await store.get_default_data(test_name)
+    data, _ = await store.get_default_data(test_name)
+    return data
 
 
 @api_router.get("/default/result/{test_name}/changes")
 async def default_changes(test_name: str):
-    store = DBStore()
-    results = await store.get_default_data(test_name)
-    return await calc_changes(test_name, results)
+    return await calc_changes(test_name)
 
 
 # Must come at the end, once we've setup all the routes
@@ -293,7 +322,7 @@ async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> 
 
 async def _get_user_config(user_id: str):
     store = DBStore()
-    config = await store.get_user_config(user_id)
+    config, _ = await store.get_user_config(user_id)
     core_config = config.get("core", None)
     if core_config:
         core_config = Config(**core_config)

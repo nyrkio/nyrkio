@@ -464,9 +464,7 @@ def test_disable_change_detection_for_metric(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert data["benchmark1"]
-    assert len(data["benchmark1"][0]["changes"]) == 1
-    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
+    assert not data["benchmark1"]
 
 
 def test_disable_and_reenable_changes_for_metrics(client):
@@ -537,9 +535,7 @@ def test_disable_and_reenable_changes_for_metrics(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert data["benchmark1"]
-    assert len(data["benchmark1"][0]["changes"]) == 1
-    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
+    assert not data["benchmark1"]
 
     # Re-enable change detection for metric2
     response = client.post("/api/v0/result/benchmark1/changes/enable", json=["metric2"])
@@ -550,6 +546,93 @@ def test_disable_and_reenable_changes_for_metrics(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
+    for ch in data["benchmark1"][0]["changes"]:
+        assert ch["metric"] == "metric2"
+    assert data["benchmark1"][0]["time"] == 3
+
+
+def test_add_metric_while_disabled(client):
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    client.login()
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert not data["benchmark1"]
+
+    # Disable change detection for metric2
+    response = client.post(
+        "/api/v0/result/benchmark1/changes/disable", json=["metric2"]
+    )
+    assert response.status_code == 200
+
+    # Then add more data, including for metric2
+    data = [
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 3.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+    ]
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert not data["benchmark1"]
+
+    # Re-enable change detection for metric2
+    response = client.post("/api/v0/result/benchmark1/changes/enable", json=["metric2"])
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    data = response.json()
+    assert data
+    assert "benchmark1" in data
+    assert data["benchmark1"]
     for ch in data["benchmark1"][0]["changes"]:
         assert ch["metric"] == "metric2"
     assert data["benchmark1"][0]["time"] == 3
@@ -633,9 +716,7 @@ def test_enable_change_for_empty_metrics_succeeds(client):
     data = response.json()
     assert data
     assert "benchmark1" in data
-    assert data["benchmark1"]
-    assert len(data["benchmark1"][0]["changes"]) == 1
-    assert data["benchmark1"][0]["changes"][0]["forward_change_percent"] == 900.0
+    assert not data["benchmark1"]
 
     # enable change detection for all metrics
     response = client.post("/api/v0/result/benchmark1/changes/enable", json=[])
@@ -1052,9 +1133,7 @@ def test_disable_changes_for_test_with_slashes(client):
     json = response.json()
     assert json
     assert "benchmark1/test" in json
-    assert json["benchmark1/test"]
-    assert len(json["benchmark1/test"][0]["changes"]) == 1
-    assert json["benchmark1/test"][0]["changes"][0]["forward_change_percent"] == 900.0
+    assert not json["benchmark1/test"]
 
 
 def test_disable_reenable_changes_for_test_with_slashes(client):
@@ -1122,9 +1201,7 @@ def test_disable_reenable_changes_for_test_with_slashes(client):
     json = response.json()
     assert json
     assert "benchmark1/test" in json
-    assert json["benchmark1/test"]
-    assert len(json["benchmark1/test"][0]["changes"]) == 1
-    assert json["benchmark1/test"][0]["changes"][0]["forward_change_percent"] == 900.0
+    assert not json["benchmark1/test"]
 
     # Re-enable change detection for metric2
     response = client.post(

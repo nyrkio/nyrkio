@@ -303,7 +303,8 @@ def test_org_test_config_public(gh_client):
 
     response = gh_client.get("/api/v0/public/results")
     assert response.status_code == 200
-    assert response.json() == [
+    json = response.json()
+    assert json == [
         {
             "test_name": "nyrkio/nyrkio/main/benchmark1",
         }
@@ -318,7 +319,8 @@ def test_org_test_config_public(gh_client):
 
     response = gh_client.get("/api/v0/orgs/config/nyrkio/nyrkio/main/benchmark1")
     assert response.status_code == 200
-    assert response.json() == []
+    json = response.json()
+    assert json == []
 
     response = gh_client.get("/api/v0/public/results")
     assert response.status_code == 200
@@ -502,7 +504,7 @@ def test_org_config_min_magnitude(gh_client):
         "/api/v0/orgs/result/nyrkio/nyrkio/main/benchmark1/changes"
     )
     assert response.status_code == 200
-
+    print(response)
     json = response.json()
     assert json
     assert "nyrkio/nyrkio/main/benchmark1" in json

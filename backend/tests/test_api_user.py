@@ -18,7 +18,8 @@ def test_add_and_get_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None, "billing": None}
+    json = response.json()
+    assert json == {**config, "core": None, "billing": None}
 
 
 def test_update_existing_user_config(client):
@@ -34,7 +35,8 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None, "billing": None}
+    json = response.json()
+    assert json == {**config, "core": None, "billing": None}
 
     new_config = {"notifiers": {"slack": False}}
     response = client.put("/api/v0/user/config", json=new_config)
@@ -42,7 +44,8 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**new_config, "core": None, "billing": None}
+    json = response.json()
+    assert json == {**new_config, "core": None, "billing": None}
 
 
 def test_user_config_set_min_magnitude_max_pvalue(client):
@@ -59,8 +62,8 @@ def test_user_config_set_min_magnitude_max_pvalue(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-
-    assert response.json() == {**config, "notifiers": None, "billing": None}
+    json = response.json()
+    assert json == {**config, "notifiers": None, "billing": None}
 
 
 def test_user_config_set_max_pvalue_invalid(client):

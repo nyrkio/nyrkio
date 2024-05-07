@@ -48,7 +48,7 @@ def validate_config(config: UserConfig):
 @user_router.get("/config")
 async def get_user_config(user: User = Depends(auth.current_active_user)):
     store = DBStore()
-    config = await store.get_user_config(user.id)
+    config, _ = await store.get_user_config(user.id)
 
     config["billing"] = {"plan": user.billing["plan"]} if user.billing else None
 
