@@ -282,11 +282,12 @@ async def cached_get(repo, commit):
     On cache miss, if the HTTP request fails then nothing is added to the cache.
 
     If we exceed the GitHub API rate limit, raise a GitHubRateLimitExceededError and
-    disable fetching until the rate limit resets.
+    disable fetching until the rate limit resets. Until the rate limits resets return
+    None.
     """
     global GH_FETCH_RESET_TIMESTAMP
     if GH_FETCH_RESET_TIMESTAMP > datetime.now().timestamp():
-        return
+        return None
 
     commit_msg = None
     client = httpx.AsyncClient()
@@ -325,6 +326,8 @@ class GitHubReport(Report):
         GitHub repository, add a 'commit_msg' key with the first line of the commit
         message.
 
+        Return the updated attributes if a commit message was added, otherwise None.
+
         Raises GitHubRateLimitExceededError if the GitHub API rate limit is exceeded.
         """
         if "git_commit" not in attributes:
@@ -341,6 +344,9 @@ class GitHubReport(Report):
         msg = await cached_get(repo, commit)
         if msg:
             attributes["commit_msg"] = msg
+            return attributes
+
+        return None
 
     async def produce_report(self, test_name: str, report_type: ReportType):
         change_points = self._Report__change_points
