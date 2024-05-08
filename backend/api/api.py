@@ -214,7 +214,7 @@ def _build_result_series(
 ):
     series = PerformanceTestResultSeries(test_name, core_config)
 
-    if results_meta is None:
+    if not results_meta:
         results_meta = [{"last_modified": NULL_DATETIME}] * len(results)
 
     if isinstance(results, list):

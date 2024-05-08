@@ -610,3 +610,37 @@ def test_delete_result_by_org():
     assert all(list(isinstance(m["last_modified"], datetime) for m in meta))
 
     asyncio.run(store.delete_result(org_id, test_name, None))
+
+
+def test_data_without_meta_field():
+    """Ensure that we can get data without a meta field"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+    new_list = [
+        DBStore.create_doc_with_metadata(r, user.id, test_name) for r in results
+    ]
+    test_results = store.db.test_results
+
+    # Simulate an old version of the data
+    for r in new_list:
+        del r["meta"]
+
+    asyncio.run(test_results.insert_many(new_list))
+
+    db_results = asyncio.run(store.get_results(user.id, test_name))
+    assert db_results[0][0]["timestamp"] == results[0]["timestamp"]

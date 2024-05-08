@@ -732,26 +732,38 @@ def separate_meta(doc: Union[Dict, List[Dict]]) -> None:
     """
     Split user data and metadata fields and return both.
 
-    The metadata part contains fields that shouldn't be returned outside the HTTP API. (api.py)
+    The metadata part contains fields that shouldn't be returned outside the
+    HTTP API. (api.py)
+
+    Returns two lists, one with the data and one with the metadata.
+
+    If no metadata is found (because this is an old document that was written
+    before we appended metadata in add_results()), the second list will be empty.
     """
     if isinstance(doc, list):
+        # mfleming: How could this ever happen?
         if len(doc) == 0:
             return [], []
 
         d = dict(doc[-1])  # copy the dict
-        _validate_meta(d)
-        m = d["meta"]
-        del d["meta"]
+
+        m = []
+        if "meta" in d:
+            m.append(d["meta"])
+            del d["meta"]
+
         if len(doc) > 1:
             data, meta = separate_meta(doc[:-1])
-            data.append(d), meta.append(m)
+            data.append(d), meta.extend(m)
             return data, meta
         else:
-            return [d], [m]
+            return [d], m
 
-    _validate_meta(dict(doc))
-    meta = doc["meta"]
-    del doc["meta"]
+    meta = []
+    if "meta" in doc:
+        meta = doc["meta"]
+        del doc["meta"]
+
     return doc, meta
 
 
