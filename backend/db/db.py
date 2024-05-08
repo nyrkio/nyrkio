@@ -661,7 +661,22 @@ class DBStore(object):
 
     async def get_change_points(
         self, id: str, series_id_tuple: Tuple[str, float, float, Any]
-    ) -> Tuple[List[Dict], List[Dict]]:
+    ) -> List[Dict]:
+        """
+        Get the change points for a given user id and test name from the cache.
+
+        Return a list of change points if they exist. If no change points are
+        found, return an empty list.
+
+        Callers of this function need to handle change point invalidation, i.e.
+        recompute the change points for this series. Change points need to be
+        invalidated if:
+
+          1. The series has been updated since the change points were computed
+          2. The user has updated their config since the change points were computed
+
+        If change points need to be recomputed, return an empty list.
+        """
         collection = self.db.change_points
 
         primary_key = OrderedDict(
@@ -674,24 +689,32 @@ class DBStore(object):
         )
 
         results = await collection.find({"_id": primary_key}).to_list(None)
-        assert len(results) <= 1
+        if len(results) > 1:
+            logging.error(f"Multiple change points found for {series_id_tuple[0]}")
+            return []
 
         if len(results) == 0:
             # Nothing was cached
-            return None, None
+            return []
 
         data, meta = separate_meta(results[0])
 
-        # Changing pvalue or any other parameter of the algorithm invalidates the user's cache
-        user_config, user_meta = await self.get_user_config(id)
-        if (
-            meta is None
-            or user_meta is None
-            or meta["last_modified"] < user_meta["last_modified"]
-        ):
-            return [], []
+        if meta["last_modified"] < series_id_tuple[3]:
+            # User has updated the series since the change points were last computed.
+            # Caller needs to recompute the change points.
+            return []
 
-        return data, meta
+        user_config, user_meta = await self.get_user_config(id)
+        if not user_config:
+            # User has no config, so cannot have invalidated the cache
+            return data
+
+        if user_meta and meta["last_modified"] < user_meta["last_modified"]:
+            # User has updated their config since the change points were last computed.
+            # Caller needs to recompute the change points.
+            return []
+
+        return data
 
 
 # Will be patched by conftest.py if we're running tests
