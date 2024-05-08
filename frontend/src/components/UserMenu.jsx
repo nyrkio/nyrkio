@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useNavigate, useState, useEffect } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
 
@@ -28,6 +28,7 @@ export const UserMenu = ({ setLoggedIn }) => {
     checkForAdminPrvis();
   }, []);
 
+  const navigate = useNavigate();
   const handleLogoutClick = async () => {
     console.debug("Setting logged in to false");
     const response = await fetch("/api/v0/auth/jwt/logout", {
@@ -45,6 +46,11 @@ export const UserMenu = ({ setLoggedIn }) => {
     setLoggedIn(false);
     localStorage.setItem("loggedIn", "false");
     localStorage.removeItem("token");
+    try {
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
   };
   return (
     <Dropdown>
