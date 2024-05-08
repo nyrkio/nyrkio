@@ -1,6 +1,7 @@
 import asyncio
 from typing import Dict, List
 
+from db.db import MockDBStrategy
 from starlette.testclient import TestClient
 
 from backend.api.api import app
@@ -381,8 +382,8 @@ def test_unauth_get_default_data_test_results(unauthenticated_client):
     assert response.status_code == 200
     from backend.db.db import MockDBStrategy
 
-    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
-    assert len(response.json()) == 1
+    assert response.json() == MockDBStrategy.DEFAULT_DATA
+    assert len(response.json()) == len(MockDBStrategy.DEFAULT_DATA)
 
 
 def test_auth_user_get_default_data_test_results(client):
@@ -392,8 +393,8 @@ def test_auth_user_get_default_data_test_results(client):
     assert response.status_code == 200
     from backend.db.db import MockDBStrategy
 
-    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
-    assert len(response.json()) == 1
+    assert response.json() == MockDBStrategy.DEFAULT_DATA
+    assert len(response.json()) == len(MockDBStrategy.DEFAULT_DATA)
 
 
 def test_disable_change_detection_for_metric(client):
@@ -2036,3 +2037,166 @@ def test_auth_user_generate_token(client):
     token = response.json()
     assert "access_token" in token
     assert token["token_type"] == "bearer"
+
+
+def test_calc_changes_after_update(client):
+    """Ensure that we can calculate changes after updating a test"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 1
+    assert json["benchmark1"][0]["time"] == 3
+
+    # Hit the cache
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 1
+    assert json["benchmark1"][0]["time"] == 3
+
+    # Update final result
+    data[-1]["metrics"][0]["value"] = 1.0
+    response = client.delete(
+        f"/api/v0/result/benchmark1?timestamp={data[-1]['timestamp']}"
+    )
+    assert response.status_code == 200
+
+    response = client.post("/api/v0/result/benchmark1", json=[data[-1]])
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 0
+
+
+def test_disable_metric_invalidates_change_points(client):
+    """Ensure that disabling a metric invalidates change points"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 30.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 1
+    assert json["benchmark1"][0]["time"] == 3
+    assert len(json["benchmark1"][0]["changes"]) == 2
+    assert json["benchmark1"][0]["changes"][0]["metric"] == "metric1"
+    assert json["benchmark1"][0]["changes"][1]["metric"] == "metric2"
+
+    # Disable metric1
+    response = client.post(
+        "/api/v0/result/benchmark1/changes/disable", json=["metric1"]
+    )
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 1
+    assert json["benchmark1"][0]["time"] == 3
+    assert len(json["benchmark1"][0]["changes"]) == 1
+    assert json["benchmark1"][0]["changes"][0]["metric"] == "metric2"
+
+
+def test_default_data_changes(unauthenticated_client):
+    """Ensure that we can get change points for default data"""
+    client = unauthenticated_client
+
+    response = client.get("/api/v0/default/result/default_benchmark/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "default_benchmark" in json
+    assert len(json["default_benchmark"]) == 1
+    assert (
+        json["default_benchmark"][0]["time"]
+        == MockDBStrategy.DEFAULT_DATA[-1]["timestamp"]
+    )

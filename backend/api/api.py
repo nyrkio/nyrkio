@@ -188,13 +188,14 @@ async def get_cached_or_calc_changes(user_id, series):
         return series.calculate_change_points()
 
     store = DBStore()
-    cached_cp, meta = await store.get_change_points(user_id, series.get_series_id())
-    cp = {}
-    if cached_cp is not None and series.results:
+    cached_cp = await store.get_change_points(user_id, series.get_series_id())
+    if len(cached_cp) > 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
         series_metric_names = set([m.name for m in series.results[0].metrics])
-        cached_metric_names = set([o.keys() for o in cached_cp])
+        cached_metric_names = set([o for o in cached_cp["change_points"]])
+
+        cp = {}
         if series_metric_names == cached_metric_names:
             for metric_name, analyzed_json in cached_cp["change_points"].items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
@@ -213,7 +214,7 @@ def _build_result_series(
 ):
     series = PerformanceTestResultSeries(test_name, core_config)
 
-    if results_meta is None:
+    if not results_meta:
         results_meta = [{"last_modified": NULL_DATETIME}] * len(results)
 
     if isinstance(results, list):

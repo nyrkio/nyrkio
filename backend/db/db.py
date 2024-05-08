@@ -90,14 +90,53 @@ class MockDBStrategy(ConnectionStrategy):
         self.connection = client.get_database("test")
         return self.connection
 
-    DEFAULT_DATA = {
-        "timestamp": 123456,
-        "attributes": {
-            "git_repo": "https://github.com/nyrkio/nyrkio",
-            "branch": "main",
-            "git_commit": "123456",
+    DEFAULT_DATA = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 1.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
         },
-    }
+        {
+            "timestamp": 2,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 1.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123457",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 30.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123458",
+            },
+        },
+    ]
 
     async def init_db(self):
         # Add test users
@@ -110,15 +149,16 @@ class MockDBStrategy(ConnectionStrategy):
         self.user = await manager.create(user)
 
         # Add some default data
-        result = DBStore.create_doc_with_metadata(
-            MockDBStrategy.DEFAULT_DATA, self.user.id, "default_benchmark"
-        )
-        await self.connection.default_data.insert_one(result)
+        results = [
+            DBStore.create_doc_with_metadata(r, self.user.id, "default_benchmark")
+            for r in self.DEFAULT_DATA
+        ]
+        await self.connection.default_data.insert_many(results)
 
         # Usually a new user would get the default data automatically,
         # but since we added the default data after the user was created,
         # we need to add it manually.
-        await self.connection.test_results.insert_one(result)
+        await self.connection.test_results.insert_many(results)
 
         su = UserCreate(
             id=2,
@@ -570,7 +610,6 @@ class DBStore(object):
             {"user_id": id, "test_name": test_name}, exclude_projection
         ).to_list(None)
 
-        print(config)
         return separate_meta(config)
 
     async def set_test_config(self, id: Any, test_name: str, config: List[Dict]):
@@ -661,7 +700,22 @@ class DBStore(object):
 
     async def get_change_points(
         self, id: str, series_id_tuple: Tuple[str, float, float, Any]
-    ) -> Tuple[List[Dict], List[Dict]]:
+    ) -> List[Dict]:
+        """
+        Get the change points for a given user id and test name from the cache.
+
+        Return a list of change points if they exist. If no change points are
+        found, return an empty list.
+
+        Callers of this function need to handle change point invalidation, i.e.
+        recompute the change points for this series. Change points need to be
+        invalidated if:
+
+          1. The series has been updated since the change points were computed
+          2. The user has updated their config since the change points were computed
+
+        If change points need to be recomputed, return an empty list.
+        """
         collection = self.db.change_points
 
         primary_key = OrderedDict(
@@ -674,24 +728,32 @@ class DBStore(object):
         )
 
         results = await collection.find({"_id": primary_key}).to_list(None)
-        assert len(results) <= 1
+        if len(results) > 1:
+            logging.error(f"Multiple change points found for {series_id_tuple[0]}")
+            return []
 
         if len(results) == 0:
             # Nothing was cached
-            return None, None
+            return []
 
         data, meta = separate_meta(results[0])
 
-        # Changing pvalue or any other parameter of the algorithm invalidates the user's cache
-        user_config, user_meta = await self.get_user_config(id)
-        if (
-            meta is None
-            or user_meta is None
-            or meta["last_modified"] < user_meta["last_modified"]
-        ):
-            return [], []
+        if meta["last_modified"] < series_id_tuple[3]:
+            # User has updated the series since the change points were last computed.
+            # Caller needs to recompute the change points.
+            return []
 
-        return data, meta
+        user_config, user_meta = await self.get_user_config(id)
+        if not user_config:
+            # User has no config, so cannot have invalidated the cache
+            return data
+
+        if user_meta and meta["last_modified"] < user_meta["last_modified"]:
+            # User has updated their config since the change points were last computed.
+            # Caller needs to recompute the change points.
+            return []
+
+        return data
 
 
 # Will be patched by conftest.py if we're running tests
@@ -709,26 +771,38 @@ def separate_meta(doc: Union[Dict, List[Dict]]) -> None:
     """
     Split user data and metadata fields and return both.
 
-    The metadata part contains fields that shouldn't be returned outside the HTTP API. (api.py)
+    The metadata part contains fields that shouldn't be returned outside the
+    HTTP API. (api.py)
+
+    Returns two lists, one with the data and one with the metadata.
+
+    If no metadata is found (because this is an old document that was written
+    before we appended metadata in add_results()), the second list will be empty.
     """
     if isinstance(doc, list):
+        # mfleming: How could this ever happen?
         if len(doc) == 0:
             return [], []
 
         d = dict(doc[-1])  # copy the dict
-        _validate_meta(d)
-        m = d["meta"]
-        del d["meta"]
+
+        m = []
+        if "meta" in d:
+            m.append(d["meta"])
+            del d["meta"]
+
         if len(doc) > 1:
             data, meta = separate_meta(doc[:-1])
-            data.append(d), meta.append(m)
+            data.append(d), meta.extend(m)
             return data, meta
         else:
-            return [d], [m]
+            return [d], m
 
-    _validate_meta(dict(doc))
-    meta = doc["meta"]
-    del doc["meta"]
+    meta = []
+    if "meta" in doc:
+        meta = doc["meta"]
+        del doc["meta"]
+
     return doc, meta
 
 
