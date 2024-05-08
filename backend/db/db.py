@@ -610,7 +610,6 @@ class DBStore(object):
             {"user_id": id, "test_name": test_name}, exclude_projection
         ).to_list(None)
 
-        print(config)
         return separate_meta(config)
 
     async def set_test_config(self, id: Any, test_name: str, config: List[Dict]):
