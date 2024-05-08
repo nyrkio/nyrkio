@@ -90,14 +90,53 @@ class MockDBStrategy(ConnectionStrategy):
         self.connection = client.get_database("test")
         return self.connection
 
-    DEFAULT_DATA = {
-        "timestamp": 123456,
-        "attributes": {
-            "git_repo": "https://github.com/nyrkio/nyrkio",
-            "branch": "main",
-            "git_commit": "123456",
+    DEFAULT_DATA = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 1.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
         },
-    }
+        {
+            "timestamp": 2,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 1.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123457",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {
+                    "name": "foo",
+                    "value": 30.0,
+                    "unit": "ms",
+                },
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123458",
+            },
+        },
+    ]
 
     async def init_db(self):
         # Add test users
@@ -110,15 +149,16 @@ class MockDBStrategy(ConnectionStrategy):
         self.user = await manager.create(user)
 
         # Add some default data
-        result = DBStore.create_doc_with_metadata(
-            MockDBStrategy.DEFAULT_DATA, self.user.id, "default_benchmark"
-        )
-        await self.connection.default_data.insert_one(result)
+        results = [
+            DBStore.create_doc_with_metadata(r, self.user.id, "default_benchmark")
+            for r in self.DEFAULT_DATA
+        ]
+        await self.connection.default_data.insert_many(results)
 
         # Usually a new user would get the default data automatically,
         # but since we added the default data after the user was created,
         # we need to add it manually.
-        await self.connection.test_results.insert_one(result)
+        await self.connection.test_results.insert_many(results)
 
         su = UserCreate(
             id=2,

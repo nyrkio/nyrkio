@@ -1,6 +1,7 @@
 import asyncio
 from typing import Dict, List
 
+from db.db import MockDBStrategy
 from starlette.testclient import TestClient
 
 from backend.api.api import app
@@ -381,8 +382,8 @@ def test_unauth_get_default_data_test_results(unauthenticated_client):
     assert response.status_code == 200
     from backend.db.db import MockDBStrategy
 
-    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
-    assert len(response.json()) == 1
+    assert response.json() == MockDBStrategy.DEFAULT_DATA
+    assert len(response.json()) == len(MockDBStrategy.DEFAULT_DATA)
 
 
 def test_auth_user_get_default_data_test_results(client):
@@ -392,8 +393,8 @@ def test_auth_user_get_default_data_test_results(client):
     assert response.status_code == 200
     from backend.db.db import MockDBStrategy
 
-    assert response.json() == [MockDBStrategy.DEFAULT_DATA]
-    assert len(response.json()) == 1
+    assert response.json() == MockDBStrategy.DEFAULT_DATA
+    assert len(response.json()) == len(MockDBStrategy.DEFAULT_DATA)
 
 
 def test_disable_change_detection_for_metric(client):
@@ -2183,3 +2184,19 @@ def test_disable_metric_invalidates_change_points(client):
     assert json["benchmark1"][0]["time"] == 3
     assert len(json["benchmark1"][0]["changes"]) == 1
     assert json["benchmark1"][0]["changes"][0]["metric"] == "metric2"
+
+
+def test_default_data_changes(unauthenticated_client):
+    """Ensure that we can get change points for default data"""
+    client = unauthenticated_client
+
+    response = client.get("/api/v0/default/result/default_benchmark/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert json
+    assert "default_benchmark" in json
+    assert len(json["default_benchmark"]) == 1
+    assert (
+        json["default_benchmark"][0]["time"]
+        == MockDBStrategy.DEFAULT_DATA[-1]["timestamp"]
+    )

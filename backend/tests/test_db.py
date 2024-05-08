@@ -129,7 +129,7 @@ def test_default_data_for_new_user():
 
     # Lookup the data for benchmark1
     results, meta = asyncio.run(store.get_results(user.id, "default_benchmark"))
-    assert results == [MockDBStrategy.DEFAULT_DATA]
+    assert results == MockDBStrategy.DEFAULT_DATA
 
 
 def test_get_default_data():
@@ -146,7 +146,7 @@ def test_get_default_data():
     # Ensure that the user has some test results
     results, meta = asyncio.run(store.get_default_data("default_benchmark"))
     assert len(results) > 0
-    assert results == [MockDBStrategy.DEFAULT_DATA]
+    assert results == MockDBStrategy.DEFAULT_DATA
 
 
 def test_get_default_data_with_invalid_test_name():
