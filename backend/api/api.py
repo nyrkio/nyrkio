@@ -238,9 +238,14 @@ def _build_result_series(
 ):
     series = PerformanceTestResultSeries(test_name, core_config)
 
-    metadata_exists = any(results_meta)
-    if not metadata_exists:
-        results_meta = [{"last_modified": NULL_DATETIME}] * len(results)
+    metadata_missing = not all(results_meta)
+    if metadata_missing:
+        # Find any empty dicts and replace them with a NULL_DATETIME. This
+        # happens when test results have no metadata, which is the case for
+        # old data.
+        for i, d in enumerate(results_meta):
+            if not d:
+                results_meta[i] = {"last_modified": NULL_DATETIME}
 
     results_with_meta = list(zip(results, results_meta))
 

@@ -1,10 +1,11 @@
 import asyncio
+from datetime import datetime
 from typing import Dict, List
 
-from db.db import MockDBStrategy
+from db.db import NULL_DATETIME, MockDBStrategy
 from starlette.testclient import TestClient
 
-from backend.api.api import app
+from backend.api.api import app, _build_result_series
 from backend.api.public import extract_public_test_name
 
 from conftest import AuthenticatedTestClient, SuperuserClient
@@ -2226,3 +2227,85 @@ def test_put_existing_result(client):
     assert response.status_code == 200
     json = response.json()
     assert_response_data_matches_expected(json, data)
+
+
+def test_build_series():
+    """
+    Ensure that we can build a series with and without metadata
+    """
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "6789a",
+            },
+        },
+    ]
+
+    series = _build_result_series("test_name", data, [{}, {}])
+    assert series.last_modified() == NULL_DATETIME
+
+    now = datetime.now()
+    series = _build_result_series(
+        "test_name", data, [{"last_modified": now}, {"last_modified": now}]
+    )
+    assert series.last_modified() == now
+
+
+def test_build_series_with_partial_metadata():
+    """
+    Ensure that we can build a series with partial metadata
+
+    Users might have a mixture of test results, some with metadata and some
+    without.
+    """
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "6789a",
+            },
+        },
+    ]
+
+    now = datetime.now()
+
+    # Empty metadata for last result
+    series = _build_result_series("test_name", data, [{"last_modified": now}, {}])
+    assert series.last_modified() == now
+
+    # Empty metadata for first result
+    series = _build_result_series("test_name", data, [{}, {"last_modified": now}])
+    assert series.last_modified() == now
