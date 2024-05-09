@@ -175,6 +175,30 @@ async def add_result(
     return await changes(test_name, notify=1, user=user)
 
 
+@api_router.put("/result/{test_name:path}")
+async def update_result(
+    test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
+):
+    store = DBStore()
+
+    try:
+        await store.add_results(user.id, test_name, data.root, update=True)
+    except DBStoreMissingRequiredKeys as e:
+        explanation = {
+            "reason": "Result is missing required keys",
+            "data": e.missing_keys,
+        }
+        raise HTTPException(status_code=400, detail=explanation)
+
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail="Invalid data")
+
+    # Compute the change points and persist the result so they are cheap to GET later.
+    # Since we compute them after POSTing them, may as well return the results to the user.
+    return await changes(test_name, notify=1, user=user)
+
+
 async def cache_changes(
     cp: Dict[str, AnalyzedSeries], user_id: str, series: PerformanceTestResultSeries
 ):

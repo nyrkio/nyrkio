@@ -350,28 +350,37 @@ class DBStore(object):
         d["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
         return d
 
-    async def add_results(self, id: Any, test_name: str, results: List[Dict]):
+    async def add_results(
+        self, id: Any, test_name: str, results: List[Dict], update: bool = False
+    ):
         """
         Create the representation of test results for storing in the DB, e.g. add
         metadata like user id and version of the schema.
 
-        If the user tries to add a result that already exists, raise a
-        DBStoreResultExists exception.
+        If the user tries to add a result that already exists (and update is
+        False), raise a DBStoreResultExists exception. Otherwise, update the
+        existing result.
         """
         new_list = [DBStore.create_doc_with_metadata(r, id, test_name) for r in results]
         test_results = self.db.test_results
 
-        try:
-            await test_results.insert_many(new_list)
-        except BulkWriteError as e:
-            if e.details["writeErrors"][0]["code"] == 11000:
-                duplicate_key = e.details["writeErrors"][0]["op"]["_id"]
+        if update:
+            for r in new_list:
+                await test_results.update_one(
+                    {"_id": r["_id"]}, {"$set": r}, upsert=True
+                )
+        else:
+            try:
+                await test_results.insert_many(new_list)
+            except BulkWriteError as e:
+                if e.details["writeErrors"][0]["code"] == 11000:
+                    duplicate_key = e.details["writeErrors"][0]["op"]["_id"]
 
-                # Don't leak user_id to the client. Anyway, it's not JSON
-                # serializable.
-                del duplicate_key["user_id"]
+                    # Don't leak user_id to the client. Anyway, it's not JSON
+                    # serializable.
+                    del duplicate_key["user_id"]
 
-                raise DBStoreResultExists(duplicate_key)
+                    raise DBStoreResultExists(duplicate_key)
 
     async def get_results(
         self, id: Any, test_name: str

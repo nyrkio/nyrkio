@@ -2099,12 +2099,7 @@ def test_calc_changes_after_update(client):
 
     # Update final result
     data[-1]["metrics"][0]["value"] = 1.0
-    response = client.delete(
-        f"/api/v0/result/benchmark1?timestamp={data[-1]['timestamp']}"
-    )
-    assert response.status_code == 200
-
-    response = client.post("/api/v0/result/benchmark1", json=[data[-1]])
+    response = client.put("/api/v0/result/benchmark1", json=[data[-1]])
     assert response.status_code == 200
 
     response = client.get("/api/v0/result/benchmark1/changes")
@@ -2200,3 +2195,34 @@ def test_default_data_changes(unauthenticated_client):
         json["default_benchmark"][0]["time"]
         == MockDBStrategy.DEFAULT_DATA[-1]["timestamp"]
     )
+
+
+def test_put_existing_result(client):
+    """Ensure that we can update an existing result"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    data[0]["metrics"][0]["value"] = 2.0
+    response = client.put("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 200
+    json = response.json()
+    assert_response_data_matches_expected(json, data)

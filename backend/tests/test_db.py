@@ -673,3 +673,35 @@ def test_separate_meta():
 
     data, metadata = separate_meta([{"foo": "bar"}])
     check_data(data, metadata)
+
+
+def test_update_existing_result():
+    """Ensure that we can update an existing result"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    results = [
+        {
+            "timestamp": 1234,
+            "metrics": {"foo": 1},
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+
+    asyncio.run(store.add_results(user.id, test_name, results))
+    response, _ = asyncio.run(store.get_results(user.id, test_name))
+    assert response == results
+
+    results[0]["metrics"]["foo"] = 2
+
+    asyncio.run(store.add_results(user.id, test_name, results, update=True))
+    response, _ = asyncio.run(store.get_results(user.id, test_name))
+    assert response == results
