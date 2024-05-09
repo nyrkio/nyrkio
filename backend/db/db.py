@@ -5,7 +5,7 @@ from collections import OrderedDict
 from datetime import datetime, timezone
 import logging
 import os
-from typing import Dict, List, Tuple, Union, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
@@ -573,9 +573,9 @@ class DBStore(object):
         user_config = self.db.user_config
         config = await user_config.find_one({"user_id": user_id}, exclude_projection)
         if config:
-            return separate_meta(config)
+            return separate_meta_one(config)
         else:
-            return {}, None
+            return {}, {}
 
     async def set_user_config(self, id: Any, config: Dict):
         """
@@ -598,7 +598,9 @@ class DBStore(object):
         user_config = self.db.user_config
         await user_config.delete_one({"user_id": id})
 
-    async def get_test_config(self, id: Any, test_name: str) -> Tuple[Dict, Dict]:
+    async def get_test_config(
+        self, id: Any, test_name: str
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Get the test's configuration.
 
@@ -698,14 +700,14 @@ class DBStore(object):
         collection = self.db.change_points
         await collection.update_one({"_id": primary_key}, {"$set": doc}, upsert=True)
 
-    async def get_change_points(
+    async def get_cached_change_points(
         self, id: str, series_id_tuple: Tuple[str, float, float, Any]
-    ) -> List[Dict]:
+    ) -> Dict:
         """
         Get the change points for a given user id and test name from the cache.
 
-        Return a list of change points if they exist. If no change points are
-        found, return an empty list.
+        Return a dict of change points (key'd by metric name) if they exist.
+        If no change points are found, return an empty dict.
 
         Callers of this function need to handle change point invalidation, i.e.
         recompute the change points for this series. Change points need to be
@@ -714,7 +716,7 @@ class DBStore(object):
           1. The series has been updated since the change points were computed
           2. The user has updated their config since the change points were computed
 
-        If change points need to be recomputed, return an empty list.
+        If change points need to be recomputed, return an empty dict.
         """
         collection = self.db.change_points
 
@@ -728,32 +730,37 @@ class DBStore(object):
         )
 
         results = await collection.find({"_id": primary_key}).to_list(None)
-        if len(results) > 1:
-            logging.error(f"Multiple change points found for {series_id_tuple[0]}")
-            return []
-
         if len(results) == 0:
             # Nothing was cached
-            return []
+            return {}
 
-        data, meta = separate_meta(results[0])
+        if len(results) != 1:
+            # This should never happen. If it does, we can't trust the cache so
+            # force a recompute.
+            logging.error(
+                f"Multiple change points found for {series_id_tuple[0]}. Forcing recompute."
+            )
+            return {}
 
-        if meta["last_modified"] < series_id_tuple[3]:
+        data, meta = separate_meta_one(results[0])
+
+        series_last_modified = series_id_tuple[3]
+        if meta["last_modified"] < series_last_modified:
             # User has updated the series since the change points were last computed.
             # Caller needs to recompute the change points.
-            return []
+            return {}
 
         user_config, user_meta = await self.get_user_config(id)
         if not user_config:
             # User has no config, so cannot have invalidated the cache
-            return data
+            return data["change_points"]
 
         if user_meta and meta["last_modified"] < user_meta["last_modified"]:
             # User has updated their config since the change points were last computed.
             # Caller needs to recompute the change points.
-            return []
+            return {}
 
-        return data
+        return data["change_points"]
 
 
 # Will be patched by conftest.py if we're running tests
@@ -767,49 +774,39 @@ async def do_on_startup():
     await store.startup()
 
 
-def separate_meta(doc: Union[Dict, List[Dict]]) -> None:
+def separate_meta_one(doc: Dict) -> Tuple[Dict, Dict]:
     """
     Split user data and metadata fields and return both.
 
     The metadata part contains fields that shouldn't be returned outside the
     HTTP API. (api.py)
 
-    Returns two lists, one with the data and one with the metadata.
-
     If no metadata is found (because this is an old document that was written
-    before we appended metadata in add_results()), the second list will be empty.
+    before we appended metadata in add_results()), the second tuple element
+    will be an empty dict.
     """
-    if isinstance(doc, list):
-        # mfleming: How could this ever happen?
-        if len(doc) == 0:
-            return [], []
+    dup = dict(doc)
+    meta = {}
 
-        d = dict(doc[-1])  # copy the dict
+    if "meta" in dup:
+        meta = dup["meta"]
+        del dup["meta"]
 
-        m = []
-        if "meta" in d:
-            m.append(d["meta"])
-            del d["meta"]
-
-        if len(doc) > 1:
-            data, meta = separate_meta(doc[:-1])
-            data.append(d), meta.extend(m)
-            return data, meta
-        else:
-            return [d], m
-
-    meta = []
-    if "meta" in doc:
-        meta = doc["meta"]
-        del doc["meta"]
-
-    return doc, meta
+    return dup, meta
 
 
-def _validate_meta(doc: Union[dict, list]) -> None:
-    if not (
-        "meta" in doc
-        and "last_modified" in doc["meta"]
-        and isinstance(doc["meta"]["last_modified"], datetime)
-    ):
-        raise DBStoreMissingRequiredKeys(["meta.last_modified"])
+def separate_meta(doc: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
+    """
+    Split user data and metadata fields and return both.
+
+    Returns two lists, one with the data and one with the metadata. Each entry
+    in the list is a dict and both lists have the same number of elements.
+    """
+    data = []
+    metadata = []
+    for d in doc:
+        dup, meta = separate_meta_one(d)
+        data.append(dup)
+        metadata.append(meta)
+
+    return data, metadata

@@ -188,16 +188,16 @@ async def get_cached_or_calc_changes(user_id, series):
         return series.calculate_change_points()
 
     store = DBStore()
-    cached_cp = await store.get_change_points(user_id, series.get_series_id())
+    cached_cp = await store.get_cached_change_points(user_id, series.get_series_id())
     if len(cached_cp) > 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
         series_metric_names = set([m.name for m in series.results[0].metrics])
-        cached_metric_names = set([o for o in cached_cp["change_points"]])
+        cached_metric_names = set([o for o in cached_cp])
 
         cp = {}
         if series_metric_names == cached_metric_names:
-            for metric_name, analyzed_json in cached_cp["change_points"].items():
+            for metric_name, analyzed_json in cached_cp.items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
 
             return cp
@@ -210,17 +210,15 @@ async def get_cached_or_calc_changes(user_id, series):
 
 
 def _build_result_series(
-    test_name, results, results_meta=None, disabled=None, core_config=None
+    test_name, results, results_meta, disabled=None, core_config=None
 ):
     series = PerformanceTestResultSeries(test_name, core_config)
 
-    if not results_meta:
+    metadata_exists = any(results_meta)
+    if not metadata_exists:
         results_meta = [{"last_modified": NULL_DATETIME}] * len(results)
 
-    if isinstance(results, list):
-        results_with_meta = list(zip(results, results_meta))
-    else:
-        results_with_meta = list((results, results_meta))
+    results_with_meta = list(zip(results, results_meta))
 
     # TODO(matt) - iterating like this is silly, we should just be able to pass
     # the results in batch.

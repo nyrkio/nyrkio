@@ -8,6 +8,8 @@ from backend.db.db import (
     DBStoreMissingRequiredKeys,
     DBStoreResultExists,
     MockDBStrategy,
+    separate_meta,
+    separate_meta_one,
 )
 
 from backend.auth.auth import add_user
@@ -644,3 +646,30 @@ def test_data_without_meta_field():
 
     db_results = asyncio.run(store.get_results(user.id, test_name))
     assert db_results[0][0]["timestamp"] == results[0]["timestamp"]
+
+
+def test_separate_meta():
+    """Ensure that we can separate data and metadata"""
+    aggregated_data = [
+        {"foo": "bar", "timestamp": 1234, "meta": {"baz": "qux"}},
+        {"foo": "bar", "timestamp": 5678, "meta": {"baz": "qux"}},
+    ]
+
+    def check_data(d, m):
+        assert len(d) == len(m)
+        for dat in d:
+            assert "meta" not in dat
+
+    data, metadata = separate_meta_one(aggregated_data[0])
+    check_data([data], [metadata])
+
+    data, metadata = separate_meta(aggregated_data)
+    check_data(data, metadata)
+    assert metadata[0]["baz"] == "qux"
+    assert metadata[1]["baz"] == "qux"
+
+    data, metadata = separate_meta([])
+    check_data(data, metadata)
+
+    data, metadata = separate_meta([{"foo": "bar"}])
+    check_data(data, metadata)
