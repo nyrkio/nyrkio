@@ -152,9 +152,8 @@ async def github_callback(
     request: Request,
     access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
-    error: Optional[str] = None,
 ):
-    if error:
+    if request.get("error"):
         return RedirectResponse("/login?gh_login=error")
 
     token, state = access_token_state
