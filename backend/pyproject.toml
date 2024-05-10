@@ -29,7 +29,7 @@ pytest-datadir = "^1.5.0"
 sortedcontainers = "^2.4.0"
 pytest-benchmark = "^4.0.0"
 sentry-sdk = "^1.40.4"
-aiohttp = "^3.9.3"
+aiohttp = "^3.9.4"
 stripe = "^9.2.0"
 
 [tool.poetry.dev-dependencies]
