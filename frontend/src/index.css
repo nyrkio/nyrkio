@@ -810,3 +810,10 @@ div.card.people-card .card-header img {
   max-height: 26em;
 
 }
+
+.footer .footer-legal {
+  font-size: small;
+}
+.footer .footer-legal a {
+  color: var(--nyrkio-dark-gray);
+}
