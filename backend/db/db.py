@@ -754,6 +754,12 @@ class DBStore(object):
         data, meta = separate_meta_one(results[0])
 
         series_last_modified = series_id_tuple[3]
+        if not meta:
+            # Series doesn't have a last_modified field. It probably predates the time we even
+            # had caching for change points.
+            # Caller needs to compute the change_points now.
+            return {}
+
         if meta["last_modified"] < series_last_modified:
             # User has updated the series since the change points were last computed.
             # Caller needs to recompute the change points.

@@ -74,30 +74,63 @@ async def changes(
     return await calc_changes(test_name, user.id, notifiers)
 
 
-# @api_router.get("/result/{test_name_prefix:path}/summary")
-# async def get_subtree_summary(
-#     test_name_prefix: str, user: User = Depends(auth.current_active_user)
-# ) -> Dict:
-#     """
-#     Get all change points for all test results that are in the sub-tree of `test_name_prefix` and
-#     return a summary of that data.
-#
-#     The UI would use this information to show something like "project: 57 change points, the latest
-#     on 2024-04-20".
-#
-#     Note that for this feature we have added pre-computation and storage of change points.
-#     Without such pre-compute, we would here constantly be re-computing all test results of the user!
-#     """
-#     subtree_test_names = await store.get_test_names(user.id, test_name_prefix)
-#
-#     if not subtree_test_names:
-#         raise HTTPException(status_code=404, detail="Not Found")
-#
-#     core_config = await _get_user_config(user.id)
-#
-#     for test_name in subtree_test_names:
-#         change_points = await calc_changes(test_name, results, core_config=core_config)
-#         subtree_changes[test_name] = change_points
+@api_router.get("/result/{test_name_prefix:path}/summary")
+async def get_subtree_summary(
+    test_name_prefix: str, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    """
+    Get all change points for all test results that are in the sub-tree of `test_name_prefix` and
+    return a summary of that data.
+
+    The UI would use this information to show something like "project: 57 change points, the latest
+    on 2024-04-20".
+
+    Note that for this feature we have added pre-computation and storage of change points.
+    Without such pre-compute, we would here constantly be re-computing all test results of the user!
+    """
+    store = DBStore()
+    # all_summaries = {}
+    summary = {
+        "total_change_points": 0,
+        "newest_time": None,
+        "newest_test_name": None,
+        "oldest_time": None,
+        "oldest_test_name": None,
+        "newest_change_point": None,
+        "oldest_change_point": None,
+        "largest_change": None,
+        "largest_test_name": None,
+    }
+    subtree_test_names = await store.get_test_names(user.id, test_name_prefix)
+
+    if not subtree_test_names:
+        raise HTTPException(status_code=404, detail="Not Found")
+
+    for test_name in subtree_test_names:
+        series, change_points = await _calc_changes(test_name, user.id, None)
+        for metric_name, analyzed_series in change_points.items():
+            for metric_name, cp_list in analyzed_series.change_points.items():
+                for cp in cp_list:
+                    first = summary["total_change_points"] == 0
+                    if first or summary["newest_time"] < cp.time:
+                        summary["newest_time"] = cp.time
+                        summary["newest_test_name"] = test_name
+                        summary["newest_change_point"] = cp
+                    if first or summary["oldest_time"] > cp.time:
+                        summary["oldest_time"] = cp.time
+                        summary["oldest_test_name"] = test_name
+                        summary["oldest_change_point"] = cp
+                    if first or abs(summary["largest_change"]) < abs(
+                        cp.forward_change_percent()
+                    ):
+                        summary["largest_change"] = cp.forward_change_percent()
+                        summary["largest_test_name"] = test_name
+                        summary["largest_change_point"] = cp
+
+                    summary["total_change_points"] += 1
+
+        # all_summaries["test_name"] = summary
+    return summary
 
 
 @api_router.get("/results")
@@ -278,7 +311,7 @@ def _build_result_series(
     return series
 
 
-async def calc_changes(test_name, user_id=None, notifiers=None):
+async def _calc_changes(test_name, user_id, notifiers):
     store = DBStore()
     series = None
 
@@ -294,6 +327,11 @@ async def calc_changes(test_name, user_id=None, notifiers=None):
         )
 
     changes = await get_cached_or_calc_changes(user_id, series)
+    return series, changes
+
+
+async def calc_changes(test_name, user_id=None, notifiers=None):
+    series, changes = await _calc_changes(test_name, user_id, notifiers)
     reports = await series.produce_reports(changes, notifiers)
     return reports
 
