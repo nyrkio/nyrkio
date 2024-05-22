@@ -14,6 +14,7 @@ import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
+import { LegalPage } from "./components/LegalPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { ServicesPage } from "./components/ServicesPage.jsx";
@@ -67,6 +68,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<ServicesPage loggedIn={loggedIn} />}
             />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/legal" element={<LegalPage />} />
             <Route path="/legend" element={<LegendPage />} />
             <Route
               path="/signup"

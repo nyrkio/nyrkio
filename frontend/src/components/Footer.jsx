@@ -1,3 +1,7 @@
+import ToS from "../static/doc/Terms Of Service 1.0.pdf";
+import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
+import { Link } from "react-router-dom";
+
 export const Footer = () => {
   return (
     <>
@@ -89,11 +93,18 @@ export const Footer = () => {
               </ul>
             </div>
             <div className="row justify-content-center p-3">
-              <div className="col-md-4 align-items-center text-center">
+              <div className="align-items-center text-center">
                 <span className="mb-3 mb-md-0 text-body-secondary" style={{color: "#ffffff"}}>
                   &copy; 2024 Nyrkiö Oy
                 </span>
               </div>
+            </div>
+            <div className="row justify-content-center p-3 mb-5">
+              <div className="align-items-center text-center footer-legal">
+            <Link to={ToS} target="_blank">Terms of Service</Link>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <Link to={PrivacyPolicy} target="_blank">Privacy Policy</Link>
+            </div>
             </div>
           </footer>
         </div>

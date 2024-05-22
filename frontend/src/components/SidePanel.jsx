@@ -105,6 +105,9 @@ const AboutSidePanel = ({ loggedIn }) => {
         <Link to="/about" className="nav-link">
           About Us
         </Link>
+        <Link to="/legal" className="nav-link">
+          Legal
+        </Link>
         <Link to="/legend" className="nav-link">
           The Legend of Nyyrikki
         </Link>
