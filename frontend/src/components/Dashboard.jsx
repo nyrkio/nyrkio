@@ -508,71 +508,37 @@ const validTestName = (name, testNames) => {
 };
 
 const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
-  const [rawChanges, setRawChanges] = useState([]);
+  const [rawChanges, setRawChanges] = useState({});
   const [sumChanges, setSumChanges] = useState(0);
   const [firstChanges, setFirstChanges] = useState("");
 
-  const fetchSummarizedData = async (prefix) => {
-    console.debug("Fetching number of changes for " + prefix);
-
-    const testsToSummarize = testNames.filter((name) => {
-      return name.startsWith(prefix);
-    });
-    const options = {
+  const fetchSummaryApi = async (prefix) => {
+    console.debug("Fetching summary for " + prefix);
+    const url = baseUrls.api + prefix + "/summary";
+    const response = await fetch(url, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
-    };
-
-    //console.debug(testsToSummarize);
-    const yesterday = new Date() - 24 * 60 * 60 * 1000;
-    const ten_minutes = new Date() - 10*60*1000;
-    testsToSummarize.forEach(async (testName) => {
-      // TODO(mfleming) Hack alert. For public results we added
-      // the "https://github.com" prefix in PublicDashboard.jsx and need
-      // to strip it here, otherwise we'll get HTTP 404 when hitting the
-      // backend.
-      const unencodedTestName = decodeURIComponent(testName).replace(
-        "https://github.com/",
-        ""
-      );
-      const url = baseUrls.api + unencodedTestName + "/changes";
-      //console.debug(url);
-      caches.open("nyrkio-changes").then((cache) => {
-        cache.match(url).then(async (response) => {
-          //console.debug(response);
-          if (
-            response &&
-            response.ok &&
-            Date.parse(response.headers.get("Date")) > ten_minutes //yesterday
-          ) {
-            const resultData = await response.json();
-            const newobj = {};
-            newobj[url] = resultData;
-            setRawChanges((prevState) => [...prevState, newobj]);
-          } else {
-            const response2 = await fetch(url, options);
-            if (response2 && response2.ok) {
-              const resultData = response2.clone().json();
-              cache.put(url, response2);
-              const newobj = {};
-              newobj[url] = resultData;
-              setRawChanges((prevState) => [...prevState, newobj]);
-            } else {
-              console.error(
-                "Failed to get change point summary for " + testName + " " + url
-              );
-              console.error(response2);
-            }
-          }
-        });
-      });
     });
+
+    if (response.status != 200) {
+      console.error("Failed to fetch summary: " + response.status);
+      return;
+    }
+
+    const resultData = await response.json();
+    setRawChanges(resultData);
   };
 
+
+
+
+
+
   useEffect(() => {
-    const res = fetchSummarizedData(longName);
+    //const res = fetchSummarizedData(longName);
+    const res = fetchSummaryApi(longName);
 
     return () => {
       const a = 1;
@@ -581,43 +547,21 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
   }, [baseUrls, longName, testNames]);
 
   useEffect(() => {
-    var recentDate = 0;
-    var localSum = 0;
-    setFirstChanges("");
+    var newestDate = new Date();
+    console.debug(longName);
+    console.debug(rawChanges);
+    if (rawChanges.total_change_points && parseInt(rawChanges.total_change_points) ) {
+      setSumChanges(rawChanges["total_change_points"]);
+    }
+    if (rawChanges.newest_time && parseInt(rawChanges.newest_time) ) {
+      newestDate = new Date(1000*parseInt(rawChanges["newest_time"]));
+      setFirstChanges(newestDate.toLocaleString());
+    }
 
-    // Remove duplicates due to multiple calls to useEffect
-    const correctRawChanges = [];
-    const seen = [];
-    //console.debug(longName);
-    //console.debug(rawChanges);
-    rawChanges.forEach((obj) => {
-      const key = Object.keys(obj)[0];
-      if (!seen.includes(key)) {
-        seen.push(key);
-        correctRawChanges.push(obj[key]);
-      }
-    });
-
-    correctRawChanges.forEach((obj) => {
-      const objname = Object.keys(obj)[0];
-      if (objname && objname.startsWith(longName)) {
-        obj[objname].forEach((testobj) => {
-          localSum = localSum + testobj.changes.length;
-          //console.log(sumChanges + "  " + rawChanges.length);
-          if (testobj.time >= recentDate) {
-            const testdate = new Date(testobj.time * 1000);
-            const newestDate = testdate.toLocaleDateString();
-            //console.log(newestDate);
-            setFirstChanges(newestDate);
-            //if(testdate)  setFirstChanges(testdate.toLocaleString());
-            recentDate = testobj.time;
-          }
-        });
-      }
-      setSumChanges(localSum);
-    });
   }, [rawChanges]);
 
+//   console.debug(sumChanges);
+//   console.debug(firstChanges);
   if (sumChanges > 0 && firstChanges)
     return (
       <>
