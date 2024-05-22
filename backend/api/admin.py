@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi_users.exceptions import UserNotExists
 
 from backend.auth import auth
-from backend.core.config import Config
 from backend.db.db import User, DBStore
 
 admin_router = APIRouter(prefix="/admin")
@@ -33,7 +32,6 @@ async def changes(test_path: str, user: User = Depends(auth.current_active_super
     except UserNotExists:
         raise HTTPException(status_code=404, detail="No such user exists")
 
-    store = DBStore()
     test_name = "/".join(test_path.split("/")[1:])
 
     from backend.api.api import calc_changes

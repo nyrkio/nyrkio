@@ -120,12 +120,14 @@ async def get_subtree_summary(
                         summary["oldest_time"] = cp.time
                         summary["oldest_test_name"] = test_name
                         summary["oldest_change_point"] = cp
-                    if first or abs(summary["largest_change"]) < abs(cp.forward_change_percent()):
+                    if first or abs(summary["largest_change"]) < abs(
+                        cp.forward_change_percent()
+                    ):
                         summary["largest_change"] = cp.forward_change_percent()
                         summary["largest_test_name"] = test_name
                         summary["largest_change_point"] = cp
 
-                    summary["total_change_points"] +=1
+                    summary["total_change_points"] += 1
 
         # all_summaries["test_name"] = summary
     return summary
