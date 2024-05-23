@@ -8,22 +8,26 @@ All of the examples in this doc use `curl` but you can use your favourite langua
 
 Click on the Login button in the top right corner:
 
-![Login button](/src/static/getting-started-login-button.png)
+![](/src/static/getting-started-login-button.png)
+![](/assets/getting-started-login-button.png)
 
 The easiest and recommended option is to just click on the Github button on the top and you're done.
 
-![Login screen](/src/static/getting-started-login.png)
+![](/src/static/getting-started-login.png)
+![](/assets/getting-started-login.png)
 
 ## 2. Create a JWT token
 
 We use JWT to access the Nyrkiö API. Click again on the red button on your top right. If you are
 logged in you can now select _User Settings_.
 
-![Setttings menu](/src/static/getting-started-UserSettings.png)
+![](/src/static/getting-started-UserSettings.png)
+![](/assets/getting-started-UserSettings.png)
 
 Create a new API key and make sure to copy paste it and save it somewhere.
 
-![Setttings screen](/src/static/getting-started-API-key.png)
+![](/src/static/getting-started-API-key.png)
+![](/assets/getting-started-API-key.png)
 
 ## 3. Upload performance test results
 
