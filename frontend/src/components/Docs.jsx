@@ -4,24 +4,10 @@ import { Link } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import introDoc from "../docs/intro.md";
-
-const revealToken = (ev) => {
-  //console.log(ev);
-  const target = ev.target;
-  const span = document.getElementById("token-output");
-  if(span.innerHTML==""){
-    span.innerHTML=localStorage.getItem("token");
-    target.classList.remove("bi-envelope");
-    target.classList.add("bi-envelope-open");
-  }
-  else {
-    span.innerHTML="";
-    target.classList.remove("bi-envelope-open");
-    target.classList.add("bi-envelope");
-  }
-  ev.preventDefault( );
-};
-
+import img1 from "../static/getting-started-login-button.png"
+import img2 from "../static/getting-started-login.png"
+import img3 from "../static/getting-started-UserSettings.png"
+import img4 from "../static/getting-started-API-key.png"
 
 export const Docs = () => {
   const [content, setContent] = useState("");
@@ -57,6 +43,10 @@ export const Docs = () => {
                   },
                 }}
               />
+          <img src={img1} style={{width:"1px", "maxHeight":"1px"}}/>
+          <img src={img2} style={{width:"1px", "maxHeight":"1px"}}/>
+          <img src={img3} style={{width:"1px", "maxHeight":"1px"}}/>
+          <img src={img4} style={{width:"1px", "maxHeight":"1px"}}/>
           </div>
     </>
   );
