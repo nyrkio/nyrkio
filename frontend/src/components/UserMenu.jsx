@@ -39,7 +39,7 @@ export const UserMenu = ({ setLoggedIn }) => {
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
-        "Failed to log out: " + response.status + " " + response.statusText
+        "Failed to log out: " + response.status + " " + response.statusText,
       );
     }
     setLoggedIn(false);

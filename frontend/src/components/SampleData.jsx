@@ -87,12 +87,15 @@ export const SampleData = () => {
       <div className="col">
         <h1>See for yourself!</h1>
         <p>&nbsp;</p>
-        <p>
-          Here is the benchmark data from our friends at{" "}
-        </p>
+        <p>Here is the benchmark data from our friends at </p>
         <p>
           <a href="https://tigerbeetle.com/" target="_blank" rel="noreferrer">
-          <img src={tigerBeetleLogo} alt="TigerBeetle logo" title="TigerBeetle" className="tb-logo" />
+            <img
+              src={tigerBeetleLogo}
+              alt="TigerBeetle logo"
+              title="TigerBeetle"
+              className="tb-logo"
+            />
           </a>
         </p>
       </div>
@@ -101,7 +104,9 @@ export const SampleData = () => {
       </div>
       <hr />
       <div className="row">
-        <a href="/public">More public test results from other Nyrkiö users...</a>
+        <a href="/public">
+          More public test results from other Nyrkiö users...
+        </a>
       </div>
       <hr />
     </div>

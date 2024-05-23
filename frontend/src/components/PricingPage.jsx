@@ -6,16 +6,16 @@ export const PricingPage = ({ loggedIn }) => {
   const enterprisePriceFloor = 40;
   const enterprisePricePerHead = 40;
   const [businessPrice, setBusinessPrice] = useState(
-    businessPriceFloor * businessPricePerHead
+    businessPriceFloor * businessPricePerHead,
   );
   const [enterprisePrice, setEnterprisePrice] = useState(
-    enterprisePriceFloor * enterprisePricePerHead
+    enterprisePriceFloor * enterprisePricePerHead,
   );
   const cut1 = 100;
   const [annualDiscount, setAnnualDiscount] = useState(false);
   const [annualSavingsPercent, setAnnualSavingsPercent] = useState(20);
   const [annualSavingsEuro, setAnnualSavingsEuro] = useState(
-    enterprisePrice * 12 * (annualSavingsPercent / 100)
+    enterprisePrice * 12 * (annualSavingsPercent / 100),
   );
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
@@ -27,7 +27,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       b = Math.max(
         businessPriceFloor * businessPricePerHead,
-        total * businessPricePerHead
+        total * businessPricePerHead,
       );
       b = Math.round(b);
     } else if (total <= 5000) {
@@ -44,7 +44,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       e = Math.max(
         enterprisePriceFloor * enterprisePricePerHead,
-        total * enterprisePricePerHead
+        total * enterprisePricePerHead,
       );
       e = Math.round(e);
     } else if (total <= 5000) {
@@ -82,10 +82,10 @@ export const PricingPage = ({ loggedIn }) => {
     return rounded;
   };
   const [busHours, setBusHours] = useState(
-    getBusHours(businessPriceFloor * businessPricePerHead)
+    getBusHours(businessPriceFloor * businessPricePerHead),
   );
   const [entHours, setEntHours] = useState(
-    getEntHours(enterprisePriceFloor * enterprisePricePerHead)
+    getEntHours(enterprisePriceFloor * enterprisePricePerHead),
   );
 
   const updateDiscount = () => {
@@ -276,10 +276,10 @@ export const PricingPage = ({ loggedIn }) => {
             <h1>Pricing</h1>
             <div className="p-3 mb-3">
               Pricing plans are simple: For small to medium sized companies,
-              pricing is based on the size of your team or organization.
-              The subscription automatically covers all engineers, because we
-              want to empower everyone on the team to be responsible for
-              performance of their own code.
+              pricing is based on the size of your team or organization. The
+              subscription automatically covers all engineers, because we want
+              to empower everyone on the team to be responsible for performance
+              of their own code.
             </div>
           </div>
         </div>
@@ -398,7 +398,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company."
+                            "Please enter number of employees in the company.",
                           );
                           e.preventDefault();
                           return false;
@@ -460,7 +460,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company."
+                            "Please enter number of employees in the company.",
                           );
                           e.preventDefault();
                           return false;
@@ -509,8 +509,8 @@ export const PricingPage = ({ loggedIn }) => {
         <p>
           *){" "}
           <small>
-            Now in closed beta: Benchmarking as a Service. We run your benchmarks on
-            servers tuned to minimize random noise in the results.
+            Now in closed beta: Benchmarking as a Service. We run your
+            benchmarks on servers tuned to minimize random noise in the results.
           </small>
         </p>
 
@@ -564,8 +564,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </tr>
               </tbody>
 
-              <tbody>
-              </tbody>
+              <tbody></tbody>
 
               <tbody>
                 <tr>
@@ -600,8 +599,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <th scope="row" className="text-start">
                     Slack alerts
                   </th>
-                  <td>
-                  </td>
+                  <td></td>
                   <td>
                     <i className="bi bi-check"></i>
                   </td>
@@ -613,8 +611,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <th scope="row" className="text-start">
                     Email alerts
                   </th>
-                  <td>
-                  </td>
+                  <td></td>
                   <td>
                     <i className="bi bi-check"></i>
                   </td>
@@ -626,10 +623,8 @@ export const PricingPage = ({ loggedIn }) => {
                   <th scope="row" className="text-start">
                     Jira integration
                   </th>
-                  <td>
-                  </td>
-                  <td>
-                  </td>
+                  <td></td>
+                  <td></td>
                   <td>
                     <i className="bi bi-check"></i>
                   </td>
@@ -641,10 +636,8 @@ export const PricingPage = ({ loggedIn }) => {
                   <th scope="row" className="text-start">
                     Indemnification, NDA, SLA
                   </th>
-                  <td>
-                  </td>
-                  <td>
-                  </td>
+                  <td></td>
+                  <td></td>
                   <td>
                     <i className="bi bi-check"></i>
                   </td>

@@ -43,7 +43,7 @@ export const DrawLineChart = ({
       (result) =>
         result.metrics
           .filter((metric) => metric.name === metricName)
-          .map((metric) => metric.value)[0]
+          .map((metric) => metric.value)[0],
     );
     return value_map;
   };
@@ -100,7 +100,7 @@ export const DrawLineChart = ({
     const handleClose = () => setShow(false);
 
     var result = displayData.find(
-      (o) => parseTimestamp(o.timestamp) === timestamp
+      (o) => parseTimestamp(o.timestamp) === timestamp,
     );
 
     if (result === undefined) {
@@ -188,7 +188,7 @@ export const DrawLineChart = ({
       e.nativeEvent,
       "nearest",
       { intersect: false },
-      true
+      true,
     );
 
     if (points.length === 0) {
@@ -313,7 +313,7 @@ export const DrawLineChart = ({
                             });
                           }
                         });
-                      }
+                      },
                     );
 
                     return labelArray;

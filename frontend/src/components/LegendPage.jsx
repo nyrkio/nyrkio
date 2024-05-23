@@ -18,12 +18,12 @@ export const LegendPage = () => {
           <h3>A spirit has many names</h3>
           <p>
             Nyrkiö is one of the many names of{" "}
-            <span className="nyrkio-accent-dark">Nyyrikki</span>, the ancient spirit
-            of hunting of the Finnish and Karelian conifer forests. They are the
-            son of Tapio, the king of the forest, and Mielikki the protective
-            and kind mother of the forest kingdom. They also have a sister,
-            Tellervo - a playful and beautiful young girl, who nevertheless is
-            assigned responsibility for cattle and the birds.
+            <span className="nyrkio-accent-dark">Nyyrikki</span>, the ancient
+            spirit of hunting of the Finnish and Karelian conifer forests. They
+            are the son of Tapio, the king of the forest, and Mielikki the
+            protective and kind mother of the forest kingdom. They also have a
+            sister, Tellervo - a playful and beautiful young girl, who
+            nevertheless is assigned responsibility for cattle and the birds.
           </p>
           <p>
             The forest is a holy place for the Fennic tribes (Hämäläiset,
@@ -37,22 +37,22 @@ export const LegendPage = () => {
           </p>
           <p>
             Nyrkiö is known under many names beyond just{" "}
-            <span className="nyrkio-accent-dark">Nyyrikki</span>. A Latin manuscript
-            uses the variant <em>Nyrckes</em>, which hence can be thought of as
-            the international variation of the name. Although in most songs
-            Nyyrikki is introduced as the <em>son</em> of Tapio, they are
-            sometimes also witnessed to have taken a more feminine corpus when
-            interacting with humans. In fact the "kki" ending in the name
+            <span className="nyrkio-accent-dark">Nyyrikki</span>. A Latin
+            manuscript uses the variant <em>Nyrckes</em>, which hence can be
+            thought of as the international variation of the name. Although in
+            most songs Nyyrikki is introduced as the <em>son</em> of Tapio, they
+            are sometimes also witnessed to have taken a more feminine corpus
+            when interacting with humans. In fact the "kki" ending in the name
             suggests feminine association, while Nyrckes, Nyrkiö and others are
             masculin names. Hence we use{" "}
             <a href="https://en.wikipedia.org/wiki/Singular_they">
               singular they
             </a>{" "}
             as the pronoun when referring to{" "}
-            <span className="nyrkio-accent-dark">Nyyrikki</span>. This is of course
-            purely as guidance for our international readers, as{" "}
-            <span className="nyrkio-accent-dark">Nyyrikki</span> themselves remains
-            blissfully unaware of gendered pronouns...{" "}
+            <span className="nyrkio-accent-dark">Nyyrikki</span>. This is of
+            course purely as guidance for our international readers, as{" "}
+            <span className="nyrkio-accent-dark">Nyyrikki</span> themselves
+            remains blissfully unaware of gendered pronouns...{" "}
             <a href="https://finland.fi/han/article/">
               Finnish and Finno-Ugric languages don't have them
             </a>
@@ -90,13 +90,13 @@ export const LegendPage = () => {
             </p>
             <p>
               And in that kingdom,{" "}
-              <span className="nyrkio-accent-dark">Nyyrikki</span> is assigned the
-              caretaker role for small game, in particular the squirrels.
+              <span className="nyrkio-accent-dark">Nyyrikki</span> is assigned
+              the caretaker role for small game, in particular the squirrels.
             </p>
             <p>
               While seemingly a lesser task in the family*,{" "}
-              <span className="nyrkio-accent-dark">Nyyrikki</span> is known to be a
-              loyal and committed guardian spirit, caring well for their
+              <span className="nyrkio-accent-dark">Nyyrikki</span> is known to
+              be a loyal and committed guardian spirit, caring well for their
               creatures. And so it was the case, that eventually the small
               squirrels, and particularly their skin, was considered the most
               precious possession a hunter could catch in the forest. (Second
@@ -156,8 +156,8 @@ export const LegendPage = () => {
               <span className="nyrkio-accent-dark">Nyyrikki</span> to reveal a
               squirrel or some other pray up on a branch. And{" "}
               <span className="nyrkio-accent-dark">Nyyrikki</span> will also put
-              some <span className="nyrkio-accent-dark">markers</span> in front of
-              the hunter, so that they will see a clear path out of the dark
+              some <span className="nyrkio-accent-dark">markers</span> in front
+              of the hunter, so that they will see a clear path out of the dark
               forests.
             </p>
           </div>
