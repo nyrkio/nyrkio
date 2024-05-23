@@ -43,14 +43,14 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             "Authentication to Nyrkiö.com failed: " +
               response.status +
               " " +
-              response.statusText
+              response.statusText,
           );
           setErrorText(
             "Authentication to Nyrkiö.com failed! (" +
               response.status +
               " " +
               response.statusText +
-              ")"
+              ")",
           );
           setLoggedIn(false);
           return false;

@@ -55,13 +55,13 @@ const LearnMore = () => {
       <div className="row pt-5">
         <h3>Ready to try it?</h3>
       </div>
-     <div className="row pt-2">
+      <div className="row pt-2">
         <Link to="/docs/getting-started">Getting started guide</Link>
       </div>
       <div className="row pt-5">
         <h3>Want to learn more?</h3>
       </div>
-     <div className="row pt-2">
+      <div className="row pt-2">
         <Link to="/product">Read about change detection</Link>
       </div>
     </div>

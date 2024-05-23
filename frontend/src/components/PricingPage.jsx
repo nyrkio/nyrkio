@@ -6,16 +6,16 @@ export const PricingPage = ({ loggedIn }) => {
   const enterprisePriceFloor = 40;
   const enterprisePricePerHead = 40;
   const [businessPrice, setBusinessPrice] = useState(
-    businessPriceFloor * businessPricePerHead
+    businessPriceFloor * businessPricePerHead,
   );
   const [enterprisePrice, setEnterprisePrice] = useState(
-    enterprisePriceFloor * enterprisePricePerHead
+    enterprisePriceFloor * enterprisePricePerHead,
   );
   const cut1 = 100;
   const [annualDiscount, setAnnualDiscount] = useState(false);
   const [annualSavingsPercent, setAnnualSavingsPercent] = useState(20);
   const [annualSavingsEuro, setAnnualSavingsEuro] = useState(
-    enterprisePrice * 12 * (annualSavingsPercent / 100)
+    enterprisePrice * 12 * (annualSavingsPercent / 100),
   );
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
@@ -27,7 +27,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       b = Math.max(
         businessPriceFloor * businessPricePerHead,
-        total * businessPricePerHead
+        total * businessPricePerHead,
       );
       b = Math.round(b);
     } else if (total <= 5000) {
@@ -44,7 +44,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       e = Math.max(
         enterprisePriceFloor * enterprisePricePerHead,
-        total * enterprisePricePerHead
+        total * enterprisePricePerHead,
       );
       e = Math.round(e);
     } else if (total <= 5000) {
@@ -82,10 +82,10 @@ export const PricingPage = ({ loggedIn }) => {
     return rounded;
   };
   const [busHours, setBusHours] = useState(
-    getBusHours(businessPriceFloor * businessPricePerHead)
+    getBusHours(businessPriceFloor * businessPricePerHead),
   );
   const [entHours, setEntHours] = useState(
-    getEntHours(enterprisePriceFloor * enterprisePricePerHead)
+    getEntHours(enterprisePriceFloor * enterprisePricePerHead),
   );
 
   const updateDiscount = () => {
@@ -276,10 +276,10 @@ export const PricingPage = ({ loggedIn }) => {
             <h1>Pricing</h1>
             <div className="p-3 mb-3">
               Pricing plans are simple: For small to medium sized companies,
-              pricing is based on the size of your team or organization size.
-              The subscription automatically covers all engineers, because we
-              want to empower everyone on the team to be responsible for
-              performance of their own code.
+              pricing is based on the size of your team or organization. The
+              subscription automatically covers all engineers, because we want
+              to empower everyone on the team to be responsible for performance
+              of their own code.
             </div>
           </div>
         </div>
@@ -345,9 +345,9 @@ export const PricingPage = ({ loggedIn }) => {
                   0<small className="text-body-secondary fw-light"> €/mo</small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
-                  <li>100 test results</li>
-                  <li>1 metric per test</li>
-                  <li>Monitor 1 GitHub branch</li>
+                  <li>1 Github branch</li>
+                  <li>10 metrics per branch</li>
+                  <li>History of 100 points per metric</li>
                 </ul>
                 <button
                   type="button"
@@ -370,8 +370,10 @@ export const PricingPage = ({ loggedIn }) => {
                   <BusinessPrice />
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
-                  <li>10,000 test results</li>
+                  <li>10 Git branches</li>
+                  <li>10 tests per branch</li>
                   <li>100 metrics per test</li>
+                  <li>History of 200 points per metric</li>
                   <li>Email and Slack notifications</li>
                   <li>Support for teams</li>
                   <li>{busHours} cpu-hours/month*</li>
@@ -396,7 +398,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company."
+                            "Please enter number of employees in the company.",
                           );
                           e.preventDefault();
                           return false;
@@ -458,7 +460,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company."
+                            "Please enter number of employees in the company.",
                           );
                           e.preventDefault();
                           return false;
@@ -507,8 +509,8 @@ export const PricingPage = ({ loggedIn }) => {
         <p>
           *){" "}
           <small>
-            Coming soon: Benchmarking as a Service. We run your benchmarks on
-            servers tuned to minimize random noise in the results.
+            Now in closed beta: Benchmarking as a Service. We run your
+            benchmarks on servers tuned to minimize random noise in the results.
           </small>
         </p>
 
@@ -530,31 +532,41 @@ export const PricingPage = ({ loggedIn }) => {
               <tbody>
                 <tr>
                   <th scope="row" className="text-start">
-                    Test Results
-                  </th>
-                  <td>100</td>
-                  <td>10,000</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    Metrics per test
-                  </th>
-                  <td>1</td>
-                  <td>100</td>
-                  <td>Unlimited</td>
-                </tr>
-              </tbody>
-
-              <tbody>
-                <tr>
-                  <th scope="row" className="text-start">
                     GitHub branch monitoring
                   </th>
                   <td>1 branch</td>
                   <td>10 branches</td>
                   <td>Unlimited</td>
                 </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    Tests / branch
+                  </th>
+                  <td>10</td>
+                  <td>10</td>
+                  <td>Unlimited</td>
+                </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    Metrics / test
+                  </th>
+                  <td>10</td>
+                  <td>100</td>
+                  <td>Unlimited</td>
+                </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    History of points / metric
+                  </th>
+                  <td>100</td>
+                  <td>200</td>
+                  <td>Unlimited</td>
+                </tr>
+              </tbody>
+
+              <tbody></tbody>
+
+              <tbody>
                 <tr>
                   <th scope="row" className="text-start">
                     GitHub PR gating
@@ -583,25 +595,51 @@ export const PricingPage = ({ loggedIn }) => {
                     <i className="bi bi-check"></i>
                   </td>
                 </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    Slack alerts
+                  </th>
+                  <td></td>
+                  <td>
+                    <i className="bi bi-check"></i>
+                  </td>
+                  <td>
+                    <i className="bi bi-check"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    Email alerts
+                  </th>
+                  <td></td>
+                  <td>
+                    <i className="bi bi-check"></i>
+                  </td>
+                  <td>
+                    <i className="bi bi-check"></i>
+                  </td>
+                </tr>
+                <tr>
+                  <th scope="row" className="text-start">
+                    Jira integration
+                  </th>
+                  <td></td>
+                  <td></td>
+                  <td>
+                    <i className="bi bi-check"></i>
+                  </td>
+                </tr>
               </tbody>
 
               <tbody>
                 <tr>
                   <th scope="row" className="text-start">
-                    Integrations
+                    Indemnification, NDA, SLA
                   </th>
                   <td></td>
+                  <td></td>
                   <td>
-                    Email
-                    <br />
-                    Slack
-                  </td>
-                  <td>
-                    Email
-                    <br />
-                    Slack
-                    <br />
-                    JIRA
+                    <i className="bi bi-check"></i>
                   </td>
                 </tr>
               </tbody>
@@ -617,7 +655,8 @@ export const PricingPage = ({ loggedIn }) => {
                 </tr>
                 <tr>
                   <th scope="row" className="text-start"></th>
-                  <td colSpan="3" className="nyrkio-right">
+                  <td></td>
+                  <td colSpan="2" className="nyrkio-right">
                     <small>
                       Additional CPUH credits at {CPUHdollars * dollarToEuro}{" "}
                       EUR.

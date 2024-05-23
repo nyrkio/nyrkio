@@ -52,15 +52,15 @@ export const Breadcrumb = ({ testName, baseUrls }) => {
             <ol className="breadcrumb">
               {console.log(baseUrls.breadCrumbtestRootTitle)}
 
-            {baseUrls.breadcrumbTestRootTitle ?
-              <li className="breadcrumb-item" key="root">
-                <Link to={`${baseUrls.testRoot}`}>
-                  {baseUrls.breadcrumbTestRootTitle}
-                </Link>
-              </li>
-            :
-              <span></span>
-              }
+              {baseUrls.breadcrumbTestRootTitle ? (
+                <li className="breadcrumb-item" key="root">
+                  <Link to={`${baseUrls.testRoot}`}>
+                    {baseUrls.breadcrumbTestRootTitle}
+                  </Link>
+                </li>
+              ) : (
+                <span></span>
+              )}
               {createItems()}
             </ol>
           </nav>
@@ -135,7 +135,6 @@ export const Dashboard = () => {
   var prefix;
 
   document.body.classList.add("section-dashboards");
-
 
   // Remove /tests/ from the beginning of the path
   if (location.pathname.startsWith("/tests/")) {
@@ -337,21 +336,20 @@ export const SingleResultWithTestname = ({
               <ChangePointSummaryTable changeData={changePointData} />
             </div>
 
-          {!isPublicDashboard(dashboardType) && (
-            <div className="row mt-5">
-              <p className="text-center small mb-1">Publish test results</p>
-              <TestSettings
-                dashboardType={dashboardType}
-                testName={testName}
-                attributes={
-                  displayData.length > 0
-                    ? displayData[displayData.length - 1].attributes
-                    : undefined
-                }
-              />
-            </div>
-          )}
-
+            {!isPublicDashboard(dashboardType) && (
+              <div className="row mt-5">
+                <p className="text-center small mb-1">Publish test results</p>
+                <TestSettings
+                  dashboardType={dashboardType}
+                  testName={testName}
+                  attributes={
+                    displayData.length > 0
+                      ? displayData[displayData.length - 1].attributes
+                      : undefined
+                  }
+                />
+              </div>
+            )}
 
             <div className="row">
               {unique.map((metric) => {
@@ -531,11 +529,6 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
     setRawChanges(resultData);
   };
 
-
-
-
-
-
   useEffect(() => {
     //const res = fetchSummarizedData(longName);
     const res = fetchSummaryApi(longName);
@@ -550,18 +543,20 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
     var newestDate = new Date();
     console.debug(longName);
     console.debug(rawChanges);
-    if (rawChanges.total_change_points && parseInt(rawChanges.total_change_points) ) {
+    if (
+      rawChanges.total_change_points &&
+      parseInt(rawChanges.total_change_points)
+    ) {
       setSumChanges(rawChanges["total_change_points"]);
     }
-    if (rawChanges.newest_time && parseInt(rawChanges.newest_time) ) {
-      newestDate = new Date(1000*parseInt(rawChanges["newest_time"]));
+    if (rawChanges.newest_time && parseInt(rawChanges.newest_time)) {
+      newestDate = new Date(1000 * parseInt(rawChanges["newest_time"]));
       setFirstChanges(newestDate.toLocaleString());
     }
-
   }, [rawChanges]);
 
-//   console.debug(sumChanges);
-//   console.debug(firstChanges);
+  //   console.debug(sumChanges);
+  //   console.debug(firstChanges);
   if (sumChanges > 0 && firstChanges)
     return (
       <>
@@ -588,6 +583,5 @@ const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
         </div>
       </>
     );
-  else
-    return (<span className="summarize-cp-no-changes"></span>);
+  else return <span className="summarize-cp-no-changes"></span>;
 };

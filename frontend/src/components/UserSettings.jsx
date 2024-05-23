@@ -37,7 +37,7 @@ const ApiKey = () => {
         "Failed to generate API key: " +
           response.status +
           " " +
-          response.statusText
+          response.statusText,
       );
     } else {
       const data = await response.json();
@@ -110,10 +110,10 @@ const HunterSettings = () => {
   const saveHunterSettingsReal = async () => {
     const minMagnitude =
       getRealMinMagnitude(
-        document.getElementById("nyrkio-min-magnitude-slider").value
+        document.getElementById("nyrkio-min-magnitude-slider").value,
       ) / 100.0;
     const pValue = getRealPValue(
-      document.getElementById("nyrkio-p-value-slider").value
+      document.getElementById("nyrkio-p-value-slider").value,
     );
     const configObject = {
       core: { min_magnitude: minMagnitude, max_pvalue: pValue },
@@ -180,7 +180,7 @@ const HunterSettings = () => {
     const scaledDown = rawValue / 1000.0;
     const logScale = Math.pow(scaledDown, 4) / 100;
     const quantized = parseFloat(
-      (Math.round(logScale * 2) / 2.0).toPrecision(2)
+      (Math.round(logScale * 2) / 2.0).toPrecision(2),
     );
     //console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized));
     return quantized;

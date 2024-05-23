@@ -78,8 +78,8 @@ body {
 }
 
 .row {
-  margin-left:0;
-  margin-right:0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 div.nyyrikki-banner-right,
@@ -108,7 +108,6 @@ img.nyyrikki-original-art {
   max-height: 110vh;
 }
 
-
 body.section-about .footer {
   background-image: url(/src/static/36215479721_4beda5c4ae_k.jpg);
   background-repeat: no-repeat;
@@ -118,7 +117,6 @@ body.section-about .footer {
   background-opacity: 0.5;
   height: 600px;
 }
-
 
 body #root div.container-fluid {
   padding-left: 0px;
@@ -168,7 +166,6 @@ img.tb-logo {
   margin-top: 2em;
   margin-bottom: 2em;
 }
-
 
 div.container.nyyrikki-legend .nyyrikki-last-text {
   margin-bottom: 300px;
@@ -270,11 +267,9 @@ button:focus-visible {
 .nyrkio-services .card .card-body .card-body-text {
   height: 15em;
   overflow: scroll;
-
 }
 .nyrkio-services .card p {
   font-weight: bold;
-
 }
 .nyrkio-services .card button.disabled-empty-space {
   background-color: transparent;
@@ -331,7 +326,9 @@ button:focus-visible {
   display: block;
   padding: 0.5rem 1rem;
   text-decoration: none;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
 }
 
@@ -361,9 +358,6 @@ button:focus-visible {
 .navbar-left.navbar-nav a.nav-link {
   color: var(--nyrkio-tattoo-red);
 }
-
-
-
 
 .btn-success {
   color: var(--nyrkio-light-gray3);
@@ -508,15 +502,14 @@ div.card div.card-header {
 
 .summarize-change-points {
   font-size: 70%;
-  color: var(--nyrkio-active)
+  color: var(--nyrkio-active);
 }
 
 @media (max-width: 799px) {
-    .summarize-change-points .summarize-cp-text{
-        display: none;
-    }
+  .summarize-change-points .summarize-cp-text {
+    display: none;
+  }
 }
-
 
 .ag-theme-nyrkio a {
   color: var(--nyrkio-tattoo-red);
@@ -645,7 +638,7 @@ div.card div.card-header {
   font-style: italic;
 }
 .nyrkio-pricing .nyrkio-plans .col .card {
-  min-height: 23em;
+  min-height: 25em;
 }
 
 .nyrkio-pricing .nyrkio-plans .col .card small {
@@ -687,7 +680,7 @@ div.card div.card-header {
 .nyrkio-pricing .nyrkio-pricing-note {
   margin-top: 4em;
   margin-bottom: 4em;
-  padding:1em;
+  padding: 1em;
   border-radius: 1em;
   color: var(--nyrkio-horn-dark-brown);
   background-color: var(--nyrkio-light-gray4);
@@ -697,13 +690,12 @@ div.card div.card-header {
   text-decoration: underline;
 }
 
-
 .nyrkio-pricing .calculator-annual {
   background-color: var(--bs-light);
 }
 .nyrkio-pricing .calculator-annual div {
   text-align: left;
-  padding-top:0.5em;
+  padding-top: 0.5em;
 }
 
 .form-switch .form-check-input {
@@ -711,16 +703,16 @@ div.card div.card-header {
   border-color: var(--nyrkio-horn-light-brown);
 }
 .form-switch .form-check-input:focus {
-    border-color: var(--nyrkio-horn-light-brown);
-    outline: 0;
-    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
-    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
+  border-color: var(--nyrkio-horn-light-brown);
+  outline: 0;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,0.25)'/></svg>");
 }
 .form-switch .form-check-input:checked {
-    background-color: var(--nyrkio-tattoo-red);
-    border-color: white;
-    border: none;
-    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
+  background-color: var(--nyrkio-tattoo-red);
+  border-color: white;
+  border: none;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,1.0)'/></svg>");
 }
 
 .nyrkio-pricing .nyrkio-open-source {
@@ -752,7 +744,8 @@ input[type="range"].nyrkio-slider::-moz-range-thumb {
   width: 20px;
   height: 20px;
   background-color: var(--nyrkio-tattoo-red);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 1px 2px rgba(0, 0, 0, 0.05);
   border: 0px solid transparent;
 }
@@ -784,7 +777,8 @@ input[type="range"].nyrkio-slider::-webkit-slider-thumb {
   width: 20px;
   height: 20px;
   background-color: var(--nyrkio-tattoo-red);
-  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2),
+  -webkit-box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
     0 1px 2px rgba(0, 0, 0, 0.05);
   border-radius: 10px;
 }
@@ -808,7 +802,6 @@ input[type="range"].nyrkio-slider::-webkit-slider-runnable-track {
 div.card.people-card .card-header img {
   max-width: 100%;
   max-height: 26em;
-
 }
 
 .footer .footer-legal {

@@ -17,7 +17,7 @@ const SubscribeSuccess = ({ sessionId }) => {
         "Failed to send session ID: " +
           response.status +
           " " +
-          response.statusText
+          response.statusText,
       );
     }
   };
@@ -67,7 +67,7 @@ const UserBillingPage = () => {
         "Failed to fetch billing info: " +
           response.status +
           " " +
-          response.statusText
+          response.statusText,
       );
       return;
     }
@@ -109,7 +109,7 @@ const UserBillingPage = () => {
         "Failed to create portal session: " +
           response.status +
           " " +
-          response.statusText
+          response.statusText,
       );
       return;
     }
