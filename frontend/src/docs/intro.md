@@ -1,34 +1,3 @@
-# Getting started in 3 easy steps
-
-This guide will show you how to get started with Nyrkiö.
-
-All of the examples in this doc use `curl` but you can use your favourite language and libraries for sending HTTP requests.
-
-## 1.Create a user account
-
-Click on the Login button in the top right corner:
-
-![](/src/static/getting-started-login-button.png)
-![](/assets/getting-started-login-button.png)
-
-The easiest and recommended option is to just click on the Github button on the top and you're done.
-
-![](/src/static/getting-started-login.png)
-![](/assets/getting-started-login.png)
-
-## 2. Create a JWT token
-
-We use JWT to access the Nyrkiö API. Click again on the red button on your top right. If you are
-logged in you can now select _User Settings_.
-
-![](/src/static/getting-started-UserSettings.png)
-![](/assets/getting-started-UserSettings.png)
-
-Create a new API key and make sure to copy paste it and save it somewhere.
-
-![](/src/static/getting-started-API-key.png)
-![](/assets/getting-started-API-key.png)
-
 ## 3. Upload performance test results
 
 Now comes the main bit -- uploading performance test results. The JSON schema for test results has a few required fields which are described in more detail in the [API docs](/openapi).
