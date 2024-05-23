@@ -74,7 +74,7 @@ The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "in
 
 ## 4. View the charts in the dashboard
 
-Now, if you navigate to https://nyrkio.com/result/BENCHMARK1 you'll see three charts with a single data point each.
+Now, if you navigate to https://nyrkio.com/result/benchmark1 you'll see three charts with a single data point each.
 
 ## Questions?
 
