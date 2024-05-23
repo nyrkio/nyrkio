@@ -52,9 +52,17 @@ const FeatureHighlight = () => {
 const LearnMore = () => {
   return (
     <div className="container pt-5 text-center">
-      <div className="row">
+      <div className="row pt-5">
+        <h3>Ready to try it?</h3>
+      </div>
+     <div className="row pt-2">
+        <Link to="/docs/getting-started">Getting started guide</Link>
+      </div>
+      <div className="row pt-5">
         <h3>Want to learn more?</h3>
-        <Link to="/product">Read about the product here</Link>
+      </div>
+     <div className="row pt-2">
+        <Link to="/product">Read about change detection</Link>
       </div>
     </div>
   );

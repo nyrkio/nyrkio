@@ -8,9 +8,9 @@ export const UserSettings = () => {
   return (
     <>
       <div className="container">
+        <ApiKey />
         <HunterSettings />
         <SlackSettings />
-        <ApiKey />
       </div>
     </>
   );
@@ -84,7 +84,7 @@ const ApiKey = () => {
       <div className="row pt-5 justify-content-center">
         <div className="col-md-8">
           <div className="card">
-            <div className="card-header">API keys</div>
+            <div className="card-header p-2">API keys</div>
             <div className="card-body"></div>
             <div className="row">
               <b>
@@ -301,7 +301,7 @@ const HunterSettings = () => {
     <div className="row pt-5 justify-content-center">
       <div className="col-md-8">
         <div className="card">
-          <div className="card-header">Change Point Detection</div>
+          <div className="card-header p-2">Change Point Detection</div>
           <div className="card-body">
             <p className="card-text">
               These settings are global for all your metrics.
@@ -370,7 +370,7 @@ const SlackSettings = () => {
     <div className="row pt-5 justify-content-center">
       <div className="col-md-8">
         <div className="card">
-          <div className="card-header">Slack</div>
+          <div className="card-header p-2">Slack</div>
           <div className="card-body">
             {Object.keys(slackData).length > 0 ? (
               <>

@@ -4,47 +4,10 @@ import { Link } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import introDoc from "../docs/intro.md";
-
-const revealToken = (ev) => {
-  //console.log(ev);
-  const target = ev.target;
-  const span = document.getElementById("token-output");
-  if(span.innerHTML==""){
-    span.innerHTML=localStorage.getItem("token");
-    target.classList.remove("bi-envelope");
-    target.classList.add("bi-envelope-open");
-  }
-  else {
-    span.innerHTML="";
-    target.classList.remove("bi-envelope-open");
-    target.classList.add("bi-envelope");
-  }
-  ev.preventDefault( );
-};
-
-const getMyLoggedInToken = () => {
-  const loggedIn = localStorage.getItem("loggedIn");
-  if(!loggedIn){
-    return (
-      <></>
-    );
-  }
-  else {
-    return (
-
-    <>
-      <div id="get-jwt-token" className="p-5">
-      <Link to="/" className="text-right" onClick={revealToken}>
-      <span title="Click here to get your current JWT token..."
-            className="get-jwt-token bi bi-envelope"></span>
-      </Link>
-      <br />
-      <span id="token-output"></span>
-      </div>
-    </>
-    );
-  }
-};
+import img1 from "../static/getting-started-login-button.png"
+import img2 from "../static/getting-started-login.png"
+import img3 from "../static/getting-started-UserSettings.png"
+import img4 from "../static/getting-started-API-key.png"
 
 export const Docs = () => {
   const [content, setContent] = useState("");
@@ -60,7 +23,7 @@ export const Docs = () => {
   return (
     <>
         <div className="row mt-4 m-2 p-0 col-lg-10">
-              {getMyLoggedInToken()}
+        <FirstHalf />
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 children={content}
@@ -84,4 +47,53 @@ export const Docs = () => {
           </div>
     </>
   );
+};
+
+const FirstHalf = () => {
+  return (
+    <>
+    <div>
+      <h1> Getting started in 3 easy steps</h1>
+
+      <p>
+      This guide will show you how to get started with Nyrkiö.
+      </p>
+
+      <p>
+      All of the examples in this doc use `curl` but you can use your favourite language and libraries for sending HTTP requests.
+      </p>
+
+      <h2> 1.Create a user account</h2>
+
+      <p>
+      Click on the Login button in the top right corner:
+      </p>
+
+          <img src={img1} />
+
+      <p>
+      The easiest and recommended option is to just click on the Github button on the top and you're done.
+      </p>
+
+          <img src={img2} />
+
+      <h2> 2. Create a JWT token</h2>
+
+      <p>
+      We use JWT to access the Nyrkiö API. Click again on the red button on your top right. If you are
+      logged in you can now select _User Settings_.
+      </p>
+
+          <img src={img3} />
+      <p>
+      Create a new API key and make sure to copy paste it and save it somewhere.
+      </p>
+
+          <img src={img4} />
+
+
+      </div>
+    </>
+  );
+
 };
