@@ -22,29 +22,6 @@ const revealToken = (ev) => {
   ev.preventDefault( );
 };
 
-const getMyLoggedInToken = () => {
-  const loggedIn = localStorage.getItem("loggedIn");
-  if(!loggedIn){
-    return (
-      <></>
-    );
-  }
-  else {
-    return (
-
-    <>
-      <div id="get-jwt-token" className="p-5">
-      <Link to="/" className="text-right" onClick={revealToken}>
-      <span title="Click here to get your current JWT token..."
-            className="get-jwt-token bi bi-envelope"></span>
-      </Link>
-      <br />
-      <span id="token-output"></span>
-      </div>
-    </>
-    );
-  }
-};
 
 export const Docs = () => {
   const [content, setContent] = useState("");
@@ -60,7 +37,6 @@ export const Docs = () => {
   return (
     <>
         <div className="row mt-4 m-2 p-0 col-lg-10">
-              {getMyLoggedInToken()}
               <ReactMarkdown
                 remarkPlugins={[remarkGfm]}
                 children={content}
