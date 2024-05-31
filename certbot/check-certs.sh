@@ -30,6 +30,7 @@ if [ ! -f /etc/letsencrypt/live/$DOMAIN/fullchain.pem ]; then
 else
   # If the certificate common name (CN) is localhost then that's a dummy certificate
   # and we need to use certbot to create a real one.
+  # Alternatively, if the certificate is about to expire in less than 14 days, we should renew it.
   if [ "$(openssl x509 -noout -subject -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem)" = "subject=CN = localhost" ]; then
     echo "Creating real certificate for $DOMAIN"
     # Avoid "live directory exists for $DOMAIN" error
@@ -43,6 +44,9 @@ else
       done
     fi
     certbot certonly --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
+  elif [ "$(openssl x509 -noout -checkend $((60*60*24*14)) -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem)" = "Certificate will expire" ]; then
+    echo "Renewing certificate for $DOMAIN"
+    certbot renew --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
   else
     echo "Certificate for $DOMAIN already exists and is not a dummy certificate."
   fi
