@@ -27,12 +27,15 @@ GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
 
 
 def create_nyrkio_payload(benchmark, extra_info):
+    commit = GIT_COMMIT if GIT_COMMIT else os.environ.get("GITHUB_SHA")
+    branch = GIT_TARGET_BRANCH if GIT_TARGET_BRANCH else "main"
+
     # The loops we need to jump through to get the commit time are
     # ridiculous. GitHub actions do a shallow clone so we can't use
     # git show -s --format=%ct HEAD. Instead we have to use the
     # REST API.
     response = requests.get(
-        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{GIT_COMMIT}"
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{commit}"
     )
     response.raise_for_status()
     timestamp = int(
@@ -50,8 +53,8 @@ def create_nyrkio_payload(benchmark, extra_info):
         "timestamp": timestamp,
         "metrics": metrics,
         "attributes": {
-            "git_commit": GIT_COMMIT,
-            "branch": GIT_TARGET_BRANCH,
+            "git_commit": commit,
+            "branch": branch,
             "git_repo": "https://github.com/nyrkio/nyrkio",
         },
         "extra_info": extra_info,

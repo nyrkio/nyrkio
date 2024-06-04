@@ -31,10 +31,12 @@ jobs:
           AWS_REGION: eu-north-1
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           NYRKIO_ENV_PROD: ${{ secrets.NYRKIO_ENV_PROD }}
+          NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
           ENV: prod
         run: |
           # Build a docker container and push it to ECR
           echo "$NYRKIO_ENV_PROD" > .env.backend
+          echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg SSL_DOMAIN=nyrkio.com --build-arg EXTRA_DOMAINS="nyrk.io xn--nyrki-nua.com"
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
