@@ -30,10 +30,13 @@ jobs:
           AWS_REGION: eu-north-1
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           NYRKIO_ENV_STAGING: ${{ secrets.NYRKIO_ENV_STAGING }}
+          NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
           ENV: staging
         run: |
           # Build a docker container and push it to ECR
           echo "$NYRKIO_ENV_STAGING " > .env.backend
+          echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
+
           docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg SSL_DOMAIN=staging.nyrkio.com
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG

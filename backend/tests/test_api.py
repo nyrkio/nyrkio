@@ -5,7 +5,8 @@ from typing import Dict, List
 from db.db import NULL_DATETIME, MockDBStrategy
 from starlette.testclient import TestClient
 
-from backend.api.api import app, _build_result_series
+from backend.api.api import app
+from backend.api.changes import _build_result_series
 from backend.api.public import extract_public_test_name
 
 from conftest import AuthenticatedTestClient, SuperuserClient
@@ -960,6 +961,48 @@ def test_duplicate_result_message_includes_key(client):
         "branch": "main",
         "git_commit": "123456",
     }
+
+
+def test_add_and_get_user_config(client):
+    """Ensure that we can store and retrieve user configuration"""
+    client.login()
+    config = {
+        "notifiers": {
+            "slack": True,
+            "github": False,
+        }
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    assert response.json() == {**config, "core": None, "billing": None}
+
+
+def test_update_existing_user_config(client):
+    """Ensure that we can update an existing user configuration"""
+    client.login()
+    config = {
+        "notifiers": {
+            "slack": True,
+            "github": False,
+        }
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    assert response.json() == {**config, "core": None, "billing": None}
+
+    new_config = {"notifiers": {"slack": False, "github": True}}
+    response = client.put("/api/v0/user/config", json=new_config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    assert response.json() == {**new_config, "core": None, "billing": None}
 
 
 def test_create_test_result_with_slash_separator(client):
@@ -2309,3 +2352,48 @@ def test_build_series_with_partial_metadata():
     # Empty metadata for first result
     series = _build_result_series("test_name", data, [{}, {"last_modified": now}])
     assert series.last_modified() == now
+
+
+def test_results_returns_sorted_test_names(client):
+    """Ensure that the results endpoint returns sorted test names"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        },
+    ]
+
+    for b in ("benchmark3", "benchmark2", "benchmark1"):
+        response = client.post(f"/api/v0/result/{b}", json=data)
+        assert response.status_code == 200
+
+    response = client.get("/api/v0/results")
+    assert response.status_code == 200
+    json = response.json()
+    assert json == [
+        {"test_name": "benchmark1"},
+        {"test_name": "benchmark2"},
+        {"test_name": "benchmark3"},
+    ]

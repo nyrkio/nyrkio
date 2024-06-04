@@ -290,7 +290,9 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
-    def create_doc_with_metadata(doc: Dict, id: Any, test_name: str) -> Dict:
+    def create_doc_with_metadata(
+        doc: Dict, id: Any, test_name: str, pull_number=None
+    ) -> Dict:
         """
         Return a new document with added metadata, e.g. the version of the schema and the user ID.
 
@@ -348,10 +350,18 @@ class DBStore(object):
         d["version"] = DBStore._VERSION
         d["test_name"] = test_name
         d["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
+        if pull_number:
+            d["pull_request"] = pull_number
+
         return d
 
     async def add_results(
-        self, id: Any, test_name: str, results: List[Dict], update: bool = False
+        self,
+        id: Any,
+        test_name: str,
+        results: List[Dict],
+        update: bool = False,
+        pull_number=None,
     ):
         """
         Create the representation of test results for storing in the DB, e.g. add
@@ -361,7 +371,10 @@ class DBStore(object):
         False), raise a DBStoreResultExists exception. Otherwise, update the
         existing result.
         """
-        new_list = [DBStore.create_doc_with_metadata(r, id, test_name) for r in results]
+        new_list = [
+            DBStore.create_doc_with_metadata(r, id, test_name, pull_number)
+            for r in results
+        ]
         test_results = self.db.test_results
 
         if update:
@@ -383,13 +396,18 @@ class DBStore(object):
                     raise DBStoreResultExists(duplicate_key)
 
     async def get_results(
-        self, id: Any, test_name: str
+        self, id: Any, test_name: str, pull_request=None
     ) -> Tuple[List[Dict], List[Dict]]:
         """
         Retrieve test results for a given user and test name. The results are
         guaranteed to be sorted by timestamp in ascending order.
 
         If no results are found, return (None,None).
+
+        If pull_request is not None, then return results where the pull_request
+        field is empty or matches the pull_request argument. This is used to
+        filter results so you get A) the historic results of a branch (e.g.
+        main) and B) the pull request result.
         """
         test_results = self.db.test_results
 
@@ -397,20 +415,43 @@ class DBStore(object):
         exclude_projection = {key: 0 for key in self._internal_keys}
 
         # TODO(matt) We should read results in batches, not all at once
-        results = (
-            await test_results.find(
-                {"user_id": id, "test_name": test_name}, exclude_projection
+        if pull_request:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": id,
+                        "test_name": test_name,
+                        "$or": [
+                            {"pull_request": {"$eq": pull_request}},
+                            {"pull_request": {"$exists": False}},
+                        ],
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
             )
-            .sort("timestamp")
-            .to_list(None)
-        )
+        else:
+            results = (
+                await test_results.find(
+                    {
+                        "user_id": id,
+                        "test_name": test_name,
+                        "pull_request": {"$exists": False},
+                    },
+                    exclude_projection,
+                )
+                .sort("timestamp")
+                .to_list(None)
+            )
 
         return separate_meta(results)
 
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
         Get a list of all test names for a given user. If id is None then
-        return a dictionary of all test names for all users.
+        return a dictionary of all test names for all users. Entries are returned
+        in sorted order.
 
         If test_name_prefix is specified, returns the subset of names (paths, really) where the
         beginning of the test name matches the test_name_prefix.
@@ -419,17 +460,18 @@ class DBStore(object):
         """
         test_results = self.db.test_results
         if id:
-            test_names = await test_results.distinct("test_name", {"user_id": id})
-            # TODO: I was just refactoring existing code here, but the below could actually be
-            # pushed into the MongoDB query.
-            if test_name_prefix:
-                prfx_len = len(test_name_prefix)
-                test_names = list(
-                    filter(lambda name: name[:prfx_len] == test_name_prefix, test_names)
-                )
-
-            return test_names
-
+            results = await test_results.aggregate(
+                [
+                    {"$match": {"user_id": id}},
+                    {"$group": {"_id": None, "names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_name": 1}},
+                    {"$project": {"_id": 0, "test_names": "$names"}},
+                ],
+            ).to_list(None)
+            # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
+            sorted_list = results[0]["test_names"] if results else []
+            sorted_list.sort()
+            return sorted_list
         else:
             results = await test_results.aggregate(
                 [
@@ -463,9 +505,22 @@ class DBStore(object):
         test_results = self.db.test_results
         await test_results.delete_many({"user_id": user.id})
 
-    async def delete_result(self, id: Any, test_name: str, timestamp: int):
+    async def delete_result(
+        self, id: Any, test_name: str, timestamp=None, pull_request=None
+    ):
         """
-        Delete a single result for a given user, test name, and timestamp.
+        Delete a single result for a given user and test name.
+
+        The semantics of this function are a little weird since we have
+        a single function to handle multiple scenarios.
+
+        For regular results (non-pull request), if timestamp is specified,
+        delete the result with that timestamp. Instead, if a pull_request is
+        specified, delete all results for that pull request. If neither
+        timestamp nor pull_request are specified, delete all results for the
+        given user and test name.
+
+        This means that you can't delete a pull request result by timestamp.
 
         If no matching results are found, do nothing.
         """
@@ -473,6 +528,10 @@ class DBStore(object):
         if timestamp:
             await test_results.delete_one(
                 {"user_id": id, "test_name": test_name, "timestamp": timestamp}
+            )
+        elif pull_request:
+            await test_results.delete_many(
+                {"user_id": id, "test_name": test_name, "pull_request": pull_request}
             )
         else:
             await test_results.delete_many({"user_id": id, "test_name": test_name})
@@ -777,6 +836,92 @@ class DBStore(object):
 
         return data["change_points"]
 
+    async def add_pr_test_name(
+        self, user_id: Any, repo: str, git_commit: str, pull_number: int, test_name: str
+    ):
+        """
+        Add a list of test_names for a given pull request and git commit.
+
+        Because the pull request API only allows results for a single test name
+        to be added at a time, we may need to update the existing list of test
+        names for a given pull request and git commit.
+        """
+        pr_tests = self.db.pr_tests
+        id = OrderedDict(
+            {
+                "git_commit": git_commit,
+                "pull_number": pull_number,
+                "user_id": user_id,
+                "git_repo": repo,
+            }
+        )
+
+        # Push a new test name onto the list
+        await pr_tests.update_one(
+            {"_id": id},
+            {
+                "$push": {"test_names": test_name},
+                "$set": {
+                    "user_id": user_id,
+                    "git_commit": git_commit,
+                    "pull_number": pull_number,
+                    "git_repo": repo,
+                },
+            },
+            upsert=True,
+        )
+
+    async def get_pull_requests(
+        self, user_id, repo=None, git_commit=None, pull_number=None
+    ) -> List[Dict]:
+        """
+        Get a list of pull requests for a given user.
+
+        If any of repo, git_commit, or pull_number are None, return all pull
+        requests for the user. Otherwise, return the pull request that matches
+        the given repo, git_commit, and pull_number.
+
+        Each entry in the list is a dict with the following keys:
+          - git_repo - the git repository
+          - git_commit - the git commit
+          - pull_number - the pull request number
+          - test_names - a list of test names
+
+        NOTE: git_repo should not include the protocol or github.com domain.
+
+        Return an empty list if no results are found.
+        """
+        pr_tests = self.db.pr_tests
+        # Do a lookup on the primary key if we have all the fields
+        if repo and git_commit and pull_number:
+            primary_key = OrderedDict(
+                {
+                    "git_commit": git_commit,
+                    "pull_number": pull_number,
+                    "user_id": user_id,
+                    "git_repo": repo,
+                }
+            )
+            test_names = await pr_tests.find_one({"_id": primary_key})
+            return build_pulls([test_names]) if test_names else []
+
+        # Otherwise, do a lookup on the user_id
+        pulls = await pr_tests.find({"user_id": user_id}).to_list(None)
+        return build_pulls(pulls)
+
+    async def delete_pull_requests(self, user_id: Any, repo: str, pull_number: int):
+        """
+        Delete a pull request for a given user.
+        """
+        pr_tests = self.db.pr_tests
+        await pr_tests.delete_many(
+            {
+                "user_id": user_id,
+                "pull_number": pull_number,
+                "git_repo": repo,
+            }
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
@@ -825,3 +970,17 @@ def separate_meta(doc: List[Dict]) -> Tuple[List[Dict], List[Dict]]:
         metadata.append(meta)
 
     return data, metadata
+
+
+def build_pulls(pr_tests_result):
+    """Convert the PR tests result to the "pulls" format."""
+    results = []
+    for pr in pr_tests_result:
+        pulls = {
+            "git_repo": pr["git_repo"],
+            "git_commit": pr["git_commit"],
+            "pull_number": pr["pull_number"],
+            "test_names": pr["test_names"],
+        }
+        results.append(pulls)
+    return results
