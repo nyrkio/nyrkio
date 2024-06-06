@@ -77,6 +77,7 @@ class GitHubCommentNotifier:
         Create a issue comment body from the test results and changes.
         """
 
+        header = "**Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
 
@@ -95,9 +96,9 @@ class GitHubCommentNotifier:
                     body += f"{test_name} | {m} | {ch}\n"
 
         if not anything_to_report:
-            return "No performance changes detected. 🚀"
+            return header + "No performance changes detected. 🚀"
 
-        return body
+        return header + body
 
     async def notify(self, results, pr_commit, changes):
         """
