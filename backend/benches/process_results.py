@@ -86,14 +86,6 @@ def submit_results(test_name, results, token, pull_number):
     response = requests.post(url, json=results, headers=headers)
     raise_for_status(response, test_name)
 
-    if pull_number:
-        # Trigger GitHub PR comment notification
-        response = requests.get(
-            f"https://nyrkio.com/api/v0/pulls/{repo}/{pull_number}/changes/{GIT_COMMIT}?notify=1",
-            headers=headers,
-        )
-        raise_for_status(response, test_name)
-
 
 def main(result_filename, extra_info_filename):
     # ...
@@ -134,6 +126,18 @@ def main(result_filename, extra_info_filename):
 
     for test_name in test_names:
         submit_results(test_name, post_data[test_name], token, pull_number)
+
+    if pull_number:
+        # Trigger GitHub PR comment notification
+        repo = "nyrkio/nyrkio"
+        response = requests.get(
+            f"https://nyrkio.com/api/v0/pulls/{repo}/{pull_number}/changes/{GIT_COMMIT}?notify=1",
+            headers={
+                "Authorization": f"Bearer {token}",
+                "Content-type": "application/json",
+            },
+        )
+        raise_for_status(response, test_name)
 
 
 if __name__ == "__main__":
