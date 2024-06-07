@@ -67,9 +67,13 @@ async def get_pr_changes(
     pr = pulls[0]
     all_results = []
     for test_name in pr["test_names"]:
-        results, _ = await store.get_results(user.id, test_name, pull_number)
+        results, _ = await store.get_results(
+            user.id, test_name, pull_number, git_commit
+        )
         all_results.append({test_name: results})
-        ch = await calc_changes(test_name, user.id, pull_request=pull_number)
+        ch = await calc_changes(
+            test_name, user.id, pull_request=pull_number, pr_commit=git_commit
+        )
         if ch:
             changes.append(ch)
 

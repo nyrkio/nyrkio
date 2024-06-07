@@ -305,3 +305,114 @@ def test_pr_get_individual_result(client):
     json = response.json()
     assert len(json) == 1
     assert json[0]["timestamp"] == 1
+
+
+def test_only_last_pr_result_used_in_changes(client):
+    """Ensure that only the last PR result is used in changes"""
+    client.login()
+
+    test_name = "benchmark1"
+    repo = "nyrkio/nyrkio"
+
+    # Add a bunch of regular test results that set the baseline for a metric
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/" + repo,
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/" + repo,
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 1.0, "unit": "ms"},
+                {"name": "metric2", "value": 2.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/" + repo,
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        },
+    ]
+
+    response = client.post(f"/api/v0/result/{test_name}", json=data)
+    assert response.status_code == 200
+
+    response = client.get(f"/api/v0/result/{test_name}/changes")
+    assert response.status_code == 200
+    json = response.json()
+    assert "benchmark1" in json
+    assert len(json["benchmark1"]) == 0
+
+    pull_number = 123
+    git_commit = "abcdef"
+    data = {
+        "timestamp": 10,
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 20.0, "unit": "ms"},
+        ],
+        "attributes": {
+            "git_repo": "https://github.com" + repo,
+            "branch": "main",
+            "git_commit": git_commit,
+        },
+    }
+
+    response = client.post(
+        f"/api/v0/pulls/{repo}/{pull_number}/result/{test_name}", json=[data]
+    )
+    assert response.status_code == 200
+
+    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0]["benchmark1"][0]["time"] == 10
+
+    # Ensure that we get the correct number of change points when we add more
+    # PR results.
+    num_results = 5
+    last_commit = f"{git_commit}{num_results - 1}"
+    for i in range(1, num_results):
+        data["timestamp"] = 10 + i
+        data["metrics"][1]["value"] = 200.0
+        data["attributes"]["git_commit"] = f"{git_commit}{i}"
+        response = client.post(
+            f"/api/v0/pulls/{repo}/{pull_number}/result/{test_name}", json=[data]
+        )
+        assert response.status_code == 200
+
+    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}")
+    assert response.status_code == 200
+
+    json = response.json()
+    assert len(json) == 1
+    assert len(json[0]["benchmark1"]) == 1
+    assert json[0]["benchmark1"][0]["time"] == 10
+
+    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{last_commit}")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert len(json[0]["benchmark1"]) == 1
+    assert json[0]["benchmark1"][0]["time"] == 10 + num_results - 1
