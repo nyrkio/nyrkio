@@ -6,16 +6,16 @@ export const PricingPage = ({ loggedIn }) => {
   const enterprisePriceFloor = 40;
   const enterprisePricePerHead = 40;
   const [businessPrice, setBusinessPrice] = useState(
-    businessPriceFloor * businessPricePerHead,
+    businessPriceFloor * businessPricePerHead
   );
   const [enterprisePrice, setEnterprisePrice] = useState(
-    enterprisePriceFloor * enterprisePricePerHead,
+    enterprisePriceFloor * enterprisePricePerHead
   );
   const cut1 = 100;
   const [annualDiscount, setAnnualDiscount] = useState(false);
   const [annualSavingsPercent, setAnnualSavingsPercent] = useState(20);
   const [annualSavingsEuro, setAnnualSavingsEuro] = useState(
-    enterprisePrice * 12 * (annualSavingsPercent / 100),
+    enterprisePrice * 12 * (annualSavingsPercent / 100)
   );
   const [busYear, setBusYear] = useState(businessPrice * 12);
   const [entYear, setEntYear] = useState(enterprisePrice * 12);
@@ -27,7 +27,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       b = Math.max(
         businessPriceFloor * businessPricePerHead,
-        total * businessPricePerHead,
+        total * businessPricePerHead
       );
       b = Math.round(b);
     } else if (total <= 5000) {
@@ -44,7 +44,7 @@ export const PricingPage = ({ loggedIn }) => {
     if (total < cut1) {
       e = Math.max(
         enterprisePriceFloor * enterprisePricePerHead,
-        total * enterprisePricePerHead,
+        total * enterprisePricePerHead
       );
       e = Math.round(e);
     } else if (total <= 5000) {
@@ -82,10 +82,10 @@ export const PricingPage = ({ loggedIn }) => {
     return rounded;
   };
   const [busHours, setBusHours] = useState(
-    getBusHours(businessPriceFloor * businessPricePerHead),
+    getBusHours(businessPriceFloor * businessPricePerHead)
   );
   const [entHours, setEntHours] = useState(
-    getEntHours(enterprisePriceFloor * enterprisePricePerHead),
+    getEntHours(enterprisePriceFloor * enterprisePricePerHead)
   );
 
   const updateDiscount = () => {
@@ -398,7 +398,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company.",
+                            "Please enter number of employees in the company."
                           );
                           e.preventDefault();
                           return false;
@@ -436,7 +436,6 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Everything in Business, plus...</li>
                   <li>Unlimited results and metrics</li>
                   <li>JIRA integration</li>
-                  <li>24/7 support</li>
                   <li>{entHours} cpu-hours/month*</li>
                 </ul>
                 {loggedIn ? (
@@ -460,7 +459,7 @@ export const PricingPage = ({ loggedIn }) => {
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
-                            "Please enter number of employees in the company.",
+                            "Please enter number of employees in the company."
                           );
                           e.preventDefault();
                           return false;
