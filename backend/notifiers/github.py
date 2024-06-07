@@ -77,27 +77,28 @@ class GitHubCommentNotifier:
         Create a issue comment body from the test results and changes.
         """
 
-        chs = []
-        for ch in changes:
-            for _, data in ch.items():
-                if data:
-                    chs.append(data)
-        if not chs:
-            return "No performance changes detected. 🚀"
-
-        # Create a GitHub markdown table with all results
+        header = "**Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
 
+        anything_to_report = False
         for entry in results:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
                 for m in test_metrics:
                     ch = find_changes(pr_commit, test_name, m, changes)
-                    ch = "N/A" if ch is None else f"{ch:.2f}%"
+                    if ch is None:
+                        ch = "N/A"
+                    else:
+                        ch = f"{ch:.2f}%"
+                        anything_to_report = True
+
                     body += f"{test_name} | {m} | {ch}\n"
 
-        return body
+        if not anything_to_report:
+            return header + "No performance changes detected. 🚀"
+
+        return header + body
 
     async def notify(self, results, pr_commit, changes):
         """

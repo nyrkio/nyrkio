@@ -155,7 +155,11 @@ async def get_pr_result(
 
     # Filter out the results that are not from the repo
     # TODO(mfleming): We should push this down into the query to the db.
-    results = [r for r in results if r["attributes"]["git_repo"] == repo]
+    results = [
+        r
+        for r in results
+        if r["attributes"]["git_repo"] == "https://github.com/" + repo
+    ]
     return results
 
 

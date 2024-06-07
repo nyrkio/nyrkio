@@ -8,7 +8,7 @@ def test_pr_add_result(client):
         "timestamp": 1,
         "metrics": [{"metric1": 1.0, "metric2": 2.0}],
         "attributes": {
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
             "branch": "main",
             "git_commit": "12345",
         },
@@ -76,7 +76,7 @@ def test_pr_delete_result(client):
         "timestamp": 1,
         "metrics": [{"metric1": 1.0, "metric2": 2.0}],
         "attributes": {
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
             "branch": "main",
             "git_commit": "12345",
         },
@@ -123,7 +123,7 @@ def test_pr_add_fails_with_identical_timestamp(client):
         "timestamp": 1,
         "metrics": [{"metric1": 1.0, "metric2": 2.0}],
         "attributes": {
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
             "branch": "main",
             "git_commit": "12345",
         },
@@ -191,7 +191,7 @@ def test_pr_add_results_with_non_pr_results(client):
                 {"name": "metric3", "value": 30.0, "unit": "ms"},
             ],
             "attributes": {
-                "git_repo": repo,
+                "git_repo": "https://github.com/" + repo,
                 "branch": "main",
                 "git_commit": git_commit,
             },
@@ -252,7 +252,7 @@ def test_pr_pulls(client):
         "timestamp": 1,
         "metrics": [{"metric1": 1.0, "metric2": 2.0}],
         "attributes": {
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
             "branch": "main",
             "git_commit": git_commit,
         },
@@ -275,3 +275,33 @@ def test_pr_pulls(client):
             "git_repo": repo,
         }
     ]
+
+
+def test_pr_get_individual_result(client):
+    """Ensure that we can get individual PR results"""
+    client.login()
+
+    pull_number = 123
+    git_commit = "12345"
+    test_name = "benchmark1"
+    repo = "nyrkio/nyrkio"
+    data = {
+        "timestamp": 1,
+        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "attributes": {
+            "git_repo": "https://github.com/" + repo,
+            "branch": "main",
+            "git_commit": git_commit,
+        },
+    }
+
+    response = client.post(
+        f"/api/v0/pulls/{repo}/{pull_number}/result/{test_name}", json=[data]
+    )
+    assert response.status_code == 200
+
+    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/result/{test_name}")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+    assert json[0]["timestamp"] == 1
