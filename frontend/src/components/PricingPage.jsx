@@ -436,7 +436,6 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Everything in Business, plus...</li>
                   <li>Unlimited results and metrics</li>
                   <li>JIRA integration</li>
-                  <li>24/7 support</li>
                   <li>{entHours} cpu-hours/month*</li>
                 </ul>
                 {loggedIn ? (
