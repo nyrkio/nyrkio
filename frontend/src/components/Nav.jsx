@@ -48,6 +48,11 @@ const NavigationItems = () => {
               About
             </a>
           </li>
+          <li className="nav-item">
+            <a className="nav-link" href="https://blog.nyrkio.com" title="Blog">
+              Blog
+            </a>
+          </li>
         </ul>
       </div>
     </>
