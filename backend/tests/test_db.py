@@ -11,6 +11,7 @@ from backend.db.db import (
     separate_meta,
     separate_meta_one,
     build_pulls,
+    filter_out_pr_results,
 )
 
 from backend.auth.auth import add_user
@@ -870,3 +871,69 @@ def test_pulls_func():
             "pull_number": 1,
         },
     ]
+
+
+def test_get_results_with_exact_pr_commit():
+    """Ensure that we can get results for a specific pr and commit"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    pull_number = 123
+    git_commit = "123456"
+    repo = "https://github.com/nyrkio/nyrkio"
+
+    results = [
+        {
+            "timestamp": 1,
+            "attributes": {
+                "git_repo": repo,
+                "branch": "main",
+                "git_commit": git_commit,
+            },
+        }
+    ]
+
+    asyncio.run(store.add_results(user.id, test_name, results))
+    results[0]["timestamp"] = 2
+    asyncio.run(store.add_results(user.id, test_name, results, pull_number=pull_number))
+
+    data, _ = asyncio.run(
+        store.get_results(user.id, test_name, pull_number, git_commit)
+    )
+    assert len(data) == 2
+    results[0]["timestamp"] = 3
+    results[0]["attributes"]["git_commit"] = "abcdef"
+    asyncio.run(store.add_results(user.id, test_name, results, pull_number=pull_number))
+
+    data, _ = asyncio.run(
+        store.get_results(user.id, test_name, pull_number, git_commit)
+    )
+    assert len(data) == 2
+
+
+def test_filter_out_pr_results():
+    """Ensure that we can filter out pr results"""
+    results = [
+        {"metrics": {"foo": 1}, "attributes": {"git_commit": "foo"}},
+        {"metrics": {"foo": 2}, "attributes": {"git_commit": "bar"}},
+        {
+            "metrics": {"foo": 3},
+            "attributes": {"git_commit": "baz"},
+            "pull_request": 123,
+        },
+        {
+            "metrics": {"foo": 4},
+            "attributes": {"git_commit": "bam"},
+            "pull_request": 123,
+        },
+    ]
+
+    filtered = filter_out_pr_results(results, "baz")
+    assert len(filtered) == 3
+
+    filtered = filter_out_pr_results(results, "bam")
+    assert len(filtered) == 3

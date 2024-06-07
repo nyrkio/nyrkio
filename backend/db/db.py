@@ -396,7 +396,7 @@ class DBStore(object):
                     raise DBStoreResultExists(duplicate_key)
 
     async def get_results(
-        self, id: Any, test_name: str, pull_request=None
+        self, id: Any, test_name: str, pull_request=None, pr_commit=None
     ) -> Tuple[List[Dict], List[Dict]]:
         """
         Retrieve test results for a given user and test name. The results are
@@ -404,10 +404,11 @@ class DBStore(object):
 
         If no results are found, return (None,None).
 
-        If pull_request is not None, then return results where the pull_request
-        field is empty or matches the pull_request argument. This is used to
-        filter results so you get A) the historic results of a branch (e.g.
-        main) and B) the pull request result.
+        If pull_request and pr_commit are not None, then return results where
+        the pull_request field is empty or matches the pull_request and
+        pr_commit arguments. This is used to filter results so you get A) the
+        historic results of a branch (e.g. main) and B) the pull request
+        result for the exact pr_commit.
         """
         test_results = self.db.test_results
 
@@ -431,6 +432,17 @@ class DBStore(object):
                 .sort("timestamp")
                 .to_list(None)
             )
+
+            if not pr_commit:
+                logging.error(
+                    f"pr_commit is None for pull request {pull_request}."
+                    " Defaulting to last result."
+                )
+                pr_commit = list(filter(lambda x: "pull_request" in x, results))[-1][
+                    "attributes"
+                ]["git_commit"]
+
+            results = filter_out_pr_results(results, pr_commit)
         else:
             results = (
                 await test_results.find(
@@ -984,3 +996,16 @@ def build_pulls(pr_tests_result):
         }
         results.append(pulls)
     return results
+
+
+def filter_out_pr_results(results, pr_commit):
+    """
+    Filter out results that are not for the given PR commit.
+    """
+    return list(
+        filter(
+            lambda x: "pull_request" not in x
+            or x["attributes"]["git_commit"] == pr_commit,
+            results,
+        )
+    )
