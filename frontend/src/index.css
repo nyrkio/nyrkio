@@ -1,8 +1,8 @@
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:  "Big Shoulders Text", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
+  font-optical-sizing: auto;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   background-color: #242424;
@@ -36,6 +36,7 @@
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
+  --bs-body-font-size: 12pt;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);
   --bs-link-color: var(--nyrkio-text);
@@ -70,6 +71,7 @@ body {
   font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
   line-height: var(--bs-body-line-height);
+  letter-spacing: 0.0rem;
   color: var(--nyrkio-text);
   text-align: var(--bs-body-text-align);
   background-color: var(--bs-body-bg);
@@ -193,14 +195,26 @@ h2,
 .h2,
 h1,
 .h1 {
-  margin-top: 0;
-  margin-bottom: 0.5rem;
+  margin-top: 3rem;
+  margin-bottom: 2rem;
   font-weight: 400;
   line-height: 1.2;
+  letter-spacing: 0.2rem;
   color: var(--bs-heading-color);
+  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
 }
-h6,
-.h6,
+h1,
+.h1 {
+  letter-spacing: 0.1rem;
+}
+h2,
+.h2 {
+  letter-spacing: 0.05rem;
+}
+h3,
+.h3 {
+  letter-spacing: 0.02rem;
+}
 h5,
 .h5,
 h4,
@@ -209,7 +223,19 @@ h4,
   margin-bottom: 0.5rem;
   font-weight: 400;
   line-height: 1.2;
+  letter-spacing: 0.01rem;
   color: var(--bs-heading-color2);
+  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
+}
+h6,
+.h6 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.0rem;
+  color: var(--bs-heading-color2);
+  font-family: "Inter", "Arial", sans;
 }
 h1,
 .h1 {
