@@ -46,7 +46,7 @@ else
     certbot certonly --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
   elif [ "$(openssl x509 -noout -checkend $((60*60*24*14)) -in /etc/letsencrypt/live/$DOMAIN/fullchain.pem)" = "Certificate will expire" ]; then
     echo "Renewing certificate for $DOMAIN"
-    certbot renew --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS
+    certbot renew --expand --webroot --webroot-path=/var/www/certbot --cert-name $DOMAIN --email admin@nyrkio.com --agree-tos --no-eff-email -d $DOMAIN $EXTRAS --force-renewal
   else
     echo "Certificate for $DOMAIN already exists and is not a dummy certificate."
   fi
