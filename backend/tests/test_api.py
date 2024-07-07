@@ -2397,3 +2397,29 @@ def test_results_returns_sorted_test_names(client):
         {"test_name": "benchmark2"},
         {"test_name": "benchmark3"},
     ]
+
+
+def test_payload_missing_metric_unit_doesnt_persist(client):
+    """Ensure that a payload missing metric unit doesn't persist"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 1.0},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+        }
+    ]
+
+    response = client.post("/api/v0/result/benchmark1", json=data)
+    assert response.status_code == 400
+
+    # Check to see if the result was persisted
+    response = client.get("/api/v0/result/benchmark1")
+    assert response.status_code == 404

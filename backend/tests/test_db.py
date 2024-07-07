@@ -1,4 +1,5 @@
 import asyncio
+import copy
 import pytest
 from datetime import datetime
 
@@ -60,6 +61,7 @@ def test_add_single_result():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -83,6 +85,7 @@ def test_create_doc_with_metadata():
     test_name = "benchmark1"
     test_result = {
         "timestamp": 1234,
+        "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
         "attributes": {
             "git_repo": "https://github.com/nyrkio/nyrkio",
             "branch": "main",
@@ -223,6 +226,7 @@ def test_cannot_add_same_result_twice():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -316,6 +320,7 @@ def test_get_all_test_names_without_user():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -399,6 +404,7 @@ def test_get_public_results():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -438,6 +444,7 @@ def test_get_public_results():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -537,6 +544,7 @@ def test_result_names_for_invalid_user():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -563,6 +571,7 @@ def test_delete_result():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -596,6 +605,7 @@ def test_delete_result_by_org():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -635,6 +645,7 @@ def test_data_without_meta_field():
     results = [
         {
             "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -696,7 +707,7 @@ def test_update_existing_result():
     results = [
         {
             "timestamp": 1234,
-            "metrics": {"foo": 1},
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -709,7 +720,7 @@ def test_update_existing_result():
     response, _ = asyncio.run(store.get_results(user.id, test_name))
     assert response == results
 
-    results[0]["metrics"]["foo"] = 2
+    results[0]["metrics"][0]["value"] = 2
 
     asyncio.run(store.add_results(user.id, test_name, results, update=True))
     response, _ = asyncio.run(store.get_results(user.id, test_name))
@@ -729,6 +740,7 @@ def test_pull_number():
     results = [
         {
             "timestamp": 1,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
@@ -889,6 +901,7 @@ def test_get_results_with_exact_pr_commit():
     results = [
         {
             "timestamp": 1,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": repo,
                 "branch": "main",
@@ -937,3 +950,60 @@ def test_filter_out_pr_results():
 
     filtered = filter_out_pr_results(results, "bam")
     assert len(filtered) == 3
+
+
+def test_missing_keys():
+    """Ensure that we raise an exception if we're missing required keys"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    legit_result = [
+        {
+            "timestamp": 1234,
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+            "metrics": [{"name": "metric1", "unit": "unit1", "value": 1}],
+        }
+    ]
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_timestamp = copy.deepcopy(legit_result)
+        del missing_timestamp[0]["timestamp"]
+        asyncio.run(store.add_results(user.id, test_name, missing_timestamp))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_git_repo = copy.deepcopy(legit_result)
+        del missing_git_repo[0]["attributes"]["git_repo"]
+        asyncio.run(store.add_results(user.id, test_name, missing_git_repo))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_branch = copy.deepcopy(legit_result)
+        del missing_branch[0]["attributes"]["branch"]
+        asyncio.run(store.add_results(user.id, test_name, missing_branch))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_git_commit = copy.deepcopy(legit_result)
+        del missing_git_commit[0]["attributes"]["git_commit"]
+        asyncio.run(store.add_results(user.id, test_name, missing_git_commit))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_metric_name = legit_result.copy()
+        del missing_metric_name[0]["metrics"][0]["name"]
+        asyncio.run(store.add_results(user.id, test_name, missing_metric_name))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_metric_value = legit_result.copy()
+        del missing_metric_value[0]["metrics"][0]["value"]
+        asyncio.run(store.add_results(user.id, test_name, missing_metric_value))
+
+    with pytest.raises(DBStoreMissingRequiredKeys):
+        missing_metric_unit = legit_result.copy()
+        del missing_metric_unit[0]["metrics"][0]["unit"]
+        asyncio.run(store.add_results(user.id, test_name, missing_metric_unit))

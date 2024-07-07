@@ -6,7 +6,10 @@ def test_pr_add_result(client):
     repo = "nyrkio/nyrkio"
     data = {
         "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
         "attributes": {
             "git_repo": "https://github.com/" + repo,
             "branch": "main",
@@ -74,7 +77,10 @@ def test_pr_delete_result(client):
     repo = "nyrkio/nyrkio"
     data = {
         "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
         "attributes": {
             "git_repo": "https://github.com/" + repo,
             "branch": "main",
@@ -121,7 +127,10 @@ def test_pr_add_fails_with_identical_timestamp(client):
     repo = "nyrkio/nyrkio"
     data = {
         "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
         "attributes": {
             "git_repo": "https://github.com/" + repo,
             "branch": "main",
@@ -250,7 +259,10 @@ def test_pr_pulls(client):
     repo = "nyrkio/nyrkio"
     data = {
         "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
         "attributes": {
             "git_repo": "https://github.com/" + repo,
             "branch": "main",
@@ -287,7 +299,10 @@ def test_pr_get_individual_result(client):
     repo = "nyrkio/nyrkio"
     data = {
         "timestamp": 1,
-        "metrics": [{"metric1": 1.0, "metric2": 2.0}],
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
         "attributes": {
             "git_repo": "https://github.com/" + repo,
             "branch": "main",
