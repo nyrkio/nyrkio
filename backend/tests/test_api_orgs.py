@@ -31,7 +31,7 @@ def test_org_results(client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [{"name": "metric1", "value": 1.0, "unit": "ms"}],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -41,7 +41,7 @@ def test_org_results(client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 2.0}],
+            "metrics": [{"name": "metric1", "value": 2.0, "unit": "ms"}],
             "extra_info": {"foo": "baz"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -93,7 +93,7 @@ def test_add_result_for_invalid_org(gh_client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [{"name": "metric1", "value": 1.0, "unit": "ms"}],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -128,7 +128,7 @@ def test_fetch_org_results(gh_client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [{"name": "metric1", "value": 1.0, "unit": "ms"}],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -153,7 +153,7 @@ def test_delete_org_result_by_timestamp(gh_client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [{"name": "metric1", "value": 1.0, "unit": "ms"}],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -163,7 +163,7 @@ def test_delete_org_result_by_timestamp(gh_client):
         },
         {
             "timestamp": 2,
-            "metrics": [{"metric1": 2.0}],
+            "metrics": [{"name": "metric1", "value": 2.0, "unit": "ms"}],
             "extra_info": {"foo": "baz"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -265,7 +265,7 @@ def test_org_test_config_public(gh_client):
     data = [
         {
             "timestamp": 1,
-            "metrics": [{"metric1": 1.0}],
+            "metrics": [{"name": "metric1", "value": 1.0, "unit": "ms"}],
             "extra_info": {"foo": "bar"},
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",

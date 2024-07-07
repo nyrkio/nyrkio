@@ -290,6 +290,43 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
+    def check_for_missing_keys(data):
+        """
+        This function is responsible for validating the incoming JSON data and
+        checking that it conforms to our schema.
+        """
+
+        missing_keys = []
+
+        # Make sure all the required keys are present
+        for key in ["timestamp", "attributes"]:
+            if key not in data:
+                missing_keys.append(key)
+
+        attr_keys = ("git_repo", "branch", "git_commit")
+        if "attributes" not in data:
+            # They're all missing
+            missing_keys.extend([f"attributes.{k}" for k in attr_keys])
+            missing_keys.append(missing_keys)
+        else:
+            for key in attr_keys:
+                if key not in data["attributes"]:
+                    missing_keys.append(f"attributes.{key}")
+
+        metric_keys = ("name", "value", "unit")
+        if "metrics" not in data:
+            # they're all missing
+            missing_keys.extend([f"metrics.{k}" for k in metric_keys])
+            missing_keys.append(missing_keys)
+        else:
+            for key in metric_keys:
+                for metric in data["metrics"]:
+                    if key not in metric:
+                        missing_keys.append(f"metrics.{key}")
+
+        return missing_keys
+
+    @staticmethod
     def create_doc_with_metadata(
         doc: Dict, id: Any, test_name: str, pull_number=None
     ) -> Dict:
@@ -309,23 +346,7 @@ class DBStore(object):
         """
         d = dict(doc)
 
-        missing_keys = []
-
-        # Make sure all the required keys are present
-        for key in ["timestamp", "attributes"]:
-            if key not in d:
-                missing_keys.append(key)
-
-        attr_keys = ("git_repo", "branch", "git_commit")
-        if "attributes" not in d:
-            # They're all missing
-            missing_keys.extend([f"attributes.{k}" for k in attr_keys])
-            missing_keys.append(missing_keys)
-        else:
-            for key in attr_keys:
-                if key not in d["attributes"]:
-                    missing_keys.append(f"attributes.{key}")
-
+        missing_keys = DBStore.check_for_missing_keys(d)
         if len(missing_keys) > 0:
             raise DBStoreMissingRequiredKeys(missing_keys)
 
