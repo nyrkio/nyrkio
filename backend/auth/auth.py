@@ -196,7 +196,7 @@ async def github_callback(
     client = httpx.AsyncClient()
     response = await client.get(
         "https://api.github.com/user/orgs",
-        headers={"Authorization": f"token {token['access_token']}"},
+        headers={"Authorization": f"Bearer {token['access_token']}"},
     )
     if response.status_code != 200:
         logging.error(
