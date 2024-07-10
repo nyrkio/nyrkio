@@ -195,7 +195,7 @@ async def github_callback(
     # Find all organizations the user is a member of
     client = httpx.AsyncClient()
     response = await client.get(
-        "https://api.github.com/user/orgs",
+        "https://api.github.com/user/memberships/orgs",
         headers={"Authorization": f"Bearer {token['access_token']}"},
     )
     if response.status_code != 200:
