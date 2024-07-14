@@ -539,7 +539,7 @@ const UserInfo = () => {
             <DisplayOrgs />
 
             <hr />
-            <p className="card-text">If you are member of a Github org and it isn't shown here... <a href="https://docs.github.com/en/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/about-authentication-with-saml-single-sign-on#about-oauth-apps-github-apps-and-saml-sso">Please review the Github Enterprise documentation for SAML authenticated goup membership.</a></p>
+            <p className="card-text">If you are a member of a Github org and it isn't shown above, you should request for the Nyrkiö app to be installed specifically to the org you want to post results for. Please click on <a href="https://github.com/apps/nyrkio/installations/new">https://github.com/apps/nyrkio/installations/new</a> and select the org you want to use for nyrkio performance results.</p>
           </div>
         </div>
       </div>
