@@ -836,3 +836,7 @@ div.card.people-card .card-header img {
 .footer .footer-legal a {
   color: var(--nyrkio-dark-gray);
 }
+
+#nyrkio-settings-userinfo label {
+  font-weight: bold;
+}

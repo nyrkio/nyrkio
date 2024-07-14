@@ -11,6 +11,7 @@ export const UserSettings = () => {
         <ApiKey />
         <HunterSettings />
         <SlackSettings />
+        <UserInfo />
       </div>
     </>
   );
@@ -435,6 +436,110 @@ const SlackSettings = () => {
               </svg>
               {slackBtnText}
             </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+const UserInfo = () => {
+
+
+  const username = localStorage.getItem("username");
+  const authMethod = localStorage.getItem("authMethod");
+  const authServer = localStorage.getItem("authServer");
+  const [orgs, setOrgs] = useState([]);
+
+  const getOrganizations = async () => {
+    const url = "/api/v0/orgs/";
+    console.debug("GET " + url);
+    const response = await fetch(url, {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    if (response.status !== 200) {
+      console.error("Failed to GET User's organizations");
+      console.log(response);
+      return response;
+    } else console.debug(response);
+
+    const data = await response.json();
+    console.debug(data);
+    if ( Array.isArray(data)  ) {
+      return data;
+    } else {
+      return ["Fetching your organizations failed."];
+    }
+  };
+
+  const [ghOrgs, setGhOrgs] = useState([]);
+  const [nyrkioOrgs, setNyrkioOrgs] = useState([]);
+
+  useEffect(() => {
+    getOrganizations().then((data) => {
+      console.log(data);
+      var temp = [];
+      data.forEach((d) => {
+        temp.push(d.organization.login);
+      });
+
+      setOrgs(temp);
+      var nOrgs = [];
+      var gOrgs = [];
+      temp.forEach((o) => {
+        nOrgs.push('<a href="https://nyrkio.com/orgs/'+o+'">nyrkio.com/orgs/'+o+'</a><br />');
+        gOrgs.push('<a href="https://github.com/orgs/'+o+'">'+o+'<br />');
+      });
+
+      if(nOrgs.length > 0)  setNyrkioOrgs(nOrgs);
+      else setNyrkioOrgs(["😱"]);
+
+      if(gOrgs.length > 0)  setGhOrgs(gOrgs);
+      else setGhOrgs(["-"]);
+
+    });
+  }, []);
+
+  const DisplayOrgs = () => {
+    if(authServer == "github.com" || true){
+      return (<>
+              <p className="card-text">
+                <label>Github Organizations you are a member of:</label> </p>
+              <p dangerouslySetInnerHTML={{__html: ghOrgs}}>
+              </p>
+              <p className="card-text">
+                <label>This means you have write permission to the following Nyrkio organizations:</label>
+              </p>
+                <p dangerouslySetInnerHTML={{ __html: nyrkioOrgs.join(" ") }}></p>
+            </>);
+    }
+  };
+
+  return (
+    <div className="row pt-5 justify-content-center">
+      <div className="col-md-8">
+        <div className="card" id="nyrkio-settings-userinfo">
+          <div className="card-header p-2">Information about your user account</div>
+          <div className="card-body">
+            <p className="card-text">
+              <label>Username:</label> {username}
+            </p>
+            <p className="card-text">
+              <label>Authentication method:</label> {authMethod}
+            </p>
+            <p className="card-text">
+              <label>Authentication server:</label> {authServer}
+            </p>
+            <DisplayOrgs />
+
+            <hr />
+            <p className="card-text">If you are member of a Github org and it isn't shown here... <a href="https://docs.github.com/en/enterprise-cloud@latest/authentication/authenticating-with-saml-single-sign-on/about-authentication-with-saml-single-sign-on#about-oauth-apps-github-apps-and-saml-sso">Please review the Github Enterprise documentation for SAML authenticated goup membership.</a></p>
           </div>
         </div>
       </div>

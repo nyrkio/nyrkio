@@ -67,6 +67,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("username", username);
         localStorage.setItem("token", body["access_token"]);
+        localStorage.setItem("authMethod", "password");
+        localStorage.setItem("authServer", "nyrkio.com");
 
         posthog.capture("login", { property: username });
         try {
@@ -102,6 +104,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     setLoggedIn(true);
     localStorage.setItem("loggedIn", "true");
     localStorage.setItem("username", username);
+    localStorage.setItem("authMethod", "oauth");
+    localStorage.setItem("authServer", "github.com");
     posthog.capture("login", { property: username });
 
     try {
