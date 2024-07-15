@@ -21,7 +21,7 @@ from backend.db.db import (
     DBStore,
 )
 from backend.notifiers.slack import SlackNotifier
-
+import numpy
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -123,6 +123,10 @@ async def get_subtree_summary(
                     summary["total_change_points"] += 1
 
         # all_summaries["test_name"] = summary
+    for k in summary.keys():
+        if isinstance(summary[k], numpy.int64):
+            summary[k] = float(summary[k])
+
     return summary
 
 
