@@ -40,6 +40,7 @@ def get_org_with_raise(orgs, org_string):
     If the organization is not found, raise an HTTPException.
     """
     for o in orgs:
+        print(o)
         if o["login"] == org_string:
             return o
     raise HTTPException(status_code=404, detail="No such organization exists")
