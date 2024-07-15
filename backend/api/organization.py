@@ -40,6 +40,7 @@ def get_org_with_raise(orgs, org_string):
     If the organization is not found, raise an HTTPException.
     """
     for o in orgs:
+        print(o)
         if o["login"] == org_string:
             return o
     raise HTTPException(status_code=404, detail="No such organization exists")
@@ -131,10 +132,12 @@ async def get_results(
     store = DBStore()
     results = []
     for org in get_user_orgs(user):
-        org_id = org["id"]
-        res = await store.get_test_names(org_id)
-        if res:
-            results.extend(res)
+        print(org)
+        if "id" in org:
+            org_id = org["id"]
+            res = await store.get_test_names(org_id)
+            if res:
+                results.extend(res)
 
     return [{"test_name": name} for name in results]
 
