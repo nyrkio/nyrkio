@@ -43,6 +43,8 @@ def get_org_with_raise(orgs, org_string):
         print(o)
         if "login" in o and o["login"] == org_string:
             return o
+        if "organization" in o and o["organization"].get("login", None) == org_string:
+            return o
     raise HTTPException(status_code=404, detail="No such organization exists")
 
 
