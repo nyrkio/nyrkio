@@ -511,7 +511,7 @@ const UserInfo = () => {
       return (<>
               <p className="card-text">
                 <label>Github Organizations you are a member of:</label> </p>
-              <p dangerouslySetInnerHTML={{__html: ghOrgs,join(" ")}}>
+              <p dangerouslySetInnerHTML={{__html: ghOrgs.join(" ")}}>
               </p>
               <p className="card-text">
                 <label>This means you have write permission to the following Nyrkio organizations:</label>
