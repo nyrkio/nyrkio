@@ -3,6 +3,7 @@ from typing import Dict, List, Union
 
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
+from fastapi_utils.tasks import repeat_every
 
 from backend.auth import auth
 from backend.api.admin import admin_router
@@ -21,7 +22,11 @@ from backend.db.db import (
     DBStore,
 )
 from backend.notifiers.slack import SlackNotifier
+from backend.api.background import precompute_cached_change_points
+
+
 import numpy
+
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -100,7 +105,7 @@ async def get_subtree_summary(
         raise HTTPException(status_code=404, detail="Not Found")
 
     for test_name in subtree_test_names:
-        series, change_points = await _calc_changes(test_name, user.id, None)
+        series, change_points, is_cached = await _calc_changes(test_name, user.id, None)
         for metric_name, analyzed_series in change_points.items():
             for metric_name, cp_list in analyzed_series.change_points.items():
                 for cp in cp_list:
@@ -246,6 +251,12 @@ async def default_result(test_name: str) -> List[Dict]:
 async def default_changes(test_name: str):
     return await calc_changes(test_name)
 
+@api_router.get("/h/compute")
+@repeat_every(seconds=10)
+async def precompute():
+    print("Background task: precompute change points")
+    await precompute_cached_change_points()
+    return []
 
 # Must come at the end, once we've setup all the routes
 app.include_router(api_router, prefix="/api/v0")
@@ -278,3 +289,5 @@ async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> 
             channel = slack["channel"]
             notifiers.append(SlackNotifier(url, [channel]))
     return notifiers
+
+

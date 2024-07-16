@@ -22,11 +22,12 @@ async def cache_changes(
 async def get_cached_or_calc_changes(user_id, series):
     if user_id is None:
         # We only cache change points for logged in users
-        return series.calculate_change_points()
+        return series.calculate_change_points(), None
 
     store = DBStore()
     cached_cp = await store.get_cached_change_points(user_id, series.get_series_id())
-    if len(cached_cp) > 0 and series.results:
+
+    if cached_cp is not None and len(cached_cp) > 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
         series_metric_names = set([m.name for m in series.results[0].metrics])
@@ -37,13 +38,16 @@ async def get_cached_or_calc_changes(user_id, series):
             for metric_name, analyzed_json in cached_cp.items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
 
-            return cp
+            return cp, True
+    if cached_cp is not None and len(cached_cp) == 0:
+        # We computed the change points, and there were zero of them
+        return cached_cp, True
 
     # "else"
     # Cached change points not found or have expired, (re)compute from start:
     changes = series.calculate_change_points()
     await cache_changes(changes, user_id, series)
-    return changes
+    return changes, False
 
 
 def _build_result_series(
@@ -109,15 +113,14 @@ async def _calc_changes(
         series = _build_result_series(
             test_name, results, results_meta, disabled, core_config
         )
-
-    changes = await get_cached_or_calc_changes(user_id, series)
-    return series, changes
+    changes, is_cached = await get_cached_or_calc_changes(user_id, series)
+    return series, changes, is_cached
 
 
 async def calc_changes(
     test_name, user_id=None, notifiers=None, pull_request=None, pr_commit=None
 ):
-    series, changes = await _calc_changes(
+    series, changes, is_cached = await _calc_changes(
         test_name, user_id, notifiers, pull_request, pr_commit
     )
     reports = await series.produce_reports(changes, notifiers)

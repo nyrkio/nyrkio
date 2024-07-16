@@ -779,9 +779,15 @@ class DBStore(object):
         series_id_tuple: Tuple[str, float, float, Any],
     ):
         change_points_json = {}
+        cp_timestamps = [datetime.now(tz=timezone.utc)]
         for metric_name, analyzed_series in change_points.items():
-            assert analyzed_series.test_name() == series_id_tuple[0]
+            if not analyzed_series.test_name() == series_id_tuple[0]:
+                print(
+                    analyzed_series.test_name() + " must be equal to " +
+                    series_id_tuple[0] + " but wasn't!"
+                )
             change_points_json[metric_name] = analyzed_series.to_json()
+            cp_timestamps.append(analyzed_series.change_points_timestamp)
 
         primary_key = OrderedDict(
             {
@@ -792,9 +798,12 @@ class DBStore(object):
             }
         )
         series_last_modified = series_id_tuple[3]
+        change_points_timestamp = min(cp_timestamps)
         doc = {
             "_id": primary_key,
-            "meta": {"last_modified": series_last_modified},
+            "meta": {
+                "last_modified": series_last_modified,
+                "change_points_timestamp": change_points_timestamp},
             "change_points": change_points_json,
         }
 
@@ -829,11 +838,10 @@ class DBStore(object):
                 "min_magnitude": series_id_tuple[2],
             }
         )
-
         results = await collection.find({"_id": primary_key}).to_list(None)
         if len(results) == 0:
             # Nothing was cached
-            return {}
+            return None
 
         if len(results) != 1:
             # This should never happen. If it does, we can't trust the cache so
@@ -841,31 +849,33 @@ class DBStore(object):
             logging.error(
                 f"Multiple change points found for {series_id_tuple[0]}. Forcing recompute."
             )
-            return {}
+            return None
 
         data, meta = separate_meta_one(results[0])
-
         series_last_modified = series_id_tuple[3]
         if not meta:
             # Series doesn't have a last_modified field. It probably predates the time we even
             # had caching for change points.
             # Caller needs to compute the change_points now.
-            return {}
+            return None
+        if not "change_points_timestamp" in meta:
+            # v2, see above
+            return None
 
-        if meta["last_modified"] < series_last_modified:
+        if meta["change_points_timestamp"] < series_last_modified:
             # User has updated the series since the change points were last computed.
             # Caller needs to recompute the change points.
-            return {}
+            return None
 
         user_config, user_meta = await self.get_user_config(id)
         if not user_config:
             # User has no config, so cannot have invalidated the cache
             return data["change_points"]
 
-        if user_meta and meta["last_modified"] < user_meta["last_modified"]:
+        if user_meta and meta["change_points_timestamp"] < user_meta["last_modified"]:
             # User has updated their config since the change points were last computed.
             # Caller needs to recompute the change points.
-            return {}
+            return None
 
         return data["change_points"]
 
@@ -954,6 +964,17 @@ class DBStore(object):
                 "git_repo": repo,
             }
         )
+
+    async def list_users(self):
+        users_collection = self.db.User
+        query: Dict[str, Any] = {"is_active": True}
+        cursor = users_collection.find(query)
+
+        results = [
+            User(**obj) async for obj in cursor
+        ]  # For each result, MongoDB gives us a raw dictionary that we hydrate back in our Pydantic model
+
+        return results
 
 
 # Will be patched by conftest.py if we're running tests
