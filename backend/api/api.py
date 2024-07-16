@@ -251,12 +251,14 @@ async def default_result(test_name: str) -> List[Dict]:
 async def default_changes(test_name: str):
     return await calc_changes(test_name)
 
+
 @api_router.get("/h/compute")
 @repeat_every(seconds=10)
 async def precompute():
     print("Background task: precompute change points")
     await precompute_cached_change_points()
     return []
+
 
 # Must come at the end, once we've setup all the routes
 app.include_router(api_router, prefix="/api/v0")
@@ -289,5 +291,3 @@ async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> 
             channel = slack["channel"]
             notifiers.append(SlackNotifier(url, [channel]))
     return notifiers
-
-

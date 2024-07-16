@@ -20,6 +20,7 @@ async def precompute_cached_change_points():
     and OOM. A goal of this background task is to compute the change points in smaller chunks so that
     won't happen.
     """
+    do_n_in_one_task = 50
     db = DBStore()
     all_users = await db.list_users()
     for user in all_users:
@@ -31,6 +32,7 @@ async def precompute_cached_change_points():
             # print("precompute_cached_change_points: " +str(user.email) + " " + test_name)
             series, changes, is_cached = await _calc_changes(test_name, user_id)
             if not is_cached:
+                do_n_in_one_task -= 1
                 logging.info(
                     f"Computed new change points for user={user_id}, test_name={test_name}."
                 )
@@ -43,5 +45,8 @@ async def precompute_cached_change_points():
                 # We do this to split up the background computation into smaller chunks, to avoid hogging
                 # the cpu for minutes at a time and to consume infinite amounts of memory when python
                 # and numpy don't release the memory quickly enough.
-                return []
+                if do_n_in_one_task == 0:
+                    return []
+
     print("It appears as everything is cached and there's nothing to do?")
+    return []

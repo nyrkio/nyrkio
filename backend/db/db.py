@@ -783,8 +783,10 @@ class DBStore(object):
         for metric_name, analyzed_series in change_points.items():
             if not analyzed_series.test_name() == series_id_tuple[0]:
                 print(
-                    analyzed_series.test_name() + " must be equal to " +
-                    series_id_tuple[0] + " but wasn't!"
+                    analyzed_series.test_name()
+                    + " must be equal to "
+                    + series_id_tuple[0]
+                    + " but wasn't!"
                 )
             change_points_json[metric_name] = analyzed_series.to_json()
             cp_timestamps.append(analyzed_series.change_points_timestamp)
@@ -803,7 +805,8 @@ class DBStore(object):
             "_id": primary_key,
             "meta": {
                 "last_modified": series_last_modified,
-                "change_points_timestamp": change_points_timestamp},
+                "change_points_timestamp": change_points_timestamp,
+            },
             "change_points": change_points_json,
         }
 
@@ -858,7 +861,7 @@ class DBStore(object):
             # had caching for change points.
             # Caller needs to compute the change_points now.
             return None
-        if not "change_points_timestamp" in meta:
+        if "change_points_timestamp" not in meta:
             # v2, see above
             return None
 
