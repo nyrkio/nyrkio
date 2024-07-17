@@ -134,6 +134,12 @@ async def get_subtree_summary(
 
     return summary
 
+@api_router.get("/results/precompute")
+@repeat_every(seconds=10)
+async def precompute():
+    print("Background task: precompute change points")
+    await precompute_cached_change_points()
+    return []
 
 @api_router.get("/results")
 async def results(user: User = Depends(auth.current_active_user)) -> List[Dict]:
@@ -252,12 +258,6 @@ async def default_changes(test_name: str):
     return await calc_changes(test_name)
 
 
-@api_router.get("/h/compute")
-@repeat_every(seconds=10)
-async def precompute():
-    print("Background task: precompute change points")
-    await precompute_cached_change_points()
-    return []
 
 
 # Must come at the end, once we've setup all the routes

@@ -13,7 +13,7 @@ from backend.db.db import DBStore, NULL_DATETIME
 
 
 async def cache_changes(
-    cp: Dict[str, AnalyzedSeries], user_id: str, series: PerformanceTestResultSeries
+    cp: Dict[str, AnalyzedSeries], user_id, series: PerformanceTestResultSeries
 ):
     store = DBStore()
     await store.persist_change_points(cp, user_id, series.get_series_id())
@@ -26,7 +26,6 @@ async def get_cached_or_calc_changes(user_id, series):
 
     store = DBStore()
     cached_cp = await store.get_cached_change_points(user_id, series.get_series_id())
-
     if cached_cp is not None and len(cached_cp) > 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
@@ -39,6 +38,7 @@ async def get_cached_or_calc_changes(user_id, series):
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
 
             return cp, True
+
     if cached_cp is not None and len(cached_cp) == 0:
         # We computed the change points, and there were zero of them
         return cached_cp, True
@@ -127,7 +127,7 @@ async def calc_changes(
     return reports
 
 
-async def _get_user_config(user_id: str):
+async def _get_user_config(user_id):
     store = DBStore()
     config, _ = await store.get_user_config(user_id)
     core_config = config.get("core", None)

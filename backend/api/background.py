@@ -24,18 +24,13 @@ async def precompute_cached_change_points():
     db = DBStore()
     all_users = await db.list_users()
     for user in all_users:
-        user_id = str(user.id)
-        # print(user_id)
+        user_id = user.id
         test_names = await db.get_test_names(user.id)
-        # print(test_names)
         for test_name in test_names:
             # print("precompute_cached_change_points: " +str(user.email) + " " + test_name)
             series, changes, is_cached = await _calc_changes(test_name, user_id)
             if not is_cached:
                 do_n_in_one_task -= 1
-                logging.info(
-                    f"Computed new change points for user={user_id}, test_name={test_name}."
-                )
                 print(
                     f"Computed new change points for user={user_id} ({user.email}), test_name={test_name}."
                 )
