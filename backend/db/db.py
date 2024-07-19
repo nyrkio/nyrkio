@@ -979,6 +979,31 @@ class DBStore(object):
 
         return results
 
+    async def get_summaries_cache(self, user_id):
+        coll = self.db.summaries_cache
+        results = await coll.find({"_id": user_id}).to_list(None)
+        if results is None or len(results) == 0:
+            return {}
+        cache2 = results[0]
+        cache1 = {}
+        for k, v in cache2.items():
+            k1 = k
+            k1 = k1.replace("¤", ".")
+            cache1[k1] = cache2[k]
+
+        return cache1
+
+    async def save_summaries_cache(self, user_id, cache):
+        cache["_id"] = user_id
+        cache2 = {}
+        for k, v in cache.items():
+            k2 = k
+            k2 = k2.replace(".", "¤")
+            cache2[k2] = cache[k]
+        self.db.summaries_cache.update_one(
+            {"_id": user_id}, {"$set": cache2}, upsert=True
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

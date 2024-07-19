@@ -20,8 +20,6 @@ python-multipart = "^0.0.6"
 hunter = { path = "./hunter", develop = true }
 uvicorn = "^0.24.0.post1"
 fastapi-users = {extras = ["beanie", "oauth"], version = "^12.1.2"}
-fastapi-utils = "0.6.0"
-typing-inspect = "0.8.0"
 # Pinned because of the issue in https://github.com/pyca/bcrypt/issues/684
 bcrypt = "4.0.1"
 ruff = "^0.1.8"
