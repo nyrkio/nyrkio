@@ -32,9 +32,6 @@ async def precompute_cached_change_points():
                 print(
                     f"Computed new change points for user={user_id} ({user.email}), test_name={test_name}."
                 )
-                # The summary data could in fact naturally be part of AnalyzedSeries, but it started as
-                # a side project and so its data is too.
-                await precompute_summaries_leaves(test_name, changes, user)
                 # We found a result series that didn't have cached change points and have now computed
                 # the chánge points and cached them. Time to exit this task and let the next invocation
                 # compute the next set of change points.
@@ -189,10 +186,10 @@ async def precompute_summaries_non_leaf(user: User):
     await store.save_summaries_cache(user.id, cache)
 
 
-async def precompute_summaries_leaves(test_name, changes, user):
-    print("Pre-compute summary for " + str(user.id) + " " + test_name)
+async def precompute_summaries_leaves(test_name, changes, user_id):
+    print("Pre-compute summary for " + str(user_id) + " " + test_name)
     store = DBStore()
-    cache = await store.get_summaries_cache(user.id)
+    cache = await store.get_summaries_cache(user_id)
     summary = make_new_summary()
     for metric_name, analyzed_series in changes.items():
         for metric_name, cp_list in analyzed_series.change_points.items():
@@ -224,7 +221,7 @@ async def precompute_summaries_leaves(test_name, changes, user):
     # the non-leaf nodes even if nothing changed. For example, a simple model would be to flip the
     # value to "todo" whenever leaf summaries are updated, and "done" when non-leaf summaries are
     # written. In the same update, of course.
-    await store.save_summaries_cache(user.id, cache)
+    await store.save_summaries_cache(user_id, cache)
 
 
 def make_new_summary():
