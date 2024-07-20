@@ -7,7 +7,7 @@ from fastapi import FastAPI, APIRouter, Depends, HTTPException
 from backend.auth import auth
 from backend.api.admin import admin_router
 from backend.api.billing import billing_router
-from backend.api.changes import calc_changes, _calc_changes
+from backend.api.changes import calc_changes
 from backend.api.config import config_router
 from backend.api.model import TestResults
 from backend.api.organization import org_router
@@ -21,7 +21,8 @@ from backend.db.db import (
     DBStore,
 )
 from backend.notifiers.slack import SlackNotifier
-import numpy
+from backend.api.background import precompute_cached_change_points
+
 
 app = FastAPI(openapi_url="/openapi.json")
 
@@ -82,52 +83,83 @@ async def get_subtree_summary(
     Without such pre-compute, we would here constantly be re-computing all test results of the user!
     """
     store = DBStore()
-    # all_summaries = {}
-    summary = {
-        "total_change_points": 0,
-        "newest_time": None,
-        "newest_test_name": None,
-        "oldest_time": None,
-        "oldest_test_name": None,
-        "newest_change_point": None,
-        "oldest_change_point": None,
-        "largest_change": None,
-        "largest_test_name": None,
-    }
-    subtree_test_names = await store.get_test_names(user.id, test_name_prefix)
+    cache = await store.get_summaries_cache(user.id)
+    if test_name_prefix in cache:
+        return cache[test_name_prefix]
 
-    if not subtree_test_names:
-        raise HTTPException(status_code=404, detail="Not Found")
+    return {}
 
-    for test_name in subtree_test_names:
-        series, change_points = await _calc_changes(test_name, user.id, None)
-        for metric_name, analyzed_series in change_points.items():
-            for metric_name, cp_list in analyzed_series.change_points.items():
-                for cp in cp_list:
-                    first = summary["total_change_points"] == 0
-                    if first or summary["newest_time"] < cp.time:
-                        summary["newest_time"] = cp.time
-                        summary["newest_test_name"] = test_name
-                        summary["newest_change_point"] = cp
-                    if first or summary["oldest_time"] > cp.time:
-                        summary["oldest_time"] = cp.time
-                        summary["oldest_test_name"] = test_name
-                        summary["oldest_change_point"] = cp
-                    if first or abs(summary["largest_change"]) < abs(
-                        cp.forward_change_percent()
-                    ):
-                        summary["largest_change"] = cp.forward_change_percent()
-                        summary["largest_test_name"] = test_name
-                        summary["largest_change_point"] = cp
 
-                    summary["total_change_points"] += 1
+# async def get_subtree_summary(
+#     test_name_prefix: str, user: User = Depends(auth.current_active_user)
+# ) -> Dict:
+#     """
+#     Get all change points for all test results that are in the sub-tree of `test_name_prefix` and
+#     return a summary of that data.
+#
+#     The UI would use this information to show something like "project: 57 change points, the latest
+#     on 2024-04-20".
+#
+#     Note that for this feature we have added pre-computation and storage of change points.
+#     Without such pre-compute, we would here constantly be re-computing all test results of the user!
+#     """
+#     store = DBStore()
+#     # all_summaries = {}
+#     summary = {
+#         "total_change_points": 0,
+#         "newest_time": None,
+#         "newest_test_name": None,
+#         "oldest_time": None,
+#         "oldest_test_name": None,
+#         "newest_change_point": None,
+#         "oldest_change_point": None,
+#         "largest_change": None,
+#         "largest_test_name": None,
+#     }
+#     print(f"Start of /summary for {user.id} {test_name_prefix}")
+#     subtree_test_names = await store.get_test_names(user.id, test_name_prefix)
+#
+#     if not subtree_test_names:
+#         raise HTTPException(status_code=404, detail="Not Found")
+#
+#     for test_name in subtree_test_names:
+#         series, change_points, is_cached = await _calc_changes(test_name, user.id, None)
+#         # print(change_points)
+#         # print(is_cached)
+#         for metric_name, analyzed_series in change_points.items():
+#             for metric_name, cp_list in analyzed_series.change_points.items():
+#                 for cp in cp_list:
+#                     first = summary["total_change_points"] == 0
+#                     if first or summary["newest_time"] < cp.time:
+#                         summary["newest_time"] = cp.time
+#                         summary["newest_test_name"] = test_name
+#                         summary["newest_change_point"] = cp
+#                     if first or summary["oldest_time"] > cp.time:
+#                         summary["oldest_time"] = cp.time
+#                         summary["oldest_test_name"] = test_name
+#                         summary["oldest_change_point"] = cp
+#                     if first or abs(summary["largest_change"]) < abs(
+#                         cp.forward_change_percent()
+#                     ):
+#                         summary["largest_change"] = cp.forward_change_percent()
+#                         summary["largest_test_name"] = test_name
+#                         summary["largest_change_point"] = cp
+#
+#                     summary["total_change_points"] += 1
+#
+#         # all_summaries["test_name"] = summary
+#     for k in summary.keys():
+#         if isinstance(summary[k], numpy.int64):
+#             summary[k] = float(summary[k])
+#
+#     return summary
 
-        # all_summaries["test_name"] = summary
-    for k in summary.keys():
-        if isinstance(summary[k], numpy.int64):
-            summary[k] = float(summary[k])
 
-    return summary
+@api_router.get("/results/precompute")
+async def precompute():
+    print("Background task: precompute change points")
+    await precompute_cached_change_points()
+    return []
 
 
 @api_router.get("/results")

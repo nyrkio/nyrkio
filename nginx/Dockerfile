@@ -1,7 +1,9 @@
-FROM node:bookworm as build
+FROM node:20 as build
 
 WORKDIR /app
 COPY frontend/package*.json ./
+RUN npm -v
+RUN node -v
 RUN npm install
 COPY frontend/. ./
 RUN npm run build
