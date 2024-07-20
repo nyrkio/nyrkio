@@ -167,7 +167,8 @@ async def github_callback(
     except jwt.DecodeError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Couldn't decode Github Oauth response.")
+            detail="Couldn't decode Github Oauth response.",
+        )
 
     account_id, account_email = await github_oauth.get_id_email(token["access_token"])
 
