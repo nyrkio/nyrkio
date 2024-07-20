@@ -158,10 +158,15 @@ async def github_callback(
 ):
     token, state = access_token_state
     # Verify that we can decode the token so know it's valid
+    print("Github callback token & state")
+    print(token)
+    print(state)
     try:
         jwt.decode(state, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
     except jwt.DecodeError:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Couldn't decode Github Oauth response.")
 
     account_id, account_email = await github_oauth.get_id_email(token["access_token"])
 
