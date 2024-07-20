@@ -138,6 +138,7 @@ async def _get_user_config(user_id):
         core_config = Config(**core_config)
     return core_config
 
+
 async def precompute_summaries_leaves(test_name, changes, user_id):
     print("Pre-compute summary for " + str(user_id) + " " + test_name)
     store = DBStore()
