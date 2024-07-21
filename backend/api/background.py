@@ -25,7 +25,16 @@ async def precompute_cached_change_points():
         test_names = await db.get_test_names(user.id)
         for test_name in test_names:
             # print("precompute_cached_change_points: " +str(user.email) + " " + test_name)
-            series, changes, is_cached = await _calc_changes(test_name, user_id)
+            try:
+                series, changes, is_cached = await _calc_changes(test_name, user_id)
+            except Exception as exc:
+                print(
+                    f"Error in background task ({user.email} {test_name}) "
+                    + str(type(exc))
+                    + ": "
+                    + str(exc)
+                )
+                continue
 
             if not is_cached:
                 do_n_in_one_task -= 1
