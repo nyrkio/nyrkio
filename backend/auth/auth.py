@@ -158,10 +158,6 @@ async def github_callback(
 ):
     token, state = access_token_state
     # Verify that we can decode the token so know it's valid
-    print("Github callback token & state")
-    print(token)
-    print(state)
-    print(SECRET)
     try:
         jwt.decode(state, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
     except jwt.DecodeError:

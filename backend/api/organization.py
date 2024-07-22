@@ -134,9 +134,8 @@ async def get_results(
     store = DBStore()
     results = []
     for org in get_user_orgs(user):
-        print(org)
-        if "id" in org:
-            org_id = org["id"]
+        if "organization" in org:
+            org_id = org["organization"]["id"]
             res = await store.get_test_names(org_id)
             if res:
                 results.extend(res)

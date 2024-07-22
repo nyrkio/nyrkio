@@ -183,9 +183,34 @@ class MockDBStrategy(ConnectionStrategy):
                     account_email="gh@foo.com",
                     oauth_name="github",
                     access_token="gh_token",
+                    # Note (Henrik): Top level "login" and "id" used to be there in github responses,
+                    # now they no longer are. Felt tedious to update a lot of unit tests to match
+                    # reality so instead maintaining a backward compatibility here...
                     organizations=[
-                        {"login": "nyrkio", "id": 123},
-                        {"login": "nyrkio2", "id": 456},
+                        {
+                            "login": "nyrkio",
+                            "id": 123,
+                            "url": "https://api.github.com/orgs/nyrkio/memberships/foo",
+                            "organization_url": "https://api.github.com/orgs/bar",
+                            "user": {"login": "foo", "id": 3},
+                            "organization": {
+                                "login": "nyrkio",
+                                "id": 123,
+                                "url": "https://api.github.com/orgs/nyrkio",
+                            },
+                        },
+                        {
+                            "login": "nyrkio2",
+                            "id": 456,
+                            "url": "https://api.github.com/orgs/nyrkio2/memberships/foo",
+                            "organization_url": "https://api.github.com/orgs/bar",
+                            "user": {"login": "foo", "id": 3},
+                            "organization": {
+                                "login": "nyrkio2",
+                                "id": 456,
+                                "url": "https://api.github.com/orgs/nyrkio2",
+                            },
+                        },
                     ],
                 )
             ],
