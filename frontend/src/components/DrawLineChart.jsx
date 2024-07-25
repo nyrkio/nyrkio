@@ -212,7 +212,7 @@ export const DrawLineChart = ({
         timestamp={modalData}
         setTimestamp={setModalData}
       />
-      <div className="chart-wrapper">
+      <div className="chart-wrapper p-4">
         <h6 className="text-center">
           {testName}: {metricName}
         </h6>

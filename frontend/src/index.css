@@ -36,6 +36,7 @@
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
+  --bs-body-font-family: Helvetica, Arial, sans-serif;
   --bs-body-font-size: 12pt;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
-import { SidePanel } from "./SidePanel";
 import { dashboardTypes } from "../lib/utils";
 
 export const OrgDashboard = () => {
@@ -61,7 +60,6 @@ export const OrgDashboard = () => {
 
   return (
     <>
-      <SidePanel />
       <div className="row text-center">
         <h1 className="mb-4">Organization Test Results</h1>
       </div>
