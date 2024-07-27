@@ -68,6 +68,19 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
     return await calc_changes(test_name, org["id"])
 
 
+@org_router.get("/result/{test_name_prefix:path}/summary")
+async def get_subtree_summary(
+    test_name_prefix: str, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, test_name_prefix.split("/")[0])
+    store = DBStore()
+    cache = await store.get_summaries_cache(org["id"])
+    if test_name_prefix in cache:
+        return cache[test_name_prefix]
+
+    return {}
+
 @org_router.get("/result/{test_name:path}")
 async def results(
     test_name: str,
