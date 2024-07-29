@@ -1007,12 +1007,26 @@ class DBStore(object):
     async def list_orgs(self):
         users_collection = self.db.User
         agg_query: List[Dict] = [
-            { '$unwind': { 'path': "$oauth_accounts" } },
-            { '$unwind': { 'path': "$oauth_accounts.organizations" } },
-            { '$group': { '_id': "$oauth_accounts.organizations.organization.id",
-                        'org_name': { '$addToSet': "$oauth_accounts.organizations.organization.login" },
-                        'org_url': { '$addToSet': "$oauth_accounts.organizations.organization.url" } } },
-            { '$group': { '_id': 1, 'all_orgs_id': { '$push': "$_id" }, 'all_orgs_name': { '$push': "$org_name" } } }
+            {"$unwind": {"path": "$oauth_accounts"}},
+            {"$unwind": {"path": "$oauth_accounts.organizations"}},
+            {
+                "$group": {
+                    "_id": "$oauth_accounts.organizations.organization.id",
+                    "org_name": {
+                        "$addToSet": "$oauth_accounts.organizations.organization.login"
+                    },
+                    "org_url": {
+                        "$addToSet": "$oauth_accounts.organizations.organization.url"
+                    },
+                }
+            },
+            {
+                "$group": {
+                    "_id": 1,
+                    "all_orgs_id": {"$push": "$_id"},
+                    "all_orgs_name": {"$push": "$org_name"},
+                }
+            },
         ]
         results = await users_collection.aggregate(agg_query).to_list(None)
         return results[0]["all_orgs_id"]

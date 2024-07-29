@@ -79,7 +79,8 @@ async def get_subtree_summary(
     if test_name_prefix in cache:
         return cache[test_name_prefix]
 
-    return {}
+    raise HTTPException(status_code=404, detail="Not Found")
+
 
 @org_router.get("/result/{test_name:path}")
 async def results(
