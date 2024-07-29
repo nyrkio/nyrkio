@@ -1,5 +1,5 @@
 from backend.api.changes import _calc_changes
-from backend.db.db import DBStore, User
+from backend.db.db import DBStore
 
 
 async def precompute_cached_change_points():
@@ -17,7 +17,7 @@ async def precompute_cached_change_points():
     and OOM. A goal of this background task is to compute the change points in smaller chunks so that
     won't happen.
     """
-    do_n_in_one_task = 50
+    do_n_in_one_task = 150
     db = DBStore()
     all_users = await db.list_users()
     for user in all_users:
@@ -50,149 +50,103 @@ async def precompute_cached_change_points():
                 if do_n_in_one_task == 0:
                     return []
 
-        await precompute_summaries_non_leaf(user)
+        await precompute_summaries_non_leaf(user.id)
+
+    all_orgs = await db.list_orgs()
+    for org_id in all_orgs:
+        test_names = await db.get_test_names(org_id)
+        for test_name in test_names:
+            try:
+                series, changes, is_cached = await _calc_changes(test_name, org_id)
+            except Exception as exc:
+                print(
+                    f"Error in background task ({org_id} {test_name}) "
+                    + str(type(exc))
+                    + ": "
+                    + str(exc)
+                )
+                continue
+
+            if not is_cached:
+                do_n_in_one_task -= 1
+                print(
+                    f"Computed new change points for org_id={org_id}, test_name={test_name}."
+                )
+                if do_n_in_one_task == 0:
+                    return []
+
+        await precompute_summaries_non_leaf(org_id)
 
     print("It appears as everything is cached and there's nothing more to do?")
     return []
 
 
-# async def precompute_summaries(
-#     changes_batch: List[Tuple[str, List[Dict[str, AnalyzedSeries]]]], user: User
-# ):
-#     test_names = [n for n,l in changes_batch]
-#     print("Pre-compute summaries for " + str(user.id) + " " + test_names)
-#     store = DBStore()
-#     cache = await store.get_summaries_cache(user.id)
-#     test_name_prefix_todo = []
-#
-#     # First just create a summary for each test / leaf node
-#     for test_name, changes in changes_batch:
-#         summary = make_new_summary()
-#         for metric_name, analyzed_series in changes.items():
-#             for metric_name, cp_list in analyzed_series.change_points.items():
-#                 for cp in cp_list:
-#                     first = summary["total_change_points"] == 0
-#                     if first or summary["newest_time"] < cp.time:
-#                         summary["newest_time"] = cp.time
-#                         summary["newest_test_name"] = test_name
-#                         summary["newest_change_point"] = cp
-#                     if first or summary["oldest_time"] > cp.time:
-#                         summary["oldest_time"] = cp.time
-#                         summary["oldest_test_name"] = test_name
-#                         summary["oldest_change_point"] = cp
-#                     if first or abs(summary["largest_change"]) < abs(
-#                         cp.forward_change_percent()
-#                     ):
-#                         summary["largest_change"] = cp.forward_change_percent()
-#                         summary["largest_test_name"] = test_name
-#                         summary["largest_change_point"] = cp
-#
-#                     summary["total_change_points"] += 1
-#
-#         cache[test_name] = summary
-#         test_name_parts = test_name.split("/")
-#         if len(test_name_parts) > 1:
-#             test_name_prefix_todo.append("/".join(test_name_parts[:-1]))
-#
-#     print("Once all leaf nodes are in the cache, go through each prefix and create a summary of its leaves")
-#     non_leaf_cache = {}
-#     while len(test_name_prefix_todo) > 0:
-#         summary = make_new_summary()
-#
-#         # Get a prefix of the full test_names for which we just computed summaries
-#         test_name_parts = test_name_prefix_todo.pop()
-#         test_name_prefix = "/".join(test_name_parts)
-#
-#         # Once we are done with this, we'll continue up the tree until we find the root of everything
-#         if len(test_name_parts) > 1:
-#             test_name_prefix_todo.append("/".join(test_name_parts[:-1]))
-#
-#         prefix_leaves = []
-#         for k in cache.keys():
-#             if k.startswith(test_name_prefix):
-#                 prefix_leaves.append[k]
-#
-#         leaf_summaries = [cache[leaf] for leaf in prefix_leaves]
-#
-#         for leaf_summary in leaf_summaries:
-#             for k in summary.keys():
-#                 if k == "total_change_points":
-#                     summary[k] = summary[k] + leaf_summary[k]
-#                 if summary["newest_time"] < leaf_summary["newest_time"]:
-#                     summary["newest_time"] = leaf_summary["newest_time"]
-#                     summary["newest_test_name"] = leaf_summary["newest_test_name"]
-#                     summary["newest_change_point"] = leaf_summary["newest_change_point"]
-#                 if summary["oldest_time"] > leaf_summary["oldest_time"]:
-#                     summary["oldest_time"] = leaf_summary["oldest_time"]
-#                     summary["oldest_test_name"] = leaf_summary["oldest_test_name"]
-#                     summary["oldest_change_point"] = leaf_summary["oldest_change_point"]
-#                 if abs(summary["largest_change"]) < abs(leaf_summary["largest_change"]):
-#                     summary["largest_change"] = leaf_summary["largest_change"]
-#                     summary["largest_test_name"] = leaf_summary["largest_test_name"]
-#                     summary["largest_change_point"] = leaf_summary[
-#                         "largest_change_point"
-#                     ]
-#
-#             non_leaf_cache[test_name_prefix] = summary
-#     # Finally just combine the two into one huge cache
-#     cache.update(non_leaf_cache)
-#     await store.save_summaries_cache(user.id, cache)
-
-
-async def precompute_summaries_non_leaf(user: User):
-    # This still OOMs with the CrateDB dataset (700+ timeseries)
-    # Disabling for now. We'll just have summaries for the first level until this is fixed
-    return
+async def precompute_summaries_non_leaf(user_or_org_id):
     print(
-        "Once all leaf nodes are in the cache, go through each prefix and create a summary of its leaves"
+        "Once all leaf nodes are in the cache, go through each prefix and create a summary of its leaves   "
+        + str(user_or_org_id)
     )
 
     store = DBStore()
-    cache = await store.get_summaries_cache(user.id)
+    cache = await store.get_summaries_cache(user_or_org_id)
     non_leaf_cache = {}
-    test_names = cache.keys()
+    leaves = get_leaves(cache.keys())
     test_name_prefix_todo = set(
-        [("/".join(prefix.split("/"))[:-1]) for prefix in test_names]
+        [("/".join(prefix.split("/")[:-1])) for prefix in leaves]
     )
+
     while len(test_name_prefix_todo) > 0:
         summary = make_new_summary()
 
         # Get a prefix of the full test_names for which we just computed summaries
-        test_name_parts = set_pop(test_name_prefix_todo)
-        test_name_prefix = "/".join(test_name_parts)
-
+        test_name_prefix = set_pop(test_name_prefix_todo)
+        test_name_parts = (
+            test_name_prefix.split("/")
+            if "/" in test_name_prefix
+            else [test_name_prefix]
+        )
         # Once we are done with this, we'll continue up the tree until we find the root of everything
-        if len(test_name_parts) > 1:
+        if isinstance(test_name_parts, list) and len(test_name_parts) > 1:
             test_name_prefix_todo.add("/".join(test_name_parts[:-1]))
 
         prefix_leaves = []
         for k in cache.keys():
-            if k.startswith(test_name_prefix):
+            if k == "_id":
+                continue
+            if test_name_prefix in k and k != test_name_prefix:
                 prefix_leaves.append(k)
-
         leaf_summaries = [cache[leaf] for leaf in prefix_leaves]
-
         for leaf_summary in leaf_summaries:
             summary["total_change_points"] = (
                 summary["total_change_points"] + leaf_summary["total_change_points"]
             )
-            if summary["newest_time"] < leaf_summary["newest_time"]:
+            if leaf_summary["newest_time"] is not None and (
+                summary["newest_time"] is None
+                or summary["newest_time"] < leaf_summary["newest_time"]
+            ):
                 summary["newest_time"] = leaf_summary["newest_time"]
                 summary["newest_test_name"] = leaf_summary["newest_test_name"]
                 summary["newest_change_point"] = leaf_summary["newest_change_point"]
-            if summary["oldest_time"] > leaf_summary["oldest_time"]:
+            if leaf_summary["oldest_time"] is not None and (
+                summary["oldest_time"] is None
+                or summary["oldest_time"] > leaf_summary["oldest_time"]
+            ):
                 summary["oldest_time"] = leaf_summary["oldest_time"]
                 summary["oldest_test_name"] = leaf_summary["oldest_test_name"]
                 summary["oldest_change_point"] = leaf_summary["oldest_change_point"]
-            if abs(summary["largest_change"]) < abs(leaf_summary["largest_change"]):
+            if leaf_summary["largest_change"] is not None and (
+                summary["largest_change"] is None
+                or abs(summary["largest_change"]) < abs(leaf_summary["largest_change"])
+            ):
                 summary["largest_change"] = leaf_summary["largest_change"]
                 summary["largest_test_name"] = leaf_summary["largest_test_name"]
                 summary["largest_change_point"] = leaf_summary["largest_change_point"]
 
             non_leaf_cache[test_name_prefix] = summary
+
     # Finally just combine the two into one huge cache
     cache.update(non_leaf_cache)
-    await store.save_summaries_cache(user.id, cache)
+    await store.save_summaries_cache(user_or_org_id, cache)
 
 
 async def precompute_summaries_leaves(test_name, changes, user_id):
@@ -251,3 +205,20 @@ def set_pop(myset):
     for item in myset:
         myset.remove(item)
         return item
+
+
+def is_leaf(check_node, all_nodes):
+    for some_node in all_nodes:
+        if check_node in some_node and check_node != some_node:
+            return False
+    return True
+
+
+def get_leaves(all_nodes):
+    leaves = []
+    for some_node in all_nodes:
+        if some_node == "_id":
+            continue
+        if is_leaf(some_node, all_nodes):
+            leaves.append(some_node)
+    return leaves

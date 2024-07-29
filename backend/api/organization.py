@@ -40,7 +40,7 @@ def get_org_with_raise(orgs, org_string):
     If the organization is not found, raise an HTTPException.
     """
     for o in orgs:
-        print(o)
+        # print(o)
         if "login" in o and o["login"] == org_string:
             return o
         if "organization" in o and o["organization"].get("login", None) == org_string:
@@ -66,6 +66,20 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
     from backend.api.api import calc_changes
 
     return await calc_changes(test_name, org["id"])
+
+
+@org_router.get("/result/{test_name_prefix:path}/summary")
+async def get_subtree_summary(
+    test_name_prefix: str, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, test_name_prefix.split("/")[0])
+    store = DBStore()
+    cache = await store.get_summaries_cache(org["id"])
+    if test_name_prefix in cache:
+        return cache[test_name_prefix]
+
+    raise HTTPException(status_code=404, detail="Not Found")
 
 
 @org_router.get("/result/{test_name:path}")
