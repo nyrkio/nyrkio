@@ -3,6 +3,7 @@
 from collections import defaultdict
 from datetime import datetime, timezone
 import json
+import os
 from typing import List, Dict
 import httpx
 import logging
@@ -288,7 +289,15 @@ async def cached_get(repo, commit):
 
     commit_msg = None
     client = httpx.AsyncClient()
-    response = await client.get(f"https://api.github.com/repos/{repo}/commits/{commit}")
+    token = os.environ.get("GITHUB_TOKEN", None)
+    response = await client.get(
+        f"https://api.github.com/repos/{repo}/commits/{commit}",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
     if response.status_code == 200:
         # Only save the first line of the message
         commit_msg = response.json()["commit"]["message"].split("\n")[0]
