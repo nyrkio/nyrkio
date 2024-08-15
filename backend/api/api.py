@@ -21,7 +21,7 @@ from backend.db.db import (
     DBStore,
 )
 from backend.notifiers.slack import SlackNotifier
-from backend.api.background import precompute_cached_change_points
+# from backend.api.background import precompute_cached_change_points
 
 
 app = FastAPI(openapi_url="/openapi.json")
@@ -158,7 +158,7 @@ async def get_subtree_summary(
 @api_router.get("/results/precompute")
 async def precompute():
     print("Background task: precompute change points")
-    await precompute_cached_change_points()
+    # await precompute_cached_change_points()
     return []
 
 
