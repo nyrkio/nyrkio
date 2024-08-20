@@ -54,9 +54,6 @@ export const AboutPage = () => {
             Finland.
           </p>
           <p>Matt lives and works out of Halifax, United Kingdom.</p>
-          <p>
-            <a href="/contact">Contact us...</a>
-          </p>
           <h2>How</h2>
           <p>
             We've been privileged to work on the major open source projects of
