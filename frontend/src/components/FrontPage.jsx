@@ -10,40 +10,42 @@ const Banner = () => {
     <div className="container-fluid text-center nyrkio-title">
       <Logo color="Brown" filetype="png" />
       <h1>For Faster Software</h1>
-      <h5>Harness the power of change point detection</h5>
     </div>
   );
 };
 
 const FeatureHighlight = () => {
   return (
-    <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
-      <div className="col">
-        <h3>Shift left</h3>
-        <p>
-          Performance regressions are often only discovered during later stages
-          of development such as release candidate testing.
-        </p>
-        <p>
-          Pull your performance testing earlier with Nyrkiö and flag regressions
-          as soon as they're committed.
-        </p>
-      </div>
-      <div className="col">
-        <h3>Automate analysis</h3>
-        <p>
-          Avoid the tedious work of checking performance dashboards by hand.
-          Receive notifications via Slack, email, or GitHub when a performance
-          change is detected.
-        </p>
-      </div>
-      <div className="col">
-        <h3>State of the art</h3>
-        <p>
-          Change point detection is state of the art technology for detecting
-          changes in software performance. Used by leading technology companies
-          all around the world, including MongoDB and Netflix.
-        </p>
+    <div className="container-fluid p-5 text-center">
+      <h1>Harness the power of change point detection</h1>
+      <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
+        <div className="col">
+          <h3>Shift left</h3>
+          <p>
+            Performance regressions are often only discovered during later stages
+            of development such as release candidate testing.
+          </p>
+          <p>
+            Pull your performance testing earlier with Nyrkiö and flag regressions
+            as soon as they're committed.
+          </p>
+        </div>
+        <div className="col">
+          <h3>Automate analysis</h3>
+          <p>
+            Avoid the tedious work of checking performance dashboards by hand.
+            Receive notifications via Slack, email, or GitHub when a performance
+            change is detected.
+          </p>
+        </div>
+        <div className="col">
+          <h3>State of the art</h3>
+          <p>
+            Change point detection is state of the art technology for detecting
+            changes in software performance. Used by leading technology companies
+            all around the world, including MongoDB and Netflix.
+          </p>
+        </div>
       </div>
     </div>
   );
