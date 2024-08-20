@@ -26,7 +26,7 @@ curl -X POST -H "Content-type: application/json" -H "Authorization: Bearer $TOKE
              "attributes": {
                "git_repo": "https://github.com/nyrkio/nyrkio",
                "branch": "main",
-               "git_commit": "6995e2de6891c724bfeb2db33d7b87775f913ad1",
+               "git_commit": "6995e2de6891c724bfeb2db33d7b87775f913ad1"
              }
        }]'
 ```
