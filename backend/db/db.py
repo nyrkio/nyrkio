@@ -9,6 +9,7 @@ from typing import Dict, List, Tuple, Optional, Any
 
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
+import asyncio
 from mongomock_motor import AsyncMongoMockClient
 from beanie import Document, PydanticObjectId, init_beanie
 from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
@@ -73,6 +74,7 @@ class MongoDBStrategy(ConnectionStrategy):
         client = motor.motor_asyncio.AsyncIOMotorClient(
             url, uuidRepresentation="standard"
         )
+        asyncio.get_event_loop().set_debug(True)
         return client[db_name]
 
 
