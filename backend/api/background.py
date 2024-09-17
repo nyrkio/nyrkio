@@ -113,7 +113,11 @@ async def precompute_summaries_non_leaf(user_or_org_id):
         for k in cache.keys():
             if k == "_id":
                 continue
-            if test_name_prefix in k and k != test_name_prefix:
+            if (
+                test_name_prefix in k
+                and k != test_name_prefix
+                and test_name_prefix != ""
+            ):
                 prefix_leaves.append(k)
         leaf_summaries = [cache[leaf] for leaf in prefix_leaves]
         for leaf_summary in leaf_summaries:
