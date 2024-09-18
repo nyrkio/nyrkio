@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { DemoVideo } from "./FrontPage";
 
 export const PricingPage = ({ loggedIn }) => {
   const b = 200;
@@ -71,10 +72,8 @@ export const PricingPage = ({ loggedIn }) => {
         className="nyrkio-pricing container py-3"
         style={{ maxWidth: "960px" }}
       >
-        <div className="row justify-content-center">
-          <div className="text-center">
-            <h1>Pricing</h1>
-          </div>
+        <div className="container-fluid justify-content-center text-center w-100">
+          <h1>Pricing</h1>
         </div>
 
 
@@ -239,6 +238,9 @@ export const PricingPage = ({ loggedIn }) => {
           </div>
         </div>
 
+        <div className="container-fluid justify-content-center text-center w-100">
+          <DemoVideo />
+        </div>
         <h2 className="display-6 text-center mb-4 nyrkio-compare-plans">
           Compare plans
         </h2>

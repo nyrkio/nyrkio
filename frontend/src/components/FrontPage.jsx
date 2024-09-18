@@ -68,7 +68,7 @@ const LearnMore = () => {
   );
 };
 
-const DemoVideo = () => {
+export const DemoVideo = () => {
   return (
     <iframe
       width="560"

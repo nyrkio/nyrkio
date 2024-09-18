@@ -36,6 +36,10 @@ export const SidePanel = ({ loggedIn }) => {
           element={<ProductSidePanel loggedIn={loggedIn} />}
         />
         <Route
+          path="/pricing/*"
+          element={<ProductSidePanel loggedIn={loggedIn} />}
+        />
+        <Route
           path="/services"
           element={<ServicesSidePanel loggedIn={loggedIn} />}
         />
@@ -88,11 +92,11 @@ const ProductSidePanel = ({ loggedIn }) => {
   document.body.classList.add("section-product");
   return (
     <>
-      <Link to="/product" className="nav-link">
-        Nyrkiö Change Detection
-      </Link>
       <Link to="/pricing" className="nav-link">
         Pricing
+      </Link>
+      <Link to="/product" className="nav-link">
+        Nyrkiö Change Detection
       </Link>
       <Link to="/public" className="nav-link">
         Public Dashboards
