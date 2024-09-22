@@ -3,7 +3,7 @@ import grafanaDashboard from "../static/Grafana_dashboard.png";
 import image1 from "../static/50776727286_cdd63903f4_w.jpg";
 
 export const LegendPage = () => {
-  document.body.classList.add("nyyrikki-banner-right-bw");
+  document.body.classList.add("nyyrikki-banner-right");
 
   return (
     <>

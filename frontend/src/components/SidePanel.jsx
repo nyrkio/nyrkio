@@ -53,6 +53,10 @@ export const SidePanel = ({ loggedIn }) => {
           element={<AboutSidePanel loggedIn={loggedIn} />}
         />
         <Route
+          path="/legal/*"
+          element={<AboutSidePanel loggedIn={loggedIn} />}
+        />
+        <Route
           path="/signup"
           element={<LoginSidePanel loggedIn={loggedIn} />}
         />
@@ -63,6 +67,7 @@ export const SidePanel = ({ loggedIn }) => {
 };
 
 const FrontPageSidePanel = ({ loggedIn }) => {
+  document.body.classList.add("section-front");
   if (loggedIn) {
     return (
       <>

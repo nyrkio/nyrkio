@@ -32,7 +32,7 @@
   --nyrkio-text: #344767;
   --nyrkio-text-light: #6c757d;
   --nyrkio-border: var(--nyrkio-horn-dark-brown);
-  --nyrkio-active: var(--nyrkio-horn-light-brown);
+  --nyrkio-active: var(--nyrkio-dark-gray);
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
@@ -86,7 +86,8 @@ body {
 }
 
 div.nyyrikki-banner-right,
-body.nyyrikki-banner-right {
+body.nyyrikki-banner-right,
+body.nyyrikki-banner-right.section-about {
   background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-banner.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -95,7 +96,7 @@ body.nyyrikki-banner-right {
   background-opacity: 0.5;
 }
 
-body.section-about,
+body:not(.section-front),
 body.nyyrikki-banner-right-bw,
 main .nyyrikki-banner-right-bw {
   background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-medium-outline.png);
@@ -111,6 +112,7 @@ img.nyyrikki-original-art {
   max-height: 110vh;
 }
 
+body .footer,
 body.section-about .footer {
   background-image: url(/src/static/36215479721_4beda5c4ae_k.jpg);
   background-repeat: no-repeat;

@@ -4,7 +4,6 @@ import image1 from "../static/50776727286_cdd63903f4_w.jpg";
 import { Logo } from "./Logo";
 
 export const ProductPage = () => {
-  document.body.classList.add("nyyrikki-banner-right");
 
   return (
     <>
