@@ -30,7 +30,10 @@ cd nyrkio
 git submodule init
 git submodule update
 
-cat <<<END  > .env.backend
+cat > .env.backend << END
+## When using docker-compose.dev.yml with MongoDB running as a container.
+#DB_URL=mongodb://mongodb:27017/mongodb
+
 #DB_URL=mongodb://localhost:27017/nyrkiodb
 DB_URL=mongodb+srv://nyrkio:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
 DB_NAME=nyrkiodb
