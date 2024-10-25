@@ -30,9 +30,8 @@ cd nyrkio
 git submodule init
 git submodule update
 
-cat <<<END  > .env.backend
-#DB_URL=mongodb://localhost:27017/nyrkiodb
-DB_URL=mongodb+srv://nyrkio:PASSWORD@cluster0.xxxxx.mongodb.net/?retryWrites=true&w=majority
+cat > .env.backend << END
+DB_URL=mongodb://mongodb:27017/mongodb
 DB_NAME=nyrkiodb
 POSTMARK_API_KEY=
 GITHUB_CLIENT_SECRET=

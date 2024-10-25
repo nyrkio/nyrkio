@@ -1,6 +1,12 @@
 version: "3.8"
 
 services:
+  mongodb:
+    container_name: mongodb
+    image: mongodb/mongodb-community-server:latest
+    ports:
+      - "27017:27017"
+    command: mongod --quiet --logpath /dev/null
   backend:
     build: backend
     env_file:
@@ -10,6 +16,8 @@ services:
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
+    depends_on:
+      - mongodb
   nginx:
     build:
       context: ./
