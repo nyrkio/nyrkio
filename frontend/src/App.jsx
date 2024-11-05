@@ -4,7 +4,10 @@ import {
   Routes,
   Route,
   useLocation,
+  useParams,
+  useSearchParams
 } from "react-router-dom";
+
 import "./App.css";
 import { Login } from "./components/Login.jsx";
 import { Dashboard, SingleResult } from "./components/Dashboard.jsx";
@@ -39,6 +42,65 @@ function MainApp({ loggedIn, setLoggedIn }) {
   React.useEffect(() => {
     posthog.capture("$pageview");
   }, [location]);
+
+  const [searchParams,setSearchParams] = useSearchParams();
+  let embed = searchParams.get("embed", "no");
+  if(embed == "yes"){
+    return (
+    <>
+      <div className="container-fluid h-100 row">
+        <div
+          className="col-sm-12 col-md-9 col-xl-10 container-fluid"
+          id="main-content"
+        >
+          <Routes>
+            <Route path="/" element={loggedIn ? <Dashboard embed={embed}/> : <Nothing />} />
+            <Route path="/frontpage" element={<Nothing />} />
+            <Route
+              path="/tests/*"
+              element={<Dashboard loggedIn={loggedIn} embed={embed}/>}
+            />
+            <Route path="/product" element={<ProductPage />} />
+            <Route
+              path="/pricing"
+              element={<PricingPage loggedIn={loggedIn} />}
+            />
+            <Route
+              path="/services"
+              element={<ServicesPage loggedIn={loggedIn} />}
+            />
+            <Route path="/about" element={<AboutPage />} />
+            <Route path="/legal" element={<LegalPage />} />
+            <Route path="/legend" element={<LegendPage />} />
+            <Route
+              path="/signup"
+              element={<SignUpPage setLoggedIn={setLoggedIn} />}
+            />
+            <Route path="/public/*" element={<PublicDashboard embed={embed} />} />
+            <Route path="/orgs/*" element={<OrgDashboard embed={embed}/>} />
+            <Route
+              path="/login"
+              element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
+            />
+            <Route path="/result/*" element={<SingleResult embed={embed}/>} />
+            <Route path="/docs/getting-started" element={<Docs />} />
+            <Route path="/user/settings" element={<UserSettings />} />
+            <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
+            <Route
+              path="/billing"
+              element={<BillingPage loggedIn={loggedIn} />}
+            />
+            <Route path="*" element={<NoMatch />} />
+          </Routes>
+        </div>
+        <ScrollToTop />
+      </div>
+    </>
+    )
+  };
+
+
+
 
   return (
     <>

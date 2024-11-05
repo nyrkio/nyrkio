@@ -10,9 +10,9 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
     value.forEach((changePoint) => {
-      console.log(changePoint);
+      console.debug(changePoint);
       const changes = changePoint["changes"];
-      console.log(changes);
+      console.debug(changes);
       changes.map((change) => {
         const commit = changePoint["attributes"]["git_commit"];
 

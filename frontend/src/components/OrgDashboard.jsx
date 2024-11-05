@@ -3,7 +3,7 @@ import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
 import { dashboardTypes } from "../lib/utils";
 
-export const OrgDashboard = () => {
+export const OrgDashboard = ({embed}) => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [prefix, setPrefix] = useState(undefined);
@@ -72,6 +72,7 @@ export const OrgDashboard = () => {
             data={orgData}
             baseUrls={baseUrls}
             dashboardType={dashboardTypes.ORG}
+            embed={embed}
           />
         )}
       </div>

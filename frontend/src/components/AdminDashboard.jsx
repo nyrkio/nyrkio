@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SingleResultWithTestname } from "./Dashboard";
 
-const UserResults = ({ user, testNames }) => {
+const UserResults = ({ user, testNames, embed }) => {
   console.log("testname");
   console.log(testNames);
 
@@ -36,6 +36,7 @@ const UserResults = ({ user, testNames }) => {
                 baseUrls={baseUrls}
                 breadcrumbName={testName}
                 isPublic={false}
+                embed={embed}
               />
             );
           });
