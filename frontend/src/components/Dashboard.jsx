@@ -128,7 +128,7 @@ export const TestList = ({
   });
 };
 
-export const Dashboard = () => {
+export const Dashboard = ({loggedIn, embed}) => {
   const [loading, setLoading] = useState(false);
   const [unencodedTestNames, setUnencodedTestNames] = useState([]);
   const location = useLocation();
@@ -190,13 +190,16 @@ export const Dashboard = () => {
 
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name) => decodeURI(name));
-
+  console.log(embed);
   return (
     <>
+      {embed == "yes" ? "" :
       <Breadcrumb
         testName={prefix}
         baseUrls={{ tests: "tests", testRoot: "/", testRootTitle: "Tests" }}
       />
+    }
+
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
         {loading ? (
           <div>Loading</div>
@@ -253,13 +256,14 @@ export const SingleResultWithTestname = ({
   baseUrls,
   breadcrumbName,
   dashboardType,
+  embed
 }) => {
   const [loading, setLoading] = useState(false);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
-  console.log("Display data");
-  console.log(displayData);
+  console.debug("Display data");
+  console.debug(displayData);
 
   console.debug("Dashboardtype: " + dashboardType);
 
@@ -322,7 +326,7 @@ export const SingleResultWithTestname = ({
       return a;
     }
   }, []);
-  console.log("unique: " + unique);
+  console.debug("unique: " + unique);
 
   return (
     <>
@@ -330,7 +334,9 @@ export const SingleResultWithTestname = ({
         <div>Loading</div>
       ) : (
         <>
+          {embed == "yes" ? "" :
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
+          }
           <div className="container">
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} />
@@ -360,6 +366,7 @@ export const SingleResultWithTestname = ({
                     testName={testName}
                     timestamps={timestamps}
                     displayData={displayData}
+                    key={testName+"/"+metric.name}
                   />
                 );
               })}
@@ -375,7 +382,7 @@ SingleResultWithTestname.propTypes = {
   testName: PropTypes.string.isRequired,
 };
 
-export const SingleResult = () => {
+export const SingleResult = ({embed}) => {
   const location = useLocation();
 
   const testName = location.pathname.substring(8);
@@ -392,6 +399,7 @@ export const SingleResult = () => {
       baseUrls={baseUrls}
       breadcrumbName={testName}
       dashboardType={dashboardTypes.USER}
+      embed={embed}
     />
   );
 };

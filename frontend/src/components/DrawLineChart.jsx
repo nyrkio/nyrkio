@@ -63,7 +63,7 @@ export const DrawLineChart = ({
       const metrics = changePoint["changes"].map((change) => {
         return change["metric"];
       });
-      console.log(metrics);
+      console.debug(metrics);
       const t = changePoint["time"];
       changePointTimes.push({ t, metrics });
     });

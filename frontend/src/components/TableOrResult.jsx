@@ -7,7 +7,7 @@ import { createShortNames } from "../lib/utils";
 //
 // Otherwise, treat the pathname as a prefix for a name in data and list
 // all tests with that prefix upto the next "/".
-export const TableOrResult = ({ prefix, data, baseUrls, dashboardType }) => {
+export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed }) => {
   const testNames = data;
   const shortNames = createShortNames(prefix, testNames);
 
@@ -22,6 +22,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType }) => {
           baseUrls={baseUrls}
           breadcrumbName={prefix}
           dashboardType={dashboardType}
+          embed={embed}
         />
       </>
     );
@@ -30,7 +31,9 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType }) => {
     // Otherwise, display a list of tests upto the next "/"
     return (
       <>
+        {embed == "yes" ? "" :
         <Breadcrumb testName={prefix} baseUrls={baseUrls} />
+        }
         <div className="col-md-7">
           <TestList
             baseUrls={baseUrls}
