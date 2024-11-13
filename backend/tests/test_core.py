@@ -184,6 +184,10 @@ def test_tigerbeetle_data(shared_datadir):
 
     assert len(changes) == 1
     assert "tigerbeetle" in changes
+    res = vars(series.results)["_lists"][0]
+    met = [x.__dict__["metrics"] for x in res]
+    print([x[0].__dict__["value"] for x in met])
+    print(changes)
     assert len(changes["tigerbeetle"]) == 2
 
     expected_commits = (

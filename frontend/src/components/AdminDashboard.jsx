@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SingleResultWithTestname } from "./Dashboard";
+import { impersonateUser } from "./ImpersonateControls";
 
 const UserResults = ({ user, testNames, embed }) => {
-  console.log("testname");
-  console.log(testNames);
+  console.debug("testname");
+  console.debug(testNames);
 
   if (
     testNames === undefined ||
@@ -20,7 +21,7 @@ const UserResults = ({ user, testNames, embed }) => {
       <ul>
         {testNames.map((testName) => {
           return Object.values(testName).map((testName) => {
-            console.log(testName);
+            console.debug(testName);
             if (testName === undefined || testName.length === 0) {
               return <></>;
             }
@@ -45,16 +46,17 @@ const UserResults = ({ user, testNames, embed }) => {
     </div>
   );
 };
+
 const UserTable = ({ data }) => {
   console.log("data is");
   console.log(data);
   return (
     <div className="row">
       <ul>
-        {Object.entries(data).map(([user, testName]) => {
+        {Object.entries(data).map(([idx, user]) => {
           return (
-            <li className="list-group-item">
-              <Link to={`/admin/tests/${user}`}>{user}</Link>
+            <li className="list-group-item" key={user['_id'] || -1}>
+              <Link to={`/`} onClick={(event) => {event.preventDefault(); impersonateUser(user).then(()=>{ window.location.href = '/'})}}>{user['email']}</Link>
             </li>
           );
         })}
@@ -70,7 +72,7 @@ const MainAdminDashboard = ({ results }) => {
         <h1>Admin Dashboard</h1>
         <div>
           <div className="card">
-            <div className="card-header">All user tests</div>
+            <div className="card-header">Impersonate user:</div>
             <div className="card-body">
               <ul className="list-group list-group-flush">
                 <UserTable data={results} />
@@ -93,14 +95,14 @@ export const AdminDashboard = () => {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([{}]);
   const fetchData = async () => {
-    const results = await fetch("/api/v0/admin/results", {
+    const tempresults = await fetch("/api/v0/admin/all_users", {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    const resultData = await results.json();
-    console.log(resultData);
+    const resultData = await tempresults.json();
+    console.debug(resultData);
     setResults(resultData);
   };
 
@@ -110,19 +112,11 @@ export const AdminDashboard = () => {
       setLoading(false);
     });
   }, []);
-
   if (loading) {
     return <div>Loading...</div>;
-  }
-
-  if (location.pathname.startsWith("/admin/tests")) {
-    const user = location.pathname.split("/")[3];
-    return (
-      <>
-        <AdminUserResults user={user} results={results} />
-      </>
-    );
-  } else {
-    return <MainAdminDashboard results={results} />;
-  }
+ }
+ return <MainAdminDashboard results={results} />;
 };
+
+
+

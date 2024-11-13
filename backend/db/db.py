@@ -27,6 +27,7 @@ class User(BeanieBaseUser, Document):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    superuser: Optional[Dict[str, str]] = Field(None)
 
 
 async def get_user_db():
@@ -523,12 +524,12 @@ class DBStore(object):
             results = await test_results.aggregate(
                 [
                     {"$match": {"user_id": id}},
-                    {"$group": {"_id": None, "names": {"$addToSet": "$test_name"}}},
-                    {"$sort": {"test_name": 1}},
-                    {"$project": {"_id": 0, "test_names": "$names"}},
+                    {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_names": 1}},
                 ],
             ).to_list(None)
             # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
+            # Henrik: Should now but left this anyway as it also modified structure...
             sorted_list = results[0]["test_names"] if results else []
             sorted_list.sort()
             return sorted_list
@@ -555,6 +556,50 @@ class DBStore(object):
                 email = user["email"]
                 user_results[email] = result["test_names"]
             return user_results
+
+    async def get_all_users(
+        self, is_superuser=None, is_active=None, is_verified=None
+    ) -> Any:
+        User = self.db.User
+        query_filter = {}
+        fields = {
+            "_id": True,
+            "email": True,
+            "is_active": True,
+            "is_superuser": True,
+            "is_verified": True,
+        }
+        if is_superuser is not None:
+            filter["is_superuser"] = bool(is_superuser)
+        if is_active is not None:
+            filter["is_active"] = bool(is_active)
+        if is_verified is not None:
+            filter["is_verified"] = bool(is_verified)
+
+        results = await User.find(query_filter, fields).to_list(None)
+        for result in results:
+            result["_id"] = str(result["_id"])
+        return results
+
+    async def get_impersonate_user(self, admin_user: str):
+        query = {"_id": admin_user, "expire": {"$gt": datetime.now(timezone.utc)}}
+        impersonate_mapping = await self.db.impersonate.find_one(query)
+        return impersonate_mapping.get("user_id") if impersonate_mapping else None
+
+    async def set_impersonate_user(
+        self, admin_user: str, impersonate_user: str, expire: datetime
+    ):
+        id_doc = {"_id": admin_user.email}
+        impersonate_user = {
+            "_id": admin_user.email,
+            "user_email": impersonate_user.email,
+            "user_id": impersonate_user.id,
+            "expire": expire,
+        }
+        await self.db.impersonate.replace_one(id_doc, impersonate_user, upsert=True)
+
+    async def delete_impersonate_user(self, admin_user):
+        await self.db.impersonate.delete_many({"_id": admin_user})
 
     async def delete_all_results(self, user: User):
         """

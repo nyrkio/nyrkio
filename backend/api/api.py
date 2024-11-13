@@ -23,7 +23,6 @@ from backend.db.db import (
 from backend.notifiers.slack import SlackNotifier
 from backend.api.background import precompute_cached_change_points
 
-
 app = FastAPI(openapi_url="/openapi.json")
 
 

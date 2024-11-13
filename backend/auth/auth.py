@@ -38,6 +38,7 @@ from backend.db.db import (
 )
 from backend.auth.github import github_oauth
 from backend.auth.email import send_email, read_template_file
+from backend.auth.superuser import SuperuserStrategy
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
@@ -68,8 +69,20 @@ cookie_backend = AuthenticationBackend(
     get_strategy=get_jwt_strategy,
 )
 
+
+def get_superuser_strategy() -> SuperuserStrategy:
+    return SuperuserStrategy(secret=SECRET, lifetime_seconds=None)
+
+
+superuser_backend = AuthenticationBackend(
+    name="jwt",  # superuser strategy extends jwt
+    transport=bearer_transport,
+    get_strategy=get_superuser_strategy,
+)
+
+
 fastapi_users = FastAPIUsers[User, uuid.UUID](
-    get_user_manager, [jwt_backend, cookie_backend]
+    get_user_manager, [superuser_backend, cookie_backend]
 )
 
 # Github requires this to be the exact same string, so no use trying to switch between

@@ -4,6 +4,8 @@ services:
   mongodb:
     container_name: mongodb
     image: mongodb/mongodb-community-server:latest
+    environment:
+      - API_PORT=27017
     ports:
       - "27017:27017"
     command: mongod --quiet --logpath /dev/null

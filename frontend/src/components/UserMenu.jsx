@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
+import { ImpersonateControls } from "./ImpersonateControls";
 
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -8,7 +9,8 @@ export const UserMenu = ({ setLoggedIn }) => {
   if (localStorage.getItem("loggedIn") == "true") {
     username = localStorage.getItem("username");
   }
-
+  console.debug("username");
+  console.debug(username);
   const checkForAdminPrvis = async () => {
     const response = await fetch("/api/v0/auth/admin", {
       method: "GET",

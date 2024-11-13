@@ -1,6 +1,7 @@
 import { LogOut, LoginButton } from "./Login.jsx";
 import { UserMenu } from "./UserMenu.jsx";
 import { SmallLogo } from "./Logo";
+import { ImpersonateControls } from "./ImpersonateControls";
 
 const NavigationItems = () => {
   return (
@@ -65,13 +66,15 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
       <div className="container-fluid m-1">
         <NavigationItems />
         {loggedIn ? (
-          <>
             <UserMenu setLoggedIn={setLoggedIn} />
-          </>
         ) : (
           <LoginButton />
         )}
+        <div className=" nyrkio-login-controls">
+        <ImpersonateControls />
+        </div>
       </div>
     </nav>
   );
 };
+
