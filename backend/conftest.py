@@ -103,6 +103,14 @@ def client():
 
 
 @pytest.fixture
+def superuser_client():
+    with SuperuserClient(app) as client:
+        yield client
+        # Delete all results after each test
+        client.delete("/api/v0/results")
+
+
+@pytest.fixture
 def unauthenticated_client():
     with TestClient(app) as client:
         yield client

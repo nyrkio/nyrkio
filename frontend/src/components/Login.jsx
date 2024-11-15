@@ -58,6 +58,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       })
       .then((body) => {
         if (!body) {
+          console.log("Empty response when logging in.")
+          setErrorText("Empty response when logging in.");
+          setLoggedIn(false);
           return;
         }
         console.log("Logged in. (" + username + ")");
@@ -66,6 +69,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
         localStorage.setItem("loggedIn", "true");
         localStorage.setItem("username", username);
+        localStorage.setItem("username_real", username);
         localStorage.setItem("token", body["access_token"]);
         localStorage.setItem("authMethod", "password");
         localStorage.setItem("authServer", "nyrkio.com");
@@ -182,12 +186,24 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   );
 };
 
-export const LogOut = ({ setLoggedIn }) => {
-  const handleLogoutClick = () => {
+const logoutTasks = ({setLoggedIn}) => {
+
     console.log("Setting logged in to false");
     setLoggedIn(false);
+
     localStorage.setItem("loggedIn", "false");
+    localStorage.setItem("username", "");
+    localStorage.setItem("username_real", "");
+    document.body.classList.remove( "impersonate-user" );
+
+
     posthog.reset();
+
+};
+
+export const LogOut = ({ setLoggedIn }) => {
+  const handleLogoutClick = () => {
+    logoutTasks({setLoggedIn});
   };
   return (
     <>

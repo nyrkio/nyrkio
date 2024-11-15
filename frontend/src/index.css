@@ -395,6 +395,25 @@ button:focus-visible {
   box-shadow: none;
 }
 
+.btn-danger {
+  color: white;
+  background-color: var(--nyrkio-dark-gray);
+  border-color: var(--nyrkio-dark-gray);
+  box-shadow: none;
+}
+body.impersonate-user nav.navbar-top .btn-success,
+body.impersonate-user nav.navbar-top .btn-danger {
+  border-radius: 0;
+}
+
+body.impersonate-user {
+  border: 5px solid orangered;
+}
+
+body.impersonate-user nav.navbar-top {
+  background-color: orangered;
+}
+
 .btn-check:focus + .btn-success,
 .btn-success:focus {
   color: var(--nyrkio-light-gray3);
