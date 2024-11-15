@@ -24,8 +24,8 @@ async def cache_changes(
 
 async def get_cached_or_calc_changes(user_id, series):
     if user_id is None:
-        # We only cache change points for logged in users
-        return series.calculate_change_points(), None
+        # Dummy user just because the caching code was written such that it assumes a user
+        user_id = '000000000000000000000000'
 
     store = DBStore()
     cached_cp = await store.get_cached_change_points(user_id, series.get_series_id())
