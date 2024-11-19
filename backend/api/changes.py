@@ -9,7 +9,7 @@ from backend.core.core import (
     ResultMetric,
 )
 from backend.core.config import Config
-from backend.db.db import DBStore, NULL_DATETIME
+from backend.db.db import DBStore, NULL_DATETIME, separate_meta_one
 
 
 async def cache_changes(
@@ -22,13 +22,20 @@ async def cache_changes(
     await precompute_summaries_leaves(series.name, cp, user_id)
 
 
-async def get_cached_or_calc_changes(user_id, series):
+async def get_cached_or_calc_changes(user_id, series, cached_cp=None):
     if user_id is None:
-        # We only cache change points for logged in users
-        return series.calculate_change_points(), None
+        # Dummy user just because the caching code was written such that it assumes a user
+        user_id = "000000000000000000000000"
 
-    store = DBStore()
-    cached_cp = await store.get_cached_change_points(user_id, series.get_series_id())
+    do_incremental = False
+    if cached_cp is not None:
+        do_incremental = True
+    else:
+        # If you didn't do it earlier, now fetch cached/precomputed change points from the database
+        store = DBStore()
+        cached_cp = await store.get_cached_change_points(
+            user_id, series.get_series_id()
+        )
     if cached_cp is not None and len(cached_cp) > 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
@@ -40,23 +47,36 @@ async def get_cached_or_calc_changes(user_id, series):
             for metric_name, analyzed_json in cached_cp.items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
 
-            return cp, True
+            if do_incremental:
+                if series.tail_newer_than_cache():
+                    # There are test results newer than the cache, but we can do incremental Hunter
+                    changes = series.incremental_change_points(cached_cp)
+                    await cache_changes(changes, user_id, series)
+                    return changes, False
+            else:
+                # Cache is valid, nothing new to process
+                return cp, True
 
     if cached_cp is not None and len(cached_cp) == 0:
         # We computed the change points, and there were zero of them
         return cached_cp, True
 
-    # "else"
-    # Cached change points not found or have expired, (re)compute from start:
+    # Cached change points not found,need full calculation
     changes = series.calculate_change_points()
     await cache_changes(changes, user_id, series)
     return changes, False
 
 
 def _build_result_series(
-    test_name, results, results_meta, disabled=None, core_config=None
+    test_name,
+    results,
+    results_meta,
+    disabled=None,
+    core_config=None,
+    change_points_timestamp=None,
 ):
     series = PerformanceTestResultSeries(test_name, core_config)
+    series.change_points_timestamp = change_points_timestamp
 
     metadata_missing = not all(results_meta)
     if metadata_missing:
@@ -104,6 +124,7 @@ async def _calc_changes(
     store = DBStore()
     series = None
 
+    cp_data = None
     if user_id is None:
         results, results_meta = await store.get_default_data(test_name)
         series = _build_result_series(test_name, results, results_meta)
@@ -113,10 +134,32 @@ async def _calc_changes(
         )
         disabled = await store.get_disabled_metrics(user_id, test_name)
         core_config = await _get_user_config(user_id)
-        series = _build_result_series(
-            test_name, results, results_meta, disabled, core_config
+        if core_config:
+            max_pvalue = core_config.max_pvalue
+            min_magnitude = core_config.min_magnitude
+        else:
+            max_pvalue = Config().max_pvalue
+            min_magnitude = Config().min_magnitude
+
+        raw_cached_cp = await store._get_cached_cp_db(
+            user_id, test_name, max_pvalue, min_magnitude
         )
-    changes, is_cached = await get_cached_or_calc_changes(user_id, series)
+        cp_timestamp = None
+        if raw_cached_cp is not None:
+            cp_data, cp_meta = separate_meta_one(raw_cached_cp)
+            cp_timestamp = store._validate_cached_cp_timestamp(cp_meta)
+
+        series = _build_result_series(
+            test_name,
+            results,
+            results_meta,
+            disabled,
+            core_config,
+            change_points_timestamp=cp_timestamp,
+        )
+    changes, is_cached = await get_cached_or_calc_changes(
+        user_id, series, cached_cp=cp_data
+    )
     return series, changes, is_cached
 
 

@@ -878,6 +878,8 @@ class DBStore(object):
             "meta": {
                 "last_modified": series_last_modified,
                 "change_points_timestamp": change_points_timestamp,
+                # 3 = hunter from_json() includes weak_change_points, w
+                "schema_version": 3,
             },
             "change_points": change_points_json,
         }
@@ -886,7 +888,7 @@ class DBStore(object):
         await collection.update_one({"_id": primary_key}, {"$set": doc}, upsert=True)
 
     async def get_cached_change_points(
-        self, id: str, series_id_tuple: Tuple[str, float, float, Any]
+        self, user_id: str, series_id_tuple: Tuple[str, float, float, Any]
     ) -> Dict:
         """
         Get the change points for a given user id and test name from the cache.
@@ -903,14 +905,24 @@ class DBStore(object):
 
         If change points need to be recomputed, return an empty dict.
         """
+        results = await self._get_cached_cp_db(
+            user_id, series_id_tuple[0], series_id_tuple[1], series_id_tuple[2]
+        )
+        if results is None:
+            return None
+        return await self._validate_cached_cp(user_id, results, series_id_tuple[3])
+
+    async def _get_cached_cp_db(
+        self, user_id: str, test_name: str, max_pvalue: str, min_magnitude: str
+    ) -> Dict:
         collection = self.db.change_points
 
         primary_key = OrderedDict(
             {
-                "user_id": id,
-                "test_name": series_id_tuple[0],
-                "max_pvalue": series_id_tuple[1],
-                "min_magnitude": series_id_tuple[2],
+                "user_id": user_id,
+                "test_name": test_name,
+                "max_pvalue": max_pvalue,
+                "min_magnitude": min_magnitude,
             }
         )
         results = await collection.find({"_id": primary_key}).to_list(None)
@@ -922,27 +934,36 @@ class DBStore(object):
             # This should never happen. If it does, we can't trust the cache so
             # force a recompute.
             logging.error(
-                f"Multiple change points found for {series_id_tuple[0]}. Forcing recompute."
+                f"Multiple change points found for {test_name}. Forcing recompute."
             )
             return None
 
-        data, meta = separate_meta_one(results[0])
-        series_last_modified = series_id_tuple[3]
+        return results[0]
+
+    def _validate_cached_cp_timestamp(self, meta):
         if not meta:
             # Series doesn't have a last_modified field. It probably predates the time we even
             # had caching for change points.
             # Caller needs to compute the change_points now.
-            return None
+            return False
         if "change_points_timestamp" not in meta:
             # v2, see above
+            return False
+
+        return meta["change_points_timestamp"]
+
+    async def _validate_cached_cp(self, user_id, db_results, series_last_modified):
+        data, meta = separate_meta_one(db_results)
+        change_points_timestamp = self._validate_cached_cp_timestamp(meta)
+        if not change_points_timestamp:
             return None
 
-        if meta["change_points_timestamp"] < series_last_modified:
+        if change_points_timestamp < series_last_modified:
             # User has updated the series since the change points were last computed.
             # Caller needs to recompute the change points.
             return None
 
-        user_config, user_meta = await self.get_user_config(id)
+        user_config, user_meta = await self.get_user_config(user_id)
         if not user_config:
             # User has no config, so cannot have invalidated the cache
             return data["change_points"]

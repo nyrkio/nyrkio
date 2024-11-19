@@ -76,9 +76,12 @@ class PerformanceTestResult:
 
 
 class PerformanceTestResultSeries:
-    def __init__(self, name, config=None):
+    def __init__(self, name, config=None, change_points_timestamp=None):
         self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
+        # If we know the timestamp of cached change points, then we can keep track of whether and
+        # how many points in our tail end are new = newer than the cached change points.
+        self.change_points_timestamp = change_points_timestamp
 
         if not config:
             config = Config()
@@ -120,6 +123,20 @@ class PerformanceTestResultSeries:
 
         self.results.add(result)
 
+    def tail_newer_than_cache(self):
+        if self.change_points_timestamp is None or not self.change_points_timestamp:
+            return 0
+
+        newer_than_cache = 0
+        for r in self.results:
+            if self.change_points_timestamp < r._last_modified:
+                newer_than_cache += 1
+            else:
+                # We only care about the case where newer data points have been appended to the tail
+                # end of the series.
+                if newer_than_cache > 0:
+                    return 0
+
     def delete_result(self, timestamp):
         """
         Delete a result from the series
@@ -143,12 +160,53 @@ class PerformanceTestResultSeries:
             for k, v in attributes.items():
                 self.attributes[k].append(v)
 
-    def per_metric_series(self) -> Dict[str, SingleMetricSeries]:
-        # TODO(mfleming) Instead of building this dict here we should refactor
-        # PerformanceTestResultSeries to store the data in this way, i.e. by
-        # metric name, when we add results.
-        data = {}
+        def __iter__(self):
+            for i in range(len(self.timestamps)):
+                t = self.timestamps[i]
+                d = self.data[i]
+                obj = {
+                    "timestamp": t,
+                    "metric_name": self.metric_name,
+                    "metric_unit": self.metric_unit,
+                    "metric_data": d,
+                    "attributes": {},
+                }
+                for k, v in self.attributes.items():
+                    obj["attributes"][k] = v[i]
+                yield obj
+
+    # def per_metric_series(self) -> Dict[str, SingleMetricSeries]:
+    #     # TODO(mfleming) Instead of building this dict here we should refactor
+    #     # PerformanceTestResultSeries to store the data in this way, i.e. by
+    #     # metric name, when we add results.
+    #     data = {}
+    #     for r in self.results:
+    #         for rm in r.metrics:
+    #             if rm.name not in data:
+    #                 s = data[rm.name] = PerformanceTestResultSeries.SingleMetricSeries()
+    #             else:
+    #                 s = data[rm.name]
+    #
+    #             s.add_result(r.timestamp, rm, r.attributes)
+    #
+    #     return data
+
+    def per_metric_series(self, split_new=False) -> Dict[str, SingleMetricSeries]:
+        old_data = {}
+        new_data = {}
         for r in self.results:
+            data = old_data
+            if split_new:
+                if self.change_points_timestamp < r._last_modified:
+                    data = new_data
+                else:
+                    if new_data:
+                        raise ValueError(
+                            "Cannot split series cleanly at {}. Please do a full recompute of change points and use split_new=True".format(
+                                self.change_points_timestamp
+                            )
+                        )
+
             for rm in r.metrics:
                 if rm.name not in data:
                     s = data[rm.name] = PerformanceTestResultSeries.SingleMetricSeries()
@@ -157,7 +215,10 @@ class PerformanceTestResultSeries:
 
                 s.add_result(r.timestamp, rm, r.attributes)
 
-        return data
+        if split_new:
+            return old_data, new_data
+        else:
+            return old_data
 
     async def calculate_changes(self, notifiers=None):
         change_points = self.calculate_change_points()
@@ -195,11 +256,39 @@ class PerformanceTestResultSeries:
 
         return all_change_points
 
+    def incremental_change_points(self, old_cp) -> Dict[str, AnalyzedSeries]:
+        all_change_points = {}
+        data, new_data = self.per_metric_series(split_new=True)
+        if not _validate_cached_series(self.name, data, old_cp):
+            logging.warning(
+                "{}: Discarding cached change points and doing a full compute.".format(
+                    self.name
+                )
+            )
+            return self.calculate_change_points()
+
+        options = AnalysisOptions()
+        options.min_magnitude = self.config.min_magnitude
+        options.max_pvalue = self.config.max_pvalue
+
+        for metric_name, new_results in new_data.items():
+            analyzed_series = old_cp[metric_name]
+            for new_result in new_results:
+                analyzed_series.append(
+                    new_result["timestamp"],
+                    {metric_name: new_result["metric_data"]},
+                    new_result["attributes"],
+                )
+            all_change_points[metric_name] = analyzed_series
+
+        return all_change_points
+
     async def produce_reports(
         self, all_change_points: Dict[str, AnalyzedSeries], notifiers: list
     ) -> list:
         reports = []
         for metric_name, analyzed_series in all_change_points.items():
+            # analyzed_series.change_points_by_time = AnalyzedSeries.__group_change_points_by_time(analyzed_series.__series, analyzed_series.change_points)
             change_points = analyzed_series.change_points_by_time
             report = GitHubReport(analyzed_series.metric(metric_name), change_points)
             produced_report = await report.produce_report(self.name, ReportType.JSON)
@@ -366,3 +455,35 @@ class GitHubReport(Report):
 
         report = super().produce_report(test_name, report_type)
         return report
+
+
+def _validate_cached_series(test_name, data, old_cp):
+    for metric_name, m in data.items():
+        metric_timestamps = m.timestamps
+        metric_units = {metric_name: m.metric_unit}
+        metric_data = {metric_name: m.metric_data}
+        attributes = m.attributes
+        series = Series(
+            test_name,
+            None,
+            metric_timestamps,
+            metric_units,
+            metric_data,
+            attributes,
+        )
+        cached_series = old_cp.__series[metric_name]
+        if cached_series.test_name != series.test_name:
+            logging.warning(
+                "{}/{}: Cached test_name didn't match. Will discard cache. {} != {}".format(
+                    test_name, metric_name, cached_series.test_name, series.test_name
+                )
+            )
+            return False
+        if len(cached_series.time) != len(series.time):
+            logging.warning(
+                "{}/{}: Cached test_name didn't match. Will discard cache. {} != {}".format(
+                    test_name, metric_name, cached_series.test_name, series.test_name
+                )
+            )
+            return False
+    return True
