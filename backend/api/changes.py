@@ -29,12 +29,15 @@ async def get_cached_or_calc_changes(
         # Dummy user just because the caching code was written such that it assumes a user
         user_id = "000000000000000000000000"
 
+    store = DBStore()
+    raw_cached_cp = cached_cp
     do_incremental = False
     if cached_cp is not None:
         do_incremental = True
+        cached_cp = raw_cached_cp["change_points"]
+
     else:
         # If you didn't do it earlier, now fetch cached/precomputed change points from the database
-        store = DBStore()
         cached_cp = await store.get_cached_change_points(
             user_id, series.get_series_id()
         )
@@ -52,14 +55,14 @@ async def get_cached_or_calc_changes(
             if do_incremental:
                 if series.tail_newer_than_cache():
                     # There are test results newer than the cache, but we can do incremental Hunter
-                    changes = series.incremental_change_points(cached_cp)
+                    changes = series.incremental_change_points(raw_cached_cp)  # Sorry
                     await cache_changes(changes, user_id, series)
                     return changes, False
                 else:
                     fake_meta = {"change_points_timestamp": cp_timestamp}
                     fake_db_result = {"meta": fake_meta, "change_points": cached_cp}
-                    if store._validate_cached_cp(
-                        user_id, fake_db_result, series.get_series_id[3]
+                    if await store._validate_cached_cp(
+                        user_id, fake_db_result, series.get_series_id()[3]
                     ):
                         # Cache is valid, nothing new to process
                         return cp, True
@@ -159,7 +162,6 @@ async def _calc_changes(
         if raw_cached_cp is not None:
             cp_data, cp_meta = separate_meta_one(raw_cached_cp)
             cp_timestamp = store._validate_cached_cp_timestamp(cp_meta)
-
         series = _build_result_series(
             test_name,
             results,
