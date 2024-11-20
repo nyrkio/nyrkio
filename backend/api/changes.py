@@ -22,7 +22,9 @@ async def cache_changes(
     await precompute_summaries_leaves(series.name, cp, user_id)
 
 
-async def get_cached_or_calc_changes(user_id, series, cached_cp=None):
+async def get_cached_or_calc_changes(
+    user_id, series, cached_cp=None, cp_timestamp=None
+):
     if user_id is None:
         # Dummy user just because the caching code was written such that it assumes a user
         user_id = "000000000000000000000000"
@@ -53,6 +55,15 @@ async def get_cached_or_calc_changes(user_id, series, cached_cp=None):
                     changes = series.incremental_change_points(cached_cp)
                     await cache_changes(changes, user_id, series)
                     return changes, False
+                else:
+                    fake_meta = {"change_points_timestamp": cp_timestamp}
+                    fake_db_result = {"meta": fake_meta, "change_points": cached_cp}
+                    if store._validate_cached_cp(
+                        user_id, fake_db_result, series.get_series_id[3]
+                    ):
+                        # Cache is valid, nothing new to process
+                        return cp, True
+
             else:
                 # Cache is valid, nothing new to process
                 return cp, True
@@ -125,6 +136,7 @@ async def _calc_changes(
     series = None
 
     cp_data = None
+    cp_timestamp = None
     if user_id is None:
         results, results_meta = await store.get_default_data(test_name)
         series = _build_result_series(test_name, results, results_meta)
@@ -144,7 +156,6 @@ async def _calc_changes(
         raw_cached_cp = await store._get_cached_cp_db(
             user_id, test_name, max_pvalue, min_magnitude
         )
-        cp_timestamp = None
         if raw_cached_cp is not None:
             cp_data, cp_meta = separate_meta_one(raw_cached_cp)
             cp_timestamp = store._validate_cached_cp_timestamp(cp_meta)
@@ -158,7 +169,7 @@ async def _calc_changes(
             change_points_timestamp=cp_timestamp,
         )
     changes, is_cached = await get_cached_or_calc_changes(
-        user_id, series, cached_cp=cp_data
+        user_id, series, cached_cp=cp_data, cp_timestamp=cp_timestamp
     )
     return series, changes, is_cached
 
