@@ -49,7 +49,11 @@ def get_org_with_raise(orgs, org_string):
 
 
 @org_router.get("/result/{test_name:path}/changes")
-async def changes(test_name: str, user: User = Depends(auth.current_active_user)):
+async def changes(
+    test_name: str,
+    notify: Union[int, None] = None,
+    user: User = Depends(auth.current_active_user),
+):
     user_orgs = get_user_orgs(user)
     org = get_org_with_raise(user_orgs, test_name.split("/")[0])
 
@@ -63,9 +67,10 @@ async def changes(test_name: str, user: User = Depends(auth.current_active_user)
     if core_config:
         core_config = Config(**core_config)
 
-    from backend.api.api import calc_changes
+    from backend.api.api import calc_changes, get_notifiers
 
-    return await calc_changes(test_name, org["id"])
+    notifiers = await get_notifiers(notify, config, user)
+    return await calc_changes(test_name, org["id"], notifiers)
 
 
 @org_router.get("/result/{test_name_prefix:path}/summary")

@@ -63,7 +63,7 @@ async def changes(
 ):
     store = DBStore()
     config, config_meta = await store.get_user_config(user.id)
-    notifiers = await _get_notifiers(notify, config, user)
+    notifiers = await get_notifiers(notify, config, user)
     return await calc_changes(test_name, user.id, notifiers)
 
 
@@ -232,7 +232,7 @@ async def do_db():
     await do_on_startup()
 
 
-async def _get_notifiers(notify: Union[int, None], config: dict, user: User) -> list:
+async def get_notifiers(notify: Union[int, None], config: dict, user: User) -> list:
     notifiers = []
     if notify:
         slack = config.get("slack", {})
