@@ -23,8 +23,6 @@ from backend.db.db import (
 from backend.notifiers.slack import SlackNotifier
 from backend.api.background import precompute_cached_change_points
 
-import logging
-
 app = FastAPI(openapi_url="/openapi.json")
 
 
@@ -238,13 +236,13 @@ async def get_notifiers(notify: Union[int, None], config: dict, user: User) -> l
     notifiers = []
     if notify:
         slack = config.get("slack", {})
-        logging.info(f"slack {slack} for user {user.id}")
+        print(f"slack {slack} for user {user.id}")
         if slack and slack.get("channel"):
             if not user.slack:
                 raise HTTPException(status_code=400, detail="Slack not configured")
 
             url = user.slack["incoming_webhook"]["url"]
             channel = slack["channel"]
-            logging.info(f"Appending slack notifier for {url} and {channel}")
+            print(f"Appending slack notifier for {url} and {channel}")
             notifiers.append(SlackNotifier(url, [channel]))
     return notifiers
