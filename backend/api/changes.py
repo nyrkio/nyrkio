@@ -132,9 +132,7 @@ def _build_result_series(
     return series
 
 
-async def _calc_changes(
-    test_name, user_id=None, notifiers=None, pull_request=None, pr_commit=None
-):
+async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=None):
     store = DBStore()
     series = None
 
@@ -180,7 +178,7 @@ async def calc_changes(
     test_name, user_id=None, notifiers=None, pull_request=None, pr_commit=None
 ):
     series, changes, is_cached = await _calc_changes(
-        test_name, user_id, notifiers, pull_request, pr_commit
+        test_name, user_id, pull_request, pr_commit
     )
     reports = await series.produce_reports(changes, notifiers)
     return reports

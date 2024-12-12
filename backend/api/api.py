@@ -1,4 +1,5 @@
 # Copyright (c) 2024, Nyrkiö Oy
+from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Union
 
 
@@ -232,6 +233,13 @@ async def do_db():
     await do_on_startup()
 
 
+def _since_days(days):
+    if days is None:
+        return None
+
+    return datetime.now(tz=timezone.utc) - timedelta(days=days)
+
+
 async def get_notifiers(notify: Union[int, None], config: dict, user: User) -> list:
     notifiers = []
     if notify:
@@ -243,6 +251,7 @@ async def get_notifiers(notify: Union[int, None], config: dict, user: User) -> l
 
             url = user.slack["incoming_webhook"]["url"]
             channel = slack["channel"]
+            since = _since_days(config.get("since_days", 14))
             print(f"Appending slack notifier for {url} and {channel}")
-            notifiers.append(SlackNotifier(url, [channel]))
+            notifiers.append(SlackNotifier(url, [channel], since))
     return notifiers
