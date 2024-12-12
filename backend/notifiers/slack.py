@@ -34,15 +34,16 @@ class SlackNotifier:
     to send messages.
     """
 
-    def __init__(self, url, channels):
+    def __init__(self, url, channels, since=None):
         self.client = AsyncWebhookClient(url)
         self.channels = channels
+        self.since = since
 
     async def notify(self, series):
         dispatches = SlackNotification(
             series,
             data_selection_description=None,
-            since=None,
+            since=self.since,
         ).create_dispatches()
         if len(dispatches) > 3:
             logging.error(

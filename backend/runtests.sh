@@ -1,0 +1,91 @@
+#!/bin/bash
+
+
+
+
+
+function lint(){
+  echo "Lint backend code..."
+  ruff --exclude hunter $lintargs
+}
+
+function format(){
+  echo "Format python code..."
+  ruff format --exclude hunter $ruffargs
+}
+
+function unit(){
+  echo "Run unit tests..."
+  pytest tests
+}
+
+function perf(){
+  echo "Run performance tests..."
+  if $deploy -eq "true"
+  then
+    cd ..
+    docker compose -f docker-compose.dev.yml up -d
+    cd backend
+  fi
+
+  pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/
+
+  if $deploy -eq "true"
+  then
+    # Dump the logs in case of failure
+    docker compose -f docker-compose.dev.yml logs
+    docker compose -f docker-compose.dev.yml down
+  fi
+
+}
+
+fix=false
+deploy=false
+
+for opt in "$@"; do
+  print "$opt"
+
+  case ${opt} in
+    --fix)
+      fix=true
+      ;;
+    --deploy)
+      deploy=true
+      ;;
+    format)
+      if $fix -eq "true"
+      then
+        ruffargs="--check"
+      else
+        ruffargs=""
+      fi
+      format
+      ;;
+    lint)
+      if $fix -eq "true"
+      then
+        lintargs=""
+      else
+        lintargs="--fix"
+      fi
+      lint
+      ;;
+    unit)
+      unit
+      ;;
+    perf)
+      perf
+      ;;
+    all)
+      format
+      lint
+      unit
+      perf
+      ;;
+    ?)
+      echo "Invalid option: ${opt}."
+      echo "Usage: runtests.sh format|lint|unit|all"
+      exit 1
+      ;;
+  esac
+done
