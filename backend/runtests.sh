@@ -1,25 +1,22 @@
 #!/bin/bash
 
 
-
-
-
-function lint(){
+function lint() {
   echo "Lint backend code..."
   ruff --exclude hunter $lintargs
 }
 
-function format(){
+function format() {
   echo "Format python code..."
   ruff format --exclude hunter $ruffargs
 }
 
-function unit(){
+function unit() {
   echo "Run unit tests..."
   pytest tests
 }
 
-function perf(){
+function perf() {
   echo "Run performance tests..."
   if $deploy -eq "true"
   then
@@ -55,18 +52,18 @@ for opt in "$@"; do
     format)
       if $fix -eq "true"
       then
-        ruffargs="--check"
-      else
         ruffargs=""
+      else
+        ruffargs="--check"
       fi
       format
       ;;
     lint)
       if $fix -eq "true"
       then
-        lintargs=""
-      else
         lintargs="--fix"
+      else
+        lintargs=""
       fi
       lint
       ;;
