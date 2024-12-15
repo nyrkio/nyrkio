@@ -1,6 +1,5 @@
 #!/bin/bash
 
-
 function lint() {
   echo "Lint backend code..."
   ruff --exclude hunter $lintargs
