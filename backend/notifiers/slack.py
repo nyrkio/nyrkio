@@ -7,7 +7,7 @@ from backend.hunter.hunter.series import AnalyzedSeries
 import logging
 
 
-class SlackNotification():
+class SlackNotification:
     def __init__(
         self,
         test_analyzed_series: Dict[str, AnalyzedSeries],
@@ -35,7 +35,6 @@ class SlackNotification():
                     self.dates_change_points[date_str] = {}
                 self.dates_change_points[date_str][test_name] = group
 
-
     def create_dispatches(self):
         all_messages = self.create_message()
         # TODO: split all_messages to parts if too long
@@ -45,66 +44,71 @@ class SlackNotification():
     def create_message(self):
         # https://api.slack.com/reference/block-kit/blocks#section
         slack_message = {
-            "blocks":
-            {
+            "blocks": {
                 "type": "section",
-                "text":
-                {
+                "text": {
                     "type": "plain_text",
                     "text": "Changes since: " + self.since.isoformat(),
-                }
+                },
             },
-            "fields":[]
-            }
+            "fields": [],
+        }
 
         for iso_date, tests in self.dates_change_points.items():
             test_name = tests.keys()[0]
             commit = tests[test_name].attributes["git_commit"]
             git_repo = tests[test_name].attributes["git_repo"]
 
-
-            slack_message["blocks"]["fields"] += [{
-                "type": "header",
-                "text":
+            slack_message["blocks"]["fields"] += [
                 {
-                    "type": "mrkdwn",
-                    "text": iso_date,
-                }
-            },
-            {
-                "type": "header",
-                "text":
+                    "type": "header",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": iso_date,
+                    },
+                },
                 {
-                    "type": "mrkdwn",
-                    "text": "[{}]({}/commit/{})".format(commit, git_repo, commit),
-                }
-            }]
+                    "type": "header",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "[{}]({}/commit/{})".format(commit, git_repo, commit),
+                    },
+                },
+            ]
             for test_name, group in tests.items():
                 for change in group.changes:
                     metric = change.metric
                     change_percent = change.forward_change_percent()
                     change_emoji = self.__get_change_emoji(test_name, change)
 
-                    slack_message["blocks"]["fields"] += [{
-                        "type": "section",
-                        "text":
+                    slack_message["blocks"]["fields"] += [
                         {
-                            "type": "mrkdwn",
-                            "text": "[{}](https:/nyrkio.com/result/example?commit={})".format(test_name, commit),
-                        }
-                    },
-                    {
-                        "type": "section",
-                        "text":
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "[{}](https:/nyrkio.com/result/example?commit={})".format(
+                                    test_name, commit
+                                ),
+                            },
+                        },
                         {
-                            "type": "mrkdwn",
-                            "text": "[{} {}: {}](https:/nyrkio.com/result/{}?commit={}#{})".format(change_emoji, metric, change_percent, test_name, commit, metric),
-                        }
-                    }]
+                            "type": "section",
+                            "text": {
+                                "type": "mrkdwn",
+                                "text": "[{} {}: {}](https:/nyrkio.com/result/{}?commit={}#{})".format(
+                                    change_emoji,
+                                    metric,
+                                    change_percent,
+                                    test_name,
+                                    commit,
+                                    metric,
+                                ),
+                            },
+                        },
+                    ]
 
         slack_message["blocks"]["fields"] += self._get_tests_with_insufficient_data()
         return slack_message
-
 
     def _get_change_emoji(self, test_name, change):
         """Nyrkiö doesn't have the concept of metric direction."""
@@ -119,27 +123,30 @@ class SlackNotification():
             txt_msg = ""
             delimiter = ""
             for test in self.tests_with_insufficient_data:
-                txt_msg += "{}[{}](https:/nyrkio.com/result/{})".format(delimiter, test, test)
+                txt_msg += "{}[{}](https:/nyrkio.com/result/{})".format(
+                    delimiter, test, test
+                )
                 delimiter = ", "
 
-            return [{
-                "type": "section",
-                "text":
+            return [
                 {
-                    "type": "mrkdwn",
-                    "text": "Too few data to analyze:",
-                }
-            },
-            {
-                "type": "section",
-                "text":
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": "Too few data to analyze:",
+                    },
+                },
                 {
-                    "type": "mrkdwn",
-                    "text": txt_msg,
-                }
-            }]
+                    "type": "section",
+                    "text": {
+                        "type": "mrkdwn",
+                        "text": txt_msg,
+                    },
+                },
+            ]
         else:
             return []
+
 
 class SlackNotifier:
     """
