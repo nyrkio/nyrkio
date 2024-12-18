@@ -16,7 +16,12 @@ EXPOSE 80
 EXPOSE 443
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx/nginx.conf /etc/nginx/conf.d/nginx.conf.template
-ARG SSL_DOMAIN
-ENV DOMAIN=$SSL_DOMAIN
+# nyrkio.com or staging.nyrkio.com
+ARG DOMAIN
+ENV DOMAIN=$DOMAIN
 RUN envsubst '$DOMAIN' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf
 RUN cat /etc/nginx/conf.d/nginx.conf
+
+RUN mkdir -p /etc/nginx/ssl/live/$DOMAIN/
+COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
+COPY nyrkio.com.key       /etc/nginx/ssl/live/$DOMAIN/privkey.key

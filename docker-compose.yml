@@ -17,24 +17,10 @@ services:
       context: ./
       dockerfile: ./nginx/Dockerfile
       args:
-        - SSL_DOMAIN
+        - DOMAIN
     ports:
       - "80:80"
       - "443:443"
     depends_on:
       - backend
-      - certbot
-    volumes:
-      - ./certbot/run/conf:/etc/nginx/ssl:ro
-      - ./certbot/run/www:/var/www/certbot:ro
     restart: always
-  certbot:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/certbot:${IMAGE_TAG}
-    build:
-      context: ./
-      dockerfile: ./certbot/Dockerfile
-    env_file:
-      - .env.backend
-    volumes:
-      - ./certbot/run/conf/:/etc/letsencrypt/:rw
-      - ./certbot/run/www/:/var/www/certbot/:rw

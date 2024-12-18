@@ -31,17 +31,22 @@ jobs:
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           NYRKIO_ENV_STAGING: ${{ secrets.NYRKIO_ENV_STAGING }}
           NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
+          SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
+          SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
           ENV: staging
         run: |
           # Build a docker container and push it to ECR
           echo "$NYRKIO_ENV_STAGING " > .env.backend
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
+          echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
+          echo "$SSL_SECRET_KEY" > nyrkio.com.key
+          pwd
+          ls -a
 
-          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg SSL_DOMAIN=staging.nyrkio.com
+          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
-          docker push $ECR_REGISTRY/nyrkio/staging/certbot:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:
@@ -88,13 +93,8 @@ jobs:
           echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
 
           echo "$SSH_PRIVATE_KEY" | ssh-add -
+
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
-          # Check for valid certificates, creating dummy ones if necessary
-          docker compose -f docker-compose.yml up --no-build -d certbot
-
           docker compose -f docker-compose.yml up --no-build -d nginx backend
-
-          # Potentially update the dummy certificates with real ones
-          docker compose -f docker-compose.yml up --no-build -d certbot
