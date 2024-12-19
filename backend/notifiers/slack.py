@@ -55,7 +55,7 @@ class SlackNotification:
         }
 
         for iso_date, tests in self.dates_change_points.items():
-            test_name = tests.keys()[0]
+            test_name = list(tests.keys())[0]
             commit = tests[test_name].attributes["git_commit"]
             git_repo = tests[test_name].attributes["git_repo"]
 
