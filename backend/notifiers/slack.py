@@ -79,7 +79,7 @@ class SlackNotification:
                 for change in group.changes:
                     metric = change.metric
                     change_percent = change.forward_change_percent()
-                    change_emoji = self.__get_change_emoji(test_name, change)
+                    change_emoji = self._get_change_emoji(test_name, change)
 
                     slack_message["blocks"]["fields"] += [
                         {
