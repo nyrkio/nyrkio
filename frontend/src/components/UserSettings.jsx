@@ -342,7 +342,7 @@ const SlackSettings = () => {
       },
     });
     const data = await response.json();
-
+    console.debug(data);
     if (Object.keys(data).length > 0 && Object.keys(data.slack).length > 0) {
       setSlackData(data.slack);
     }
