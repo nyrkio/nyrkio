@@ -283,7 +283,7 @@ async def slack_oauth(
     # Fetch the access token from slack.com
     client = httpx.AsyncClient()
     # redirect_uri = f"https://{SERVER_NAME}/user/settings"
-    redirect_uri = "https://nyrkio.com/user/settings"
+    redirect_uri = "https://staging.nyrkio.com/user/settings"
     logging.info(f"redirect_uri: {redirect_uri}")
     response = await client.post(
         "https://slack.com/api/oauth.v2.access",
