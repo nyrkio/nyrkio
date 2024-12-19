@@ -341,6 +341,7 @@ const SlackSettings = () => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
+    console.debug(response);
     const data = await response.json();
     console.debug(data);
     if (Object.keys(data).length > 0 && Object.keys(data.slack).length > 0) {
