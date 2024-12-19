@@ -169,7 +169,7 @@ class SlackNotifier:
                     "text": "A message *with some bold text* and _some italicized text_."
                 }
             }
-        test_block = {
+        test_block = [{
                 "blocks": [
                     {
                         "type": "section",
@@ -197,7 +197,7 @@ class SlackNotifier:
                         ]
                     }
                 ]
-            }
+            }]
         for blocks in dispatches:
             blocks_json = json.dumps([blocks])
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
