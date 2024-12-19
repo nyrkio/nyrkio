@@ -50,8 +50,8 @@ class SlackNotification:
                     "type": "plain_text",
                     "text": "Changes since: " + self.since.isoformat(),
                 },
+                "fields": [],
             },
-            "fields": [],
         }
 
         for iso_date, tests in self.dates_change_points.items():
