@@ -63,18 +63,12 @@ class SlackNotification:
 
             slack_message["blocks"][0]["fields"] += [
                 {
-                    "type": "header",
-                    "text": {
                         "type": "mrkdwn",
                         "text": iso_date,
-                    },
                 },
                 {
-                    "type": "header",
-                    "text": {
                         "type": "mrkdwn",
                         "text": "[{}]({}/commit/{})".format(short_commit, git_repo, commit),
-                    },
                 },
             ]
             for test_name, group in tests.items():
