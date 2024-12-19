@@ -170,7 +170,7 @@ class SlackNotifier:
                 }
             }
         for blocks in dispatches:
-            blocks_json = json.dumps(test)
+            blocks_json = json.dumps([test])
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
             print(blocks_json)
             response = await self.client.send(text=blocks_json)
