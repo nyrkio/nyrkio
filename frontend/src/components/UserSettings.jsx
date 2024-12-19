@@ -341,9 +341,7 @@ const SlackSettings = () => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    console.debug(response);
     const data = await response.json();
-    console.debug(data);
     if (Object.keys(data).length > 0 && Object.keys(data.slack).length > 0) {
       setSlackData(data.slack);
     }
@@ -409,7 +407,7 @@ const SlackSettings = () => {
               </>
             )}
             <a
-              href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fnyrkio.com%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
+              href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fstaging.nyrkio.com%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
               className="slack-btn"
             >
               <svg
