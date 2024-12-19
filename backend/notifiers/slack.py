@@ -30,7 +30,7 @@ class SlackNotification:
                 cpg_time = datetime.fromtimestamp(group.time, tz=UTC)
                 if self.since and cpg_time < self.since:
                     continue
-                date_str = cpg_time.isoformat()
+                date_str = cpg_time.strftime("%Y-%m-%dT%H:%M:%S")
                 if date_str not in self.dates_change_points:
                     self.dates_change_points[date_str] = {}
                 self.dates_change_points[date_str][test_name] = group
@@ -58,6 +58,7 @@ class SlackNotification:
         for iso_date, tests in self.dates_change_points.items():
             test_name = list(tests.keys())[0]
             commit = tests[test_name].attributes["git_commit"]
+            short_commit = commit[0:6]
             git_repo = tests[test_name].attributes["git_repo"]
 
             slack_message["blocks"][0]["fields"] += [
@@ -72,7 +73,7 @@ class SlackNotification:
                     "type": "header",
                     "text": {
                         "type": "mrkdwn",
-                        "text": "[{}]({}/commit/{})".format(commit, git_repo, commit),
+                        "text": "[{}]({}/commit/{})".format(short_commit, git_repo, commit),
                     },
                 },
             ]
@@ -84,27 +85,22 @@ class SlackNotification:
 
                     slack_message["blocks"][0]["fields"] += [
                         {
-                            "type": "section",
                             "text": {
                                 "type": "mrkdwn",
                                 "text": "[{}](https:/nyrkio.com/result/example?commit={})".format(
                                     test_name, commit
                                 ),
-                            },
                         },
                         {
-                            "type": "section",
-                            "text": {
                                 "type": "mrkdwn",
                                 "text": "[{} {}: {}](https:/nyrkio.com/result/{}?commit={}#{})".format(
                                     change_emoji,
                                     metric,
-                                    change_percent,
+                                    round(change_percent, 1),
                                     test_name,
                                     commit,
                                     metric,
                                 ),
-                            },
                         },
                     ]
 
