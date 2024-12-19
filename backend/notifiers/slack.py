@@ -85,11 +85,10 @@ class SlackNotification:
 
                     slack_message["blocks"][0]["fields"] += [
                         {
-                            "text": {
                                 "type": "mrkdwn",
                                 "text": "[{}](https:/nyrkio.com/result/example?commit={})".format(
                                     test_name, commit
-                                ),
+                                )
                         },
                         {
                                 "type": "mrkdwn",
@@ -100,7 +99,8 @@ class SlackNotification:
                                     test_name,
                                     commit,
                                     metric,
-                                ),
+                                )
+
                         }
                     ]
 
