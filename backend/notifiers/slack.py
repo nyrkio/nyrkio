@@ -170,10 +170,10 @@ class SlackNotifier:
                 }
             }
         for blocks in dispatches:
-            blocks_json = json.dumps(blocks)
+            test_json = json.dumps(test)
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
-            print(test)
-            response = await self.client.send(text="test (fallback)", blocks=test)
+            print(test_json)
+            response = await slf.client.send(text="test (fallback)", blocks=test_json)
             if response.status_code != 200 or response.body != "ok":
                 logging.error(
                     f"Failed to send Slack notification: {response.status_code}, {response.body}"
