@@ -169,11 +169,40 @@ class SlackNotifier:
                     "text": "A message *with some bold text* and _some italicized text_."
                 }
             }
+        test_block = {
+                "blocks": [
+                    {
+                        "type": "section",
+                        "text": {
+                            "text": "A message *with some bold text* and _some italicized text_.",
+                            "type": "mrkdwn"
+                        },
+                        "fields": [
+                            {
+                                "type": "mrkdwn",
+                                "text": "*Priority*"
+                            },
+                            {
+                                "type": "mrkdwn",
+                                "text": "*Type*"
+                            },
+                            {
+                                "type": "plain_text",
+                                "text": "High"
+                            },
+                            {
+                                "type": "plain_text",
+                                "text": "Silly"
+                            }
+                        ]
+                    }
+                ]
+            }
         for blocks in dispatches:
             blocks_json = json.dumps([blocks])
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
-            print(blocks_json)
-            response = await self.client.send(text=blocks_json, blocks=blocks)
+            print(test_block)
+            response = await self.client.send(text=blocks_json, blocks=test_block)
             if response.status_code != 200 or response.body != "ok":
                 logging.error(
                     f"Failed to send Slack notification: {response.status_code}, {response.body}"
