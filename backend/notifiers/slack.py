@@ -5,7 +5,7 @@ from pytz import UTC
 from backend.hunter.hunter.series import AnalyzedSeries
 
 import logging
-
+import json
 
 class SlackNotification:
     def __init__(
@@ -48,7 +48,7 @@ class SlackNotification:
                 "type": "section",
                 "text": {
                     "type": "plain_text",
-                    "text": "Changes since: " + self.since.isoformat(),
+                    "text": "Changes since: " + self.since.strftime("%Y-%m-%dT%H:%M:%S"),
                 },
                 "fields": [],
             },
@@ -79,7 +79,7 @@ class SlackNotification:
                 for change in group.changes:
                     metric = change.metric
                     change_percent = change.forward_change_percent()
-                    change_emoji = self._get_change_emoji(test_name, change)
+                    change_emoji = self._get_change_emoji(change)
 
                     slack_message["blocks"]["fields"] += [
                         {
@@ -110,7 +110,7 @@ class SlackNotification:
         slack_message["blocks"]["fields"] += self._get_tests_with_insufficient_data()
         return slack_message
 
-    def _get_change_emoji(self, test_name, change):
+    def _get_change_emoji(self, change):
         """Nyrkiö doesn't have the concept of metric direction."""
         regression = change.forward_change_percent()
         if regression >= 0:
@@ -173,8 +173,9 @@ class SlackNotifier:
             return
 
         for blocks in dispatches:
-            logging.debug(f"Sending Slack notification to {self.channels}: {blocks}")
-            response = await self.client.send(text="test (fallback)", blocks=blocks)
+            blocks_json = json.dumps(blocks)
+            logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
+            response = await self.client.send(text="test (fallback)", blocks=blocks_json)
             if response.status_code != 200 or response.body != "ok":
                 logging.error(
                     f"Failed to send Slack notification: {response.status_code}, {response.body}"
