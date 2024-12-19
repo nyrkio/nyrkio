@@ -101,7 +101,7 @@ class SlackNotification:
                                     commit,
                                     metric,
                                 ),
-                        },
+                        }
                     ]
 
         slack_message["blocks"][0]["fields"] += self._get_tests_with_insufficient_data()
