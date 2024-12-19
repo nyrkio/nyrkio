@@ -44,14 +44,15 @@ class SlackNotification:
     def create_message(self):
         # https://api.slack.com/reference/block-kit/blocks#section
         slack_message = {
-            "blocks": {
+            "blocks": [
+            {
                 "type": "section",
                 "text": {
                     "type": "plain_text",
                     "text": "Changes since: " + self.since.strftime("%Y-%m-%dT%H:%M:%S"),
                 },
                 "fields": [],
-            },
+            }]
         }
 
         for iso_date, tests in self.dates_change_points.items():
@@ -59,7 +60,7 @@ class SlackNotification:
             commit = tests[test_name].attributes["git_commit"]
             git_repo = tests[test_name].attributes["git_repo"]
 
-            slack_message["blocks"]["fields"] += [
+            slack_message["blocks"][0]["fields"] += [
                 {
                     "type": "header",
                     "text": {
@@ -81,7 +82,7 @@ class SlackNotification:
                     change_percent = change.forward_change_percent()
                     change_emoji = self._get_change_emoji(change)
 
-                    slack_message["blocks"]["fields"] += [
+                    slack_message["blocks"][0]["fields"] += [
                         {
                             "type": "section",
                             "text": {
@@ -107,7 +108,7 @@ class SlackNotification:
                         },
                     ]
 
-        slack_message["blocks"]["fields"] += self._get_tests_with_insufficient_data()
+        slack_message["blocks"][0]["fields"] += self._get_tests_with_insufficient_data()
         return slack_message
 
     def _get_change_emoji(self, change):
@@ -165,7 +166,6 @@ class SlackNotifier:
             data_selection_description=None,
             since=self.since,
         ).create_dispatches()
-        print(dispatches)
         if len(dispatches) > 3:
             logging.error(
                 "Change point summary would produce too many Slack notifications"
@@ -175,6 +175,7 @@ class SlackNotifier:
         for blocks in dispatches:
             blocks_json = json.dumps(blocks)
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks_json}")
+            print(blocks_json)
             response = await self.client.send(text="test (fallback)", blocks=blocks_json)
             if response.status_code != 200 or response.body != "ok":
                 logging.error(
