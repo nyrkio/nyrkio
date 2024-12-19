@@ -63,11 +63,11 @@ class SlackNotification:
 
             slack_message["blocks"][0]["fields"] += [
                 {
-                        "type": "mrkdwn",
+                        "type": "plain_text",
                         "text": iso_date,
                 },
                 {
-                        "type": "mrkdwn",
+                        "type": "plain_text",
                         "text": "[{}]({}/commit/{})".format(short_commit, git_repo, commit),
                 },
             ]
@@ -79,13 +79,13 @@ class SlackNotification:
 
                     slack_message["blocks"][0]["fields"] += [
                         {
-                                "type": "mrkdwn",
+                                "type": "plain_text",
                                 "text": "[{}](https:/nyrkio.com/result/example?commit={})".format(
                                     test_name, commit
                                 )
                         },
                         {
-                                "type": "mrkdwn",
+                                "type": "plain_text",
                                 "text": "[{} {}: {}](https:/nyrkio.com/result/{}?commit={}#{})".format(
                                     change_emoji,
                                     metric,
@@ -123,14 +123,14 @@ class SlackNotification:
                 {
                     "type": "section",
                     "text": {
-                        "type": "mrkdwn",
+                        "type": "plain_text",
                         "text": "Too few data to analyze:",
                     },
                 },
                 {
                     "type": "section",
                     "text": {
-                        "type": "mrkdwn",
+                        "type": "plain_text",
                         "text": txt_msg,
                     },
                 },
