@@ -88,7 +88,7 @@ class SlackNotification:
                             "type": "rich_text_section",
                             "elements": [
                                 {
-                                    "type": "rich_text",
+                                    "type": "text",
                                     "text": ". "
                                 }
                             ],
