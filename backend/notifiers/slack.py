@@ -28,7 +28,8 @@ class SlackNotification:
                 self.tests_with_insufficient_data.append(test)
 
         self.dates_change_points = {}
-        for test_name, analyzed_series in self.test_analyzed_series.items():
+        for metric_name, analyzed_series in self.test_analyzed_series.items():
+            test_name = analyzed_series.test_name()
             for group in analyzed_series.change_points_by_time:
                 cpg_time = datetime.fromtimestamp(group.time, tz=UTC)
                 if self.since and cpg_time < self.since:
@@ -37,7 +38,9 @@ class SlackNotification:
                 date_str = cpg_time.strftime("%Y-%m-%dT%H:%M:%S")
                 if test_name not in self.dates_change_points:
                     self.dates_change_points[test_name] = {}
-                self.dates_change_points[test_name][date_str] = group
+                if metric_name not in self.dates_change_points[test_name]:
+                    self.dates_change_points[test_name][metric_name] = {}
+                self.dates_change_points[test_name][metric_name][date_str] = group
 
         self.make_intro()
 
@@ -75,89 +78,78 @@ class SlackNotification:
 
     def create_message(self):
         # https://api.slack.com/reference/block-kit/blocks#section
-        if len(self.dates_change_points.items()) == 0:
-            return []
-
         slack_message = self.get_intro()
-        for test_name, tests in self.dates_change_points.items():
-            slack_message += [
-                {
-                    "type": "rich_text",
-                    "elements": [
-                        {
-                            "type": "rich_text_section",
-                            "elements": [
-                                {
-                                    "type": "text",
-                                    "text": ". "
-                                }
-                            ],
-                        },
-                        {
-                            "type": "rich_text_section",
-                            "elements": [
-                                {
-                                    "type": "link",
-                                    "text": test_name,
-                                    "url": "{}{}".format(self.base_url, test_name),
-                                }
-                            ],
-                        }
-                    ],
-                }
-            ]
+        for test_name, all_metrics in self.dates_change_points.items():
+            if not all_metrics:
+                continue
 
-            for iso_date, group in tests.items():
-                commit = group.attributes["git_commit"]
-                short_commit = commit[0:7]
-                git_repo = group.attributes["git_repo"]
+            for metric_name, tests in all_metrics.items():
+                if not tests:
+                    continue
 
-                slack_message += [
-                    {
-                        "type": "rich_text",
-                        "elements": [
-                            {
-                                "type": "rich_text_section",
-                                "elements": [
-                                    {
-                                        "type": "link",
-                                        "text": short_commit,
-                                        "url": "{}/commit/{}".format(git_repo, commit),
-                                        "style": {"bold": True},
-                                    },
-                                    {"type": "text", "text": "    {}".format(iso_date)},
-                                ],
-                            },
-                        ],
-                    },
-                ]
-                for change in group.changes:
-                    metric = change.metric
-                    change_percent = change.forward_change_percent()
-                    change_emoji = self._get_change_emoji(change)
+                for iso_date, group in tests.items():
+                    if not group:
+                        continue
+
+                    commit = group.attributes["git_commit"]
+                    short_commit = commit[0:7]
+                    git_repo = group.attributes["git_repo"]
 
                     slack_message += [
                         {
                             "type": "rich_text",
-                            "elements": [
+                                "elements": [
                                 {
                                     "type": "rich_text_section",
                                     "elements": [
-                                        {"type": "emoji", "name": change_emoji},
+                                        {
+                                            "type": "text",
+                                            "text": ". "
+                                        }
+                                    ],
+                                },
+                                {
+                                    "type": "rich_text_section",
+                                    "elements": [
                                         {
                                             "type": "link",
-                                            "text": ". {}: {} %".format(
-                                                metric, round(change_percent, 1)
-                                            ),
-                                            "url": "{}{}?commit={}#{}".format(
-                                                self.base_url, test_name, commit, metric
-                                            ),
+                                            "text": short_commit,
+                                            "url": "{}/commit/{}".format(git_repo, commit),
+                                            "style": {"bold": True},
                                         },
+                                        {"type": "text", "text": "    {}".format(iso_date)},
                                     ],
-                                }
+                                },
                             ],
-                        }
+                        },
                     ]
+                    for change in group.changes:
+                        metric = change.metric
+                        change_percent = change.forward_change_percent()
+                        change_emoji = self._get_change_emoji(change)
+
+                        slack_message += [
+                            {
+                                "type": "rich_text",
+                                "elements": [
+                                    {
+                                        "type": "rich_text_section",
+                                        "elements": [
+                                            {"type": "emoji", "name": change_emoji},
+                                            {
+                                                "type": "link",
+                                                "text": "{}: {} => {} %".format(
+                                                    test_name, metric, round(change_percent, 1)
+                                                ),
+                                                "url": "{}{}?commit={}#{}".format(
+                                                    self.base_url, test_name, commit, metric
+                                                ),
+                                            },
+                                        ],
+                                    }
+                                ],
+                            }
+                        ]
 
         slack_message += self._get_tests_with_insufficient_data()
         return slack_message
