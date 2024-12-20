@@ -14,9 +14,11 @@ class SlackNotification:
         test_analyzed_series: Dict[str, AnalyzedSeries],
         data_selection_description: str = None,
         since: datetime = None,
+        base_url: str = "https://nyrkio.com/result/"
     ):
         self.data_selection_description = data_selection_description
         self.since = since
+        self.base_url = base_url
         self.tests_with_insufficient_data = []
         self.test_analyzed_series = dict()
         for test, series in test_analyzed_series.items():
@@ -97,7 +99,7 @@ class SlackNotification:
                                 {
                                     "type": "link",
                                     "text": test_name,
-                                    "url": "https://nyrkio.com/result/{}".format(test_name),
+                                    "url": "{}{}".format(self.base_url, test_name),
                                 }
                             ],
                         }
@@ -147,8 +149,8 @@ class SlackNotification:
                                             "text": ". {}: {} %".format(
                                                 metric, round(change_percent, 1)
                                             ),
-                                            "url": "https://nyrkio.com/result/{}?commit={}#{}".format(
-                                                test_name, commit, metric
+                                            "url": "{}{}?commit={}#{}".format(
+                                                self.base_url, test_name, commit, metric
                                             ),
                                         },
                                     ],
@@ -173,8 +175,8 @@ class SlackNotification:
             txt_msg = ""
             delimiter = ""
             for test in self.tests_with_insufficient_data:
-                txt_msg += "{}[{}](https:/nyrkio.com/result/{})".format(
-                    delimiter, test, test
+                txt_msg += "{}[{}]({}{})".format(
+                    delimiter, test, self.base_url, test
                 )
                 delimiter = ", "
 
@@ -189,7 +191,7 @@ class SlackNotification:
                 {
                     "type": "section",
                     "text": {
-                        "type": "plain_text",
+                        "type": "mrkdwn",
                         "text": txt_msg,
                     },
                 },
@@ -204,16 +206,18 @@ class SlackNotifier:
     to send messages.
     """
 
-    def __init__(self, url, channels, since=None):
+    def __init__(self, url, channels, since=None, base_url="https://nyrkio.com/result"):
         self.client = AsyncWebhookClient(url)
         self.channels = channels
         self.since = since
+        self.base_url = base_url
 
     async def notify(self, series):
         dispatches = SlackNotification(
             series,
             data_selection_description=None,
             since=self.since,
+            base_url=self.base_url
         ).create_dispatches()
         if len(dispatches) > 3:
             logging.error(
