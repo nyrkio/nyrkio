@@ -96,3 +96,19 @@ export const dashboardTypes = {
   PUBLIC: "public",
   USER: "user",
 };
+
+export const applyHash = () => {
+  if (!window.hashTimer){
+    window.hashTimer = window.setTimeout(() => {
+      if(window.location.hash){
+        // const tmphash = window.location.hash;
+        // window.location.hash = "";
+        // console.debug("refresh location.hash now that everything loaded")
+        // window.location.hash = tmphash;
+        // console.log(window.location.hash.substring(1));
+        const e = document.getElementById(window.location.hash.substring(1));
+        if(e){e.scrollIntoView();}
+      }
+    }, 2000);
+  }
+};

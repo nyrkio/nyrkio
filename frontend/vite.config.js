@@ -8,8 +8,8 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        // target: "https://nyrk.io",
-        target: "http://localhost",
+        target: "https://nyrk.io",
+        // target: "http://localhost",
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ""),
       },

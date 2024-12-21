@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Button, Modal, ModalHeader } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
 // DO NOT REMOVE
@@ -34,9 +35,11 @@ export const DrawLineChart = ({
   timestamps,
   displayData,
   changePointData,
+  searchParams
 }) => {
   const chartRef = useRef();
   const metricName = metric["name"];
+  const metricNameWithHash = "#"+metricName;
   const metricUnit = metric["unit"];
   const parseData = (data, metricName) => {
     const value_map = data.map(
@@ -96,8 +99,23 @@ export const DrawLineChart = ({
     return timestamps.length > 100 ? 0 : 1;
   };
 
-  const PopupModal = ({ show, setShow, timestamp, setTimestamp }) => {
-    const handleClose = () => setShow(false);
+  var userClosed = false;
+  const PopupModal = ({ metricName, show, setShow, timestamp, setTimestamp }) => {
+    const handleClose = () => {setShow(false); userClosed=true;};
+    if(qtimestamp && showModal===null && !userClosed){
+      //console.log(timestamps);
+      console.log(timestamps.indexOf(qtimestamp));
+      console.log(window.location.hash);
+      if(timestamps.indexOf(qtimestamp)>=0 &&
+        window.location.hash == "#"+metricName
+      ){
+        const e = document.getElementById(window.location.hash);
+        if(e){e.scrollIntoView();}
+        setModalData(parseTimestamp(qtimestamp));
+        setShowModal(true);
+
+      }
+    }
 
     var result = displayData.find(
       (o) => parseTimestamp(o.timestamp) === timestamp,
@@ -202,19 +220,27 @@ export const DrawLineChart = ({
     setShowModal(true);
   };
 
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(null);
   const [modalData, setModalData] = useState({});
+  const [queryParams, setQueryParams] = useSearchParams();
+  const qtimestamp = parseInt(queryParams.get("timestamp"));
+  useEffect(()=>{
+  },[showModal, PopupModal]);
+
+
+
   return (
     <>
       <PopupModal
+        metricName={metricName}
         show={showModal}
         setShow={setShowModal}
         timestamp={modalData}
         setTimestamp={setModalData}
       />
-      <div className="chart-wrapper p-4">
+      <div className="chart-wrapper p-4" id={metricName}>
         <h6 className="text-center">
-          {testName}: {metricName}
+          {testName}: <a href={metricNameWithHash}>{metricName}</a>
         </h6>
         <Line
           ref={chartRef}

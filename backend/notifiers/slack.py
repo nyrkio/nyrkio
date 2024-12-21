@@ -91,6 +91,7 @@ class SlackNotification:
                     if not group:
                         continue
 
+                    timestamp = group.time
                     commit = group.attributes["git_commit"]
                     short_commit = commit[0:7]
                     git_repo = group.attributes["git_repo"]
@@ -141,8 +142,8 @@ class SlackNotification:
                                                 "text": "{}: {} => {} %".format(
                                                     test_name, metric, round(change_percent, 1)
                                                 ),
-                                                "url": "{}{}?commit={}#{}".format(
-                                                    self.base_url, test_name, commit, metric
+                                                "url": "{}{}?commit={}&timestamp={}#{}".format(
+                                                    self.base_url, test_name, commit, timestamp, metric
                                                 ),
                                             },
                                         ],
