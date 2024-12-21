@@ -1,11 +1,15 @@
+import { useSearchParams } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 
-export const ChangePointSummaryTable = ({ changeData }) => {
+export const ChangePointSummaryTable = ({ changeData, searchParams }) => {
   var rowData = [];
+  //const [searchParams, setSearchParams] = useSearchParams();
+  const numeric_timestamp = searchParams.get("timestamp");
+  const text_timestamp = parseTimestamp(numeric_timestamp);
 
   console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
@@ -41,8 +45,25 @@ export const ChangePointSummaryTable = ({ changeData }) => {
   }
 
   const colDefs = [
-    { field: "date", sort: "desc" },
-    { field: "metric" },
+    { field: "date", sort: "desc",
+      cellRenderer: (params) => {
+        const text = params.value;
+        //console.debug(text, text_timestamp);
+        if (text == text_timestamp){
+          return (<b>{text}</b>);
+        }
+        return text;
+      }
+    },
+    { field: "metric",
+      cellRenderer: (params) => {
+        const metric_name = params.value;
+        const url = "#"+metric_name;
+        return (
+          <a href={url}>{metric_name}</a>
+        );
+      }
+    },
     { field: "change" },
     {
       field: "commit",

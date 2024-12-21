@@ -69,7 +69,9 @@ async def changes(
 
     from backend.api.api import calc_changes, get_notifiers
 
-    notifiers = await get_notifiers(notify, config, user)
+    notifiers = await get_notifiers(
+        notify, config, user, base_url="https://nyrkio.com/orgs/"
+    )
     return await calc_changes(test_name, org["id"], notifiers)
 
 

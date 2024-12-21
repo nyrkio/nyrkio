@@ -286,6 +286,10 @@ class PerformanceTestResultSeries:
     async def produce_reports(
         self, all_change_points: Dict[str, AnalyzedSeries], notifiers: list
     ) -> list:
+        if notifiers:
+            for notifier in notifiers:
+                await notifier.notify(all_change_points)
+
         reports = []
         for metric_name, analyzed_series in all_change_points.items():
             # analyzed_series.change_points_by_time = AnalyzedSeries.__group_change_points_by_time(analyzed_series.__series, analyzed_series.change_points)
@@ -293,10 +297,6 @@ class PerformanceTestResultSeries:
             report = GitHubReport(analyzed_series.metric(metric_name), change_points)
             produced_report = await report.produce_report(self.name, ReportType.JSON)
             reports.append(json.loads(produced_report))
-
-            if notifiers:
-                for notifier in notifiers:
-                    await notifier.notify({self.name: analyzed_series})
 
         # Merge all reports into a single list, collapsing metrics with the same
         # timestamp into a single entry.

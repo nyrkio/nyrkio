@@ -1,15 +1,23 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import { NoMatch } from "./NoMatch";
-import { createShortNames, dashboardTypes } from "../lib/utils";
+import { createShortNames, dashboardTypes, applyHash } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 import { SidePanel } from "./SidePanel";
 
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
+};
+
+const Loading = ({loading}) => {
+  if (loading) {
+    return (<><div>Loading...</div></>);
+  }
+  return (<><div className="loading_done"></div></>);
 };
 
 export const Breadcrumb = ({ testName, baseUrls }) => {
@@ -170,16 +178,13 @@ export const Dashboard = ({loggedIn, embed}) => {
       setUnencodedTestNames((prevState) => [...prevState, test_name]);
     });
     setLoading(false);
+
   };
 
   useEffect(() => {
     setLoading(true);
     fetchData();
   }, []);
-
-  if (loading) {
-    return <div>Loading</div>;
-  }
 
   const testNames = unencodedTestNames.map((name) => encodeURI(name));
 
@@ -191,6 +196,8 @@ export const Dashboard = ({loggedIn, embed}) => {
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name) => decodeURI(name));
   console.log(embed);
+
+
   return (
     <>
       {embed == "yes" ? "" :
@@ -201,10 +208,7 @@ export const Dashboard = ({loggedIn, embed}) => {
     }
 
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
-        {loading ? (
-          <div>Loading</div>
-        ) : (
-          <>
+            <Loading loading={loading} />
             <div className="container-fluid">
               <div className="card">
                 <div className="card-header">Please select a test</div>
@@ -235,8 +239,6 @@ export const Dashboard = ({loggedIn, embed}) => {
                 </div>
               </div>
             </div>
-          </>
-        )}
       </div>
     </>
   );
@@ -262,6 +264,7 @@ export const SingleResultWithTestname = ({
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
   console.debug("Display data");
   console.debug(displayData);
 
@@ -327,19 +330,16 @@ export const SingleResultWithTestname = ({
     }
   }, []);
   console.debug("unique: " + unique);
-
+  applyHash();
   return (
     <>
-      {loading ? (
-        <div>Loading</div>
-      ) : (
-        <>
           {embed == "yes" ? "" :
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           }
           <div className="container">
+            <Loading loading={loading} />
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} />
+              <ChangePointSummaryTable changeData={changePointData} searchParams={searchParams} />
             </div>
 
             {!isPublicDashboard(dashboardType) && (
@@ -367,13 +367,12 @@ export const SingleResultWithTestname = ({
                     timestamps={timestamps}
                     displayData={displayData}
                     key={testName+"/"+metric.name}
+                    searchParams={searchParams}
                   />
                 );
               })}
             </div>
           </div>
-        </>
-      )}
     </>
   );
 };
@@ -462,13 +461,10 @@ const TestListEntry = ({ name, longName, baseUrls, testNames }) => {
     );
   }
 
-  if (loading) {
-    return <div>Loading</div>;
-  }
-
   if (imageUrl) {
     return (
       <div className="row justify-content-center">
+        <Loading loading={loading} />
         <div className="col-1">
           <img
             src={imageUrl}
@@ -492,6 +488,7 @@ const TestListEntry = ({ name, longName, baseUrls, testNames }) => {
     return (
       <>
         <div className="row justify-content-center">
+          <Loading loading={loading} />
           <div className="col">
             {name}{" "}
             <SummarizeChangePoints
