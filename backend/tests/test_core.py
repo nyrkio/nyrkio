@@ -309,11 +309,15 @@ def test_notifiers_get_notified():
     series = PerformanceTestResultSeries("benchmark1")
 
     metrics = [ResultMetric("metric1", "µs", 1.0)]
+    metrics2 = [ResultMetric("metric1", "µs", 2.0)]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
     series.add_result(PerformanceTestResult(3, metrics, attr))
+    series.add_result(PerformanceTestResult(4, metrics2, attr))
+    series.add_result(PerformanceTestResult(5, metrics2, attr))
+    series.add_result(PerformanceTestResult(6, metrics2, attr))
 
     class Notifier:
         notified = False
@@ -329,7 +333,10 @@ def test_notifiers_get_notified():
 
     asyncio.run(series.calculate_changes([notifier]))
     assert notifier.notified
-    assert notifier.expected_output == {"benchmark1": []}
+    assert "metric1" in notifier.expected_output.keys()
+    assert len(notifier.expected_output["metric1"]) == 1
+    assert notifier.expected_output["metric1"][0].index == 3
+    assert notifier.expected_output["metric1"][0].time == 4
 
 
 def test_changes_for_metrics_with_different_timestamps():
