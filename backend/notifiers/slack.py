@@ -14,7 +14,7 @@ class SlackNotification:
         test_analyzed_series: Dict[str, AnalyzedSeries],
         data_selection_description: str = None,
         since: datetime = None,
-        base_url: str = "https://nyrkio.com/result/"
+        base_url: str = "https://nyrkio.com/result/",
     ):
         self.data_selection_description = data_selection_description
         self.since = since
@@ -69,7 +69,6 @@ class SlackNotification:
         self.intro = []
         return intro
 
-
     def create_dispatches(self):
         all_messages = self.create_message()
         # TODO: split all_messages to parts if too long
@@ -99,15 +98,10 @@ class SlackNotification:
                     slack_message += [
                         {
                             "type": "rich_text",
-                                "elements": [
+                            "elements": [
                                 {
                                     "type": "rich_text_section",
-                                    "elements": [
-                                        {
-                                            "type": "text",
-                                            "text": ". "
-                                        }
-                                    ],
+                                    "elements": [{"type": "text", "text": ". "}],
                                 },
                                 {
                                     "type": "rich_text_section",
@@ -115,10 +109,15 @@ class SlackNotification:
                                         {
                                             "type": "link",
                                             "text": short_commit,
-                                            "url": "{}/commit/{}".format(git_repo, commit),
+                                            "url": "{}/commit/{}".format(
+                                                git_repo, commit
+                                            ),
                                             "style": {"bold": True},
                                         },
-                                        {"type": "text", "text": "    {}".format(iso_date)},
+                                        {
+                                            "type": "text",
+                                            "text": "    {}".format(iso_date),
+                                        },
                                     ],
                                 },
                             ],
@@ -140,10 +139,16 @@ class SlackNotification:
                                             {
                                                 "type": "link",
                                                 "text": "{}: {} => {} %".format(
-                                                    test_name, metric, round(change_percent, 1)
+                                                    test_name,
+                                                    metric,
+                                                    round(change_percent, 1),
                                                 ),
                                                 "url": "{}{}?commit={}&timestamp={}#{}".format(
-                                                    self.base_url, test_name, commit, timestamp, metric
+                                                    self.base_url,
+                                                    test_name,
+                                                    commit,
+                                                    timestamp,
+                                                    metric,
                                                 ),
                                             },
                                         ],
@@ -168,9 +173,7 @@ class SlackNotification:
             txt_msg = ""
             delimiter = ""
             for test in self.tests_with_insufficient_data:
-                txt_msg += "{}[{}]({}{})".format(
-                    delimiter, test, self.base_url, test
-                )
+                txt_msg += "{}[{}]({}{})".format(delimiter, test, self.base_url, test)
                 delimiter = ", "
 
             return [
@@ -210,7 +213,7 @@ class SlackNotifier:
             series,
             data_selection_description=None,
             since=self.since,
-            base_url=self.base_url
+            base_url=self.base_url,
         ).create_dispatches()
         if len(dispatches) > 3:
             logging.error(

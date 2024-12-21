@@ -240,7 +240,12 @@ def _since_days(days):
     return datetime.now(tz=timezone.utc) - timedelta(days=days)
 
 
-async def get_notifiers(notify: Union[int, None], config: dict, user: User, base_url: str = "https://nyrkio.com/result/") -> list:
+async def get_notifiers(
+    notify: Union[int, None],
+    config: dict,
+    user: User,
+    base_url: str = "https://nyrkio.com/result/",
+) -> list:
     notifiers = []
     if notify:
         slack = config.get("slack", {})
