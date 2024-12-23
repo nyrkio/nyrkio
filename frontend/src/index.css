@@ -388,11 +388,25 @@ button:focus-visible {
   color: var(--nyrkio-tattoo-red);
 }
 
+.btn-success:focus:hover,
+.btn-success:focus,
+.btn-success.btn-primary,
 .btn-success {
   color: var(--nyrkio-light-gray3);
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
+}
+
+.btn-primary {
+  background-color: var(--nyrkio-light-gray);
+  border-color: var(--nyrkio-dark-gray);
+  margin: 10px;
+}
+.btn-primary:hover {
+  background-color: var(--nyrkio-light-gray4);
+  border-color: var(--nyrkio-dark-red);
+  margin: 10px;
 }
 
 .btn-danger {
