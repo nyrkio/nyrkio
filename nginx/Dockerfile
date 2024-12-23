@@ -25,3 +25,4 @@ RUN cat /etc/nginx/conf.d/nginx.conf
 RUN mkdir -p /etc/nginx/ssl/live/$DOMAIN/
 COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
 COPY nyrkio.com.key       /etc/nginx/ssl/live/$DOMAIN/privkey.key
+RUN ls
