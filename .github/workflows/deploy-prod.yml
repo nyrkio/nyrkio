@@ -41,6 +41,9 @@ jobs:
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
           echo "$SSL_SECRET_KEY" > nyrkio.com.key
+          pwd
+          ls -a
+
           docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg DOMAIN=nyrkio.com
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
