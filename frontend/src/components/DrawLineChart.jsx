@@ -35,7 +35,8 @@ export const DrawLineChart = ({
   timestamps,
   displayData,
   changePointData,
-  searchParams
+  searchParams,
+  graphSize
 }) => {
   const chartRef = useRef();
   const metricName = metric["name"];
@@ -50,6 +51,14 @@ export const DrawLineChart = ({
     );
     return value_map;
   };
+  const getLayout = (layout) => {
+    if(layout=="overview") return {width:"100%", maxWidth: "100%", outerWidth: "25%", height:"50%", maxHeight:"50%"};
+    if(layout=="sparklines") return {width:"100%", height:"50px", maxHeight:"50px"};
+    if(layout=="2x1") return {width: "100%", minWidth: "100%", height: "70%", maxHeight: "70%"};
+    if(layout=="1x1") return {width: "100%", height: "90%", maxHeight: "90%"};
+    return {width: "100%", height: "80%", maxHeight: "80%"};
+  };
+  const layout = getLayout(graphSize);
 
   // {'testName':
   //    [{
@@ -238,7 +247,8 @@ export const DrawLineChart = ({
         timestamp={modalData}
         setTimestamp={setModalData}
       />
-      <div className="chart-wrapper p-4" id={metricName}>
+      <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
+      <div className="chart-wrapper"  style={layout}>
         <h6 className="text-center">
           {testName}: <a href={metricNameWithHash}>{metricName}</a>
         </h6>
@@ -348,8 +358,13 @@ export const DrawLineChart = ({
                 intersect: false,
               },
             },
+            // Boolean - whether or not the chart should be responsive and resize when the browser does.
+            responsive: true,
+            // Boolean - whether to maintain the starting aspect ratio or not when responsive, if set to false, will take up entire container
+            maintainAspectRatio: false,
           }}
         />
+      </div>
       </div>
     </>
   );

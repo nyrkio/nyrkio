@@ -9,6 +9,11 @@ import { createShortNames, dashboardTypes, applyHash } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 import { SidePanel } from "./SidePanel";
 
+import graph_4x4 from "../static/icons/graph-4x4.png";
+import graph_nx1 from "../static/icons/graph-nx1.png";
+import graph_2x1 from "../static/icons/graph-2x1.png";
+import graph_1x1 from "../static/icons/graph-1x1.png";
+
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
 };
@@ -299,6 +304,56 @@ export const SingleResultWithTestname = ({
     setChangePointData(changeData);
   };
 
+  const [graphSize, setGraphSize] = useState("sparklines");
+  const resetOtherButtons = (selectButton) => {
+    if (selectButton.id != "btn-graph-overview"){
+      document.getElementById("btn-graph-overview").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-sparklines"){
+      document.getElementById("btn-graph-sparklines").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-2x1"){
+      document.getElementById("btn-graph-2x1").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-1x1"){
+      document.getElementById("btn-graph-1x1").classList.remove("btn-success");
+    }
+    selectButton.classList.add("btn-success");
+    // The above doesn't work every time, so schedule backup executions to happen later, to avoid race
+    setTimeout(()=>{
+      document.getElementById(selectButton.id).classList.add("btn-success");
+    },100);
+//     setTimeout(()=>{
+//       document.getElementById(selectButton.id).classList.add("btn-success");
+//     },4000);
+  }
+  const setLayout = (e) =>{
+      const newLayout = e.currentTarget.id.substring(10);
+      console.log(newLayout);
+      setGraphSize(newLayout);
+      resetOtherButtons(e.currentTarget);
+      e.preventDefault();
+      e.stopPropagation();
+  };
+  const GraphSizePicker = () => {
+    return (<>
+            <p className="text-center">Choose layout</p>
+            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
+            </a>
+
+            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
+            </a>
+            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
+            </a>
+            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
+            </a>
+            </>);
+  }
+
   useEffect(() => {
     setLoading(true);
     fetchData().finally(() => {
@@ -342,6 +397,10 @@ export const SingleResultWithTestname = ({
               <ChangePointSummaryTable changeData={changePointData} searchParams={searchParams} />
             </div>
 
+            <div className="row justify-content-center text-center">
+              <GraphSizePicker />
+            </div>
+
             {!isPublicDashboard(dashboardType) && (
               <div className="row mt-5">
                 <p className="text-center small mb-1">Publish test results</p>
@@ -368,6 +427,7 @@ export const SingleResultWithTestname = ({
                     displayData={displayData}
                     key={testName+"/"+metric.name}
                     searchParams={searchParams}
+                    graphSize={graphSize}
                   />
                 );
               })}
