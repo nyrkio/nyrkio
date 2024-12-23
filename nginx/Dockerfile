@@ -22,7 +22,8 @@ ENV DOMAIN=$DOMAIN
 RUN envsubst '$DOMAIN' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf
 RUN cat /etc/nginx/conf.d/nginx.conf
 
+# Mount point for external dir
 RUN mkdir -p /etc/nginx/ssl/live/$DOMAIN/
-COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
-COPY nyrkio.com.key       /etc/nginx/ssl/live/$DOMAIN/privkey.key
-RUN ls
+# COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
+# COPY nyrkio.com.key       /etc/nginx/ssl/live/$DOMAIN/privkey.key
+# RUN ls
