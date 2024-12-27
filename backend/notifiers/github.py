@@ -72,7 +72,7 @@ class GitHubCommentNotifier:
         return access_token
 
     @staticmethod
-    def create_body(results, pr_commit, changes) -> str:
+    def create_body(results, pr_commit, changes, base_url) -> str:
         """
         Create a issue comment body from the test results and changes.
         """
@@ -80,6 +80,7 @@ class GitHubCommentNotifier:
         header = "**Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
+        footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/Nyrkio%CC%88Logo_Final_Logomark_RedTan_100x100.png)](https://nyrkio.com)"
 
         anything_to_report = False
         for entry in results:
@@ -93,14 +94,16 @@ class GitHubCommentNotifier:
                         ch = f"{ch:.2f}%"
                         anything_to_report = True
 
-                    body += f"{test_name} | {m} | {ch}\n"
+                    body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch}\n"
 
         if not anything_to_report:
-            return header + "No performance changes detected. 🚀"
+            return header + "No performance changes detected. 🚀" + footer
 
-        return header + body
+        return header + body + footer
 
-    async def notify(self, results, pr_commit, changes):
+    async def notify(
+        self, results, pr_commit, changes, base_url: str = "https://nyrkio.com/result/"
+    ):
         """
         Post a comment to the pull request with the test results.
 
@@ -111,7 +114,7 @@ class GitHubCommentNotifier:
         if not access_token:
             return
 
-        body = GitHubCommentNotifier.create_body(results, pr_commit, changes)
+        body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
 
         # Lookup the issue url from the pull request
         logging.debug(f"Fetching pull request: {self.pull_url}")

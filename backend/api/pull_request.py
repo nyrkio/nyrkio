@@ -70,6 +70,14 @@ async def get_pr_changes(
         results, _ = await store.get_results(
             user.id, test_name, pull_number, git_commit
         )
+        if not len(results) >= 1:
+            raise HTTPException(
+                status_code=404,
+                detail="Did not find any commits for test_name '{}'. Not even {} which is the commit of this pull request.".format(
+                    test_name, git_commit
+                ),
+            )
+
         all_results.append({test_name: results})
         ch = await calc_changes(
             test_name, user.id, pull_request=pull_number, pr_commit=git_commit
