@@ -88,13 +88,10 @@ class GitHubCommentNotifier:
                 test_metrics = collect_metrics(results)
                 for m in test_metrics:
                     ch, mb, ma = find_changes(pr_commit, test_name, m, changes)
-                    if ch is None:
-                        ch = "N/A"
-                    else:
-                        ch = str(ch)  # just in case, should be a str already.
+                    if ch is not None:
                         anything_to_report = True
 
-                    body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
+                        body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
 
         if not anything_to_report:
             return header + "No performance changes detected. 🚀" + footer
