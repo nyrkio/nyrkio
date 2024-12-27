@@ -30,7 +30,7 @@ This is true for all the API endpoints in this file.
 """
 
 import logging
-from typing import Union
+from typing import Union, Any
 
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -51,8 +51,18 @@ async def get_pr_changes(
     notify: Union[int, None] = None,
     user: User = Depends(auth.current_active_user),
 ):
+    return await _get_pr_changes(pull_number, git_commit, repo, notify, user.id)
+
+
+async def _get_pr_changes(
+    pull_number: int,
+    git_commit: str,
+    repo: str,
+    notify: Union[int, None] = None,
+    user_or_org_id: Any = None,
+):
     store = DBStore()
-    pulls = await store.get_pull_requests(user.id, repo, git_commit, pull_number)
+    pulls = await store.get_pull_requests(user_or_org_id, repo, git_commit, pull_number)
     if not pulls:
         raise HTTPException(status_code=404, detail="No test results found")
 
@@ -62,13 +72,13 @@ async def get_pr_changes(
         logging.error(f"Multiple results for pull request: {pulls}")
 
     changes = []
-    user_config, _ = await store.get_user_config(user.id)
+    user_config, _ = await store.get_user_config(user_or_org_id)
 
     pr = pulls[0]
     all_results = []
     for test_name in pr["test_names"]:
         results, _ = await store.get_results(
-            user.id, test_name, pull_number, git_commit
+            user_or_org_id, test_name, pull_number, git_commit
         )
         if not len(results) >= 1:
             raise HTTPException(
@@ -80,7 +90,7 @@ async def get_pr_changes(
 
         all_results.append({test_name: results})
         ch = await calc_changes(
-            test_name, user.id, pull_request=pull_number, pr_commit=git_commit
+            test_name, user_or_org_id, pull_request=pull_number, pr_commit=git_commit
         )
         if ch:
             changes.append(ch)
@@ -104,11 +114,23 @@ async def add_pr_result(
     pull_number: int,
     user: User = Depends(auth.current_active_user),
 ):
+    return await _add_pr_result(test_name, test_result, repo, pull_number, user.id)
+
+
+async def _add_pr_result(
+    test_name: str,
+    test_result: TestResults,
+    repo: str,
+    pull_number: int,
+    user_or_org_id: Any = None,
+):
     results = test_result.root
 
     store = DBStore()
     try:
-        await store.add_results(user.id, test_name, results, pull_number=pull_number)
+        await store.add_results(
+            user_or_org_id, test_name, results, pull_number=pull_number
+        )
     except DBStoreResultExists:
         raise HTTPException(
             status_code=400, detail="Result for this pull request already exists"
@@ -117,7 +139,7 @@ async def add_pr_result(
     # mfleming: The expectation is that this is usually a singleton list.
     for r in results:
         await store.add_pr_test_name(
-            user.id, repo, r.attributes["git_commit"], pull_number, test_name
+            user_or_org_id, repo, r.attributes["git_commit"], pull_number, test_name
         )
 
 
@@ -128,20 +150,30 @@ async def delete_pr_result(
     user: User = Depends(auth.current_active_user),
 ):
     """Delete all results for a pull request."""
+    return await _delete_pr_result(repo, pull_number, user.id)
+
+
+async def _delete_pr_result(
+    repo: str,
+    pull_number: int,
+    user_or_org_id: Any,
+):
     store = DBStore()
-    pulls = await store.get_pull_requests(user.id)
+    pulls = await store.get_pull_requests(user_or_org_id)
 
     matches = list(
         filter(
             lambda x: x["git_repo"] == repo and x["pull_number"] == pull_number, pulls
         )
     )
-    await store.delete_pull_requests(user.id, repo, pull_number)
+    await store.delete_pull_requests(user_or_org_id, repo, pull_number)
 
     # TODO(mfleming) Again, it'd be better to push this down into the query.
     for match in matches:
         for test_name in match["test_names"]:
-            await store.delete_result(user.id, test_name, pull_request=pull_number)
+            await store.delete_result(
+                user_or_org_id, test_name, pull_request=pull_number
+            )
     return []
 
 
@@ -152,8 +184,17 @@ async def get_pr_result(
     pull_number: int,
     user: User = Depends(auth.current_active_user),
 ):
+    return await _get_pr_result(test_name, repo, pull_number, user.id)
+
+
+async def _get_pr_result(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    user_or_org_id: Any = None,
+):
     store = DBStore()
-    pulls = await store.get_pull_requests(user.id)
+    pulls = await store.get_pull_requests(user_or_org_id)
 
     a = list(
         filter(
@@ -163,7 +204,9 @@ async def get_pr_result(
     if not list(filter(lambda x: test_name in x["test_names"], a)):
         raise HTTPException(status_code=404, detail="Not Found")
 
-    results, _ = await store.get_results(user.id, test_name, pull_request=pull_number)
+    results, _ = await store.get_results(
+        user_or_org_id, test_name, pull_request=pull_number
+    )
 
     # Filter out the results that are not from the repo
     # TODO(mfleming): We should push this down into the query to the db.
@@ -177,5 +220,9 @@ async def get_pr_result(
 
 @pr_router.get("/pulls")
 async def get_pr_results(user: User = Depends(auth.current_active_user)):
+    return await _get_pr_results(user.id)
+
+
+async def _get_pr_results(user_or_org_id: Any):
     store = DBStore()
-    return await store.get_pull_requests(user.id)
+    return await store.get_pull_requests(user_or_org_id)
