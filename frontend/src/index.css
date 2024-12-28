@@ -258,6 +258,9 @@ a {
   text-decoration: inherit;
 }
 
+.card a {
+  color: var(--nyrkio-arrow-brown);
+}
 @media (prefers-color-scheme: light) {
   a:hover {
     color: var(--nyrkio-active);
@@ -362,7 +365,7 @@ button:focus-visible {
 }
 
 .navbar-light .navbar-nav .nav-link {
-  color: var(--nyrkio-tattoo-red);
+  color: var(--nyrkio-horn-dark-brown);
 }
 
 .navbar-light .navbar-nav .nav-link:hover {
@@ -385,7 +388,7 @@ button:focus-visible {
 }
 
 .navbar-left.navbar-nav a.nav-link {
-  color: var(--nyrkio-tattoo-red);
+  color: var(--nyrkio-horn-dark-brown);
 }
 
 .btn-success:focus:hover,

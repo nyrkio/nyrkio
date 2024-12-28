@@ -85,7 +85,7 @@ export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp }
   return (
     <>
       <div className="row text-center">
-        <h4>Performance Changes</h4>
+        <h3>Performance Changes</h3>
       </div>
       <div
         className="ag-theme-quartz ag-theme-nyrkio pb-5"
