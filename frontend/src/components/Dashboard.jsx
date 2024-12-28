@@ -323,9 +323,6 @@ export const SingleResultWithTestname = ({
     setTimeout(()=>{
       document.getElementById(selectButton.id).classList.add("btn-success");
     },100);
-//     setTimeout(()=>{
-//       document.getElementById(selectButton.id).classList.add("btn-success");
-//     },4000);
   }
   const setLayout = (e) =>{
       const newLayout = e.currentTarget.id.substring(10);
@@ -416,7 +413,8 @@ export const SingleResultWithTestname = ({
               </div>
             )}
 
-            <div className="row">
+            <div id="graphs" className="row">
+              <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
               {unique.map((metric) => {
                 return (
                   <DrawLineChart
