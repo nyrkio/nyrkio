@@ -335,19 +335,25 @@ export const SingleResultWithTestname = ({
   const GraphSizePicker = () => {
     return (<>
             <p className="text-center">Choose layout</p>
-            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <div className="row justify-content-center text-center">
+            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4 col-lg-2">
             <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
             </a>
 
-            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
             </a>
-            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
             </a>
-            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
             </a>
+            {embed == "yes" ? "" :
+            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
+
+            }
+            </div>
             </>);
   }
 
