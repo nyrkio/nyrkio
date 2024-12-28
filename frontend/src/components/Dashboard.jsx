@@ -5,7 +5,7 @@ import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import { NoMatch } from "./NoMatch";
-import { createShortNames, dashboardTypes, applyHash } from "../lib/utils";
+import { createShortNames, dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 import { SidePanel } from "./SidePanel";
 
@@ -270,6 +270,8 @@ export const SingleResultWithTestname = ({
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const numericTimestamp = searchParams.get("timestamp");
+  const textTimestamp = parseTimestamp(numericTimestamp);
   console.debug("Display data");
   console.debug(displayData);
 
@@ -397,7 +399,7 @@ export const SingleResultWithTestname = ({
           <div className="container">
             <Loading loading={loading} />
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} searchParams={searchParams} />
+              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} />
             </div>
 
             <div className="row justify-content-center text-center">

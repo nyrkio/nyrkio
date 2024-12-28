@@ -1,15 +1,11 @@
-import { useSearchParams } from "react-router-dom";
 import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 
-export const ChangePointSummaryTable = ({ changeData, searchParams }) => {
+export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp }) => {
   var rowData = [];
-  //const [searchParams, setSearchParams] = useSearchParams();
-  const numeric_timestamp = searchParams.get("timestamp");
-  const text_timestamp = parseTimestamp(numeric_timestamp);
 
   console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
@@ -48,8 +44,7 @@ export const ChangePointSummaryTable = ({ changeData, searchParams }) => {
     { field: "date", sort: "desc",
       cellRenderer: (params) => {
         const text = params.value;
-        //console.debug(text, text_timestamp);
-        if (text == text_timestamp){
+        if (text == queryStringTextTimestamp){
           return (<b>{text}</b>);
         }
         return text;
