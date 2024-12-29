@@ -5,7 +5,7 @@ import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import { NoMatch } from "./NoMatch";
-import { createShortNames, dashboardTypes, applyHash } from "../lib/utils";
+import { createShortNames, dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 import { SidePanel } from "./SidePanel";
 
@@ -270,6 +270,8 @@ export const SingleResultWithTestname = ({
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
+  const numericTimestamp = searchParams.get("timestamp");
+  const textTimestamp = parseTimestamp(numericTimestamp);
   console.debug("Display data");
   console.debug(displayData);
 
@@ -323,9 +325,6 @@ export const SingleResultWithTestname = ({
     setTimeout(()=>{
       document.getElementById(selectButton.id).classList.add("btn-success");
     },100);
-//     setTimeout(()=>{
-//       document.getElementById(selectButton.id).classList.add("btn-success");
-//     },4000);
   }
   const setLayout = (e) =>{
       const newLayout = e.currentTarget.id.substring(10);
@@ -338,19 +337,25 @@ export const SingleResultWithTestname = ({
   const GraphSizePicker = () => {
     return (<>
             <p className="text-center">Choose layout</p>
-            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <div className="row justify-content-center text-center">
+            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4 col-lg-2">
             <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
             </a>
 
-            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
             </a>
-            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
             </a>
-            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-2">
+            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
             <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
             </a>
+            {embed == "yes" ? "" :
+            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
+
+            }
+            </div>
             </>);
   }
 
@@ -394,7 +399,7 @@ export const SingleResultWithTestname = ({
           <div className="container">
             <Loading loading={loading} />
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} searchParams={searchParams} />
+              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} />
             </div>
 
             <div className="row justify-content-center text-center">
@@ -416,7 +421,8 @@ export const SingleResultWithTestname = ({
               </div>
             )}
 
-            <div className="row">
+            <div id="graphs" className="row">
+              <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
               {unique.map((metric) => {
                 return (
                   <DrawLineChart

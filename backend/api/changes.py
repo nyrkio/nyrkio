@@ -23,7 +23,7 @@ async def cache_changes(
 
 
 async def get_cached_or_calc_changes(
-    user_id, series, cached_cp=None, cp_timestamp=None
+    user_id, series, cached_cp=None, cp_timestamp=None, pull_request=None
 ):
     if user_id is None:
         # Dummy user just because the caching code was written such that it assumes a user
@@ -56,7 +56,8 @@ async def get_cached_or_calc_changes(
                 if series.tail_newer_than_cache():
                     # There are test results newer than the cache, but we can do incremental Hunter
                     changes = series.incremental_change_points(raw_cached_cp)  # Sorry
-                    await cache_changes(changes, user_id, series)
+                    if pull_request is not None:
+                        await cache_changes(changes, user_id, series)
                     return changes, False
                 else:
                     fake_meta = {"change_points_timestamp": cp_timestamp}
@@ -77,7 +78,8 @@ async def get_cached_or_calc_changes(
 
     # Cached change points not found,need full calculation
     changes = series.calculate_change_points()
-    await cache_changes(changes, user_id, series)
+    if pull_request is not None:
+        await cache_changes(changes, user_id, series)
     return changes, False
 
 
@@ -147,13 +149,16 @@ async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=No
         )
         disabled = await store.get_disabled_metrics(user_id, test_name)
         core_config = await _get_user_config(user_id)
-        if core_config:
-            max_pvalue = core_config.max_pvalue
-            min_magnitude = core_config.min_magnitude
-        else:
-            max_pvalue = Config().max_pvalue
-            min_magnitude = Config().min_magnitude
+        if not core_config:
+            core_config = Config()
 
+        max_pvalue = core_config.max_pvalue
+        min_magnitude = core_config.min_magnitude
+
+        # Get cached change points, including weak change points, to potentially be
+        # used for incremental hunter.
+        # Note that this is ok to do for pull requests. We just consume the prior change
+        # points but don't save back.
         raw_cached_cp = await store._get_cached_cp_db(
             user_id, test_name, max_pvalue, min_magnitude
         )
@@ -169,7 +174,11 @@ async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=No
             change_points_timestamp=cp_timestamp,
         )
     changes, is_cached = await get_cached_or_calc_changes(
-        user_id, series, cached_cp=cp_data, cp_timestamp=cp_timestamp
+        user_id,
+        series,
+        cached_cp=cp_data,
+        cp_timestamp=cp_timestamp,
+        pull_request=pull_request,
     )
     return series, changes, is_cached
 

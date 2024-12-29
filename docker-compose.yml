@@ -18,8 +18,6 @@ services:
       dockerfile: ./nginx/Dockerfile
       args:
         - DOMAIN
-    volumes:
-      - /etc/ssl/private/:/etc/nginx/ssl/live/${DOMAIN}/
     ports:
       - "80:80"
       - "443:443"

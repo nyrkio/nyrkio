@@ -8,6 +8,13 @@ from backend.api.user import UserConfig, validate_config
 from backend.auth import auth
 from backend.core.config import Config
 from backend.db.db import DBStore, User
+from backend.api.pull_request import (
+    _get_pr_results,
+    _get_pr_result,
+    _delete_pr_result,
+    _add_pr_result,
+    _get_pr_changes,
+)
 
 """
 Per-organization test result API endpoints.
@@ -272,3 +279,68 @@ async def set_org_config(
     store = DBStore()
     await store.set_user_config(org["id"], data.model_dump())
     return {}
+
+
+#
+# Pull requests
+#
+@org_router.get("/pulls/{repo:path}/{pull_number}/changes/{git_commit}")
+async def get_pr_changes(
+    pull_number: int,
+    git_commit: str,
+    repo: str,
+    notify: Union[int, None] = None,
+    user: User = Depends(auth.current_active_user),
+):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, repo.split("/")[0])
+    org_id = org["id"]
+    return await _get_pr_changes(pull_number, git_commit, repo, notify, org_id)
+
+
+@org_router.post("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+async def add_pr_result(
+    test_name: str,
+    test_result: TestResults,
+    repo: str,
+    pull_number: int,
+    user: User = Depends(auth.current_active_user),
+):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, repo.split("/")[0])
+    org_id = org["id"]
+    return await _add_pr_result(test_name, test_result, repo, pull_number, org_id)
+
+
+@org_router.delete("/pulls/{repo:path}/{pull_number}")
+async def delete_pr_result(
+    repo: str,
+    pull_number: int,
+    user: User = Depends(auth.current_active_user),
+):
+    """Delete all results for a pull request."""
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, repo.split("/")[0])
+    org_id = org["id"]
+    return await _delete_pr_result(repo, pull_number, org_id)
+
+
+@org_router.get("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+async def get_pr_result(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    user: User = Depends(auth.current_active_user),
+):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, repo.split("/")[0])
+    org_id = org["id"]
+    return await _get_pr_result(test_name, repo, pull_number, org_id)
+
+
+@org_router.get("/{org_name}/pulls")
+async def get_pr_results(org_name: str, user: User = Depends(auth.current_active_user)):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, org_name)
+    org_id = org["id"]
+    return await _get_pr_results(org_id)
