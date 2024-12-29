@@ -8,6 +8,8 @@ import { Modal } from "react-bootstrap";
 export const OrgSettings = () => {
   const location = useLocation();
   const path = location.pathname;
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
   console.debug("OrgSettings: " + path);
   if (! path.startsWith("/org/") ) {
     console.error("Should not be possible, probably a react-router problem? (expected /org/ORG_NAME in URI)")
@@ -31,7 +33,12 @@ export const OrgSettings = () => {
   return (
     <>
       <div className="container text-center">
-        <h3 className="text-center">Org: {orgName}</h3>
+        <h3 className="text-center" style={{marginBottom: 0}}><span className="bi bi-people-fill"></span> {orgName}</h3>
+        <p className="text-center">
+           <a href={"/orgs/"+orgName}  style={{color: "#999999"}}>Test results: {protocol}//{hostname}/orgs/{orgName}</a>
+           <br />
+           <a href={"https://github.com/orgs/"+orgName+"/people"}  style={{color: "#999999"}}>Org membership: https://github.com/orgs/{orgName}</a>
+        </p>
         <HunterSettings orgName={orgName} />
         <SlackSettings orgName={orgName} />
       </div>
@@ -240,7 +247,7 @@ const HunterSettings = ({orgName}) => {
           <div className="card-header p-2">Change Point Detection</div>
           <div className="card-body">
             <p className="card-text">
-              These settings are global for all your metrics.
+              These settings apply for all {orgName} metrics.
             </p>
             <NyrkioCpSliders />
           </div>
