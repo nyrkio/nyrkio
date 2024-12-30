@@ -904,3 +904,35 @@ div.card.people-card .card-header img {
 #nyrkio-settings-userinfo label {
   font-weight: bold;
 }
+
+
+#dashboard_settings .btn {
+    background-color: var(--nyrkio-horn-light-brown);
+    color: white;
+    margin: 10px;
+}
+#dashboard_settings .btn.show {
+    background-color: var(--nyrkio-tattoo-red);
+    color: white;
+
+}
+#dashboard_settings .card,
+#dashboard_settings .collapse {
+    border-radius: 10px;
+    background-color: var(--nyrkio-light-gray);
+    color: var(--nyrkio-text);
+    top: -.05em;
+}
+#dashboard_settings .collapse .form-label,
+#dashboard_settings .collapse label {
+    color: var(--nyrkio-text);
+}
+#dashboard_settings input[type="range"].nyrkio-slider {
+  -webkit-appearance: none;
+  background-color: var(--nyrkio-light-gray);
+}
+
+#dashboard_settings .collapse::after {
+    content: none;
+}
+

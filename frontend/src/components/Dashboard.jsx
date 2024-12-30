@@ -338,7 +338,10 @@ export const SingleResultWithTestname = ({
   };
   const GraphSizePicker = () => {
     return (<>
-            <p className="text-center">Choose layout</p>
+            <div className="card col-md-8">
+            <div className="card-header text-center mb-4 mt-3">Choose layout</div>
+            </div>
+            <div className="card col-md-12">
             <div className="row justify-content-center text-center">
             <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4 col-lg-2">
             <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
@@ -357,6 +360,7 @@ export const SingleResultWithTestname = ({
             <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
 
             }
+            </div>
             </div>
             </>);
   }
@@ -406,6 +410,17 @@ export const SingleResultWithTestname = ({
               <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} />
             </div>
 
+            <div id="graphs" className="row">
+            <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
+            </div>
+            <div class="text-end " id="dashboard_settings">
+            <button class="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
+            style={{marginBottom: 0}}>
+            <span className="bi bi-gear-fill"> </span>
+            </button>
+            <div class="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
+              <div  class="card card-body">
+
             <div className="row justify-content-center text-center">
               <GraphSizePicker />
             </div>
@@ -418,8 +433,9 @@ export const SingleResultWithTestname = ({
             </div>
 
             {!isPublicDashboard(dashboardType) && (
-              <div className="row mt-5">
-                <p className="text-center small mb-1">Publish test results</p>
+                <div className="row justify-content-center text-center">
+                <div className="card col-md-8">
+                <div className="card-header justify-content-center text-center mb-3 mt-5">Publish test results</div>
                 <TestSettings
                   dashboardType={dashboardType}
                   testName={testName}
@@ -430,10 +446,13 @@ export const SingleResultWithTestname = ({
                   }
                 />
               </div>
+              </div>
             )}
+              </div>
+            </div>
+            </div>
 
-            <div id="graphs" className="row">
-              <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
+            <div className="row">
               {unique.map((metric) => {
                 return (
                   <DrawLineChart
