@@ -7,6 +7,8 @@ import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import { NoMatch } from "./NoMatch";
 import { createShortNames, dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
+import { HunterSettings } from "./UserSettings";
+import { HunterSettingsOrg } from "./OrgSettings";
 import { SidePanel } from "./SidePanel";
 
 import graph_4x4 from "../static/icons/graph-4x4.png";
@@ -359,12 +361,13 @@ export const SingleResultWithTestname = ({
             </>);
   }
 
-  useEffect(() => {
+  const loadData = () => {
     setLoading(true);
     fetchData().finally(() => {
       setLoading(false);
     });
-  }, []);
+  };
+  useEffect(loadData, []);
 
   if (notFound) {
     return <NoMatch />;
@@ -391,6 +394,7 @@ export const SingleResultWithTestname = ({
   }, []);
   console.debug("unique: " + unique);
   applyHash();
+  const orgName = testName.split("/")[0];  // Not used when not an org
   return (
     <>
           {embed == "yes" ? "" :
@@ -404,6 +408,13 @@ export const SingleResultWithTestname = ({
 
             <div className="row justify-content-center text-center">
               <GraphSizePicker />
+            </div>
+
+            <div className="row justify-content-center text-center hunter-settings">
+            {dashboardType == dashboardTypes.ORG ?
+              <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
+              <HunterSettings callback={loadData}/>
+            }
             </div>
 
             {!isPublicDashboard(dashboardType) && (

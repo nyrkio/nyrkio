@@ -39,15 +39,16 @@ export const OrgSettings = () => {
            <br />
            <a href={"https://github.com/orgs/"+orgName+"/people"}  style={{color: "#999999"}}>Org membership: https://github.com/orgs/{orgName}</a>
         </p>
-        <HunterSettings orgName={orgName} />
+        <HunterSettingsOrg orgName={orgName} />
         <SlackSettings orgName={orgName} />
       </div>
     </>
   );
 };
 
+const noop = ()=>{return;};
 
-const HunterSettings = ({orgName}) => {
+export const HunterSettingsOrg = ({orgName, callback=noop}) => {
 
 
   const saveHunterSettingsOrgReal = async () => {
@@ -77,6 +78,7 @@ const HunterSettings = ({orgName}) => {
       console.log(response);
     } else console.debug(response);
 
+    callback();
   };
 
   const saveHunterSettingsOrg = throttle(saveHunterSettingsOrgReal, 1000);
@@ -169,7 +171,39 @@ const HunterSettings = ({orgName}) => {
     return (
       <>
         <div id="nyrkio-cp-sliders">
-          <div className="row">
+          <div className="row mt-5 ">
+            <p><em>Lower P-values (ex: 0.001) will find the most significant regressions, while minimizing false positives.<br />
+            Higher P-values (ex: 0.05) will find more change points.</em></p>
+            <div className="col col-md-12">
+              <label htmlFor="nyrkio-p-value-slider" className="form-label">
+                P-value:{" "}
+              </label>
+            </div>
+            <div className="col col-md-10">
+              <input
+                type="range"
+                id="nyrkio-p-value-slider"
+                name="nyrkio-p-value-slider"
+                className="nyrkio-p-value-slider nyrkio-slider"
+                style={{ width: "100%" }}
+                defaultValue={0}
+                min={100}
+                max={10100}
+                step={10}
+                precision={10}
+                tooltip="off"
+                onChange={(ev) => pvalueUpdate(ev.target.value)}
+              />
+            </div>
+            <div className="col col-md-2">
+              <span id="nyrkio-p-value-value" className="form-label">
+                {0}
+              </span>
+            </div>
+          </div>
+          <div className="row mt-5">
+            <p><em>You can filter out regressions that are so small that it's not worth fixing them even if they are "real"/statistically significant.<br />
+            For example, you might only care about regressions that are 5% or larger.</em></p>
             <div className="col col-md-12">
               <label
                 htmlFor="nyrkio-min-magnitude-slider"
@@ -199,34 +233,6 @@ const HunterSettings = ({orgName}) => {
                 {0}
               </span>
               <span className="form-label">%</span>
-            </div>
-          </div>
-          <div className="row mt-5 ">
-            <div className="col col-md-12">
-              <label htmlFor="nyrkio-p-value-slider" className="form-label">
-                P-value threshold:{" "}
-              </label>
-            </div>
-            <div className="col col-md-10">
-              <input
-                type="range"
-                id="nyrkio-p-value-slider"
-                name="nyrkio-p-value-slider"
-                className="nyrkio-p-value-slider nyrkio-slider"
-                style={{ width: "100%" }}
-                defaultValue={0}
-                min={100}
-                max={10100}
-                step={10}
-                precision={10}
-                tooltip="off"
-                onChange={(ev) => pvalueUpdate(ev.target.value)}
-              />
-            </div>
-            <div className="col col-md-2">
-              <span id="nyrkio-p-value-value" className="form-label">
-                {0}
-              </span>
             </div>
           </div>
         </div>
