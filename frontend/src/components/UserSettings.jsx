@@ -210,7 +210,7 @@ export const HunterSettings = ({callback=noop}) => {
   const getRealPValue = (rawValue) => {
     const scaledDown = rawValue / 100.0;
     const logScale = Math.pow(scaledDown, 3) / 1000;
-    const quantized = parseFloat(Math.round(logScale).toPrecision(1)) / 1000.0;
+    const quantized = Math.max(parseFloat(Math.round(logScale).toPrecision(1)) / 1000.0,0.0001);
     //console.debug("prawreal " + rawValue + " " + quantized + " " + getRawPValue(logScale) + " " + getRawPValue(quantized));
     return quantized;
   };
