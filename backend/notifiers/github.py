@@ -161,4 +161,4 @@ def find_changes(pr_commit, test_name, metric, changes):
                             c["mean_after"],
                         )
 
-    return None
+    return None, None, None
