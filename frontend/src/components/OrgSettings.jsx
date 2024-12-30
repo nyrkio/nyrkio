@@ -1,107 +1,46 @@
 import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useLocation } from "react-router";
 import { throttle } from "../lib/utils";
 import { Modal } from "react-bootstrap";
 
-export const UserSettings = () => {
-  return (
-    <>
-      <div className="container">
-        <ApiKey />
-        <HunterSettings />
-        <SlackSettings />
-        <UserInfo />
-      </div>
-    </>
-  );
-};
-
-const ApiKey = () => {
-  const [apiKey, setApiKey] = useState("");
-  const [show, setShow] = useState(false);
-  const [buttonText, setButtonText] = useState("Copy");
-
-  const generateApiKey = async () => {
-    setShow(true);
-    const response = await fetch("/api/v0/auth/token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-    if (response.status !== 200) {
-      console.error("Failed to generate API key");
-      console.log(response);
-      setApiKey(
-        "Failed to generate API key: " +
-          response.status +
-          " " +
-          response.statusText,
-      );
-    } else {
-      const data = await response.json();
-      setApiKey(data.access_token);
-    }
-  };
-
-  const handleButtonClick = () => {
-    navigator.clipboard.writeText(apiKey);
-    setButtonText("Copied!");
-  };
-
-  const handleModalClose = () => {
-    setShow(false);
-    setButtonText("Copy");
-  };
-
-  return (
-    <>
-      <Modal show={show} onHide={handleModalClose} size="lg">
-        <Modal.Header closeButton>
-          <Modal.Title>API key</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>
-          <p>Your API key is:</p>
-          <div className="row">
-            <div className="col">
-              <input
-                type="text"
-                value={apiKey}
-                readOnly
-                className="form-control"
-              />
-            </div>
-            <div className="g-0 col-1">
-              <button onClick={handleButtonClick} className="btn btn-success">
-                {buttonText}
-              </button>
-            </div>
-          </div>
-        </Modal.Body>
-      </Modal>
-
-      <div className="row pt-5 justify-content-center">
-        <div className="col-md-8">
-          <div className="card">
-            <div className="card-header p-2">API keys</div>
-            <div className="card-body"></div>
-            <div className="row">
-              <b>
-                Please make a copy of your generated API key. It cannot be
-                retrieved after closing the dialog.
-              </b>
-            </div>
-            <div className="row p-2">
-              <div className="col-6">
-                <button className="btn btn-success" onClick={generateApiKey}>
-                  Generate API key
-                </button>
-              </div>
-            </div>
-          </div>
+export const OrgSettings = () => {
+  const location = useLocation();
+  const path = location.pathname;
+  const protocol = window.location.protocol;
+  const hostname = window.location.hostname;
+  console.debug("OrgSettings: " + path);
+  if (! path.startsWith("/org/") ) {
+    console.error("Should not be possible, probably a react-router problem? (expected /org/ORG_NAME in URI)")
+    return;
+  }
+  const orgName = path.substring("/org/".length);
+  if ( orgName.length == 0 ) {
+    console.error("Should not be possible, probably a react-router problem? (expected /org/ORG_NAME in URI)")
+    return;
+  }
+  if (!validateOrgName(orgName)){
+      return (
+        <>
+        <div className="container">
+          <strong>Unauthorized / Not found: You are not a member of {orgName}.</strong>
         </div>
+        </>
+      );
+  }
+
+  return (
+    <>
+      <div className="container text-center">
+        <h3 className="text-center" style={{marginBottom: 0}}><span className="bi bi-people-fill"></span> {orgName}</h3>
+        <p className="text-center">
+           <a href={"/orgs/"+orgName}  style={{color: "#999999"}}>Test results: {protocol}//{hostname}/orgs/{orgName}</a>
+           <br />
+           <a href={"https://github.com/orgs/"+orgName+"/people"}  style={{color: "#999999"}}>Org membership: https://github.com/orgs/{orgName}</a>
+        </p>
+        <HunterSettingsOrg orgName={orgName} />
+        <SlackSettings orgName={orgName} />
       </div>
     </>
   );
@@ -109,8 +48,10 @@ const ApiKey = () => {
 
 const noop = ()=>{return;};
 
-export const HunterSettings = ({callback=noop}) => {
-  const saveHunterSettingsReal = async () => {
+export const HunterSettingsOrg = ({orgName, callback=noop}) => {
+
+
+  const saveHunterSettingsOrgReal = async () => {
     const minMagnitude =
       getRealMinMagnitude(
         document.getElementById("nyrkio-min-magnitude-slider").value,
@@ -121,10 +62,10 @@ export const HunterSettings = ({callback=noop}) => {
     const configObject = {
       core: { min_magnitude: minMagnitude, max_pvalue: pValue },
     };
-    console.debug("POST /api/v0/user/config ");
+    console.debug("POST /api/v0/orgs/org/"+orgName);
     console.debug(configObject);
 
-    const response = await fetch("/api/v0/user/config", {
+    const response = await fetch("/api/v0/orgs/org/"+orgName, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -133,32 +74,32 @@ export const HunterSettings = ({callback=noop}) => {
       body: JSON.stringify(configObject),
     });
     if (response.status !== 200) {
-      console.error("Failed to POST Nyrkiö core user settings");
+      console.error("Failed to POST Nyrkiö org settings for " + orgName);
       console.log(response);
     } else console.debug(response);
 
-    caches.delete("nyrkio-changes");
     callback();
   };
 
-  const saveHunterSettings = throttle(saveHunterSettingsReal, 1000);
+  const saveHunterSettingsOrg = throttle(saveHunterSettingsOrgReal, 1000);
 
-  const getHunterSettings = async () => {
-    console.debug("GET /api/v0/user/config");
+  const getHunterSettingsOrg = async () => {
+    console.debug("GET /api/v0/orgs/org/"+orgName);
     // TODO(mfleming) It'd be nice to not hard code this.
     // TODO(hingo) yeah actually if we don't get values from the backend it should fail somehow. Now there's a risk of resetting stored values back to defaults. It should only be possible to POST after one successful GET first fetched current values.
     const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
-    const response = await fetch("/api/v0/user/config", {
+    const response = await fetch("/api/v0/orgs/org/"+orgName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
     if (response.status !== 200) {
-      console.error("Failed to GET Nyrkiö core user settings");
+      console.debug("Failed to GET org settings for " + orgName + ". This could be because they don't exist. Using default config values in the meantime.");
       console.log(response);
       return defaultConfig;
     } else console.debug(response);
+
     const data = await response.json();
     console.debug(data);
     if (
@@ -178,7 +119,7 @@ export const HunterSettings = ({callback=noop}) => {
   const minMagnitudeUpdate = (rawValue) => {
     document.getElementById("nyrkio-min-magnitude-value").innerHTML =
       getRealMinMagnitude(rawValue);
-    saveHunterSettings();
+    saveHunterSettingsOrg();
   };
   const getRealMinMagnitude = (rawValue) => {
     const scaledDown = rawValue / 1000.0;
@@ -205,7 +146,7 @@ export const HunterSettings = ({callback=noop}) => {
   const pvalueUpdate = (rawValue) => {
     document.getElementById("nyrkio-p-value-value").innerHTML =
       getRealPValue(rawValue);
-    saveHunterSettings();
+    saveHunterSettingsOrg();
   };
   const getRealPValue = (rawValue) => {
     const scaledDown = rawValue / 100.0;
@@ -235,7 +176,7 @@ export const HunterSettings = ({callback=noop}) => {
             Higher P-values (ex: 0.05) will find more change points.</em></p>
             <div className="col col-md-12">
               <label htmlFor="nyrkio-p-value-slider" className="form-label">
-                P-value threshold:{" "}
+                P-value:{" "}
               </label>
             </div>
             <div className="col col-md-10">
@@ -300,7 +241,7 @@ export const HunterSettings = ({callback=noop}) => {
   };
 
   useEffect(() => {
-    getHunterSettings().then((initialConfig) => {
+    getHunterSettingsOrg().then((initialConfig) => {
       pvalueSet(initialConfig.max_pvalue);
       minMagnitudeSet(initialConfig.min_magnitude * 100);
     });
@@ -312,7 +253,7 @@ export const HunterSettings = ({callback=noop}) => {
           <div className="card-header p-2">Change Point Detection</div>
           <div className="card-body">
             <p className="card-text">
-              These settings are global for all your metrics.
+              These settings apply for all {orgName} metrics.
             </p>
             <NyrkioCpSliders />
           </div>
@@ -322,7 +263,7 @@ export const HunterSettings = ({callback=noop}) => {
   );
 };
 
-const SlackSettings = () => {
+const SlackSettings = ({orgName}) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [slackData, setSlackData] = useState([]);
 
@@ -342,13 +283,21 @@ const SlackSettings = () => {
   };
 
   const fetchSlackStatus = async () => {
-    const response = await fetch("/api/v0/user/config", {
+    const defaultConfig = {};
+    const response = await fetch("/api/v0/orgs/org/"+orgName, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    const data = await response.json();
+    var data = defaultConfig;
+    if (response.status !== 200) {
+      console.debug("Failed to GET org settings for " + orgName + ". This could be because they don't exist. Using default config values in the meantime.");
+      console.log(response);
+    } else {
+      console.debug(response);
+      data = await response.json();
+    }
 
     if (Object.keys(data).length > 0 && data.slack !== undefined && Object.keys(data.slack).length > 0) {
       setSlackData(data.slack);
@@ -452,13 +401,12 @@ const SlackSettings = () => {
 
 
 
-const UserInfo = () => {
+const validateOrgName = (checkOrgName) => {
 
 
   const username = localStorage.getItem("username");
   const authMethod = localStorage.getItem("authMethod");
   const authServer = localStorage.getItem("authServer");
-  const [orgs, setOrgs] = useState([]);
 
   const getOrganizations = async () => {
     const url = "/api/v0/orgs/";
@@ -485,72 +433,20 @@ const UserInfo = () => {
     }
   };
 
-  const [ghOrgs, setGhOrgs] = useState([]);
-  const [nyrkioOrgs, setNyrkioOrgs] = useState([]);
-
-  useEffect(() => {
-    getOrganizations().then((data) => {
-      console.log(data);
-      var temp = [];
-      data.forEach((d) => {
-        temp.push(d.organization.login);
-      });
-
-      setOrgs(temp);
-      var nOrgs = [];
-      var gOrgs = [];
-      temp.forEach((o) => {
-        nOrgs.push('<a href="/orgs/'+o+'">nyrkio.com/orgs/'+o+'</a>');
-        nOrgs.push(' (<a href="/org/'+o+'">config</a>) <br />');
-        gOrgs.push('<a href="https://github.com/orgs/'+o+'">'+o+'</a><br />');
-      });
-
-      if(nOrgs.length > 0)  setNyrkioOrgs(nOrgs);
-      else setNyrkioOrgs(["😱"]);
-
-      if(gOrgs.length > 0)  setGhOrgs(gOrgs);
-      else setGhOrgs(["-"]);
-
+  return getOrganizations().then((data) => {
+    console.debug(data);
+    var temp = [];
+    data.forEach((d) => {
+      temp.push(d.organization.login);
     });
-  }, []);
+    var found=false;
+    temp.forEach((o) => {
+      if(o==checkOrgName){
+        found=true;
+      }
+    });
+    if(!found) console.error(checkOrgName + " not found in [" + temp + "]");
+    return found;
 
-  const DisplayOrgs = () => {
-    if(authServer == "github.com" || true){
-      return (<>
-              <p className="card-text">
-                <label>Github Organizations you are a member of:</label> </p>
-              <p dangerouslySetInnerHTML={{__html: ghOrgs.join(" ")}}>
-              </p>
-              <p className="card-text">
-                <label>This means you have write permission to the following Nyrkio organizations:</label>
-              </p>
-                <p dangerouslySetInnerHTML={{ __html: nyrkioOrgs.join(" ") }}></p>
-            </>);
-    }
-  };
-
-  return (
-    <div className="row pt-5 justify-content-center">
-      <div className="col-md-8">
-        <div className="card" id="nyrkio-settings-userinfo">
-          <div className="card-header p-2">Information about your user account</div>
-          <div className="card-body">
-            <p className="card-text">
-              <label>Username:</label> {username}
-            </p>
-            <p className="card-text">
-              <label>Authentication method:</label> {authMethod}
-            </p>
-            <p className="card-text">
-              <label>Authentication server:</label> {authServer}
-            </p>
-            <DisplayOrgs />
-
-            <hr />
-            <p className="card-text">If you are a member of a Github org and it isn't shown above, you should request for the Nyrkiö app to be installed specifically to the org you want to post results for. Please click on <a href="https://github.com/apps/nyrkio/installations/new">https://github.com/apps/nyrkio/installations/new</a> and select the org you want to use for nyrkio performance results.</p>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+  } );
 };

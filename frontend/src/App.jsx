@@ -25,6 +25,7 @@ import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import { UserSettings } from "./components/UserSettings.jsx";
+import { OrgSettings } from "./components/OrgSettings.jsx";
 import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
@@ -77,6 +78,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<SignUpPage setLoggedIn={setLoggedIn} />}
             />
             <Route path="/public/*" element={<PublicDashboard embed={embed} />} />
+            <Route path="/org/*" element={<OrgSettings />} />
             <Route path="/orgs/*" element={<OrgDashboard embed={embed}/>} />
             <Route
               path="/login"
@@ -137,6 +139,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<SignUpPage setLoggedIn={setLoggedIn} />}
             />
             <Route path="/public/*" element={<PublicDashboard />} />
+            <Route path="/org/*" element={<OrgSettings />} />
             <Route path="/orgs/*" element={<OrgDashboard />} />
             <Route
               path="/login"

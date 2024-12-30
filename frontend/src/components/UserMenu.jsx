@@ -5,6 +5,7 @@ import { ImpersonateControls } from "./ImpersonateControls";
 
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [orgs, setOrgs] = useState([]);
   var username = null;
   if (localStorage.getItem("loggedIn") == "true") {
     username = localStorage.getItem("username");
@@ -25,9 +26,43 @@ export const UserMenu = ({ setLoggedIn }) => {
       localStorage.setItem("admin", "true");
     }
   };
+  const getOrganizations = async () => {
+    const url = "/api/v0/orgs/";
+    console.debug("GET " + url);
+    const response = await fetch(url, {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    if (response.status !== 200) {
+      console.error("Failed to GET User's organizations");
+      console.log(response);
+      return response;
+    } else console.debug(response);
+
+    const data = await response.json();
+    console.debug(data);
+    if ( Array.isArray(data)  ) {
+      return data;
+    } else {
+      return ["Fetching your organizations failed."];
+    }
+  };
 
   useEffect(() => {
     checkForAdminPrvis();
+    getOrganizations().then((data) => {
+
+      var temp = [];
+      if ( data !== undefined ){
+        data.forEach((d) => {
+          temp.push(d.organization.login);
+        });
+      }
+      setOrgs(temp);
+    } );
   }, []);
 
   const handleLogoutClick = async () => {
@@ -48,6 +83,20 @@ export const UserMenu = ({ setLoggedIn }) => {
     localStorage.setItem("loggedIn", "false");
     localStorage.removeItem("token");
   };
+
+  const orgsList = () => {
+    const orgsHtml = [];
+    for (let i=0; i<orgs.length; i++){
+      const thisOrg = orgs[i];
+      orgsHtml.push(
+          <Dropdown.Item href={"/org/"+thisOrg} key={i}>
+            <span className="bi bi-people-fill"></span> {thisOrg} Settings
+          </Dropdown.Item>
+      );
+    }
+    return orgsHtml;
+  };
+
   return (
     <Dropdown>
       <Dropdown.Toggle variant="success" id="dropdown-basic">
@@ -63,8 +112,10 @@ export const UserMenu = ({ setLoggedIn }) => {
           <></>
         )}
         <Dropdown.Item href="/user/settings">
-          <span className="bi bi-person-circle"></span> User Settings
+          <span className="bi bi-person-fill"></span> User Settings
         </Dropdown.Item>
+
+        {orgsList()}
 
         <Dropdown.Item href="/billing">
           <span className="bi bi-credit-card"></span> Billing
