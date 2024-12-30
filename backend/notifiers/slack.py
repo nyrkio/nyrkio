@@ -77,7 +77,7 @@ class SlackNotification:
 
     def create_message(self):
         # https://api.slack.com/reference/block-kit/blocks#section
-        slack_message = self.get_intro()
+        slack_message = []
         for test_name, all_metrics in self.dates_change_points.items():
             if not all_metrics:
                 continue
@@ -157,7 +157,15 @@ class SlackNotification:
                             }
                         ]
 
-        slack_message += self._get_tests_with_insufficient_data()
+        if not slack_message:
+            return []
+        else:
+            return (
+                self.get_intro()
+                + slack_message
+                + self._get_tests_with_insufficient_data()
+            )
+
         return slack_message
 
     def _get_change_emoji(self, change):
