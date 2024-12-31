@@ -56,7 +56,7 @@ async def get_cached_or_calc_changes(
                 if series.tail_newer_than_cache():
                     # There are test results newer than the cache, but we can do incremental Hunter
                     changes = series.incremental_change_points(raw_cached_cp)  # Sorry
-                    if pull_request is not None:
+                    if pull_request is None:
                         await cache_changes(changes, user_id, series)
                     return changes, False
                 else:
@@ -78,7 +78,7 @@ async def get_cached_or_calc_changes(
 
     # Cached change points not found,need full calculation
     changes = series.calculate_change_points()
-    if pull_request is not None:
+    if pull_request is None:
         await cache_changes(changes, user_id, series)
     return changes, False
 
