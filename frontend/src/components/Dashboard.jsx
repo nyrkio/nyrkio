@@ -308,7 +308,8 @@ export const SingleResultWithTestname = ({
     setChangePointData(changeData);
   };
 
-  const [graphSize, setGraphSize] = useState("sparklines");
+  const defaultGraphSize = localStorage.getItem("graphSize") || "2x1"
+  const [graphSize, setGraphSize] = useState(defaultGraphSize);
   const resetOtherButtons = (selectButton) => {
     if (selectButton.id != "btn-graph-overview"){
       document.getElementById("btn-graph-overview").classList.remove("btn-success");
@@ -330,8 +331,9 @@ export const SingleResultWithTestname = ({
   }
   const setLayout = (e) =>{
       const newLayout = e.currentTarget.id.substring(10);
-      console.log(newLayout);
+      console.debug(newLayout);
       setGraphSize(newLayout);
+      localStorage.setItem("graphSize", newLayout);
       resetOtherButtons(e.currentTarget);
       e.preventDefault();
       e.stopPropagation();
@@ -413,13 +415,13 @@ export const SingleResultWithTestname = ({
             <div id="graphs" className="row">
             <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
             </div>
-            <div class="text-end " id="dashboard_settings">
-            <button class="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
+            <div className="text-end " id="dashboard_settings">
+            <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
             style={{marginBottom: 0}}>
             <span className="bi bi-gear-fill"> </span>
             </button>
-            <div class="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
-              <div  class="card card-body">
+            <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
+              <div  className="card card-body">
 
             <div className="row justify-content-center text-center">
               <GraphSizePicker />

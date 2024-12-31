@@ -384,7 +384,7 @@ async def cached_get(repo, commit):
         headers={
             "Authorization": f"Bearer {token}",
             "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28",
+            # "X-GitHub-Api-Version": "2022-11-28",
         },
     )
     if response.status_code == 200:
@@ -395,6 +395,10 @@ async def cached_get(repo, commit):
         logging.error(
             f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
         )
+        mask = "None"
+        if token is not None:
+            mask = token[:9] + ("x" * len(token))
+        logging.error(f"Token was {mask}")
 
         # Check x-ratelimit-used and x-ratelimit-remaining headers
         remaining = response.headers.get("x-ratelimit-remaining")
