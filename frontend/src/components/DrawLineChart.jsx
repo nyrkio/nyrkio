@@ -2,10 +2,13 @@ import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Button, Modal, ModalHeader } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
+import { Tooltip } from "chart.js";
 // DO NOT REMOVE
 // necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";
+import zoomPlugin from 'chartjs-plugin-zoom';
 import { parseTimestamp } from "../lib/utils";
+ChartJS.register(zoomPlugin);
 
 const nyrkio_dark_red = "#a34111";
 const nyrkio_bright_red = "#dc3d06";
@@ -213,7 +216,7 @@ export const DrawLineChart = ({
     const chart = chartRef.current;
     const points = chart.getElementsAtEventForMode(
       e.nativeEvent,
-      "nearest",
+      "point",
       { intersect: false },
       true,
     );
@@ -236,7 +239,38 @@ export const DrawLineChart = ({
   useEffect(()=>{
   },[showModal, PopupModal]);
 
+  const syncCharts = (target) => {
+            const scaleX = target.chart.scales.x;
+            const x = scaleX._range;
+            const keys = Object.keys(ChartJS.instances);
+            for (let i of keys){
+              if(target.chart.id!=ChartJS.instances[i].id){
+                ChartJS.instances[i].zoomScale('x',x, 'show');
 
+              }
+            }
+        };
+  const syncHover = (event, targets, chart) => {
+          if (targets.length>0){
+            const dataset = targets[0].datasetIndex;
+            const idx = targets[0].index;
+
+            const keys = Object.keys(ChartJS.instances);
+            for (let i of keys){
+              if(chart.id!=ChartJS.instances[i].id){
+                 const  c = ChartJS.instances[i];
+                 c.draw(c.ctx);
+                 c.tooltip.handleEvent(event,true,true);
+                 c.tooltip.opacity=1;
+                 c.tooltip.active=true;
+                 c.tooltip.x = chart.tooltip.x;
+                 const options = c.config._config.options.plugins.tooltip;
+                 options.position="nearest";
+                 c.tooltip._updateAnimationTarget(options);
+
+                 c.tooltip.draw(c.ctx);
+              }}
+        }};
 
   return (
     <>
@@ -303,10 +337,33 @@ export const DrawLineChart = ({
               },
             },
             hover: {
-              mode: "nearest",
+              mode: "x",
               intersect: false,
             },
+            onHover: syncHover,
             plugins: {
+              zoom: {
+                zoom:{
+                  wheel: {
+                    enabled: true,
+                  },
+                  pinch: {
+                    enabled: true
+                  },
+                  mode: 'xy',
+                  overScaleMode: 'xy',
+                  onZoomComplete: syncCharts,
+                },
+                pan: {
+                  enabled: true,
+                  scaleMode: 'xy',
+                  onPanComplete: syncCharts,
+                },
+                limits: {
+                  x: {minRange: 10,}
+
+                }
+              },
               legend: {
                 display: false,
               },
@@ -318,7 +375,7 @@ export const DrawLineChart = ({
                 displayColors: false,
                 callbacks: {
                   label: (context) => {
-                    var labelArray = ["value: " + context.raw + metricUnit];
+                    var labelArray = ["value: " + context.raw + " " + metricUnit];
 
                     // Search in changePointData for this timestamp and metric
                     const timestamp = timestamps[context.dataIndex];
@@ -367,5 +424,4 @@ export const DrawLineChart = ({
       </div>
       </div>
     </>
-  );
-};
+  )};

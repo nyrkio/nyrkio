@@ -308,7 +308,8 @@ export const SingleResultWithTestname = ({
     setChangePointData(changeData);
   };
 
-  const [graphSize, setGraphSize] = useState("sparklines");
+  const defaultGraphSize = localStorage.getItem("graphSize") || "2x1"
+  const [graphSize, setGraphSize] = useState(defaultGraphSize);
   const resetOtherButtons = (selectButton) => {
     if (selectButton.id != "btn-graph-overview"){
       document.getElementById("btn-graph-overview").classList.remove("btn-success");
@@ -330,8 +331,9 @@ export const SingleResultWithTestname = ({
   }
   const setLayout = (e) =>{
       const newLayout = e.currentTarget.id.substring(10);
-      console.log(newLayout);
+      console.debug(newLayout);
       setGraphSize(newLayout);
+      localStorage.setItem("graphSize", newLayout);
       resetOtherButtons(e.currentTarget);
       e.preventDefault();
       e.stopPropagation();
