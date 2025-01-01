@@ -41,7 +41,7 @@ async def get_cached_or_calc_changes(
         cached_cp = await store.get_cached_change_points(
             user_id, series.get_series_id()
         )
-    if cached_cp is not None and len(cached_cp) > 0 and series.results:
+    if cached_cp is not None and len(cached_cp) >= 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
         series_metric_names = set([m.name for m in series.results[0].metrics])
@@ -72,9 +72,12 @@ async def get_cached_or_calc_changes(
                 # Cache is valid, nothing new to process
                 return cp, True
 
-    if cached_cp is not None and len(cached_cp) == 0:
-        # We computed the change points, and there were zero of them
-        return cached_cp, True
+    # This is now incorporated above via len() >= 0 instead of > 0.
+    # The functional change is we need to call cache_changes also in this case, to reset summaries.
+    # if cached_cp is not None and len(cached_cp) == 0:
+    #     # We computed the change points, and there were zero of them
+    #     # Hmmm... need to write a summary in all cases
+    #     return cached_cp, True
 
     # Cached change points not found,need full calculation
     changes = series.calculate_change_points()
