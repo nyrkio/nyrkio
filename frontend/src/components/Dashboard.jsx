@@ -427,14 +427,14 @@ export const SingleResultWithTestname = ({
               <GraphSizePicker />
             </div>
 
-            <div className="row justify-content-center text-center hunter-settings">
-            {dashboardType == dashboardTypes.ORG ?
-              <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
-              <HunterSettings callback={loadData}/>
-            }
-            </div>
-
             {!isPublicDashboard(dashboardType) && (
+                <>
+                <div className="row justify-content-center text-center hunter-settings">
+                {dashboardType == dashboardTypes.ORG ?
+                  <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
+                  <HunterSettings callback={loadData}/>
+                }
+                </div>
                 <div className="row justify-content-center text-center">
                 <div className="card col-md-8">
                 <div className="card-header justify-content-center text-center mb-3 mt-5">Publish test results</div>
@@ -449,6 +449,7 @@ export const SingleResultWithTestname = ({
                 />
               </div>
               </div>
+              </>
             )}
               </div>
             </div>
