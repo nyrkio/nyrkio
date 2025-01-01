@@ -184,19 +184,22 @@ export const Dashboard = ({loggedIn, embed}) => {
       const test_name = element.test_name;
       setUnencodedTestNames((prevState) => [...prevState, test_name]);
     });
-    setLoading(false);
 
   };
 
   useEffect(() => {
     setLoading(true);
-    fetchData();
+    fetchData().finally(()=>
+    {
+          setLoading(false);
+    }
+    );
   }, []);
 
   const testNames = unencodedTestNames.map((name) => encodeURI(name));
 
   // Check for invalid test name in url
-  if (prefix !== undefined && !validTestName(prefix, testNames)) {
+  if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
     return <NoMatch />;
   }
 
@@ -215,11 +218,11 @@ export const Dashboard = ({loggedIn, embed}) => {
     }
 
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
-            <Loading loading={loading} />
             <div className="container-fluid">
               <div className="card">
                 <div className="card-header">Please select a test</div>
                 <div className="card-body">
+                  <Loading loading={loading} />
                   <ul className="list-group list-group-flush">
                     <TestList
                       baseUrls={{
