@@ -90,6 +90,22 @@ async def get_subtree_summary(
     raise HTTPException(status_code=404, detail="Not Found")
 
 
+@api_router.get("/result/summarySiblings")
+async def get_subtree_summary_siblings_root(
+    user: User = Depends(auth.current_active_user),
+) -> Dict:
+    """
+    Special case for getting all summarySiblings for the root of the tree.
+    """
+    store = DBStore()
+    cache = await store.get_summaries_cache(user.id)
+    print(cache)
+    if cache:
+        return cache
+
+    raise HTTPException(status_code=404, detail="Not Found")
+
+
 @api_router.get("/result/{parent_test_name_prefix:path}/summarySiblings")
 async def get_subtree_summary_siblings(
     parent_test_name_prefix: str, user: User = Depends(auth.current_active_user)

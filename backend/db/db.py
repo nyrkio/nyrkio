@@ -1107,6 +1107,9 @@ class DBStore(object):
         cache2 = results[0]
         cache1 = {}
         for k, v in cache2.items():
+            if k == "_id":
+                continue
+
             k1 = k
             k1 = k1.replace("¤", ".")
             cache1[k1] = cache2[k]
