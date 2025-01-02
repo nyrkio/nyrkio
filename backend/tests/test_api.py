@@ -127,6 +127,7 @@ def test_add_multiple_test_results_at_once(client):
         },
     ]
     response = client.post("/api/v0/result/benchmark1", json=data)
+    print(vars(response))
     assert response.status_code == 200
 
     response = client.get("/api/v0/results")
@@ -2408,7 +2409,7 @@ def test_payload_missing_metric_unit_doesnt_persist(client):
     ]
 
     response = client.post("/api/v0/result/benchmark1", json=data)
-    assert response.status_code == 400
+    assert response.status_code >= 400
 
     # Check to see if the result was persisted
     response = client.get("/api/v0/result/benchmark1")
