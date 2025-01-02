@@ -1,4 +1,5 @@
-from typing import Dict, List, Optional, Any
+from typing import Dict, List, Optional, Any, Union
+from typing_extensions import TypedDict, NotRequired
 from pydantic import BaseModel, RootModel
 from enum import Enum
 
@@ -8,18 +9,18 @@ class DirectionEnum(str, Enum):
     lower_is_better = "lower_is_better"
 
 
-class TestResultMetrics(BaseModel):
+class Metrics(TypedDict):
     name: str
-    unit: Optional[str]
-    value: float
-    direction: Optional[str]
+    unit: str
+    value: Union[float, int]
+    direction: NotRequired[DirectionEnum]
 
 
 class TestResult(BaseModel):
     timestamp: int
-    metrics: List[Dict]
+    metrics: List[Metrics]
     attributes: Dict
-    extra_info: Optional[Dict] = {}
+    extra_info: Optional[Dict] = None
 
 
 class TestResults(RootModel[Any]):
