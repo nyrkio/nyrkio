@@ -91,6 +91,7 @@ export const TestList = ({
   shortNames,
   displayNames,
   prefix,
+  summaries,
 }) => {
   if (shortNames.length == 0) {
     return (
@@ -106,6 +107,9 @@ export const TestList = ({
   return shortNames.map((name, index) => {
     const displayName = displayNames[index];
     var longName = prefix === undefined ? name : prefix + "/" + name;
+    if(summaries&&summaries[longName]){
+      summaries[longName].placeholderKey = index;
+    }
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
@@ -121,6 +125,7 @@ export const TestList = ({
             longName={longName}
             baseUrls={baseUrls}
             testNames={testNames}
+            summaries={summaries}
           />
         </li>
       );
@@ -135,6 +140,7 @@ export const TestList = ({
               longName={longName}
               baseUrls={baseUrls}
               testNames={testNames}
+              summaries={summaries}
             />
           </Link>
         </li>
@@ -146,6 +152,7 @@ export const TestList = ({
 export const Dashboard = ({loggedIn, embed}) => {
   const [loading, setLoading] = useState(false);
   const [unencodedTestNames, setUnencodedTestNames] = useState([]);
+  const [summarySiblings, setSummarySiblings] = useState({});
   const location = useLocation();
   var prefix;
 
@@ -184,20 +191,39 @@ export const Dashboard = ({loggedIn, embed}) => {
       const test_name = element.test_name;
       setUnencodedTestNames((prevState) => [...prevState, test_name]);
     });
+
+    // Then fetch summary data for eact test/prefx/subree
+    const summaryPrefix = prefix ? prefix : "";
+    const sumResponse = await fetch("/api/v0/result/"+summaryPrefix+"/summarySiblings", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    console.debug(sumResponse);
+    if (sumResponse.status != 200) {
+      console.error("Failed to fetch summary of change points: " + sumResponse.status);
+      setSummarySiblings({});
+    }
+
+    const sumJson = await sumResponse.json();
+    console.debug(sumJson);
+    setSummarySiblings(sumJson);
     setLoading(false);
 
   };
 
   useEffect(() => {
     setLoading(true);
-    fetchData();
+    fetchData().finally(()=> setLoading(false));
   }, []);
 
   const testNames = unencodedTestNames.map((name) => encodeURI(name));
 
   // Check for invalid test name in url
-  if (prefix !== undefined && !validTestName(prefix, testNames)) {
-    return <NoMatch />;
+  if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
+      return <NoMatch />;
   }
 
   const shortNames = createShortNames(prefix, testNames);
@@ -215,11 +241,11 @@ export const Dashboard = ({loggedIn, embed}) => {
     }
 
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
-            <Loading loading={loading} />
             <div className="container-fluid">
               <div className="card">
                 <div className="card-header">Please select a test</div>
                 <div className="card-body">
+                  <Loading loading={loading} />
                   <ul className="list-group list-group-flush">
                     <TestList
                       baseUrls={{
@@ -231,6 +257,7 @@ export const Dashboard = ({loggedIn, embed}) => {
                       shortNames={shortNames}
                       prefix={prefix}
                       displayNames={displayNames}
+                      summaries={summarySiblings}
                     />
                   </ul>
                 </div>
@@ -386,19 +413,23 @@ export const SingleResultWithTestname = ({
   var metricMap = [];
   displayData.map((result) => {
     result.metrics.map((metric) => {
-      metricMap.push({ name: metric.name, unit: metric.unit });
+      metricMap.push({ name: metric.name, unit: metric.unit, direction: metric.direction });
     });
   });
 
   // Only want unique metric names
   var unique = metricMap.reduce((a, b) => {
-    if (a.findIndex((x) => x.name === b.name) === -1) {
+    const aIndex = a.findIndex((x) => x.name === b.name);
+
+    if (aIndex === -1) {
       return a.concat([b]);
     } else {
+      a[aIndex]=b; //We want the last element to define metric unit and direction
       return a;
     }
   }, []);
   console.debug("unique: " + unique);
+  console.debug(unique);
   applyHash();
   const orgName = testName.split("/")[0];  // Not used when not an org
   return (
@@ -512,8 +543,7 @@ const nameIsGitHubRepo = (name) => {
 //
 // TODO(mfleming) Fetching the avatar url is a really quick way
 // to exhaust the GitHub API rate limit. We should cache these.
-const TestListEntry = ({ name, longName, baseUrls, testNames }) => {
-  const [loading, setLoading] = useState(false);
+const TestListEntry = ({ name, longName, baseUrls, testNames, summaries }) => {
   const [imageUrl, setImageUrl] = useState(undefined);
   const [isGitHubUrl, setIsGitHubUrl] = useState(false);
 
@@ -553,6 +583,7 @@ const TestListEntry = ({ name, longName, baseUrls, testNames }) => {
               longName={longName}
               baseUrls={baseUrls}
               testNames={testNames}
+              summaries={summaries}
             />
           </div>
         </div>
@@ -609,58 +640,31 @@ const validTestName = (name, testNames) => {
   return match.length > 0;
 };
 
-const SummarizeChangePoints = ({ longName, baseUrls, testNames }) => {
-  const [rawChanges, setRawChanges] = useState({});
-  const [sumChanges, setSumChanges] = useState(0);
-  const [firstChanges, setFirstChanges] = useState("");
+const SummarizeChangePoints = ({ name, longName, baseUrls, testNames, summaries }) => {
+  // Too many re-renders... oh well, forced me to make the backend call more efficient instead
+  // so thanks React I guess
+  // const [sumChanges, setSumChanges] = useState(0);
+  // const [firstChanges, setFirstChanges] = useState("");
+  let sumChanges = 0;
+  let firstChanges = "";
+  const setSumChanges = (v) => sumChanges=v;
+  const setFirstChanges = (v) => firstChanges=v;
 
-  const fetchSummaryApi = async (prefix) => {
-    console.debug("Fetching summary for " + prefix);
-    const url = baseUrls.api + prefix + "/summary";
-    const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-
-    if (response.status != 200) {
-      console.error("Failed to fetch summary: " + response.status);
-      return;
-    }
-
-    const resultData = await response.json();
-    setRawChanges(resultData);
-  };
-
-  useEffect(() => {
-    //const res = fetchSummarizedData(longName);
-    const res = fetchSummaryApi(longName);
-
-    return () => {
-      const a = 1;
-      //console.log(rawChanges);
-    };
-  }, [baseUrls, longName, testNames]);
-
-  useEffect(() => {
+  if (!summaries || !summaries[longName]){
+    return false;
+  }
     var newestDate = new Date();
-    console.debug(longName);
-    console.debug(rawChanges);
     if (
-      rawChanges.total_change_points &&
-      parseInt(rawChanges.total_change_points)
+      summaries[longName].total_change_points &&
+      parseInt(summaries[longName].total_change_points)
     ) {
-      setSumChanges(rawChanges["total_change_points"]);
+      setSumChanges(summaries[longName]["total_change_points"]);
     }
-    if (rawChanges.newest_time && parseInt(rawChanges.newest_time)) {
-      newestDate = new Date(1000 * parseInt(rawChanges["newest_time"]));
+    if (summaries[longName].newest_time && parseInt(summaries[longName].newest_time)) {
+      newestDate = new Date(1000 * parseInt(summaries[longName]["newest_time"]));
       setFirstChanges(newestDate.toLocaleString());
     }
-  }, [rawChanges]);
 
-  //   console.debug(sumChanges);
-  //   console.debug(firstChanges);
   if (sumChanges > 0 && firstChanges)
     return (
       <>
