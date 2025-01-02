@@ -99,7 +99,6 @@ async def get_subtree_summary_siblings_root(
     """
     store = DBStore()
     cache = await store.get_summaries_cache(user.id)
-    print(cache)
     if cache:
         return cache
 
