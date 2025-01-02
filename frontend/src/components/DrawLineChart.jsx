@@ -45,6 +45,15 @@ export const DrawLineChart = ({
   const metricName = metric["name"];
   const metricNameWithHash = "#"+metricName;
   const metricUnit = metric["unit"];
+  let direction="";
+  if (metric.direction=="higher_is_better") direction="Higher is better";
+  if (metric.direction=="lower_is_better") direction="Lower is better";
+  let directionArrow="";
+  if (metric.direction=="higher_is_better") directionArrow=" ⇧";
+  if (metric.direction=="lower_is_better") directionArrow=" ⇩";
+  let metricAndDirection = metricUnit;
+  if (metric.direction=="higher_is_better") metricAndDirection = metricUnit + " >";
+  if (metric.direction=="lower_is_better") metricAndDirection = "< " + metricUnit;
   const parseData = (data, metricName) => {
     const value_map = data.map(
       (result) =>
@@ -284,7 +293,7 @@ export const DrawLineChart = ({
       <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
       <div className="chart-wrapper"  style={layout}>
         <h6 className="text-center">
-          {testName}: <a href={metricNameWithHash}>{metricName}</a>
+          <a href={metricNameWithHash}>{metricName}</a> <span title={direction}>{directionArrow}</span>
         </h6>
         <Line
           ref={chartRef}
@@ -334,6 +343,12 @@ export const DrawLineChart = ({
                 grid: {
                   display: false,
                 },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: metricAndDirection,
+                }
               },
             },
             hover: {

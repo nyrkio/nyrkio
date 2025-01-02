@@ -413,19 +413,23 @@ export const SingleResultWithTestname = ({
   var metricMap = [];
   displayData.map((result) => {
     result.metrics.map((metric) => {
-      metricMap.push({ name: metric.name, unit: metric.unit });
+      metricMap.push({ name: metric.name, unit: metric.unit, direction: metric.direction });
     });
   });
 
   // Only want unique metric names
   var unique = metricMap.reduce((a, b) => {
-    if (a.findIndex((x) => x.name === b.name) === -1) {
+    const aIndex = a.findIndex((x) => x.name === b.name);
+
+    if (aIndex === -1) {
       return a.concat([b]);
     } else {
+      a[aIndex]=b; //We want the last element to define metric unit and direction
       return a;
     }
   }, []);
   console.debug("unique: " + unique);
+  console.debug(unique);
   applyHash();
   const orgName = testName.split("/")[0];  // Not used when not an org
   return (
