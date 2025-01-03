@@ -4,7 +4,14 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 
-export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp }) => {
+const Loading = ({loading}) => {
+  if (loading) {
+    return (<><div className="loading">Loading...</div></>);
+  }
+  return (<><div className="loading_done"></div></>);
+};
+
+export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp, loading }) => {
   var rowData = [];
 
   console.debug(changeData);
@@ -33,6 +40,9 @@ export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp }
   });
 
   if (rowData.length === 0) {
+    if (loading) {
+      return (<Loading loading={loading} />);
+    }
     return (
       <>
         <span className="no-changepoints">(no changepoints)</span>

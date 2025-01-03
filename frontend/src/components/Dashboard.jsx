@@ -438,9 +438,8 @@ export const SingleResultWithTestname = ({
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           }
           <div className="container">
-            <Loading loading={loading} />
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} />
+              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} />
             </div>
 
             <div id="graphs" className="row">
