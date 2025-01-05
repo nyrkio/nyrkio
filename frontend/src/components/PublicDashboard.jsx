@@ -76,6 +76,8 @@ export const PublicDashboard = () => {
             data={publicData}
             baseUrls={baseUrls}
             dashboardType={dashboardTypes.PUBLIC}
+            loading={loading}
+            setLoading={setLoading}
           />
         )}
       </div>

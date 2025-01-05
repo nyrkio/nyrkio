@@ -1,5 +1,13 @@
-import { Breadcrumb, TestList, SingleResultWithTestname } from "./Dashboard";
+import { OrigTestList, TestList, SingleResultWithTestname } from "./Dashboard";
 import { createShortNames } from "../lib/utils";
+import { Breadcrumb } from "./Breadcrumb";
+
+const Loading = ({loading}) => {
+  if (loading) {
+    return (<><div>Loading...</div></>);
+  }
+  return (<><div className="loading_done"></div></>);
+};
 
 // Decide whether we should display a table of test names or a single result.
 // If the current url includes a pathname that we match exactly in data
@@ -7,13 +15,19 @@ import { createShortNames } from "../lib/utils";
 //
 // Otherwise, treat the pathname as a prefix for a name in data and list
 // all tests with that prefix upto the next "/".
-export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed }) => {
+export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, loading, setLoading,summaries,setSummaries,singleTestName }) => {
   const testNames = data;
   const shortNames = createShortNames(prefix, testNames);
+  const displayNames = shortNames.map((name)=>decodeURIComponent(name));
+
+  console.debug(singleTestName);
+  console.debug(prefix);
+  console.debug(data);
 
   // If we found an exact match, display the result
-  if (data.includes(prefix)) {
+  if (data.includes(prefix) || singleTestName) {
     var path = decodeURIComponent(prefix).replace("https://github.com/", "");
+    path = path || singleTestName;
 
     return (
       <>
@@ -23,26 +37,30 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed }) 
           breadcrumbName={prefix}
           dashboardType={dashboardType}
           embed={embed}
+          loading={loading}
+          setLoading={setLoading}
+          setSummaries={setSummaries}
+          summaries={summaries}
         />
       </>
     );
   } else {
-    console.debug("data: " + data);
     // Otherwise, display a list of tests upto the next "/"
     return (
       <>
         {embed == "yes" ? "" :
         <Breadcrumb testName={prefix} baseUrls={baseUrls} />
         }
-        <div className="col-md-7">
-          <TestList
+          <OrigTestList
             baseUrls={baseUrls}
-            testNames={data}
+            testNames={testNames}
             shortNames={shortNames}
-            displayNames={shortNames.map((name) => decodeURIComponent(name))}
+            displayNames={displayNames}
             prefix={prefix}
+
+            loading={loading}
+            setLoading={setLoading}
           />
-        </div>
       </>
     );
   }

@@ -55,7 +55,7 @@ export const OrgDashboard = ({embed}) => {
     results: "/orgs",
     result: "orgs",
     tests: "orgs",
-    breadcrumbTestRootTitle: "GitHub Repos",
+    breadcrumbTestRootTitle: "Github Org",
   };
 
   return (
@@ -73,6 +73,8 @@ export const OrgDashboard = ({embed}) => {
             baseUrls={baseUrls}
             dashboardType={dashboardTypes.ORG}
             embed={embed}
+            loading={loading}
+            setLoading={setLoading}
           />
         )}
       </div>
