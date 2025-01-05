@@ -10,6 +10,10 @@ import { TestSettings } from "./TestSettings";
 import { HunterSettings } from "./UserSettings";
 import { HunterSettingsOrg } from "./OrgSettings";
 import { SidePanel } from "./SidePanel";
+import { OrgDashboard } from "./OrgDashboard";
+import { PublicDashboard } from "./PublicDashboard";
+import { TableOrResult } from "./TableOrResult";
+import { Breadcrumb } from "./Breadcrumb";
 
 import graph_4x4 from "../static/icons/graph-4x4.png";
 import graph_nx1 from "../static/icons/graph-nx1.png";
@@ -27,63 +31,6 @@ const Loading = ({loading}) => {
   return (<><div className="loading_done"></div></>);
 };
 
-export const Breadcrumb = ({ testName, baseUrls }) => {
-  const createItems = () => {
-    if (testName === undefined) {
-      return <></>;
-    }
-
-    return testName.split("/").map((name, i) => {
-      // Check if we're the last component
-      if (i === testName.split("/").length - 1) {
-        return (
-          <li className="breadcrumb-item active" aria-current="page" key="leaf">
-            {decodeURIComponent(name)}
-          </li>
-        );
-      }
-
-      var prefix = testName
-        .split("/")
-        .slice(0, i + 1)
-        .join("/");
-      return (
-        <li className="breadcrumb-item" key={prefix}>
-          <Link to={`/${baseUrls.tests}/${prefix}`}>
-            {decodeURIComponent(name)}
-          </Link>
-        </li>
-      );
-    });
-  };
-
-  console.debug("baseUrls: " + baseUrls.testRoot);
-
-  return (
-    <>
-      <nav className="navbar col-xs-12 col-lg-11 col-xl-10">
-        <div className="container-fluid breadcrumb-wrapper">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
-              {console.log(baseUrls.breadCrumbtestRootTitle)}
-
-              {baseUrls.breadcrumbTestRootTitle ? (
-                <li className="breadcrumb-item" key="root">
-                  <Link to={`${baseUrls.testRoot}`}>
-                    {baseUrls.breadcrumbTestRootTitle}
-                  </Link>
-                </li>
-              ) : (
-                <span></span>
-              )}
-              {createItems()}
-            </ol>
-          </nav>
-        </div>
-      </nav>
-    </>
-  );
-};
 
 export const TestList = ({
   baseUrls,
@@ -91,8 +38,15 @@ export const TestList = ({
   shortNames,
   displayNames,
   prefix,
-  summaries,
+  summaries,setSummaries,
+  loading,
+  setLoading,
+  encodedGhNames,
 }) => {
+  // Check for invalid test name in url
+  if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
+      return <NoMatch />;
+  }
   if (shortNames.length == 0) {
     return (
       <li className="list-group-item nyrkio-empty" key="0">
@@ -113,27 +67,27 @@ export const TestList = ({
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
-        <li className="list-group-item" key={longName}>
+        <li className="list-group-item" key={index}>
           <Link
             to={`/${baseUrls.result}/${longName}`}
             state={{ testName: longName }}
           >
             {displayName}
           </Link>
+          {!loading?
           <SummarizeChangePoints
-            name={name}
             longName={longName}
-            baseUrls={baseUrls}
-            testNames={testNames}
-            summaries={summaries}
+            summaries={summaries} loading={loading}
           />
+          : ""
+          }
         </li>
       );
     } else {
       var p = name;
       if (prefix !== undefined) p = prefix + "/" + name;
       return (
-        <li className="list-group-item" key={longName}>
+        <li className="list-group-item" key={index}>
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
             <TestListEntry
               name={displayName}
@@ -141,6 +95,9 @@ export const TestList = ({
               baseUrls={baseUrls}
               testNames={testNames}
               summaries={summaries}
+              setSummaries={setSummaries}
+              setLoading={setLoading}
+              loading={loading}
             />
           </Link>
         </li>
@@ -149,97 +106,135 @@ export const TestList = ({
   });
 };
 
-export const Dashboard = ({loggedIn, embed}) => {
-  const [loading, setLoading] = useState(false);
-  const [unencodedTestNames, setUnencodedTestNames] = useState([]);
-  const [summarySiblings, setSummarySiblings] = useState({});
-  const location = useLocation();
-  var prefix;
-
+var summaries2={};
+const setSummaries2  = (v)=>{summaries2=v;};
+export const Dashboard = ({loggedIn, embed, path}) => {
   document.body.classList.add("section-dashboards");
 
-  // Remove /tests/ from the beginning of the path
-  if (location.pathname.startsWith("/tests/")) {
-    prefix = location.pathname.substring(7);
+  if (path=="/result/") return (<MyDashboard loggedIn={loggedIn} embed={embed} path={path} />);
+  if (path=="/public/") return PublicDashboard({loggedIn,embed,path});
+  if (path=="/orgs/") return OrgDashboard({loggedIn,embed,path});
 
-    // Strip trailing / if it exists
-    if (prefix.endsWith("/")) {
-      prefix = prefix.substring(0, prefix.length - 1);
-    }
+  if (path=="/tests/"|| path=="/") return (<MyDashboard loggedIn={loggedIn} embed={embed} path={path} />);
+  return <NoMatch />;
+};
 
-    // If the prefix is empty, set it to undefined
-    if (prefix === "") {
-      prefix = undefined;
-    }
-  }
+const MyDashboard = ({loggedIn, embed, path}) => {
+  const [loading, setLoading] = useState(false);
+  const [unencodedTestNames, setUnencodedTestNames] = useState([]);
+//   const [summaries, setSummaries] = useState({});
+  const location = useLocation();
+  var prefix;
+  var testName=undefined;
 
-  const fetchData = async () => {
-    const response = await fetch("/api/v0/results", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-
-    if (response.status != 200) {
-      console.error("Failed to fetch test names: " + response.status);
-      return;
-    }
-
-    const resultData = await response.json();
-    resultData.map((element) => {
-      const test_name = element.test_name;
-      setUnencodedTestNames((prevState) => [...prevState, test_name]);
-    });
-
-    // Then fetch summary data for eact test/prefx/subree
-    const summaryPrefix = prefix ? prefix : "";
-    const sumResponse = await fetch("/api/v0/result/"+summaryPrefix+"/summarySiblings", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-    });
-
-    console.debug(sumResponse);
-    if (sumResponse.status != 200) {
-      console.error("Failed to fetch summary of change points: " + sumResponse.status);
-      setSummarySiblings({});
-    }
-
-    const sumJson = await sumResponse.json();
-    console.debug(sumJson);
-    setSummarySiblings(sumJson);
-    setLoading(false);
-
+  const baseUrls = {
+    api: "/api/v0/result/",
+    tests: "tests",
+    testRoot: "/",
+    testRootTitle: "Tests",
+    results: "/results",
+    result: "result",
+    breadcrumbTestRootTitle: "",
   };
+  if (path=="/result/") {
+      testName = window.location.pathname.substring(8);
+      console.log(testName);
+      prefix=testName;
+      // If the prefix is empty, set it to undefined
+      if (prefix === "") {
+        prefix = undefined;
+      }
+      //setUnencodedTestNames([testName]);
+      useEffect(() => {
+        setLoading(false);
+      }, []);
 
-  useEffect(() => {
-    setLoading(true);
-    fetchData().finally(()=> setLoading(false));
-  }, []);
+  } else if (path=="/tests/" || path=="/"){
+//     prefix=path;
 
-  const testNames = unencodedTestNames.map((name) => encodeURI(name));
+    // Remove /tests/ from the beginning of the path
+    if (location.pathname.startsWith("/tests/")) {
+      prefix = location.pathname.substring(7);
 
-  // Check for invalid test name in url
-  if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
-      return <NoMatch />;
+      // Strip trailing / if it exists
+      if (prefix.endsWith("/")) {
+        prefix = prefix.substring(0, prefix.length - 1);
+      }
+
+      // If the prefix is empty, set it to undefined
+      if (prefix === "") {
+        prefix = undefined;
+      }
+    }
+    const fetchData = async () => {
+      const response = await fetch("/api/v0/results", {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      if (response.status != 200) {
+        console.error("Failed to fetch test names: " + response.status);
+        return;
+      }
+
+      const resultData = await response.json();
+      resultData.map((element) => {
+        const test_name = element.test_name;
+        setUnencodedTestNames((prevState) => [...prevState, test_name]);
+      });
+
+      // Then fetch summary data for eact test/prefx/subree
+      const summaryPrefix = prefix ? prefix : "";
+//       setSummaries2({});  // Probably need to initialize them now that they aren't react state variables
+      const sumResponse = await fetch("/api/v0/result/"+summaryPrefix+"/summarySiblings", {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      if (sumResponse.status != 200) {
+        console.error("Failed to fetch summary of change points: " + sumResponse.status);
+        setSummaries({});
+      }
+
+      const sumJson = await sumResponse.json();
+//       console.debug(sumJson);
+      setSummaries2(sumJson);
+      setLoading(false);
+
+    };
+
+    useEffect(() => {
+      setLoading(true);
+      fetchData().finally(()=> setLoading(false));
+    }, []);
+
+
+
+  } else {
+    console.warn("Unhandled prefix in URI: " + prefix);
+    return (<NoMatch />);
   }
+  return (<TableOrResult data={unencodedTestNames}
+                         singleTestName={testName}
+                         prefix={prefix}
+                         summaries={summaries2}
+                         setSummaries={setSummaries2}
+                         loading={loading}
+                         setLoading={setLoading}
+                         dashboardType={dashboardTypes.USER}
+                         baseUrls={baseUrls}
+                         />);
 
-  const shortNames = createShortNames(prefix, testNames);
-  const displayNames = shortNames.map((name) => decodeURI(name));
-  console.log(embed);
+};
 
-
+export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loading, setLoading, baseUrls, summaries,setSummaries}) => {
+//   const displayNames = shortNames;//.map((name) => decodeURI(name).replace("https://github.com/",""));
   return (
     <>
-      {embed == "yes" ? "" :
-      <Breadcrumb
-        testName={prefix}
-        baseUrls={{ tests: "tests", testRoot: "/", testRootTitle: "Tests" }}
-      />
-    }
-
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
             <div className="container-fluid">
               <div className="card">
@@ -248,16 +243,15 @@ export const Dashboard = ({loggedIn, embed}) => {
                   <Loading loading={loading} />
                   <ul className="list-group list-group-flush">
                     <TestList
-                      baseUrls={{
-                        tests: "tests",
-                        result: "result",
-                        api: "/api/v0/result/",
-                      }}
                       testNames={testNames}
                       shortNames={shortNames}
                       prefix={prefix}
                       displayNames={displayNames}
-                      summaries={summarySiblings}
+                      loading={loading}
+                      setLoading={setLoading}
+                      baseUrls={baseUrls}
+                      setSummaries={setSummaries}
+                      summaries={summaries}
                     />
                   </ul>
                 </div>
@@ -315,6 +309,7 @@ export const SingleResultWithTestname = ({
       },
     });
     if (response.status != 200) {
+      console.warn(response);
       setNotFound(true);
       return;
     }
@@ -402,7 +397,7 @@ export const SingleResultWithTestname = ({
   };
   useEffect(loadData, []);
 
-  if (notFound) {
+  if (!loading && notFound) {
     return <NoMatch />;
   }
 
@@ -428,8 +423,6 @@ export const SingleResultWithTestname = ({
       return a;
     }
   }, []);
-  console.debug("unique: " + unique);
-  console.debug(unique);
   applyHash();
   const orgName = testName.split("/")[0];  // Not used when not an org
   return (
@@ -510,28 +503,6 @@ SingleResultWithTestname.propTypes = {
   testName: PropTypes.string.isRequired,
 };
 
-export const SingleResult = ({embed}) => {
-  const location = useLocation();
-
-  const testName = location.pathname.substring(8);
-  console.log(testName);
-  const baseUrls = {
-    api: "/api/v0/result/",
-    tests: "tests",
-    testRoot: "/",
-    testRootTitle: "Tests",
-  };
-  return (
-    <SingleResultWithTestname
-      testName={testName}
-      baseUrls={baseUrls}
-      breadcrumbName={testName}
-      dashboardType={dashboardTypes.USER}
-      embed={embed}
-    />
-  );
-};
-
 const nameIsGitHubRepo = (name) => {
   return name.toLowerCase().startsWith("https://github.com/");
 };
@@ -542,12 +513,15 @@ const nameIsGitHubRepo = (name) => {
 //
 // TODO(mfleming) Fetching the avatar url is a really quick way
 // to exhaust the GitHub API rate limit. We should cache these.
-const TestListEntry = ({ name, longName, baseUrls, testNames, summaries }) => {
+const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSummaries ,setLoading, loading }) => {
   const [imageUrl, setImageUrl] = useState(undefined);
-  const [isGitHubUrl, setIsGitHubUrl] = useState(false);
 
   const fetchImage = async (repo) => {
-    const response = await fetch(`https://api.github.com/repos/${repo}`);
+    const response = await fetch(`https://api.github.com/repos/${repo}`, {
+      headers: {
+        "Content-type": "application/json",
+      },
+    });
     if (response.status !== 200) {
       console.error("Failed to fetch GitHub repo data: " + response.status);
       return;
@@ -561,28 +535,22 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries }) => {
 
   useEffect(() => {
     if (nameIsGitHubRepo(name)) {
-      setIsGitHubUrl(true);
       const url = name;
       const repo = url.replace("https://github.com/", "");
-      setLoading(true);
       fetchImage(repo).finally(() => {
-        setLoading(false);
       });
     }
   }, []);
 
-  if (!isGitHubUrl) {
+  if (!nameIsGitHubRepo(name)) {
     return (
       <>
         <div className="row justify-content-center">
           <div className="col">
             {name}{" "}
             <SummarizeChangePoints
-              name={name}
               longName={longName}
-              baseUrls={baseUrls}
-              testNames={testNames}
-              summaries={summaries}
+              summaries={summaries} loading={loading}
             />
           </div>
         </div>
@@ -603,12 +571,10 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries }) => {
           />
         </div>
         <div className="col">
-          {name}{" "}
+          {name.replace("https://github.com/", "")}{" "}
           <SummarizeChangePoints
-            name={name}
             longName={longName}
-            baseUrls={baseUrls}
-            testNames={testNames}
+            summaries={summaries} loading={loading}
           />
         </div>
       </div>
@@ -619,11 +585,9 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries }) => {
         <div className="row justify-content-center">
           <Loading loading={loading} />
           <div className="col">
-            {name}{" "}
+            {name.replace("https://github.com/", "")}{" "}
             <SummarizeChangePoints
-              name={name}
               longName={longName}
-              baseUrls={baseUrls}
               testNames={testNames}
             />
           </div>
@@ -639,7 +603,7 @@ const validTestName = (name, testNames) => {
   return match.length > 0;
 };
 
-const SummarizeChangePoints = ({ name, longName, baseUrls, testNames, summaries }) => {
+const SummarizeChangePoints = ({ longName, summaries,loading }) => {
   // Too many re-renders... oh well, forced me to make the backend call more efficient instead
   // so thanks React I guess
   // const [sumChanges, setSumChanges] = useState(0);
@@ -649,18 +613,18 @@ const SummarizeChangePoints = ({ name, longName, baseUrls, testNames, summaries 
   const setSumChanges = (v) => sumChanges=v;
   const setFirstChanges = (v) => firstChanges=v;
 
-  if (!summaries || !summaries[longName]){
+  if (loading || !summaries2 || !summaries2[longName]){
     return false;
   }
     var newestDate = new Date();
     if (
-      summaries[longName].total_change_points &&
-      parseInt(summaries[longName].total_change_points)
+      summaries2[longName].total_change_points &&
+      parseInt(summaries2[longName].total_change_points)
     ) {
-      setSumChanges(summaries[longName]["total_change_points"]);
+      setSumChanges(summaries2[longName]["total_change_points"]);
     }
-    if (summaries[longName].newest_time && parseInt(summaries[longName].newest_time)) {
-      newestDate = new Date(1000 * parseInt(summaries[longName]["newest_time"]));
+    if (summaries2[longName].newest_time && parseInt(summaries2[longName].newest_time)) {
+      newestDate = new Date(1000 * parseInt(summaries2[longName]["newest_time"]));
       setFirstChanges(newestDate.toLocaleString());
     }
 

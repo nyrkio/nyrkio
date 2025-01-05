@@ -10,7 +10,7 @@ import {
 
 import "./App.css";
 import { Login } from "./components/Login.jsx";
-import { Dashboard, SingleResult } from "./components/Dashboard.jsx";
+import { Dashboard} from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
@@ -29,8 +29,6 @@ import { OrgSettings } from "./components/OrgSettings.jsx";
 import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
-import { PublicDashboard } from "./components/PublicDashboard.jsx";
-import { OrgDashboard } from "./components/OrgDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
 
 function MainApp({ loggedIn, setLoggedIn }) {
@@ -55,11 +53,11 @@ function MainApp({ loggedIn, setLoggedIn }) {
           id="main-content"
         >
           <Routes>
-            <Route path="/" element={loggedIn ? <Dashboard embed={embed}/> : <Nothing />} />
+            <Route path="/" element={loggedIn ? <Dashboard embed={embed} path="/"/> : <Nothing />} />
             <Route path="/frontpage" element={<Nothing />} />
             <Route
               path="/tests/*"
-              element={<Dashboard loggedIn={loggedIn} embed={embed}/>}
+              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/tests/"/>}
             />
             <Route path="/product" element={<ProductPage />} />
             <Route
@@ -77,14 +75,20 @@ function MainApp({ loggedIn, setLoggedIn }) {
               path="/signup"
               element={<SignUpPage setLoggedIn={setLoggedIn} />}
             />
-            <Route path="/public/*" element={<PublicDashboard embed={embed} />} />
+            <Route path="/public/*"
+              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
+            />
             <Route path="/org/*" element={<OrgSettings />} />
-            <Route path="/orgs/*" element={<OrgDashboard embed={embed}/>} />
+            <Route path="/orgs/*"
+              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/orgs/"/>}
+            />
             <Route
               path="/login"
               element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
             />
-            <Route path="/result/*" element={<SingleResult embed={embed}/>} />
+            <Route path="/result/*"
+              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
+            />
             <Route path="/docs/getting-started" element={<Docs />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
@@ -116,11 +120,11 @@ function MainApp({ loggedIn, setLoggedIn }) {
           id="main-content"
         >
           <Routes>
-            <Route path="/" element={loggedIn ? <Dashboard /> : <Nothing />} />
+            <Route path="/" element={loggedIn ? <Dashboard path="/" /> : <Nothing />} />
             <Route path="/frontpage" element={<Nothing />} />
             <Route
               path="/tests/*"
-              element={<Dashboard loggedIn={loggedIn} />}
+              element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
             />
             <Route path="/product" element={<ProductPage />} />
             <Route
@@ -138,14 +142,14 @@ function MainApp({ loggedIn, setLoggedIn }) {
               path="/signup"
               element={<SignUpPage setLoggedIn={setLoggedIn} />}
             />
-            <Route path="/public/*" element={<PublicDashboard />} />
+            <Route path="/public/*" element={<Dashboard path="/public/"/>} />
             <Route path="/org/*" element={<OrgSettings />} />
-            <Route path="/orgs/*" element={<OrgDashboard />} />
+            <Route path="/orgs/*" element={<Dashboard path="/orgs/"/>} />
             <Route
               path="/login"
               element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
             />
-            <Route path="/result/*" element={<SingleResult />} />
+            <Route path="/result/*" element={<Dashboard path="/result/"/>} />
             <Route path="/docs/getting-started" element={<Docs />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
