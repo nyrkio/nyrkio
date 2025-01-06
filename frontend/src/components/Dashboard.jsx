@@ -137,7 +137,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     breadcrumbTestRootTitle: "",
   };
   if (path=="/result/") {
-      testName = window.location.pathname.substring(8);
+      testName = location.pathname.substring(8);
       console.log(testName);
       prefix=testName;
       // If the prefix is empty, set it to undefined
@@ -204,13 +204,13 @@ const MyDashboard = ({loggedIn, embed, path}) => {
 //       console.debug(sumJson);
       setSummaries2(sumJson);
       setLoading(false);
-
+      populateSummaryData(sumJson);
     };
 
     useEffect(() => {
       setLoading(true);
       fetchData().finally(()=> setLoading(false));
-    }, []);
+    }, [location]);
 
 
 
@@ -230,6 +230,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
                          />);
 
 };
+
 
 export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loading, setLoading, baseUrls, summaries,setSummaries}) => {
 //   const displayNames = shortNames;//.map((name) => decodeURI(name).replace("https://github.com/",""));
@@ -603,7 +604,26 @@ const validTestName = (name, testNames) => {
   return match.length > 0;
 };
 
+
 const SummarizeChangePoints = ({ longName, summaries,loading }) => {
+  const key = decodeURIComponent(longName).replace("https://github.com","");
+  // Later we will use data-longname attribute to read more content from a JSON object we fetch from the server
+  return (
+        <div
+          className="summarize-change-points placeholder-summary"
+          style={{
+            position: "absolute",
+            right: "0.5em",
+            top: 0,
+            textAlign: "right",
+          }}
+          data-longname={key}
+        >
+        </div>);
+};
+
+/*
+const SummarizeChangePointsBroken = ({ longName, summaries,loading }) => {
   // Too many re-renders... oh well, forced me to make the backend call more efficient instead
   // so thanks React I guess
   // const [sumChanges, setSumChanges] = useState(0);
@@ -655,4 +675,37 @@ const SummarizeChangePoints = ({ longName, summaries,loading }) => {
       </>
     );
   else return <span className="summarize-cp-no-changes"></span>;
+};
+*/
+
+// Workaround as this is too comlex for react or something
+const populateSummaryData = (sData) => {
+  console.debug(sData);
+  const summaryElements = document.getElementsByClassName("summarize-change-points");
+  for(let el of summaryElements){
+    let key=el.dataset.longname;
+    console.debug(key);
+    let a, b;
+    var newestDate = new Date();
+    if (
+      sData[key] &&
+      sData[key].total_change_points &&
+      parseInt(sData[key].total_change_points)
+    ) {
+      a = parseInt(sData[key]["total_change_points"]);
+    }
+    if (sData[key] && sData[key].newest_time && parseInt(sData[key].newest_time)) {
+      newestDate = new Date(1000 * parseInt(sData[key]["newest_time"]));
+      b = newestDate.toLocaleDateString('fi-FI');
+    }
+
+    if (a && b){
+      el.innerHTML = populateSummaryInner(a,b);
+    }
+  }
+};
+
+const populateSummaryInner = (sumChanges,latestDate) => {
+   return '<span className="summarize-cp-sum-total">'+(sumChanges > 0 ? sumChanges : "")+
+          '</span><span className="summarize-cp-text summarize-cp-text-changes"> &nbsp;changes</span><br /><span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span><span className="summarize-cp-first-changes">'+latestDate+'</span>';
 };
