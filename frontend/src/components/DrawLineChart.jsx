@@ -259,6 +259,31 @@ export const DrawLineChart = ({
               }
             }
         };
+  const resetAllZooms = (ev) => {
+    const buttons = document.getElementsByClassName("resetzoom");
+    for (let b of buttons){
+      b.style.opacity = 0;
+    }
+    // Will trigger syncCharts
+    chartRef.current.resetZoom();
+    const keys = Object.keys(ChartJS.instances);
+    for (let i of keys){
+      ChartJS.instances[i].zoom(1);
+    }
+  };
+  const dontZoomAxes = ({chart, ev, point}) => {
+    console.log(chart, ev, point);
+    console.log(chart.getZoomLevel());
+    if(chart.getZoomLevel() != 1){
+      // You can zoom once, then you can pan
+      return false;
+    }
+    const buttons = document.getElementsByClassName("resetzoom");
+    for (let b of buttons){
+      b.style.opacity = 0.5;
+    }
+    return true;
+  };
   const syncHover = (event, targets, chart) => {
           if (targets.length>0){
             const dataset = targets[0].datasetIndex;
@@ -360,19 +385,28 @@ export const DrawLineChart = ({
               zoom: {
                 zoom:{
                   wheel: {
-                    enabled: true,
+                    enabled: false,
                   },
                   pinch: {
                     enabled: true
                   },
-                  mode: 'xy',
-                  overScaleMode: 'xy',
+                  drag: {
+                    enabled: true,
+                    threshold: 200,
+
+                  },
+                  mode: 'x',
+                  scaleMode: 'x',
+                  overScaleMode: 'x',
                   onZoomComplete: syncCharts,
+                  onZoomStart: dontZoomAxes,
                 },
                 pan: {
                   enabled: true,
-                  scaleMode: 'xy',
+                  mode: 'x',
+                  scaleMode: 'x',
                   onPanComplete: syncCharts,
+                  threshold: 100,
                 },
                 limits: {
                   x: {minRange: 10,}
@@ -437,6 +471,7 @@ export const DrawLineChart = ({
           }}
         />
       </div>
+      <button className="btn-secondary resetzoom" style={{opacity: 0}} onClick={(ev)=>resetAllZooms(ev)}>Reset zoom</button>
       </div>
     </>
   )};
