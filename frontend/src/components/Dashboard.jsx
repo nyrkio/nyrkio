@@ -74,13 +74,10 @@ export const TestList = ({
           >
             {displayName}
           </Link>
-          {!loading?
           <SummarizeChangePoints
             longName={longName}
             summaries={summaries} loading={loading}
-          />
-          : ""
-          }
+            />
         </li>
       );
     } else {
@@ -186,25 +183,24 @@ const MyDashboard = ({loggedIn, embed, path}) => {
       });
 
       // Then fetch summary data for eact test/prefx/subree
-      const summaryPrefix = prefix ? prefix : "";
-//       setSummaries2({});  // Probably need to initialize them now that they aren't react state variables
-      const sumResponse = await fetch("/api/v0/result/"+summaryPrefix+"/summarySiblings", {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
-      });
-
-      if (sumResponse.status != 200) {
-        console.error("Failed to fetch summary of change points: " + sumResponse.status);
-        setSummaries({});
-      }
-
-      const sumJson = await sumResponse.json();
-//       console.debug(sumJson);
-      setSummaries2(sumJson);
-      setLoading(false);
-      populateSummaryData(sumJson);
+//       const summaryPrefix = prefix ? prefix : "";
+//       const sumResponse = await fetch("/api/v0/result/"+summaryPrefix+"/summarySiblings", {
+//         headers: {
+//           "Content-type": "application/json",
+//           Authorization: "Bearer " + localStorage.getItem("token"),
+//         },
+//       });
+//
+//       if (sumResponse.status != 200) {
+//         console.error("Failed to fetch summary of change points: " + sumResponse.status);
+//         setSummaries({});
+//       }
+//
+//       const sumJson = await sumResponse.json();
+// //       console.debug(sumJson);
+// //       setSummaries(sumJson);
+//       setLoading(false);
+//       populateSummaryData(sumJson);
     };
 
     useEffect(() => {
@@ -233,7 +229,33 @@ const MyDashboard = ({loggedIn, embed, path}) => {
 
 
 export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loading, setLoading, baseUrls, summaries,setSummaries}) => {
-//   const displayNames = shortNames;//.map((name) => decodeURI(name).replace("https://github.com/",""));
+  const location = useLocation();
+  const fethSummaryData = async () => {
+      const summaryPrefix = prefix ? prefix+"/" : "";
+      console.debug(baseUrls);
+      const base = baseUrls["api"];
+      const sumResponse = await fetch(base + summaryPrefix+"summarySiblings", {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      if (sumResponse.status != 200) {
+        console.error("Failed to fetch summary of change points: " + sumResponse.status);
+//         setSummaries({});
+      }
+
+      const sumJson = await sumResponse.json();
+      setLoading(false);
+      populateSummaryData(sumJson);
+
+  };
+  useEffect(()=>{
+    fethSummaryData().finally(()=>setLoading(false));
+  }, [location]);
+
+  //   const displayNames = shortNames;//.map((name) => decodeURI(name).replace("https://github.com/",""));
   return (
     <>
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
@@ -589,7 +611,7 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSumma
             {name.replace("https://github.com/", "")}{" "}
             <SummarizeChangePoints
               longName={longName}
-              testNames={testNames}
+              summaries={summaries} loading={loading}
             />
           </div>
         </div>
@@ -623,28 +645,29 @@ const SummarizeChangePoints = ({ longName, summaries,loading }) => {
 };
 
 /*
-const SummarizeChangePointsBroken = ({ longName, summaries,loading }) => {
+const SummarizeChangePoints = ({ longName, summaries,loading }) => {
   // Too many re-renders... oh well, forced me to make the backend call more efficient instead
   // so thanks React I guess
-  // const [sumChanges, setSumChanges] = useState(0);
-  // const [firstChanges, setFirstChanges] = useState("");
-  let sumChanges = 0;
-  let firstChanges = "";
-  const setSumChanges = (v) => sumChanges=v;
-  const setFirstChanges = (v) => firstChanges=v;
+  const [sumChanges, setSumChanges] = useState(0);
+  const [firstChanges, setFirstChanges] = useState("");
+//   let sumChanges = 0;
+//   let firstChanges = "";
+//   const setSumChanges = (v) => sumChanges=v;
+//   const setFirstChanges = (v) => firstChanges=v;
 
-  if (loading || !summaries2 || !summaries2[longName]){
+  console.debug(loading, summaries, longName);
+  if (loading || !summaries || !summaries[longName]){
     return false;
   }
     var newestDate = new Date();
     if (
-      summaries2[longName].total_change_points &&
-      parseInt(summaries2[longName].total_change_points)
+      summaries[longName].total_change_points &&
+      parseInt(summaries[longName].total_change_points)
     ) {
-      setSumChanges(summaries2[longName]["total_change_points"]);
+      setSumChanges(summaries[longName]["total_change_points"]);
     }
-    if (summaries2[longName].newest_time && parseInt(summaries2[longName].newest_time)) {
-      newestDate = new Date(1000 * parseInt(summaries2[longName]["newest_time"]));
+    if (summaries[longName].newest_time && parseInt(summaries[longName].newest_time)) {
+      newestDate = new Date(1000 * parseInt(summaries[longName]["newest_time"]));
       setFirstChanges(newestDate.toLocaleString());
     }
 
@@ -677,11 +700,11 @@ const SummarizeChangePointsBroken = ({ longName, summaries,loading }) => {
   else return <span className="summarize-cp-no-changes"></span>;
 };
 */
-
 // Workaround as this is too comlex for react or something
 const populateSummaryData = (sData) => {
   console.debug(sData);
   const summaryElements = document.getElementsByClassName("summarize-change-points");
+  console.debug(summaryElements);
   for(let el of summaryElements){
     let key=el.dataset.longname;
     console.debug(key);

@@ -56,6 +56,48 @@ async def changes(test_name: str):
     return await calc_changes(test_name, user_id)
 
 
+@public_router.get("/result/summarySiblings")
+async def get_subtree_summary_siblings_root() -> Dict:
+    """
+    TODO: Could return an aggregation of every public subtree by fetching all and smashing together?
+    """
+    return {}
+
+
+@public_router.get("/result/{parent_test_name_prefix:path}/summarySiblings")
+async def get_subtree_summary_siblings(parent_test_name_prefix: str) -> Dict:
+    """
+    Like /summary but client will ask for the parent prefix, and we return all children of that parent.
+    This allows a single call to replace separate HTTP calls for each list entry.
+    """
+    user_or_org_id = None
+    int_parent_name = None
+    public_test_prefix = None
+    store = DBStore()
+    public_results, _ = await store.get_public_results()
+
+    for test_result in public_results:
+        int_parent_name = internal_test_name(
+            test_result["user_id"], parent_test_name_prefix
+        )
+        if test_result["test_name"].startswith(int_parent_name):
+            user_or_org_id = test_result["user_id"]
+            public_test_prefix = extract_public_test_name(test_result["attributes"])
+            break
+
+    if not user_or_org_id:
+        raise HTTPException(status_code=404, detail="No such test exists")
+
+    cache = await store.get_summaries_cache(user_or_org_id)
+    # This is a public API but we're holding the names of all the non-public tests and change points
+    # this user_or_org_id. We want to return just the one where user is now.
+    filtered_cache = {}
+    for k, v in cache.items():
+        if k.startswith(int_parent_name):
+            filtered_cache["/" + public_test_prefix + "/" + k] = v
+    return filtered_cache
+
+
 @public_router.get("/result/{test_name:path}")
 async def get_result(test_name: str) -> List[Dict]:
     store = DBStore()
@@ -74,7 +116,6 @@ async def get_result(test_name: str) -> List[Dict]:
 # TODO(Henrik): Add a query to `store` where we use test_name in the query, not here
 async def lookup_public_test(store, test_name):
     results, _ = await store.get_public_results()
-    print(results)
     for r in results:
         if build_public_test_name(r) == test_name:
             return r
@@ -110,3 +151,17 @@ def build_public_test_name(test_entry):
         )
 
     return test_entry["test_name"]
+
+
+def internal_test_name(user_id, public_test_name):
+    if is_user_id("user_id"):
+        name = public_test_name.replace("https://github.com/", "")
+        name = name.replace("https:/github.com/", "")
+        parts = name.split("/")
+        if len(parts) >= 3:
+            # org = parts[0]
+            # repo = parts[1]
+            # branch = parts[2]
+            return "/".join(parts[3:])
+
+    return name

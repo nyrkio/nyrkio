@@ -96,6 +96,41 @@ async def get_subtree_summary(
     raise HTTPException(status_code=404, detail="Not Found")
 
 
+@org_router.get("/result/summarySiblings")
+async def get_subtree_summary_siblings_root(
+    user: User = Depends(auth.current_active_user),
+) -> Dict:
+    """
+    For orgs this isn't possible because each org has a different org id
+    """
+    return {}
+
+
+@org_router.get("/result/{parent_test_name_prefix:path}/summarySiblings")
+async def get_subtree_summary_siblings(
+    parent_test_name_prefix: str, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    """
+    Like /summary but client will ask for the parent prefix, and we return all children of that parent.
+    This allows a single call to replace separate HTTP calls for each list entry.
+    """
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, parent_test_name_prefix.split("/")[0])
+    store = DBStore()
+    cache = await store.get_summaries_cache(org["id"])
+
+    children = {}
+    length = len(parent_test_name_prefix)
+    for k, v in cache.items():
+        if len(k) >= length and k[:length] == parent_test_name_prefix:
+            children[k] = v
+
+    if children:
+        return children
+
+    raise HTTPException(status_code=404, detail="Not Found")
+
+
 @org_router.get("/result/{test_name:path}")
 async def results(
     test_name: str,

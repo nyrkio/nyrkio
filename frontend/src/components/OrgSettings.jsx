@@ -137,9 +137,10 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
   };
   const minMagnitudeSet = (realValue) => {
     const rawValue = getRawMinMagnitude(realValue);
-    document.getElementById("nyrkio-min-magnitude-value").innerHTML =
-      Math.round(realValue);
-    document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
+    const v = document.getElementById("nyrkio-min-magnitude-value");
+    if(v) v.innerHTML = Math.round(realValue);
+    const slider = document.getElementById("nyrkio-min-magnitude-slider");
+    if (slider) slider.value = rawValue;
     return rawValue;
   };
 
@@ -162,8 +163,10 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
   };
   const pvalueSet = (realValue) => {
     const rawValue = getRawPValue(realValue);
-    document.getElementById("nyrkio-p-value-value").innerHTML = realValue;
-    document.getElementById("nyrkio-p-value-slider").value = rawValue;
+    const v = document.getElementById("nyrkio-p-value-value");
+    if(v) v.innerHTML = realValue;
+    const slider = document.getElementById("nyrkio-p-value-slider");
+    if (slider) slider.value = rawValue;
     return rawValue;
   };
 
