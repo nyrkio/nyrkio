@@ -225,7 +225,9 @@ class PerformanceTestResultSeries:
         reports = await self.produce_reports(change_points, notifiers)
         return reports
 
-    def calculate_change_points(self) -> Dict[str, AnalyzedSeries]:
+    def calculate_change_points(
+        self, enabled_metrics=None, disabled_metrics=None
+    ) -> Dict[str, AnalyzedSeries]:
         data = self.per_metric_series()
         # Hunter has the ability to analyze multiple series at once but requires
         # that all series have the same number of data points (timestamps,
@@ -234,6 +236,13 @@ class PerformanceTestResultSeries:
         # analyze each series separately.
         all_change_points = {}
         for metric_name, m in data.items():
+            if disabled_metrics is not None:
+                if metric_name in disabled_metrics:
+                    continue
+            if enabled_metrics is not None:
+                if metric_name not in enabled_metrics:
+                    continue
+
             metric_timestamps = m.timestamps
             metric_units = {metric_name: m.metric_unit}
             metric_data = {metric_name: m.metric_data}

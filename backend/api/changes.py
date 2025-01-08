@@ -41,11 +41,14 @@ async def get_cached_or_calc_changes(
         cached_cp = await store.get_cached_change_points(
             user_id, series.get_series_id()
         )
+    disabled_metrics = await store.get_disabled_metrics(user_id, series.name)
     print(str(cached_cp)[:500])
     if cached_cp is not None and len(cached_cp) >= 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
-        series_metric_names = set([m.name for m in series.results[0].metrics])
+        series_metric_names = set(
+            [m for m in series.per_metric_series().keys() if m not in disabled_metrics]
+        )
         cached_metric_names = set([o for o in cached_cp])
 
         cp = {}
@@ -86,7 +89,7 @@ async def get_cached_or_calc_changes(
     #     return cached_cp, True
 
     # Cached change points not found,need full calculation
-    changes = series.calculate_change_points()
+    changes = series.calculate_change_points(disabled_metrics=disabled_metrics)
     if pull_request is None:
         await cache_changes(changes, user_id, series)
     print("row90" + str(pull_request))
