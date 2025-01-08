@@ -917,15 +917,15 @@ class DBStore(object):
     ) -> Dict:
         collection = self.db.change_points
 
-        primary_key = OrderedDict(
+        search_key = OrderedDict(
             {
-                "user_id": user_id,
-                "test_name": test_name,
-                "max_pvalue": max_pvalue,
-                "min_magnitude": min_magnitude,
+                "_id.user_id": user_id,
+                "_id.test_name": test_name,
+                "_id.max_pvalue": max_pvalue,
+                "_id.min_magnitude": min_magnitude,
             }
         )
-        results = await collection.find({"_id": primary_key}).to_list(None)
+        results = await collection.find(search_key).to_list(None)
         if len(results) == 0:
             # Nothing was cached
             return None
