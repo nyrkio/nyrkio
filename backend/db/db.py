@@ -927,7 +927,7 @@ class DBStore(object):
         )
         print(search_key)
         results = await collection.find(search_key).to_list(None)
-        print(results)
+        print(str(results)[:200])
         if len(results) == 0:
             # Nothing was cached
             return None
