@@ -49,6 +49,8 @@ async def get_cached_or_calc_changes(
         cached_metric_names = set([o for o in cached_cp])
 
         cp = {}
+        print(series_metric_names)
+        print(cached_metric_names)
         if series_metric_names == cached_metric_names:
             for metric_name, analyzed_json in cached_cp.items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
