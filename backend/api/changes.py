@@ -59,7 +59,7 @@ async def get_cached_or_calc_changes(
                     changes = series.incremental_change_points(raw_cached_cp)  # Sorry
                     if pull_request is None:
                         await cache_changes(changes, user_id, series)
-                    print("row62"+str(pull_request))
+                    print("row62" + str(pull_request))
                     return changes, False
                 else:
                     fake_meta = {"change_points_timestamp": cp_timestamp}
@@ -87,7 +87,7 @@ async def get_cached_or_calc_changes(
     changes = series.calculate_change_points()
     if pull_request is None:
         await cache_changes(changes, user_id, series)
-    print("row90"+str(pull_request))
+    print("row90" + str(pull_request))
     return changes, False
 
 
