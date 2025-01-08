@@ -60,6 +60,8 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
 
             loading={loading}
             setLoading={setLoading}
+          setSummaries={setSummaries}
+          summaries={summaries}
           />
       </>
     );
