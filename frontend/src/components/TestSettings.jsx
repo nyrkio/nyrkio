@@ -25,7 +25,12 @@ export const TestSettings = ({ dashboardType, testName, attributes }) => {
       },
     });
 
-    if (response.status !== 200) {
+    if (response.status == 200) {
+      console.debug(response);
+    } else if (response.status == 401){
+      console.debug("User has logged out or wrong password or whatever");
+      return;
+    } else {
       console.error("Failed to fetch config for " + testName);
       return;
     }

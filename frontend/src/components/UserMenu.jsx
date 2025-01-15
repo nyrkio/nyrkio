@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
 import { ImpersonateControls } from "./ImpersonateControls";
+import posthog from "posthog-js";
 
 export const UserMenu = ({ setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -12,6 +14,10 @@ export const UserMenu = ({ setLoggedIn }) => {
   }
   console.debug("username");
   console.debug(username);
+
+  const navigate = useNavigate();
+
+
   const checkForAdminPrvis = async () => {
     const response = await fetch("/api/v0/auth/admin", {
       method: "GET",
@@ -66,7 +72,6 @@ export const UserMenu = ({ setLoggedIn }) => {
   }, []);
 
   const handleLogoutClick = async () => {
-    console.debug("Setting logged in to false");
     const response = await fetch("/api/v0/auth/jwt/logout", {
       method: "POST",
       headers: {
@@ -79,9 +84,23 @@ export const UserMenu = ({ setLoggedIn }) => {
         "Failed to log out: " + response.status + " " + response.statusText,
       );
     }
+    console.log("Setting logged in to false");
     setLoggedIn(false);
+
     localStorage.setItem("loggedIn", "false");
     localStorage.removeItem("token");
+    localStorage.setItem("username", "");
+    localStorage.setItem("username_real", "");
+    document.body.classList.remove( "impersonate-user" );
+
+    posthog.reset();
+
+    try {
+      navigate("/");
+    } catch (error) {
+      console.log(error);
+    }
+
   };
 
   const orgsList = () => {
