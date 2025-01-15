@@ -337,7 +337,11 @@ export const SingleResultWithTestname = ({
       return;
     }
     const resultData = await response.json();
-    setDisplayData(resultData);
+    // Emergency hack: 20+ tables with 1500 points each is too much for my browser
+    // TODO: Make this configurable
+    // Note that change points in the summary table are over the entire history, you just can't see
+    // them on the graphs now. Perhaps a slider to select a time range is needed after all.
+    setDisplayData(resultData.slice(-300));
 
     const changes = await fetch(baseUrls.api + testName + "/changes", {
       headers: {
