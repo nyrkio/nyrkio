@@ -80,7 +80,7 @@ class GitHubCommentNotifier:
         header = "**Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/Nyrkio%CC%88Logo_Final_Logomark_RedTan_100x100.png)](https://nyrkio.com)"
+        footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/NyrkioLogo_Final_Logomark_RedTan_50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
         for entry in results:
