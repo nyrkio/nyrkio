@@ -72,14 +72,13 @@ export const DrawLineChart = ({
   };
   const layout = getLayout(graphSize);
 
-  // {'testName':
-  //    [{
-  //      'time': 123,
-  //      'changes': [{'forward_change_percent': 900, 'metric': 'metric1'}]
-  //    }]
-  // }
   const changePointTimes = [];
 
+  // Emergency hack: Having 20+ graphs each with 1500 points on a single page is too much:
+  if (displayData.length>300){
+    displayData = displayData.slice(-300,-1);
+    timestamps = timestamps.slice(-300, -1);
+  }
   // TODO(mfleming) Assumes a single testName but must handle multiple
   // tests in the future.
   Object.entries(changePointData).forEach(([testName, value]) => {
@@ -87,7 +86,7 @@ export const DrawLineChart = ({
       const metrics = changePoint["changes"].map((change) => {
         return change["metric"];
       });
-      console.debug(metrics);
+//       console.debug(metrics);
       const t = changePoint["time"];
       changePointTimes.push({ t, metrics });
     });
@@ -252,9 +251,10 @@ export const DrawLineChart = ({
             const scaleX = target.chart.scales.x;
             const x = scaleX._range;
             const keys = Object.keys(ChartJS.instances);
+            console.log(x);
             for (let i of keys){
               if(target.chart.id!=ChartJS.instances[i].id){
-                ChartJS.instances[i].zoomScale('x',x, 'show');
+                ChartJS.instances[i].zoomScale('x',x, 'none');
 
               }
             }
@@ -271,17 +271,19 @@ export const DrawLineChart = ({
       ChartJS.instances[i].zoom(1);
     }
   };
-  const dontZoomAxes = ({chart, ev, point}) => {
-    console.log(chart, ev, point);
-    console.log(chart.getZoomLevel());
+  const dontZoomAxes = ({chart, event, point}) => {
+    console.debug(chart, event, point);
+    console.debug(chart.getZoomLevel());
     if(chart.getZoomLevel() != 1){
       // You can zoom once, then you can pan
+      console.log("Panning. Click 'Reset zoom' to zoom again.")
       return false;
     }
     const buttons = document.getElementsByClassName("resetzoom");
     for (let b of buttons){
       b.style.opacity = 0.5;
     }
+    console.log("Zooming");
     return true;
   };
   const syncHover = (event, targets, chart) => {
@@ -388,16 +390,15 @@ export const DrawLineChart = ({
                     enabled: false,
                   },
                   pinch: {
-                    enabled: true
+                    enabled: false
                   },
                   drag: {
                     enabled: true,
-                    threshold: 200,
+                    threshold: 10,
 
                   },
                   mode: 'x',
                   scaleMode: 'x',
-                  overScaleMode: 'x',
                   onZoomComplete: syncCharts,
                   onZoomStart: dontZoomAxes,
                 },
@@ -410,7 +411,6 @@ export const DrawLineChart = ({
                 },
                 limits: {
                   x: {minRange: 10,}
-
                 }
               },
               legend: {
