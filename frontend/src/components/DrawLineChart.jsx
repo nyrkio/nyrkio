@@ -74,11 +74,6 @@ export const DrawLineChart = ({
 
   const changePointTimes = [];
 
-  // Emergency hack: Having 20+ graphs each with 1500 points on a single page is too much:
-  if (displayData && displayData.length>300){
-    displayData = displayData.slice(-300,-1);
-    timestamps = timestamps.slice(-300, -1);
-  }
   // TODO(mfleming) Assumes a single testName but must handle multiple
   // tests in the future.
   Object.entries(changePointData).forEach(([testName, value]) => {
