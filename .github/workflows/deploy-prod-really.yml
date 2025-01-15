@@ -33,9 +33,16 @@ jobs:
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PUBLIC_KEY: ${{ secrets.SSH_PUBLIC_KEY }}
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
+          SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
+          SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
           ENV: prod
         run: |
           echo "$NYRKIO_ENV_PROD" > .env.backend
+          echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
+          echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
+          echo "$SSL_SECRET_KEY" > nyrkio.com.key
+
           # Derived from https://github.com/ArwynFr/actions-docker-context/blob/master/action.yml
           mkdir -p $HOME/.ssh
           if [ -z "$SSH_AGENT_PID" ]; then
@@ -45,7 +52,9 @@ jobs:
           fi
 
           echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+
           echo "$SSH_PRIVATE_KEY" | ssh-add -
+
           echo "Deploying $IMAGE_TAG to env $ENV..."
 
           docker context create $ENV --docker "host=ssh://$SSH_USER@nyrkio.com"
