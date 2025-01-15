@@ -132,10 +132,15 @@ export const HunterSettings = ({callback=noop}) => {
       },
       body: JSON.stringify(configObject),
     });
-    if (response.status !== 200) {
+    if (response.status == 200) {
+      console.debug(response);
+    } else if (response.status == 401){
+      console.debug("User has logged out or wrong password or whatever");
+    } else {
       console.error("Failed to POST Nyrkiö core user settings");
       console.log(response);
-    } else console.debug(response);
+
+    }
 
     caches.delete("nyrkio-changes");
     callback();
@@ -154,11 +159,16 @@ export const HunterSettings = ({callback=noop}) => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    if (response.status !== 200) {
+    if (response.status == 200) {
+      console.debug(response);
+    } else if (response.status == 401){
+      console.debug("User has logged out or wrong password or whatever");
+    } else {
       console.error("Failed to GET Nyrkiö core user settings");
       console.log(response);
       return defaultConfig;
-    } else console.debug(response);
+    }
+
     const data = await response.json();
     console.debug(data);
     if (
@@ -196,9 +206,11 @@ export const HunterSettings = ({callback=noop}) => {
   };
   const minMagnitudeSet = (realValue) => {
     const rawValue = getRawMinMagnitude(realValue);
-    document.getElementById("nyrkio-min-magnitude-value").innerHTML =
-      Math.round(realValue);
-    document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
+    if (document.getElementById("nyrkio-min-magnitude-value")){
+      document.getElementById("nyrkio-min-magnitude-value").innerHTML =
+        Math.round(realValue);
+      document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
+    }
     return rawValue;
   };
 
@@ -221,8 +233,10 @@ export const HunterSettings = ({callback=noop}) => {
   };
   const pvalueSet = (realValue) => {
     const rawValue = getRawPValue(realValue);
-    document.getElementById("nyrkio-p-value-value").innerHTML = realValue;
-    document.getElementById("nyrkio-p-value-slider").value = rawValue;
+    if (document.getElementById("nyrkio-p-value-value")){
+      document.getElementById("nyrkio-p-value-value").innerHTML = realValue;
+      document.getElementById("nyrkio-p-value-slider").value = rawValue;
+    }
     return rawValue;
   };
 

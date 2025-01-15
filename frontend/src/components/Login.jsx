@@ -58,8 +58,16 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       })
       .then((body) => {
         if (!body) {
-          console.log("Empty response when logging in.")
-          setErrorText("Empty response when logging in.");
+          console.log("Empty response when logging in. (" +
+              response.status +
+              " " +
+              response.statusText +
+              ")");
+          setErrorText("Empty response when logging in. ((" +
+              response.status +
+              " " +
+              response.statusText +
+              ")");
           setLoggedIn(false);
           return;
         }
@@ -186,7 +194,19 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   );
 };
 
-const logoutTasks = ({setLoggedIn}) => {
+const logoutTasks = async ({setLoggedIn}) => {
+    const response = await fetch("/api/v0/auth/jwt/logout", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status !== 200 && response.status !== 204) {
+      console.error(
+        "Failed to log out: " + response.status + " " + response.statusText,
+      );
+    }
 
     console.log("Setting logged in to false");
     setLoggedIn(false);
@@ -196,7 +216,6 @@ const logoutTasks = ({setLoggedIn}) => {
     localStorage.setItem("username_real", "");
     document.body.classList.remove( "impersonate-user" );
 
-
     posthog.reset();
 
 };
@@ -204,6 +223,11 @@ const logoutTasks = ({setLoggedIn}) => {
 export const LogOut = ({ setLoggedIn }) => {
   const handleLogoutClick = () => {
     logoutTasks({setLoggedIn});
+        try {
+          navigate("/");
+        } catch (error) {
+          console.log(error);
+        }
   };
   return (
     <>
