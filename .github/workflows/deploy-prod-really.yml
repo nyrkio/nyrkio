@@ -4,7 +4,7 @@ on:
     branches: [main]
 
 jobs:
-  docker-images:
+  dummy-docker-images:
     runs-on: ubuntu-latest
     environment: prod
     steps:
