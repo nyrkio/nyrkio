@@ -42,7 +42,6 @@ async def get_cached_or_calc_changes(
             user_id, series.get_series_id()
         )
     disabled_metrics = await store.get_disabled_metrics(user_id, series.name)
-    print(str(cached_cp)[:500])
     if cached_cp is not None and len(cached_cp) >= 0 and series.results:
         # Metrics may have been disabled or enabled after they were cached.
         # If so, invalidate the entire result and start over.
@@ -52,8 +51,6 @@ async def get_cached_or_calc_changes(
         cached_metric_names = set([o for o in cached_cp])
 
         cp = {}
-        print(series_metric_names)
-        print(cached_metric_names)
         if series_metric_names == cached_metric_names:
             for metric_name, analyzed_json in cached_cp.items():
                 cp[metric_name] = AnalyzedSeries.from_json(analyzed_json)
@@ -64,7 +61,6 @@ async def get_cached_or_calc_changes(
                     changes = series.incremental_change_points(raw_cached_cp)  # Sorry
                     if pull_request is None:
                         await cache_changes(changes, user_id, series)
-                    print("row62" + str(pull_request))
                     return changes, False
                 else:
                     fake_meta = {"change_points_timestamp": cp_timestamp}
@@ -72,12 +68,10 @@ async def get_cached_or_calc_changes(
                     if await store._validate_cached_cp(
                         user_id, fake_db_result, series.get_series_id()[3]
                     ):
-                        print("row70")
                         # Cache is valid, nothing new to process
                         return cp, True
 
             else:
-                print("row75")
                 # Cache is valid, nothing new to process
                 return cp, True
 
@@ -92,7 +86,6 @@ async def get_cached_or_calc_changes(
     changes = series.calculate_change_points(disabled_metrics=disabled_metrics)
     if pull_request is None:
         await cache_changes(changes, user_id, series)
-    print("row90" + str(pull_request))
     return changes, False
 
 
