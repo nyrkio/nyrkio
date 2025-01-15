@@ -75,7 +75,7 @@ export const DrawLineChart = ({
   const changePointTimes = [];
 
   // Emergency hack: Having 20+ graphs each with 1500 points on a single page is too much:
-  if (displayData.length>300){
+  if (displayData && displayData.length>300){
     displayData = displayData.slice(-300,-1);
     timestamps = timestamps.slice(-300, -1);
   }
@@ -102,6 +102,36 @@ export const DrawLineChart = ({
       changePointIndexes.push({ index, metrics });
     });
   });
+  function arrayMin(arr) {
+    return arr.reduce(function (p, v) {
+      return ( p < v ? p : v );
+    });
+  }
+
+  function arrayMax(arr) {
+    return arr.reduce(function (p, v) {
+      return ( p > v ? p : v );
+    });
+  }
+  function arrayMedian(arr) {
+    const sorted = arr.sort()
+    return sorted[Math.floor(sorted.length/2)]
+  }
+  const numSize = (numbers) => {
+    const num = arrayMin(numbers);
+    if(num > 1000*1000*1000*1000) return "trillion";
+    if(num > 1000*1000*1000) return "billion";
+    if(num > 1000*1000) return "million";
+    // if(num > 1000) return "thousand";
+    return "";
+  };
+  const numfmt = (num, cutTo) => {
+    if(cutTo == "trillion") return Math.round(num / (1000*1000*1000*1000));
+    if(cutTo == "billion") return Math.round(num / (1000*1000*1000));
+    if(cutTo == "million") return Math.round(num / (1000*1000));
+    if(cutTo == "thousand") return Math.round(num / (1000));
+    return num;
+  };
 
   const isChangePoint = (index) => {
     return changePointIndexes.find((element) => {
@@ -251,7 +281,6 @@ export const DrawLineChart = ({
             const scaleX = target.chart.scales.x;
             const x = scaleX._range;
             const keys = Object.keys(ChartJS.instances);
-            console.log(x);
             for (let i of keys){
               if(target.chart.id!=ChartJS.instances[i].id){
                 ChartJS.instances[i].zoomScale('x',x, 'none');
@@ -287,7 +316,7 @@ export const DrawLineChart = ({
     return true;
   };
   const syncHover = (event, targets, chart) => {
-          if (targets.length>0){
+          if (targets && targets.length>0){
             const dataset = targets[0].datasetIndex;
             const idx = targets[0].index;
 
@@ -295,6 +324,8 @@ export const DrawLineChart = ({
             for (let i of keys){
               if(chart.id!=ChartJS.instances[i].id){
                  const  c = ChartJS.instances[i];
+                 if(!c) continue;
+                 if (!c.ctx) continue;
                  c.draw(c.ctx);
                  c.tooltip.handleEvent(event,true,true);
                  c.tooltip.opacity=1;
@@ -307,6 +338,9 @@ export const DrawLineChart = ({
                  c.tooltip.draw(c.ctx);
               }}
         }};
+        const dataValues = parseData(displayData, metricName);
+        const numberSizeWord = numSize(dataValues);
+        const cutValues = dataValues.map((v)=>numfmt(v, numberSizeWord));
 
   return (
     <>
@@ -320,7 +354,9 @@ export const DrawLineChart = ({
       <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
       <div className="chart-wrapper"  style={layout}>
         <h6 className="text-center">
-          <a href={metricNameWithHash}>{metricName}</a> <span title={direction}>{directionArrow}</span>
+          <a href={metricNameWithHash}>{metricName}</a>{ " "}
+          <span className="numfmt">{numberSizeWord?"("+numberSizeWord +")":""}</span>
+          <span title={direction}>{directionArrow}</span>
         </h6>
         <Line
           ref={chartRef}
@@ -331,7 +367,7 @@ export const DrawLineChart = ({
               {
                 id: 1,
                 label: metricName,
-                data: parseData(displayData, metricName),
+                data: cutValues,
                 fill: true,
                 borderColor: nyrkio_chart_line_color,
                 borderWidth: 2,
@@ -374,7 +410,7 @@ export const DrawLineChart = ({
               y: {
                 title: {
                   display: true,
-                  text: metricAndDirection,
+                  text: numberSizeWord + " " + metricAndDirection,
                 }
               },
             },
