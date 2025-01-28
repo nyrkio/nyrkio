@@ -909,8 +909,8 @@ div.card.people-card .card-header img {
 #dashboard_settings .inactive-label {
   color: var(--nyrkio-dark-gray);
   position: absolute;
-  top: -.3rem;
-  right: 4.5rem;
+  top: -2rem;
+  right: 1.5rem;
   width: 25rem;
   text-align: right;
   transition: 2s;

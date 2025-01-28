@@ -464,10 +464,10 @@ export const SingleResultWithTestname = ({
 
             <div className="text-end " id="dashboard_settings">
 
-            <p id="linkToGraphs" style={{textAlign: "right"}}><a href="#graphs" style={{float: "right"}}>¶</a></p>
+            <p id="linkToGraphs" style={{textAlign: "right"}}><a title="Link here" href="#graphs" style={{float: "right"}}>¶</a></p>
             <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
             >
-            <p className="inactive-label">Configure layout, parameters, visibility   . . .</p>
+            <p className="inactive-label small">Configure...</p>
             <span className="bi bi-gear-fill"> </span>
             </button>
             <div id="graphs" className="row">
