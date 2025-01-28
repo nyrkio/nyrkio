@@ -906,17 +906,50 @@ div.card.people-card .card-header img {
   font-weight: bold;
 }
 
+#dashboard_settings .inactive-label {
+    color: var(--nyrkio-dark-gray);
+  position: absolute;
+  top: -.3rem;
+  right: 4.5rem;
+  width: 25rem;
+  text-align: right;
+  transition: 2s;
+}
+#dashboard_settings .btn[aria-expanded=true]  .inactive-label {
+    opacity: 0;
+    transition: 2s;
+}
+
+#dashboard_settings #linkToGraphs a {
+    color: var(--nyrkio-dark-gray);
+}
+#dashboard_settings #linkToGraphs {
+    background-color: var(--nyrkio-horn-light-brown);
+    position: relative;
+    top: -.7rem;
+    right: .3rem;
+}
 
 #dashboard_settings .btn {
     background-color: var(--nyrkio-horn-light-brown);
     color: white;
-    margin: 10px;
+    margin: 0px;
+    z-index: 10;
+    position: relative;
+    right: 1rem;
 }
-#dashboard_settings .btn.show {
-    background-color: var(--nyrkio-tattoo-red);
-    color: white;
 
+#dashboard_settings .btn.show {
+    background-color: var(--nyrkio-horn-light-brown);
+    color: white;
+    z-index: 10;
 }
+#dashboard_settings .btn[aria-expanded=true] {
+    background-color: var(--nyrkio-horn-light-brown);
+    color: white;
+    z-index: 10;
+}
+
 #dashboard_settings .card,
 #dashboard_settings .collapse {
     border-radius: 10px;

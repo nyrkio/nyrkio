@@ -462,14 +462,17 @@ export const SingleResultWithTestname = ({
               <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} />
             </div>
 
-            <div id="graphs" className="row">
-            <p style={{textAlign: "right"}}><a href="#graphs" style={{color: "#999999", float: "right"}}>¶</a></p>
-            </div>
             <div className="text-end " id="dashboard_settings">
+
+            <p id="linkToGraphs" style={{textAlign: "right"}}><a href="#graphs" style={{float: "right"}}>¶</a></p>
             <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
-            style={{marginBottom: 0}}>
+            >
+            <p className="inactive-label">Configure layout, parameters, visibility   . . .</p>
             <span className="bi bi-gear-fill"> </span>
             </button>
+            <div id="graphs" className="row">
+            </div>
+
             <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
               <div  className="card card-body">
 

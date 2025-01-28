@@ -925,9 +925,9 @@ class DBStore(object):
                 "_id.min_magnitude": min_magnitude,
             }
         )
-        print(search_key)
+        # print(search_key)
         results = await collection.find(search_key).to_list(None)
-        print(str(results)[:200])
+        # print(str(results)[:200])
         if len(results) == 0:
             # Nothing was cached
             return None
