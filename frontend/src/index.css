@@ -907,7 +907,7 @@ div.card.people-card .card-header img {
 }
 
 #dashboard_settings .inactive-label {
-    color: var(--nyrkio-dark-gray);
+  color: var(--nyrkio-dark-gray);
   position: absolute;
   top: -.3rem;
   right: 4.5rem;
@@ -915,6 +915,7 @@ div.card.people-card .card-header img {
   text-align: right;
   transition: 2s;
 }
+
 #dashboard_settings .btn[aria-expanded=true]  .inactive-label {
     opacity: 0;
     transition: 2s;
@@ -930,7 +931,7 @@ div.card.people-card .card-header img {
     right: .3rem;
 }
 
-#dashboard_settings .btn {
+#dashboard_settings #dashboardSettingsButton.btn {
     background-color: var(--nyrkio-horn-light-brown);
     color: white;
     margin: 0px;
@@ -939,12 +940,12 @@ div.card.people-card .card-header img {
     right: 1rem;
 }
 
-#dashboard_settings .btn.show {
+#dashboard_settings #dashboardSettingsButton.btn.show {
     background-color: var(--nyrkio-horn-light-brown);
     color: white;
     z-index: 10;
 }
-#dashboard_settings .btn[aria-expanded=true] {
+#dashboard_settings #dashboardSettingsButton.btn[aria-expanded=true] {
     background-color: var(--nyrkio-horn-light-brown);
     color: white;
     z-index: 10;
