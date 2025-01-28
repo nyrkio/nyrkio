@@ -355,6 +355,24 @@ class DBStore(object):
         return missing_keys
 
     @staticmethod
+    def _force_uri_format(uri):
+        """
+        Force git_repo to be of a specific format
+
+        As git_repo is used as a primary key and in any case for querying, we have to
+        force some stricter rules than what HTTP and browsers allow for URIs.
+
+         - Remove trailing slash: https://github.com/org/repo/ -> https://github.com/org/repo/
+         - all lowercase
+        """
+        if uri.endswith("/"):
+            uri = uri[:-1]
+
+        uri = uri.lower()
+
+        return uri
+
+    @staticmethod
     def create_doc_with_metadata(
         doc: Dict, id: Any, test_name: str, pull_number=None
     ) -> Dict:
@@ -377,6 +395,9 @@ class DBStore(object):
         missing_keys = DBStore.check_for_missing_keys(d)
         if len(missing_keys) > 0:
             raise DBStoreMissingRequiredKeys(missing_keys)
+        d["attributes"]["git_repo"] = DBStore._force_uri_format(
+            d["attributes"]["git_repo"]
+        )
 
         # The id is built from the git_repo, branch, test_name, timestamp and
         # git commit. This tuple should be unique for each test result.
