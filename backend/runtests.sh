@@ -1,5 +1,10 @@
 #!/bin/bash
 
+function poetry_func () {
+  echo "poetry install..."
+  poetry install --no-interaction
+}
+
 function lint() {
   echo "Lint backend code..."
   ruff --exclude hunter $lintargs
@@ -66,6 +71,9 @@ for opt in "$@"; do
       fi
       lint
       ;;
+    poetry)
+      poetry_func
+      ;;
     unit)
       unit
       ;;
@@ -75,6 +83,7 @@ for opt in "$@"; do
     all)
       format
       lint
+      poetry_func
       unit
       perf
       ;;

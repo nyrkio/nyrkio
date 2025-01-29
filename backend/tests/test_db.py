@@ -74,6 +74,31 @@ def test_add_single_result():
     assert results == response
 
 
+def test_add_single_with_trailing_slash():
+    """Add a single test result"""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    results = [
+        {
+            "timestamp": 1234,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://GitHub.com/nyrkio/nyrkio/",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+        }
+    ]
+    asyncio.run(store.add_results(user.id, "benchmark1", results))
+    response, meta = asyncio.run(store.get_results(user.id, "benchmark1"))
+    assert response[0]["attributes"]["git_repo"] == "https://github.com/nyrkio/nyrkio"
+    assert results == response
+
+
 def test_create_doc_with_metadata():
     """Ensure that we create a doc with the correct metadata"""
     store = DBStore()
