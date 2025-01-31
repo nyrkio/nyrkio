@@ -117,7 +117,7 @@ export const Dashboard = ({loggedIn, embed, path}) => {
 };
 
 const MyDashboard = ({loggedIn, embed, path}) => {
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [unencodedTestNames, setUnencodedTestNames] = useState([]);
 //   const [summaries, setSummaries] = useState({});
   const location = useLocation();
@@ -135,7 +135,6 @@ const MyDashboard = ({loggedIn, embed, path}) => {
   };
   if (path=="/result/") {
       testName = location.pathname.substring(8);
-      console.log(testName);
       prefix=testName;
       // If the prefix is empty, set it to undefined
       if (prefix === "") {
@@ -144,7 +143,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
       //setUnencodedTestNames([testName]);
       useEffect(() => {
         setLoading(false);
-      }, []);
+      }, [location]);
 
   } else if (path=="/tests/" || path=="/"){
 //     prefix=path;
@@ -228,8 +227,9 @@ const MyDashboard = ({loggedIn, embed, path}) => {
 };
 
 
-export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loading, setLoading, baseUrls, summaries,setSummaries}) => {
+export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loading, setLoading, baseUrls, summaries,setSummaries, embed, dashboardType}) => {
   const location = useLocation();
+  const [myLoading, setMyLoading] = useState(false);
   const fethSummaryData = async () => {
       const summaryPrefix = prefix ? prefix+"/" : "";
       console.debug(baseUrls);
@@ -247,22 +247,107 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
       }
 
       const sumJson = await sumResponse.json();
-      setLoading(false);
+      //setLoading(false);
       populateSummaryData(sumJson);
 
   };
   useEffect(()=>{
-    fethSummaryData().finally(()=>setLoading(false));
+    fethSummaryData().finally(()=>{return;});
   }, [location]);
 
   //   const displayNames = shortNames;//.map((name) => decodeURI(name).replace("https://github.com/",""));
+  const showGraphs = (ev)=>{
+    const body = document.getElementById("showTestListCardBody");
+    const body2 = document.getElementById("showGraphsCardBody");
+    body.style.display = "none";
+    body2.style.display = "block";
+    const b = document.getElementById("showListButton");
+    const b2 = document.getElementById("showGraphsCardBody");
+    b.classList.add("btn-primary");
+    b2.classList.remove("btn-primary");
+  };
+  const ShowGraphsCard = ({
+                        testNames,
+                    shortNames,
+                    prefix,
+                    displayNames,
+                    baseUrls,
+                    breadcrumbName,
+                    dashboardType,
+                    embed,
+                    loading,
+                    setLoading,
+                    setSummaries,
+                    summaries,
+                    displayData
+  })=>{
+    const location = useLocation();
+    const [redraw, setRedraw] = useState(1);
+    const subtree = testNames.filter((n)=>{return (n.startsWith(prefix)&&prefix!==undefined)});
+    const ariaExpanded = localStorage.getItem("showAllGraphs", "false");
+    if (subtree.length>0 && subtree.length<30)
+        return(
+          <>  <div style={{textAlign: "right"}}>
+              <button className="btn btn-nothing text-right mt-5 col-xs-6 col-md-5 col-lg-4 col-xl-3" style={{right: 0}} title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
+              onClick={(ev)=>{localStorage.setItem("showAllGraphs", ev.target.attributes["aria-expanded"].value);}}
+              >
+              ▼ Show graphs here
+              </button>
+              </div>
+              <div>
+              <div id="graphs" className="row">
+              </div>
+
+              <div className={ariaExpanded=="true"?"":"collapse"} aria-labelledby="allGraphsButton" id="allGraphsPage">
+
+              <div className="card">
+                <div className="card-header w-100">All graphs</div>
+               <div className="card-body" id="showGraphsCardBody" >
+                  <Loading loading={loading} />
+                  <DashboardSettings       dashboardType={dashboardType}
+                    testName={testNames[0]}
+                    loadData={()=>{setRedraw(Math.random())}}
+                    displayData={displayData}
+                    embed={embed}
+                    setGraphSize={setGraphSize}
+                  />
+                  <ManyResultWithTestname
+                    testNames={testNames}
+                    shortNames={subtree}
+                    prefix={prefix}
+                    displayNames={displayNames}
+                    displayData={displayData}
+                    baseUrls={baseUrls}
+                    breadcrumbName={prefix}
+                    dashboardType={dashboardType}
+                    embed={embed}
+                    loading={loading}
+                    setLoading={setLoading}
+                    setSummaries={setSummaries}
+                    summaries={summaries}
+                    redraw={redraw}
+                  />
+              </div>
+              </div>
+              </div>
+              </div>
+            </>
+        );
+  };
+
+
+  const defaultGraphSize = localStorage.getItem("graphSize") || "2x1"
+  const [graphSize, setGraphSize] = useState(defaultGraphSize);
+
   return (
     <>
       <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
             <div className="container-fluid">
               <div className="card">
-                <div className="card-header">Please select a test</div>
-                <div className="card-body">
+                <div className="card-header w-100">Select tests</div>
+
+
+                <div className="card-body" id="showTestListCardBody">
                   <Loading loading={loading} />
                   <ul className="list-group list-group-flush">
                     <TestList
@@ -279,10 +364,24 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                   </ul>
                 </div>
               </div>
+              <ShowGraphsCard
+                    testNames={testNames}
+                    shortNames={shortNames}
+                    prefix={prefix}
+                    displayNames={displayNames}
+                    baseUrls={baseUrls}
+                    breadcrumbName={prefix}
+                    dashboardType={dashboardType}
+                    embed={embed}
+                    loading={loading}
+                    setLoading={setLoading}
+                    setSummaries={setSummaries}
+                    summaries={summaries}
 
+              />
               <div className="card">
                 <div className="card-body create-new-test">
-                  <Link to="/docs/getting-started" className="btn btn-success">
+                  <Link to="/docs/getting-started" className="btn btn-success col-xs-6 col-md-5 col-lg-4 col-xl-3">
                     <span className="bi bi-plus-square-fill">
                       &nbsp;&nbsp; Add test results
                     </span>
@@ -290,10 +389,206 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                 </div>
               </div>
             </div>
-      </div>
+            </div>
     </>
   );
 };
+
+const ManyResultWithTestname = ({
+  testNames,
+                    shortNames,
+                    prefix,
+                    displayNames,
+                    displayData,
+  baseUrls,
+  breadcrumbName,
+  dashboardType,
+  embed,
+  loading,
+  setLoading,
+  setSummaries,
+  summaries,
+  redraw
+}) => {
+
+
+  // Check for invalid test name in url
+  if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
+      return <NoMatch />;
+  }
+  if (shortNames.length == 0) {
+    return (
+      <li className="list-group-item nyrkio-empty" key="0">
+        <span
+          className="bi bi-emoji-surprise"
+          title="There are no test results"
+        ></span>
+      </li>
+    );
+  }
+  if(loading) return "";
+  shortNames=shortNames.reduce((total,current)=>{
+    if(!Array.isArray(total)) total=[total];
+    if(total.indexOf(current)==-1)total.push(current);
+    return total;
+  });
+  if(!Array.isArray(shortNames)) shortNames=[shortNames];
+  return shortNames.map((name, index) => {
+    const displayName = displayNames[index];
+    var longName = prefix === undefined ? name : prefix + "/" + name;
+    if (testNames.includes(name)) {
+      longName = name;
+    }
+    longName = decodeURIComponent(decodeURI(longName));
+    longName = longName.replace("https://github.com/", "");
+    return (
+    <div className="row mb-5" key={name}>
+          <SingleResultWithTestname
+                      title={true}
+                      testName={longName}
+                      baseUrls={baseUrls}
+                      breadcrumbName={name}
+                      dashboardType={dashboardType}
+                      embed={embed}
+                      loading={loading}
+                      setLoading={setLoading}
+                      setSummaries={setSummaries}
+                      summaries={summaries}
+                      hideSettings={true}
+                      redraw={redraw}
+                    />
+
+    </div>
+    );
+  });
+};
+
+
+
+
+
+
+
+
+
+
+  const resetOtherButtons = (selectButton) => {
+    if (selectButton.id != "btn-graph-overview"){
+      document.getElementById("btn-graph-overview").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-sparklines"){
+      document.getElementById("btn-graph-sparklines").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-2x1"){
+      document.getElementById("btn-graph-2x1").classList.remove("btn-success");
+    }
+    if (selectButton.id != "btn-graph-1x1"){
+      document.getElementById("btn-graph-1x1").classList.remove("btn-success");
+    }
+    selectButton.classList.add("btn-success");
+    // The above doesn't work every time, so schedule backup executions to happen later, to avoid race
+    setTimeout(()=>{
+      document.getElementById(selectButton.id).classList.add("btn-success");
+    },100);
+  }
+  const setLayout = (e,setGraphSize) =>{
+      const newLayout = e.currentTarget.id.substring(10);
+      console.debug(newLayout);
+      setGraphSize(newLayout);
+      localStorage.setItem("graphSize", newLayout);
+      resetOtherButtons(e.currentTarget);
+      e.preventDefault();
+      e.stopPropagation();
+  };
+  const GraphSizePicker = ({embed, setGraphSize}) => {
+    return (<>
+            <div className="card col-md-8">
+            <div className="card-header text-center mb-4 mt-3">Choose layout</div>
+            </div>
+            <div className="card col-md-12">
+            <div className="row justify-content-center text-center">
+            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4 col-lg-2">
+            <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
+            </a>
+
+            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
+            <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
+            </a>
+            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
+            <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
+            </a>
+            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
+            <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
+            </a>
+            {embed == "yes" ? "" :
+            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
+
+            }
+            </div>
+            </div>
+            </>);
+  }
+
+  const DashboardSettings = ({
+      dashboardType,
+      testName,
+      loadData,
+      displayData,
+      embed,
+      setGraphSize,
+  })=>{
+
+    const orgName = testName.split("/")[0];  // Not used when not an org
+
+    return (<>
+            <div className="text-end mt-3 mb-3" id="dashboard_settings">
+
+            <p id="linkToGraphs" style={{textAlign: "right"}}><a title="Link here" href="#graphs" style={{float: "right"}}>¶</a></p>
+            <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
+            >
+            <p className="inactive-label small">Configure...</p>
+            <span className="bi bi-gear-fill"> </span>
+            </button>
+            <div id="graphs" className="row">
+            </div>
+
+            <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
+              <div  className="card card-body">
+
+            <div className="row justify-content-center text-center">
+              <GraphSizePicker embed={embed} setGraphSize={setGraphSize}/>
+            </div>
+
+            {!isPublicDashboard(dashboardType) && (
+                <>
+                <div className="row justify-content-center text-center hunter-settings">
+                {dashboardType == dashboardTypes.ORG ?
+                  <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
+                  <HunterSettings callback={loadData}/>
+                }
+                </div>
+                <div className="row justify-content-center text-center">
+                {(displayData&&displayData[displayData.length-1])?
+                <div className="card col-md-8">
+                <div className="card-header justify-content-center text-center mb-3 mt-5">Publish test results</div>
+                <TestSettings
+                  dashboardType={dashboardType}
+                  testName={testName}
+                  attributes={displayData[displayData.length-1].attributes}
+                />              </div>
+                :""}
+              </div>
+              </>
+            )}
+              </div>
+            </div>
+            </div>
+            </>
+      );
+  };
+
+
+
 
 // This component is used to display the results of a single test. testName is
 // the name of the test as used by the API.
@@ -306,12 +601,16 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 // available if the user is editing their own tests.
 export const SingleResultWithTestname = ({
   testName,
+  title,
   baseUrls,
   breadcrumbName,
   dashboardType,
-  embed
+  embed,
+  hideSettings,
+  redraw
 }) => {
-  const [loading, setLoading] = useState(false);
+  const location = useLocation();
+  const [loading, setLoading] = useState(true);
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
@@ -359,62 +658,6 @@ export const SingleResultWithTestname = ({
 
   const defaultGraphSize = localStorage.getItem("graphSize") || "2x1"
   const [graphSize, setGraphSize] = useState(defaultGraphSize);
-  const resetOtherButtons = (selectButton) => {
-    if (selectButton.id != "btn-graph-overview"){
-      document.getElementById("btn-graph-overview").classList.remove("btn-success");
-    }
-    if (selectButton.id != "btn-graph-sparklines"){
-      document.getElementById("btn-graph-sparklines").classList.remove("btn-success");
-    }
-    if (selectButton.id != "btn-graph-2x1"){
-      document.getElementById("btn-graph-2x1").classList.remove("btn-success");
-    }
-    if (selectButton.id != "btn-graph-1x1"){
-      document.getElementById("btn-graph-1x1").classList.remove("btn-success");
-    }
-    selectButton.classList.add("btn-success");
-    // The above doesn't work every time, so schedule backup executions to happen later, to avoid race
-    setTimeout(()=>{
-      document.getElementById(selectButton.id).classList.add("btn-success");
-    },100);
-  }
-  const setLayout = (e) =>{
-      const newLayout = e.currentTarget.id.substring(10);
-      console.debug(newLayout);
-      setGraphSize(newLayout);
-      localStorage.setItem("graphSize", newLayout);
-      resetOtherButtons(e.currentTarget);
-      e.preventDefault();
-      e.stopPropagation();
-  };
-  const GraphSizePicker = () => {
-    return (<>
-            <div className="card col-md-8">
-            <div className="card-header text-center mb-4 mt-3">Choose layout</div>
-            </div>
-            <div className="card col-md-12">
-            <div className="row justify-content-center text-center">
-            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4 col-lg-2">
-            <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
-            </a>
-
-            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
-            </a>
-            {embed == "yes" ? "" :
-            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
-
-            }
-            </div>
-            </div>
-            </>);
-  }
 
   const loadData = () => {
     setLoading(true);
@@ -422,7 +665,7 @@ export const SingleResultWithTestname = ({
       setLoading(false);
     });
   };
-  useEffect(loadData, []);
+  useEffect(loadData, [location,redraw]);
 
   if (!loading && notFound) {
     return <NoMatch />;
@@ -452,6 +695,10 @@ export const SingleResultWithTestname = ({
   }, []);
   applyHash();
   const orgName = testName.split("/")[0];  // Not used when not an org
+
+
+
+
   return (
     <>
           {embed == "yes" ? "" :
@@ -459,54 +706,18 @@ export const SingleResultWithTestname = ({
           }
           <div className="container">
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} />
+              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title}/>
             </div>
 
-            <div className="text-end " id="dashboard_settings">
-
-            <p id="linkToGraphs" style={{textAlign: "right"}}><a title="Link here" href="#graphs" style={{float: "right"}}>¶</a></p>
-            <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
-            >
-            <p className="inactive-label small">Configure...</p>
-            <span className="bi bi-gear-fill"> </span>
-            </button>
-            <div id="graphs" className="row">
-            </div>
-
-            <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
-              <div  className="card card-body">
-
-            <div className="row justify-content-center text-center">
-              <GraphSizePicker />
-            </div>
-
-            {!isPublicDashboard(dashboardType) && (
-                <>
-                <div className="row justify-content-center text-center hunter-settings">
-                {dashboardType == dashboardTypes.ORG ?
-                  <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
-                  <HunterSettings callback={loadData}/>
-                }
-                </div>
-                <div className="row justify-content-center text-center">
-                <div className="card col-md-8">
-                <div className="card-header justify-content-center text-center mb-3 mt-5">Publish test results</div>
-                <TestSettings
-                  dashboardType={dashboardType}
-                  testName={testName}
-                  attributes={
-                    displayData.length > 0
-                      ? displayData[displayData.length - 1].attributes
-                      : undefined
-                  }
-                />
-              </div>
-              </div>
-              </>
-            )}
-              </div>
-            </div>
-            </div>
+            {hideSettings?"":
+            <DashboardSettings       dashboardType={dashboardType}
+              setGraphSize={setGraphSize}
+              testName={testName}
+              loadData={loadData}
+              displayData={displayData}
+              embed={embed}
+            />
+            }
 
             <div className="row">
               {unique.map((metric) => {
@@ -570,7 +781,7 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSumma
       fetchImage(repo).finally(() => {
       });
     }
-  }, []);
+  }, [location]);
 
   if (!nameIsGitHubRepo(name)) {
     return (

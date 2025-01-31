@@ -11,7 +11,7 @@ const Loading = ({loading}) => {
   return (<><div className="loading_done"></div></>);
 };
 
-export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp, loading }) => {
+export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTimestamp, loading }) => {
   var rowData = [];
 
   console.debug(changeData);
@@ -95,7 +95,7 @@ export const ChangePointSummaryTable = ({ changeData, queryStringTextTimestamp, 
   return (
     <>
       <div className="row text-center">
-        <h3>Performance Changes</h3>
+        <h3>{title?title:"Performance Changes"}</h3>
       </div>
       <div
         className="ag-theme-quartz ag-theme-nyrkio pb-5"
