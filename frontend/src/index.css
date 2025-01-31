@@ -212,7 +212,7 @@ h1,
 }
 h2,
 .h2 {
-  letter-spacing: 0.05rem;
+  letter-spacing: 0.1rem;
 }
 h3,
 .h3 {
@@ -243,6 +243,10 @@ h6,
 h1,
 .h1 {
   font-size: calc(1.425rem + 2.1vw);
+}
+h2,
+.h2 {
+  font-size: calc(1rem + 2.1vw);
 }
 h1,
 .h1,
