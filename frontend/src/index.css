@@ -212,7 +212,7 @@ h1,
 }
 h2,
 .h2 {
-  letter-spacing: 0.05rem;
+  letter-spacing: 0.1rem;
 }
 h3,
 .h3 {
@@ -243,6 +243,10 @@ h6,
 h1,
 .h1 {
   font-size: calc(1.425rem + 2.1vw);
+}
+h2,
+.h2 {
+  font-size: calc(1rem + 2.1vw);
 }
 h1,
 .h1,
@@ -412,6 +416,39 @@ button:focus-visible {
   margin: 10px;
 }
 
+.btn-secondary:focus,
+.btn-secondary {
+  color: var(--nyrkio-light-gray3);
+  background-color: var(--nyrkio-active);
+  border-color: var(--nyrkio-dark-gray);
+  max-height: 2.5em;
+  padding-top: 5px;
+  box-shadow: none;
+}
+.btn-secondary:focus:hover,
+.btn-secondary:hover {
+  background-color: var(--nyrkio-horn-dark-brown);
+  border-color: var(--nyrkio-dark-gray);
+  box-shadow: none;
+}
+
+.btn-nothing:focus,
+.btn-nothing {
+  color: var(--nyrkio-arrow-brown);
+  border-color: none;
+  max-height: 2.5em;
+  padding-top: 5px;
+  box-shadow: none;
+  box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+}
+#allGraphsButton[aria-expanded=true],
+.btn-nothing:focus:hover,
+.btn-nothing:hover {
+  color: var(--nyrkio-bear-brown);
+  border-color: var(--nyrkio-dark-gray);
+  background-color: none;
+}
+
 .btn-danger {
   color: white;
   background-color: var(--nyrkio-dark-gray);
@@ -542,13 +579,19 @@ ol.breadcrumb {
   border: none;
 }
 
+div.card div.card-header-selector,
 div.card div.card-header:first-child,
 div.card div.card-header {
   color: var(--bs-heading-color);
-  background-color: var(--nyrkio-active);
-  border-color: 1px solid var(--nyrkio-border);
+  background-color: var(--nyrkio-light-gray);
+  border-color: 1px solid var(--nyrkio-dark-gray);
   border-radius: 7px;
   font-size: 105%;
+}
+#dashboard_settings div.card div.card-header {
+  color: var(--bs-heading-color);
+  background-color: var(--nyrkio-dark-gray);
+  border-color: 1px solid var(--nyrkio-dark-gray);
 }
 
 .list-group .list-group-item {
@@ -907,22 +950,28 @@ div.card.people-card .card-header img {
 }
 
 #dashboard_settings .inactive-label {
-  color: var(--nyrkio-dark-gray);
+  color: var(--nyrkio-horn-dark-brown);
   position: absolute;
-  top: -2rem;
-  right: 1.5rem;
+  top: 0rem;
+  right: 3.5rem;
   width: 25rem;
   text-align: right;
-  transition: 2s;
+  transition: 5s;
+  opacity:0;
 }
 
+#dashboard_settings:hover .inactive-label {
+  transition: 0.2s;
+  opacity:1;
+}
 #dashboard_settings .btn[aria-expanded=true]  .inactive-label {
     opacity: 0;
     transition: 2s;
+    shadow: darkgreen;
 }
 
 #dashboard_settings #linkToGraphs a {
-    color: var(--nyrkio-dark-gray);
+    color: var(--nyrkio-light-gray);
 }
 #dashboard_settings #linkToGraphs {
     background-color: var(--nyrkio-horn-light-brown);
@@ -932,23 +981,26 @@ div.card.people-card .card-header img {
 }
 
 #dashboard_settings #dashboardSettingsButton.btn {
-    background-color: var(--nyrkio-horn-light-brown);
-    color: white;
+    color: var(--nyrkio-bear-brown);
+    border-color: var(--nyrkio-dark-gray);
+    background-color: var(--nyrkio-light-gray);
     margin: 0px;
     z-index: 10;
     position: relative;
     right: 1rem;
+    box-shadow: none;
 }
 
 #dashboard_settings #dashboardSettingsButton.btn.show {
-    background-color: var(--nyrkio-horn-light-brown);
-    color: white;
+    border-color: var(--nyrkio-dark-gray);
     z-index: 10;
 }
 #dashboard_settings #dashboardSettingsButton.btn[aria-expanded=true] {
-    background-color: var(--nyrkio-horn-light-brown);
-    color: white;
+    color: var(--nyrkio-bear-brown);
+    background-color: var(--nyrkio-light-gray);
+    border-color: var(--nyrkio-dark-gray);
     z-index: 10;
+    box-shadow: none;
 }
 
 #dashboard_settings .card,

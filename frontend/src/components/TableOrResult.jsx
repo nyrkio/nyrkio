@@ -20,9 +20,9 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name)=>decodeURIComponent(name));
 
-  console.debug(singleTestName);
-  console.debug(prefix);
-  console.debug(data);
+//   console.debug(singleTestName);
+//   console.debug(prefix);
+//   console.debug(data);
 
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
@@ -57,12 +57,14 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
             shortNames={shortNames}
             displayNames={displayNames}
             prefix={prefix}
+            dashboardType={dashboardType}
+            embed={embed}
 
             loading={loading}
             setLoading={setLoading}
-          setSummaries={setSummaries}
-          summaries={summaries}
-          />
+            setSummaries={setSummaries}
+            summaries={summaries}
+            />
       </>
     );
   }

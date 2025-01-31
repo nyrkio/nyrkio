@@ -10,13 +10,16 @@ const Banner = () => {
     <div className="container-fluid text-center nyrkio-title">
       <Logo color="Brown" filetype="png" />
       <h1>For Faster Software</h1>
-      <h5>Harness the power of change point detection</h5>
     </div>
   );
 };
 
 const FeatureHighlight = () => {
   return (
+    <>
+    <div className="text-center">
+      <h2>Harness the power of change point detection</h2>
+    </div>
     <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
       <div className="col">
         <h3>Shift left</h3>
@@ -46,6 +49,7 @@ const FeatureHighlight = () => {
         </p>
       </div>
     </div>
+    </>
   );
 };
 
