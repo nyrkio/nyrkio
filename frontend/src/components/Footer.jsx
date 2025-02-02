@@ -1,6 +1,7 @@
 import ToS from "../static/doc/Terms Of Service 1.0.pdf";
 import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import { Link } from "react-router-dom";
+import footerUpperCrust from "../static/footer-white-graphic.png";
 
 export const Footer = () => {
   return (
@@ -45,7 +46,8 @@ export const Footer = () => {
         </symbol>
       </svg>
 
-      <div className="container-fluid border-top pt-5 g-0 px-0 footer">
+      <div className="container-fluid border-top pt-0 g-0 px-0 footer">
+       <img src={footerUpperCrust} style={{position: "relative", top: "-5px", width: "100%"}}/>
         <div className="container">
           <footer className="row justify-content-center align-items-center py-3 my-4 ">
             <div className="row justify-content-center text-center">
