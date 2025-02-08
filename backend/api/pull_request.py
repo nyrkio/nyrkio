@@ -116,6 +116,16 @@ async def add_pr_result(
 ):
     return await _add_pr_result(test_name, test_result, repo, pull_number, user.id)
 
+@pr_router.put("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+async def add_pr_result(
+    test_name: str,
+    test_result: TestResults,
+    repo: str,
+    pull_number: int,
+    user: User = Depends(auth.current_active_user),
+):
+    return await _add_pr_result(test_name, test_result, repo, pull_number, user.id, update=True)
+
 
 async def _add_pr_result(
     test_name: str,
@@ -123,13 +133,14 @@ async def _add_pr_result(
     repo: str,
     pull_number: int,
     user_or_org_id: Any = None,
+    update: bool = False
 ):
     results = test_result.root
 
     store = DBStore()
     try:
         await store.add_results(
-            user_or_org_id, test_name, results, pull_number=pull_number
+            user_or_org_id, test_name, results, pull_number=pull_number, update=update
         )
     except DBStoreResultExists:
         raise HTTPException(
