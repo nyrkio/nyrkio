@@ -15,10 +15,12 @@ class Metrics(TypedDict):
     value: Union[float, int]
     direction: NotRequired[DirectionEnum]
 
+
 class Attributes(TypedDict):
     git_commit: str
     branch: str
     git_repo: str
+
 
 class TestResult(BaseModel):
     timestamp: int
