@@ -158,7 +158,20 @@ async def add_result(
 
     store = DBStore()
     await store.add_results(org_id, test_name, data.root)
-    return []
+    return await changes(test_name, notify=1, user=user)
+
+
+@org_router.put("/result/{test_name:path}")
+async def update_result(
+    test_name: str, data: TestResults, user: User = Depends(auth.current_active_user)
+):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, test_name.split("/")[0])
+    org_id = org["id"]
+
+    store = DBStore()
+    await store.add_results(org_id, test_name, data.root, update=True)
+    return await changes(test_name, notify=1, user=user)
 
 
 @org_router.delete("/result/{test_name:path}")

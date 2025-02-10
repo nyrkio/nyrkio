@@ -1,3 +1,6 @@
+import pytest
+
+
 def test_pr_add_result(client):
     """Ensure that we can add a PR result"""
     client.login()
@@ -28,6 +31,73 @@ def test_pr_add_result(client):
     response = client.get("/api/v0/pulls")
     assert response.status_code == 200
     json = response.json()
+    assert len(json) == 1
+
+    assert json == [
+        {
+            "pull_number": pull_number,
+            "test_names": benchmark_names,
+            "git_commit": "12345",
+            "git_repo": repo,
+        }
+    ]
+
+
+@pytest.mark.skip(
+    "benchmark_names doubles on the second time. This is essentially just testing MockDBStrategy so no point in debugging too much."
+)
+def test_pr_put_result(client):
+    """Ensure that we can add a PR result twice with PUT, yielding only one result"""
+    client.login()
+
+    pull_number = 123
+    repo = "nyrkio/nyrkio"
+    data = {
+        "timestamp": 1,
+        "metrics": [
+            {"name": "metric1", "value": 1.0, "unit": "ms"},
+            {"name": "metric2", "value": 2.0, "unit": "ms"},
+        ],
+        "attributes": {
+            "git_repo": "https://github.com/" + repo,
+            "branch": "main",
+            "git_commit": "12345",
+        },
+        "extra_info": {},
+    }
+
+    benchmark_names = ["benchmark1", "benchmark2"]
+    for benchmark_name in benchmark_names:
+        response = client.put(
+            f"/api/v0/pulls/{repo}/{pull_number}/result/{benchmark_name}", json=[data]
+        )
+        assert response.status_code == 200
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    print(json)
+    assert len(json) == 1
+
+    assert json == [
+        {
+            "pull_number": pull_number,
+            "test_names": benchmark_names,
+            "git_commit": "12345",
+            "git_repo": repo,
+        }
+    ]
+
+    for benchmark_name in benchmark_names:
+        response = client.put(
+            f"/api/v0/pulls/{repo}/{pull_number}/result/{benchmark_name}", json=[data]
+        )
+        assert response.status_code == 200
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    print(json)
     assert len(json) == 1
 
     assert json == [

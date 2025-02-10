@@ -16,10 +16,16 @@ class Metrics(TypedDict):
     direction: NotRequired[DirectionEnum]
 
 
+class Attributes(TypedDict):
+    git_commit: str
+    branch: str
+    git_repo: str
+
+
 class TestResult(BaseModel):
     timestamp: int
     metrics: List[Metrics]
-    attributes: Dict
+    attributes: Attributes
     extra_info: Optional[Dict] = None
 
 

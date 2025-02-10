@@ -878,12 +878,11 @@ def test_user_adds_result_with_invalid_primary_key(client):
         }
     ]
     response = client.post("/api/v0/result/invalid_test_name", json=data)
-    assert response.status_code == 400
-    assert response.json()["detail"]["reason"] == "Result is missing required keys"
-    assert response.json()["detail"]["data"] == [
-        "attributes.branch",
-        "attributes.git_commit",
-    ]
+    assert response.status_code == 422
+    json = response.json()
+    print(json)
+    assert json["detail"][0]["msg"] == "Field required"
+    assert json["detail"][0]["loc"] == ["body", 0, "attributes", "git_commit"]
 
 
 def test_user_cannot_add_same_result_twice(client):
