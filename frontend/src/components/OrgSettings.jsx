@@ -6,6 +6,7 @@ import { throttle } from "../lib/utils";
 import { Modal } from "react-bootstrap";
 
 export const OrgSettings = () => {
+  const [validName, setValidName] = useState(false);
   const location = useLocation();
   const path = location.pathname;
   const protocol = window.location.protocol;
@@ -20,7 +21,11 @@ export const OrgSettings = () => {
     console.error("Should not be possible, probably a react-router problem? (expected /org/ORG_NAME in URI)")
     return;
   }
-  if (!validateOrgName(orgName)){
+  useEffect(()=>{
+    validateOrgName(orgName);
+  }
+  ,[])
+  if (!validName){
       return (
         <>
         <div className="container">
@@ -430,26 +435,24 @@ const validateOrgName = (checkOrgName) => {
     const data = await response.json();
     console.debug(data);
     if ( Array.isArray(data)  ) {
-      return data;
-    } else {
-      return ["Fetching your organizations failed."];
+      var temp = [];
+      data.forEach((d) => {
+        temp.push(d.organization.login);
+      });
+      var found=false;
+      temp.forEach((o) => {
+        if(o==checkOrgName){
+          found=true;
+        }
+      });
+      if(!found){
+        console.error(checkOrgName + " not found in [" + temp + "]");
+        return false;
+      } else {
+        return true;
+      }
     }
   };
 
-  return getOrganizations().then((data) => {
-    console.debug(data);
-    var temp = [];
-    data.forEach((d) => {
-      temp.push(d.organization.login);
-    });
-    var found=false;
-    temp.forEach((o) => {
-      if(o==checkOrgName){
-        found=true;
-      }
-    });
-    if(!found) console.error(checkOrgName + " not found in [" + temp + "]");
-    return found;
-
-  } );
+  return getOrganizations(checkOrgName).then((valid)=>{setValidName(valid);});
 };
