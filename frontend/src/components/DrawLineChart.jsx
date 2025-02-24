@@ -284,8 +284,8 @@ export const DrawLineChart = ({
               </div>
               <div className="col-sm">
                   <p>
-                  {result&&Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
-                  {result&&Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
+                  {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
+                  {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
                   </p>
               </div>
             </div>
