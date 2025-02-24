@@ -213,7 +213,7 @@ export const DrawLineChart = ({
           if(!isChangePoint(index)) return (<></>);
           const labelArray = [];
 
-          console.log(metricName);
+          //console.log(metricName);
           // Search in changePointData for this timestamp and metric
           const timestamp = timestamps[index];
           Object.entries(changePointData).forEach(
@@ -325,12 +325,12 @@ export const DrawLineChart = ({
   };
 
   const chartClick = (e) => {
-    if(xx&&yy && xx!=event.x && yy != event.y){
+    if(xx&&yy && xx!=e.clientX && yy != e.clientY){
       console.debug("Mouse dragged. Don't open modal.");
       return;
     }
-
     const chart = chartRef.current;
+
 
     const points = chart.getElementsAtEventForMode(
       e.nativeEvent,
@@ -387,9 +387,18 @@ export const DrawLineChart = ({
       ChartJS.instances[i].zoom(1);
     }
   };
-  var xx = null,yy = null;
+
+
+  var xx = null,yy = null; var dragOrHover = "hover";
   const dontZoomAxes = ({chart, event, point}) => {
-    xx = event.x; yy = event.y;
+    //console.debug(event.type);
+    if(event.type=="mousedown"){
+      dragOrHover ="drag";
+      xx = event.x; yy = event.y;
+      chart.tooltip.opacity=0;
+      chart.tooltip.active=false;
+      _drawToolTip(chart);
+    }
     if(chart.getZoomLevel() != 1){
       // You can zoom once, then you can pan
       console.log("Panning. Click 'Reset zoom' to zoom again.")
@@ -402,45 +411,61 @@ export const DrawLineChart = ({
     console.debug("Zooming");
     return true;
   };
+
+  const _drawToolTip = (chart) => {
+        const options = chart.config._config.options.plugins.tooltip;
+        options.position="nearest";
+        chart.tooltip._updateAnimationTarget(options);
+        chart.draw(chart.ctx);
+
+        chart.tooltip.draw(chart.ctx);
+  };
+
   const syncHover = (event, targets, chart) => {
-//           if (targets && targets.length>0){
-//             const dataset = targets[0].datasetIndex;
-//             const idx = targets[0].index;
-            if(chart.tooltip.title===undefined)
-              return true; // first time, initialization isn't completed.
+            //console.debug(event.type);
+            if(chart.tooltip.title===undefined) return true; // first time, initialization isn't completed.
 
+            if(event.type=="mouseup"||event.type=="mouseout"){
+              if(dragOrHover=="drag"){
+                dragOrHover ="hover";
+                return false;
+              }
+            }
+            //console.debug(dragOrHover);
             if(event.type=="mousemove" || event.type=="mouseout"){
-            const keys = Object.keys(ChartJS.instances);
-            for (let i of keys){
-              if(chart.id!=ChartJS.instances[i].id){
-                 const  c = ChartJS.instances[i];
-                 if(!c) continue;
-                 if (!c.ctx) continue;
-//                 console.log(c.tooltip);
-                 c.tooltip.handleEvent(event,true,true);
-                if(event.type=="mousemove"){
-                  c.tooltip.opacity=1;
-                  c.tooltip.active=true;
+              if(dragOrHover=="hover"){
+                  const keys = Object.keys(ChartJS.instances);
+                  for (let i of keys){
+                    if(chart.id!=ChartJS.instances[i].id){
+                      const  c = ChartJS.instances[i];
+                      if(!c) continue;
+                      if (!c.ctx) continue;
+                      c.tooltip.handleEvent(event,true,true);
+                      if(event.type=="mousemove"){
+                        c.tooltip.opacity=0.6;
+                        c.tooltip.active=true;
 
-                }
-                 c.tooltip.x = chart.tooltip.x;
-                 for (let tipkey in chart.tooltip){
-                   if(!c.tooltip[tipkey]){
-                     c.tooltip[tipkey]=chart.tooltip[tipkey];
-                  }
-                }
-                if(event.type=="mouseout"){
-                  c.tooltip.opacity=0;
-                  c.tooltip.active=false;
+                      }
+                      c.tooltip.x = chart.tooltip.x;
+                      for (let tipkey in chart.tooltip){
+                        if(!c.tooltip[tipkey]){
+                          c.tooltip[tipkey]=chart.tooltip[tipkey];
+                        }
+                      }
+                      if(event.type=="mouseout"){
+                        c.tooltip.opacity=0;
+                        c.tooltip.active=false;
 
-                }
-                 const options = c.config._config.options.plugins.tooltip;
-                 options.position="nearest";
-                 c.tooltip._updateAnimationTarget(options);
-                 c.draw(c.ctx);
-
-                 c.tooltip.draw(c.ctx);
-              }}
+                      }
+                      _drawToolTip(c);
+                    }}
+              }
+              else if(dragOrHover=="drag"){
+                        chart.tooltip.opacity=0;
+                        chart.tooltip.active=false;
+                        _drawToolTip(chart);
+              }
+              // else: if dragging, the chart will zoom. We just keep out of the way.
         }
         return true;
       };
