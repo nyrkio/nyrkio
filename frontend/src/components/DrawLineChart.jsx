@@ -220,12 +220,12 @@ export const DrawLineChart = ({
             ([testName, value]) => {
               value.forEach((changePoint) => {
                 if (changePoint["time"] === timestamp) {
-                  console.log(JSON.stringify(changePoint));
+                  //console.log(JSON.stringify(changePoint));
                   if(what=="commit_msg"){
                       return changePoint.attributes.commit_msg;
                   }
                   if(what=="attributes"){
-                      Object.entries(changePoint.attributes).map(([k,v])=> {
+                      changePoint.attributes && Object.entries(changePoint.attributes).map(([k,v])=> {
                         if(typeof v != "object") {
                           labelArray.push(<li key={k}><label>{k}</label>: {v}</li>);
 
@@ -284,8 +284,8 @@ export const DrawLineChart = ({
               </div>
               <div className="col-sm">
                   <p>
-                  {Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
-                  {Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
+                  {result&&Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
+                  {result&&Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
                   </p>
               </div>
             </div>
