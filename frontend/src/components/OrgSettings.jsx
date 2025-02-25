@@ -22,7 +22,7 @@ export const OrgSettings = () => {
     return;
   }
   useEffect(()=>{
-    validateOrgName(orgName);
+    validateOrgName(orgName,setValidName);
   }
   ,[])
   if (!validName){
@@ -409,7 +409,7 @@ const SlackSettings = ({orgName}) => {
 
 
 
-const validateOrgName = (checkOrgName) => {
+const validateOrgName = (checkOrgName, setValidName) => {
 
 
   const username = localStorage.getItem("username");
