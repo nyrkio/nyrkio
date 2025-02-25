@@ -189,7 +189,6 @@ hr {
   color: inherit;
   border: 0;
   border-top: 1px solid;
-  opacity: 0.25;
 }
 
 h3,
@@ -642,10 +641,10 @@ div.card div.card-header {
     --ag-side-button-selected-background-color: ...;
     */
   --ag-selected-row-background-color: var(--nyrkio-horn-light-brown);
-  /* --ag-odd-row-background-color: ...;
-   * --ag-modal-overlay-background-color: ...;
+     /*--ag-odd-row-background-color: var(--nyrkio-horn-light-brown);*/
+     --ag-modal-overlay-background-color: var(--nyrkio-horn-light-brown);
      --ag-row-hover-color: var(--nyrkio-horn-light-brown);
-   */
+
   /* --ag-column-hover-color: ...;
    * --ag-range-selection-border-color: ...;
    * --ag-range-selection-border-style: ...;
@@ -733,15 +732,41 @@ div.card div.card-header {
 }
 
 .modal-content {
-  background-color: #ffffffaa;
+  background-color: #f1e8d8df;
   border-color: var(--nyrkio-bear-brown);
   border-width: 2px;
+  line-height: 1.7em;
 }
 .modal-header {
-  border-color: var(--nyrkio-bear-brown);
+  border-color: #f1e8d8df;
 }
+.modal-header .test-name {
+  color: var(--nyrkio-text-light);
+  text-align: right;
+}
+.modal-body ul,
+.modal-body hr,
+.modal-body p {
+  position: relative;
+  top: -2.2em;
+  margin: 0.25em;
+}
+.modal-body ul{
+  left: -1.5em;
+}
+.modal-content .commit-msg {
+  color: var(--nyrkio-text-light);
+  font-style: italic;
+}
+.modal-content .commit-url {
+}
+
 .modal-footer {
-  border-color: var(--nyrkio-bear-brown);
+  border-color: #f1e8d8df;
+}
+.modal-body {
+  border-color: #f1e8d8df;
+  color: black;
 }
 .modal-header .btn-close {
   background-color: var(--nyrkio-tattoo-red);

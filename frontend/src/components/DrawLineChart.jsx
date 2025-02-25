@@ -135,6 +135,9 @@ export const DrawLineChart = ({
   };
 
   const pointRadius = (index) => {
+    if (modalIndex==index){
+      return 7;
+    }
     if (isChangePoint(index)) {
       return 3;
     }
@@ -145,12 +148,11 @@ export const DrawLineChart = ({
   };
 
   var userClosed = false;
+  const handleClose = () => {setShowModal(false); userClosed=true; setModalIndex(null);};
   const PopupModal = ({ metricName, show, setShow, timestamp, setTimestamp }) => {
-    const handleClose = () => {setShow(false); userClosed=true;};
+
     if(qtimestamp && showModal===null && !userClosed){
       //console.log(timestamps);
-      console.log(timestamps.indexOf(qtimestamp));
-      console.log(window.location.hash);
       if(timestamps.indexOf(qtimestamp)>=0 &&
         window.location.hash == "#"+metricName
       ){
@@ -158,7 +160,6 @@ export const DrawLineChart = ({
         if(e){e.scrollIntoView();}
         setModalData(parseTimestamp(qtimestamp));
         setShowModal(true);
-
       }
     }
 
@@ -178,6 +179,80 @@ export const DrawLineChart = ({
     const gh_link =
       result.attributes.git_repo + "/commit/" + result.attributes.git_commit;
 
+    const get_flat_map = (index, changePointData) => {
+          if(!isChangePoint(index)) return null;
+          const flat_map = {};
+          // Search in changePointData for this timestamp and metric
+          const timestamp = timestamps[index];
+          flat_map["time"] = timestamp;
+          Object.entries(changePointData).forEach(
+            ([testName, value]) => {
+              value.forEach((changePoint) => {
+                if (changePoint["time"] === timestamp) {
+                      Object.entries(changePoint.attributes).map(([k,v])=> {
+                        if(typeof v != "object") {
+                          flat_map[k]=v;
+                        }
+                      });
+                    // Add all change point attributes to the label
+                    changePoint["changes"].forEach((change) => {
+                        const metric = change.metric;
+                        flat_map[metric] = {};
+                        flat_map[metric]["metric"] = metric;
+                        Object.entries(change).map(([key, value]) => {
+                            flat_map[metric][key] = value;
+                          });
+                      });
+                  }
+                });
+          })
+          return flat_map;
+    };
+
+    const ChangePointBox = ({index, changePointData, what, metricName}) => {
+          if(!isChangePoint(index)) return (<></>);
+          const labelArray = [];
+
+          //console.log(metricName);
+          // Search in changePointData for this timestamp and metric
+          const timestamp = timestamps[index];
+          Object.entries(changePointData).forEach(
+            ([testName, value]) => {
+              value.forEach((changePoint) => {
+                if (changePoint["time"] === timestamp) {
+                  //console.log(JSON.stringify(changePoint));
+                  if(what=="commit_msg"){
+                      return changePoint.attributes.commit_msg;
+                  }
+                  if(what=="attributes"){
+                      changePoint.attributes && Object.entries(changePoint.attributes).map(([k,v])=> {
+                        if(typeof v != "object") {
+                          labelArray.push(<li key={k}><label>{k}</label>: {v}</li>);
+
+                        }
+                      });
+                  }
+                  if(what=="changes"){
+                    // Add all change point attributes to the label
+                    changePoint["changes"].forEach((change) => {
+                        if(change.metric == metricName){
+                          const metric = change.metric;
+                          Object.entries(change).map(([key, value]) => {
+                              if(key!="metric"){
+                                labelArray.push(<li key={metric+"_"+key}><label>{key}</label>: {value}</li>);
+                              }
+                            });
+                        }
+                    });
+                    }
+                }
+                }
+              );
+          })
+          return (<><ul style={{listStyleType:'none',listStylePosition: 'inside'}}>{labelArray}</ul></>);
+    };
+
+    const flat_map = get_flat_map(result_index, changePointData);
     return (
       <>
         <Modal
@@ -188,31 +263,33 @@ export const DrawLineChart = ({
           animation={false}
         >
           <Modal.Header closeButton>
-            <Modal.Title>Test Result Data: {timestamp}</Modal.Title>
+            <Modal.Title>{result.attributes.git_commit} @ {timestamp} </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            <ul>
-              <li>
-                <b>value:</b> {value} {unit}
-              </li>
-              <li>
-                <b>git repo: </b>
-                {result.attributes.git_repo}
-              </li>
-              <li>
-                <b>branch:</b> {result.attributes.branch}
-              </li>
-              <li>
-                <b>git commit:</b>{" "}
-                <a href={gh_link} target="_blank">
-                  {result.attributes.git_commit}
-                </a>
-              </li>
-              <li>
-                <b>extra_info:</b>
-                <pre>{JSON.stringify(result.extra_info, null, 2)}</pre>
-              </li>
-            </ul>
+            <p className="commit-msg">
+                {flat_map?flat_map['commit_msg']:""}
+            </p>
+            <p className="commit-url">
+            <a href={result.attributes.git_repo} title="git_repo">{result.attributes.git_repo}</a>/{" "}
+
+            <a href={result.attributes.git_repo+"/tree/"+result.attributes.branch}>({result.attributes.branch})</a> {" "}
+            /commit/<a href={gh_link}>{result.attributes.git_commit}</a>
+            </p>
+            <hr />
+            <p className="test-name">{testName}</p>
+            <div className="row">
+              <div className="col-sm">
+                <p>{metric.name}: {value} {unit}</p>
+                <ChangePointBox index={result_index} changePointData={changePointData} metricName={metric.name} what="changes"/>
+              </div>
+              <div className="col-sm">
+                  <p>
+                  {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
+                  {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
+                  </p>
+              </div>
+            </div>
+
           </Modal.Body>
           <Modal.Footer>
             <Button
@@ -223,6 +300,7 @@ export const DrawLineChart = ({
                 }
                 const prev_timestamp = timestamps[result_index - 1];
                 setTimestamp(parseTimestamp(prev_timestamp));
+                setModalIndex(result_index-1);
               }}
             >
               Prev
@@ -235,6 +313,7 @@ export const DrawLineChart = ({
                 }
                 const next_timestamp = timestamps[result_index + 1];
                 setTimestamp(parseTimestamp(next_timestamp));
+                setModalIndex(result_index+1);
               }}
             >
               Next
@@ -246,10 +325,16 @@ export const DrawLineChart = ({
   };
 
   const chartClick = (e) => {
+    if(xx&&yy && xx!=e.clientX && yy != e.clientY){
+      console.debug("Mouse dragged. Don't open modal.");
+      return;
+    }
     const chart = chartRef.current;
+
+
     const points = chart.getElementsAtEventForMode(
       e.nativeEvent,
-      "point",
+      "nearest",
       { intersect: false },
       true,
     );
@@ -260,13 +345,14 @@ export const DrawLineChart = ({
 
     const firstPoint = points[0];
     const label = chart.data.labels[firstPoint.index];
-
     setModalData(label);
+    setModalIndex(firstPoint.index);
     setShowModal(true);
   };
 
   const [showModal, setShowModal] = useState(null);
   const [modalData, setModalData] = useState({});
+  const [modalIndex, setModalIndex] = useState(null);
   const [queryParams, setQueryParams] = useSearchParams();
   const qtimestamp = parseInt(queryParams.get("timestamp"));
   useEffect(()=>{
@@ -282,6 +368,12 @@ export const DrawLineChart = ({
 
               }
             }
+            if(target.chart.getZoomLevel() != 1){
+              const buttons = document.getElementsByClassName("resetzoom");
+              for (let b of buttons){
+                b.style.opacity = 0.5;
+              }
+            }
         };
   const resetAllZooms = (ev) => {
     const buttons = document.getElementsByClassName("resetzoom");
@@ -295,60 +387,85 @@ export const DrawLineChart = ({
       ChartJS.instances[i].zoom(1);
     }
   };
+
+
+  var xx = null,yy = null; var dragOrHover = "hover";
   const dontZoomAxes = ({chart, event, point}) => {
-    console.debug(chart, event, point);
-    console.debug(chart.getZoomLevel());
+    //console.debug(event.type);
+    if(event.type=="mousedown"){
+      dragOrHover ="drag";
+      xx = event.x; yy = event.y;
+      chart.tooltip.opacity=0;
+      chart.tooltip.active=false;
+      _drawToolTip(chart);
+    }
     if(chart.getZoomLevel() != 1){
       // You can zoom once, then you can pan
       console.log("Panning. Click 'Reset zoom' to zoom again.")
+      const buttons = document.getElementsByClassName("resetzoom");
+      for (let b of buttons){
+        b.style.opacity = 0.5;
+      }
       return false;
     }
-    const buttons = document.getElementsByClassName("resetzoom");
-    for (let b of buttons){
-      b.style.opacity = 0.5;
-    }
-    console.log("Zooming");
+    console.debug("Zooming");
     return true;
   };
+
+  const _drawToolTip = (chart) => {
+        const options = chart.config._config.options.plugins.tooltip;
+        options.position="nearest";
+        chart.tooltip._updateAnimationTarget(options);
+        chart.draw(chart.ctx);
+
+        chart.tooltip.draw(chart.ctx);
+  };
+
   const syncHover = (event, targets, chart) => {
-//           if (targets && targets.length>0){
-//             const dataset = targets[0].datasetIndex;
-//             const idx = targets[0].index;
-            if(chart.tooltip.title===undefined)
-              return true; // first time, initialization isn't completed.
+            //console.debug(event.type);
+            if(chart.tooltip.title===undefined) return true; // first time, initialization isn't completed.
 
+            if(event.type=="mouseup"||event.type=="mouseout"){
+              if(dragOrHover=="drag"){
+                dragOrHover ="hover";
+                return false;
+              }
+            }
+            //console.debug(dragOrHover);
             if(event.type=="mousemove" || event.type=="mouseout"){
-            const keys = Object.keys(ChartJS.instances);
-            for (let i of keys){
-              if(chart.id!=ChartJS.instances[i].id){
-                 const  c = ChartJS.instances[i];
-                 if(!c) continue;
-                 if (!c.ctx) continue;
-//                 console.log(c.tooltip);
-                 c.tooltip.handleEvent(event,true,true);
-                if(event.type=="mousemove"){
-                  c.tooltip.opacity=1;
-                  c.tooltip.active=true;
+              if(dragOrHover=="hover"){
+                  const keys = Object.keys(ChartJS.instances);
+                  for (let i of keys){
+                    if(chart.id!=ChartJS.instances[i].id){
+                      const  c = ChartJS.instances[i];
+                      if(!c) continue;
+                      if (!c.ctx) continue;
+                      c.tooltip.handleEvent(event,true,true);
+                      if(event.type=="mousemove"){
+                        c.tooltip.opacity=0.6;
+                        c.tooltip.active=true;
 
-                }
-                 c.tooltip.x = chart.tooltip.x;
-                 for (let tipkey in chart.tooltip){
-                   if(!c.tooltip[tipkey]){
-                     c.tooltip[tipkey]=chart.tooltip[tipkey];
-                  }
-                }
-                if(event.type=="mouseout"){
-                  c.tooltip.opacity=0;
-                  c.tooltip.active=false;
+                      }
+                      c.tooltip.x = chart.tooltip.x;
+                      for (let tipkey in chart.tooltip){
+                        if(!c.tooltip[tipkey]){
+                          c.tooltip[tipkey]=chart.tooltip[tipkey];
+                        }
+                      }
+                      if(event.type=="mouseout"){
+                        c.tooltip.opacity=0;
+                        c.tooltip.active=false;
 
-                }
-                 const options = c.config._config.options.plugins.tooltip;
-                 options.position="nearest";
-                 c.tooltip._updateAnimationTarget(options);
-                 c.draw(c.ctx);
-
-                 c.tooltip.draw(c.ctx);
-              }}
+                      }
+                      _drawToolTip(c);
+                    }}
+              }
+              else if(dragOrHover=="drag"){
+                        chart.tooltip.opacity=0;
+                        chart.tooltip.active=false;
+                        _drawToolTip(chart);
+              }
+              // else: if dragging, the chart will zoom. We just keep out of the way.
         }
         return true;
       };
@@ -368,6 +485,7 @@ export const DrawLineChart = ({
         });
   return (
     <>
+
       <PopupModal
         metricName={metricName}
         show={showModal}
@@ -394,7 +512,7 @@ export const DrawLineChart = ({
                 data: cutValues,
                 fill: true,
                 borderColor: nyrkio_chart_line_color,
-                borderWidth: 2,
+                borderWidth: 1,
                 maxBarThickness: 6,
                 backgroundColor: ({ chart: { ctx } }) => {
                   const gradient = ctx.createLinearGradient(0, 230, 0, 50);
@@ -419,7 +537,7 @@ export const DrawLineChart = ({
                 },
                 pointHoverBorderColor: nyrkio_chart_line_color,
                 pointHoverBackgroundColor: nyrkio_chart_line_color,
-                pointHoverRadius: 3,
+                pointHoverRadius: 7,
               },
             ],
           }}
@@ -498,27 +616,34 @@ export const DrawLineChart = ({
 
                             // Add all change point attributes to the label
                             changePoint["changes"].forEach((change) => {
-                              if (change["metric"] !== metricName) {
-                                return;
-                              }
-
-                              Object.entries(change).map(([key, value]) => {
-                                if (key === "metric") {
+                                if (change["metric"] !== metricName) {
                                   return;
                                 }
 
-                                var label = key + ": " + value;
-                                if (key.includes("percent")) {
-                                  label = label + "%";
-                                }
+                                Object.entries(change).map(([key, value]) => {
+                                  if (key === "metric") {
+                                    return;
+                                  }
+                                  // Reduce clutter in the tooltip. Show everything in the modal.
+                                  const filterKeys = ["mean_before", "time", "mean_after","forward_change_percent", "pvalue"];
+                                  filterKeys.forEach((fk) => {
+                                      if(fk === key){
+                                          var label = key + ": " + value;
+                                          if (key.includes("percent")) {
+                                            label = label + "%";
+                                          }
 
-                                labelArray.push(label);
+                                          labelArray.push(label);
+                                      }
+                                  });
                               });
                             });
                           }
                         });
-                      },
+                      }
                     );
+                    labelArray.push("");
+                    labelArray.push("Click for more...");
 
                     return labelArray;
                   },

@@ -362,6 +362,7 @@ class GitHubRateLimitExceededError(Exception):
 #
 # The timestamp represents the time at which we should re-enable fetching.
 GH_FETCH_RESET_TIMESTAMP = 0
+GH_FAILING_REPOS = {}
 
 # The assumption is that the first line of a commit message is typically 80
 # characters or less. So storing 16K entries means this cache will use about
@@ -383,6 +384,10 @@ async def cached_get(repo, commit):
     """
     global GH_FETCH_RESET_TIMESTAMP
     if GH_FETCH_RESET_TIMESTAMP > datetime.now().timestamp():
+        return None
+    # If repo is private, don't bombard it with 100s of messages
+    global GH_FAILING_REPOS
+    if repo in GH_FAILING_REPOS.keys() and GH_FAILING_REPOS[repo] > 5:
         return None
 
     commit_msg = None
@@ -417,6 +422,8 @@ async def cached_get(repo, commit):
             reset = response.headers.get("x-ratelimit-reset")
             GH_FETCH_RESET_TIMESTAMP = int(reset)
             raise GitHubRateLimitExceededError(used, limit, reset)
+
+        GH_FAILING_REPOS[repo] = GH_FAILING_REPOS.get(repo, 0) + 1
 
     return commit_msg
 
