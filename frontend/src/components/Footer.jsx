@@ -115,7 +115,7 @@ export const Footer = () => {
                   className="mb-3 mb-md-0 text-body-secondary"
                   style={{ color: "#ffffff" }}
                 >
-                  &copy; 2024 Nyrkiö Oy
+                  &copy; 2025 Nyrkiö Oy
                 </span>
               </div>
             </div>
