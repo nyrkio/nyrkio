@@ -141,22 +141,72 @@ body #root div.container-fluid {
 }
 
 div.frontpage div.nyrkio-logo {
-  margin-bottom: 8em;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
 }
 
 div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
-  width: 36rem;
+  width: 20rem;
   max-width: 90%;
+  max-height: 33%;
 }
 
 .frontpage .nyrkio-title h1 {
-  font-size: 4em;
+  font-size: 2em;
   letter-spacing: 0.5rem;
+  margin-top: 1em;
   margin-bottom: 0.5em;
 }
 .frontpage .nyrkio-title h5 {
   font-size: 2em;
   letter-spacing: 0.1rem;
+}
+
+.frontpage .carousel {
+  margin-top: 2em;
+}
+.frontpage .carousel img {
+  margin-top: 2em;
+  max-height: 500px;
+  max-width:100%;
+  object-fit: contain;
+}
+.frontpage .carousel-caption {
+  color: var(--nyrkio-tattoo-red);
+  position: absolute;
+  bottom: 0px;
+  padding: 0px;
+  font-size:13px;
+}
+
+.frontpage .carousel-indicators {
+  }
+
+.frontpage .carousel-caption {
+  z-index: 4;
+  position: absolute;
+  bottom: -0.5em;
+  font-size: 1.5em;
+}
+@media (max-width: 799px) {
+  .frontpage .carousel-caption {
+    font-size: 0.7em;
+  }
+  .frontpage .carousel img {
+    width: 100%;
+    min-width: 90%;
+    max-height: 200px;
+  }
+  .frontpage .carousel {
+    height:200px;
+  }
+}
+
+.frontpage .carousel-caption.pierre {
+  position: absolute;
+  right: 20px;
+  text-align: right;
+  padding: 0px;
 }
 
 div.nyrkio-logo-productpage div.nyrkio-logo img.nyrkio-logo-img {
