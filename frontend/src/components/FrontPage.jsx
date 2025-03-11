@@ -102,7 +102,7 @@ const FeatureBanner1 = () => {
           </p>
           <h2>Uncover every performance change</h2>
           <p>
-            Change point detection is designed to work with noisy performance
+            Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every regression and celebrate every
             gain.
           </p>
@@ -202,7 +202,7 @@ export const FrontPage = () => {
         <div className="padding-block "></div>
         <FeatureBanner1 />
         <div className="padding-block-sm "></div>
-        <SampleData />
+        <SampleData customerName="Turso" customerUrl="https://turso.tech" />
         <div className="padding-block "></div>
         <FeatureBanner2 />
         <LearnMore />
