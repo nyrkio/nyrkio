@@ -1,5 +1,5 @@
 :root {
-  font-family:  "Big Shoulders Text", Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family:  Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   font-optical-sizing: auto;
@@ -1098,3 +1098,25 @@ div.card.people-card .card-header img {
     content: none;
 }
 
+div.blog-rss-widget {
+  margin-bottom: 1em;
+  position: relative;
+  top: 40px;
+  z-index: 10;
+}
+div.blog-rss-widget .nyrkio-blog-body div.col {
+  padding: 2em;
+}
+div.blog-rss-widget .nyrkio-blog-body a {
+  text-decoration: underline dotted;
+}
+div.blog-rss-widget .author,
+div.blog-rss-widget .date {
+  color: var(--nyrkio-dark-gray2);
+  font-size: 60%;
+  display:block;
+  text-align:right;
+}
+div.blog-rss-widget .date::after {
+  content: "";
+}
