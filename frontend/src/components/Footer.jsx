@@ -2,6 +2,7 @@ import ToS from "../static/doc/Terms Of Service 1.0.pdf";
 import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import { Link } from "react-router-dom";
 import footerUpperCrust from "../static/footer-white-graphic.png";
+import { RssWidget } from "./RssWidget.jsx";
 
 export const Footer = () => {
   return (
@@ -46,10 +47,14 @@ export const Footer = () => {
         </symbol>
       </svg>
 
+
+      <RssWidget />
       <div className="container-fluid border-top pt-0 g-0 px-0 footer">
        <img src={footerUpperCrust} style={{position: "relative", top: "-5px", width: "100%"}}/>
         <div className="container">
-          <footer className="row justify-content-center align-items-center py-3 my-4 ">
+          <footer className="row justify-content-center align-items-center my-4 ">
+            <div className="row justify-content-center text-center">
+            </div>
             <div className="row justify-content-center text-center">
               <ul className="nav justify-content-center col-md-4 ">
                 <li className="ms-3">

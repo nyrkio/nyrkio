@@ -4,6 +4,7 @@ import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
 import { Logo } from "./Logo";
+import NyrkioCarousel from "./Carousel";
 
 const Banner = () => {
   return (
@@ -18,11 +19,11 @@ const FeatureHighlight = () => {
   return (
     <>
     <div className="text-center">
-      <h2>Harness the power of change point detection</h2>
+      <h2>Continuous Performance Engineering</h2>
     </div>
     <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
       <div className="col">
-        <h3>Shift left</h3>
+        <h3>1. Automate benchmarking</h3>
         <p>
           Performance regressions are often only discovered during later stages
           of development such as release candidate testing.
@@ -33,19 +34,21 @@ const FeatureHighlight = () => {
         </p>
       </div>
       <div className="col">
-        <h3>Automate analysis</h3>
+        <h3>2. Automate analysis</h3>
         <p>
           Avoid the tedious work of checking performance dashboards by hand.
-          Receive notifications via Slack, email, or GitHub when a performance
+          Let Nyrkiö send notifications via Slack, email, or GitHub when a performance
           change is detected.
         </p>
       </div>
       <div className="col">
-        <h3>State of the art</h3>
+        <h3>3. Math is hard</h3>
         <p>
-          Change point detection is state of the art technology for detecting
-          changes in software performance. Used by leading technology companies
-          all around the world, including MongoDB and Netflix.
+          ...but we got you covered!<br />
+          Going crazy with too many false positives?<br />
+          Nyrkiö Change Point Detection is state of the art technology for detecting
+          regressions in software performance. Used by leading technology companies
+          around the world, including MongoDB and Netflix, and based on open source Apache Otava ®.
         </p>
       </div>
     </div>
@@ -99,7 +102,7 @@ const FeatureBanner1 = () => {
           </p>
           <h2>Uncover every performance change</h2>
           <p>
-            Change point detection is designed to work with noisy performance
+            Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every regression and celebrate every
             gain.
           </p>
@@ -187,9 +190,8 @@ export const FrontPage = () => {
       <div className="frontpage container-fluid text-center w-100">
         <div className="container-fluid text-center w-100">
           <Banner />
-          <div className="padding-block frontpage-triplet"></div>
-          <DemoVideo />
-          <div className="padding-block frontpage-triplet"></div>
+          <NyrkioCarousel />
+          <div className="padding-block-sm frontpage-triplet"></div>
           <FeatureHighlight />
           <button className="btn btn-success">
             <a className="btn-link" href="/signup">
@@ -200,7 +202,7 @@ export const FrontPage = () => {
         <div className="padding-block "></div>
         <FeatureBanner1 />
         <div className="padding-block-sm "></div>
-        <SampleData />
+        <SampleData customerName="Turso" customerUrl="https://turso.tech" />
         <div className="padding-block "></div>
         <FeatureBanner2 />
         <LearnMore />
