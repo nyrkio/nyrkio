@@ -15,6 +15,7 @@ import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
+import { DocsGraphs } from "./components/DocsGraphs.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
 import { LegalPage } from "./components/LegalPage.jsx";
@@ -90,6 +91,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
             />
             <Route path="/docs/getting-started" element={<Docs />} />
+            <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
             <Route
@@ -151,6 +153,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
             />
             <Route path="/result/*" element={<Dashboard path="/result/"/>} />
             <Route path="/docs/getting-started" element={<Docs />} />
+            <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route
