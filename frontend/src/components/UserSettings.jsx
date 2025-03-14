@@ -249,7 +249,7 @@ export const HunterSettings = ({callback=noop}) => {
             Higher P-values (ex: 0.05) will find more change points.</em></p>
             <div className="col col-md-12">
               <label htmlFor="nyrkio-p-value-slider" className="form-label">
-                P-value threshold:{" "}
+                P-value:{" "}
               </label>
             </div>
             <div className="col col-md-10">
@@ -282,7 +282,7 @@ export const HunterSettings = ({callback=noop}) => {
                 htmlFor="nyrkio-min-magnitude-slider"
                 className="form-label"
               >
-                Change point threshold:{" "}
+                Change magnitude:{" "}
               </label>
             </div>
             <div className="col col-md-10">

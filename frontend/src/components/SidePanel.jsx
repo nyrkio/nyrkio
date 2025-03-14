@@ -123,6 +123,12 @@ const DocsSidePanel = ({ loggedIn }) => {
       <Link to="/docs/getting-started" className="nav-link">
         Getting started
       </Link>
+      <Link to="/docs/working-with-graphs" className="nav-link">
+        Working with the graphs
+      </Link>
+      <Link to="/docs/working-with-graphs" className="nav-link">
+        Teams/orgs
+      </Link>
       <div className="nav-link">
         <a href="/openapi">API</a>
       </div>

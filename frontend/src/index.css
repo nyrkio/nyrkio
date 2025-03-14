@@ -440,6 +440,7 @@ button:focus-visible {
   padding-right: 0.5em;
 }
 
+.navbar-left.navbar-nav .nav-link a,
 .navbar-left.navbar-nav a.nav-link {
   color: var(--nyrkio-horn-dark-brown);
 }
@@ -1119,4 +1120,14 @@ div.blog-rss-widget .date {
 }
 div.blog-rss-widget .date::after {
   content: "";
+}
+
+.nyrkio-docs img {
+  max-width: 100%;
+  background-color: var(--nyrkio-arrow-brown);
+  padding: 2px;
+  border: 7px solid var(--nyrkio-horn-light-brown);
+  margin-top: 2em;
+  margin-bottom: 2em;
+
 }
