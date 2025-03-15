@@ -1122,6 +1122,20 @@ div.blog-rss-widget .date::after {
   content: "";
 }
 
+div.blog-rss-widget   {
+  border-top: dotted #aaa 1px;
+  padding: 0;
+}
+div.blog-rss-widget .nyrkio-blog-header p {
+  position: relative;
+  bottom: 0.9em;
+  margin: 0;
+}
+div.blog-rss-widget .nyrkio-blog-header span {
+  padding: 10px;
+  background-color: #ffffff;
+}
+
 .nyrkio-docs img {
   max-width: 100%;
   background-color: var(--nyrkio-arrow-brown);
