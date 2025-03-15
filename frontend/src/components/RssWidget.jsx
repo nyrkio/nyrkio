@@ -40,7 +40,8 @@ export const RssWidget = () => {
       {loading ? "" : (
       <>
       <div className="row nyrkio-blog-header">
-        <p>Recently on <a href="https://blog.nyrkio.com">blog.nyrkio.com</a>:</p>
+        <p><span>Recently on <a href="https://blog.nyrkio.com">blog.nyrkio.com</a>:</span></p>
+
       </div>
       <div className="row nyrkio-blog-body">
         <RssListItems feed={rssFeed} />
