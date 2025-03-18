@@ -177,7 +177,7 @@ const DemoVideo = () => {
     <iframe
       width="560"
       height="315"
-      src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
+      src="https://youtu.be/OmzcWan-Rew"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
