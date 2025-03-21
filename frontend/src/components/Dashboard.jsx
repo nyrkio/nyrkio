@@ -926,7 +926,7 @@ const populateSummaryData = (sData) => {
   for(let el of summaryElements){
     let key=el.dataset.longname;
     console.debug(key);
-    let a, b;
+    let a, b, c="";
     var newestDate = new Date();
     if (
       sData[key] &&
@@ -939,14 +939,17 @@ const populateSummaryData = (sData) => {
       newestDate = new Date(1000 * parseInt(sData[key]["newest_time"]));
       b = newestDate.toLocaleDateString('fi-FI');
     }
+    if (sData[key] && sData[key].newest_time && parseInt(sData[key].newest_test_name)) {
+      c = sData[key]["newest_test_name"];
+    }
 
     if (a && b){
-      el.innerHTML = populateSummaryInner(a,b);
+      el.innerHTML = populateSummaryInner(a,b,c);
     }
   }
 };
 
-const populateSummaryInner = (sumChanges,latestDate) => {
+const populateSummaryInner = (sumChanges,latestDate, latestTestName) => {
    return '<span className="summarize-cp-sum-total">'+(sumChanges > 0 ? sumChanges : "")+
-          '</span><span className="summarize-cp-text summarize-cp-text-changes"> &nbsp;changes</span><br /><span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span><span className="summarize-cp-first-changes">'+latestDate+'</span>';
+          '</span><span className="summarize-cp-text summarize-cp-text-changes"> &nbsp;changes</span><br /><span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span><span className="summarize-cp-first-changes" title="' + latestTestName + '">'+latestDate+'</span>';
 };
