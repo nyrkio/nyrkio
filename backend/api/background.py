@@ -114,15 +114,6 @@ async def precompute_summaries_non_leaf(user_or_org_id):
         for k in cache.keys():
             if k == "_id":
                 continue
-            kparts = k.split("/") if "/" in k else [k]
-            kparts_prefix = kparts[: len(test_name_parts)]
-            cont = False
-            for tp, kp in zip(test_name_parts, kparts_prefix):
-                if tp != kp:
-                    cont = True
-            if cont:
-                continue
-
             if (
                 test_name_prefix in k
                 and k != test_name_prefix
