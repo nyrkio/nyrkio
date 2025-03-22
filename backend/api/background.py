@@ -114,7 +114,7 @@ async def precompute_summaries_non_leaf(user_or_org_id):
             if k == "_id":
                 continue
             if (
-                test_name_prefix in k
+                k.startswith(test_name_prefix)
                 and k != test_name_prefix
                 and test_name_prefix != ""
             ):
