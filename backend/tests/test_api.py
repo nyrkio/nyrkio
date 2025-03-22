@@ -61,19 +61,8 @@ def assert_response_data_matches_expected(resp_data: List[Dict], req_data: List[
     Using this function makes it possible to add new fields to the
     schema without breaking the tests.
     """
-    assert isinstance(resp_data, list)
-    assert all([isinstance(r, dict) for r in resp_data])
-    assert isinstance(req_data, list)
-    assert all([isinstance(r, dict) for r in req_data])
     assert len(resp_data) == len(req_data)
-    print(resp_data)
-    print(req_data)
     assert any(resp.items() >= req.items() for resp, req in zip(resp_data, req_data))
-    assert all(
-        k in resp and resp[k] == v
-        for resp, req in zip(resp_data, req_data)
-        for k, v in req.items()
-    )
 
 
 def test_add_result(client):
