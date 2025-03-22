@@ -87,7 +87,12 @@ async def get_subtree_summary(
     if test_name_prefix in cache:
         return cache[test_name_prefix]
 
-    raise HTTPException(status_code=404, detail="Not Found")
+    raise HTTPException(
+        status_code=404,
+        detail="Not Found: test_name_prefix={} user.id={}".format(
+            test_name_prefix, user.id
+        ),
+    )
 
 
 @api_router.get("/result/summarySiblings")
