@@ -1146,7 +1146,7 @@ class DBStore(object):
             k2 = k
             k2 = k2.replace(".", "¤")
             cache2[k2] = cache[k]
-        self.db.summaries_cache.update_one(
+        await self.db.summaries_cache.update_one(
             {"_id": user_id}, {"$set": cache2}, upsert=True
         )
 
