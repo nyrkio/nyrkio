@@ -248,7 +248,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
       const sumJson = await sumResponse.json();
       //setLoading(false);
-      populateSummaryData(sumJson);
+      populateSummaryData(sumJson, prefix);
 
   };
   useEffect(()=>{
@@ -919,7 +919,7 @@ const SummarizeChangePoints = ({ longName, summaries,loading }) => {
 };
 */
 // Workaround as this is too comlex for react or something
-const populateSummaryData = (sData) => {
+const populateSummaryData = (sData, prefix) => {
   console.debug(sData);
   const summaryElements = document.getElementsByClassName("summarize-change-points");
   console.debug(summaryElements);
@@ -939,7 +939,7 @@ const populateSummaryData = (sData) => {
       newestDate = new Date(1000 * parseInt(sData[key]["newest_time"]));
       b = newestDate.toLocaleDateString('fi-FI');
     }
-    if (sData[key] && sData[key].newest_time && parseInt(sData[key].newest_test_name)) {
+    if (sData[key] && sData[key].newest_test_name ) {
       c = sData[key]["newest_test_name"];
     }
 
@@ -951,5 +951,5 @@ const populateSummaryData = (sData) => {
 
 const populateSummaryInner = (sumChanges,latestDate, latestTestName) => {
    return '<span className="summarize-cp-sum-total">'+(sumChanges > 0 ? sumChanges : "")+
-          '</span><span className="summarize-cp-text summarize-cp-text-changes"> &nbsp;changes</span><br /><span className="summarize-cp-text summarize-cp-text-latest">latest on&nbsp;</span><span className="summarize-cp-first-changes" title="' + latestTestName + '">'+latestDate+'</span>';
+          '</span><span className="summarize-cp-text summarize-cp-text-changes"> &nbsp;changes</span><br /><span className="summarize-cp-text summarize-cp-text-latest" title="' + latestTestName + '">latest on&nbsp;</span><span className="summarize-cp-first-changes" title="' + latestTestName + '">'+latestDate+'</span>';
 };
