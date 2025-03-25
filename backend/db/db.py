@@ -1120,7 +1120,10 @@ class DBStore(object):
             },
         ]
         results = await users_collection.aggregate(agg_query).to_list(None)
-        return results[0]["all_orgs_id"]
+        if results:
+            return results[0]["all_orgs_id"]
+        else:
+            return []
 
     async def get_summaries_cache(self, user_id):
         coll = self.db.summaries_cache
