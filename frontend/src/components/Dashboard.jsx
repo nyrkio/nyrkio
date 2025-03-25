@@ -311,6 +311,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                     embed={embed}
                     setGraphSize={setGraphSize}
                   />
+                  { localStorage.getItem("showAllGraphs")!="true"? "": (
                   <ManyResultWithTestname
                     testNames={testNames}
                     shortNames={subtree}
@@ -326,7 +327,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                     setSummaries={setSummaries}
                     summaries={summaries}
                     redraw={redraw}
-                  />
+                  />)}
               </div>
               </div>
               </div>
