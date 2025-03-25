@@ -89,11 +89,11 @@ async def precompute_summaries_non_leaf(user_or_org_id):
 
     store = DBStore()
     cache = await store.get_summaries_cache(user_or_org_id)
-    non_leaf_cache = {}
     leaves = get_leaves(cache.keys())
     test_name_prefix_todo = set(
         [("/".join(prefix.split("/")[:-1])) for prefix in leaves]
     )
+    todo_next = set()
 
     while len(test_name_prefix_todo) > 0:
         summary = make_new_summary()
@@ -107,7 +107,7 @@ async def precompute_summaries_non_leaf(user_or_org_id):
         )
         # Once we are done with this, we'll continue up the tree until we find the root of everything
         if isinstance(test_name_parts, list) and len(test_name_parts) > 1:
-            test_name_prefix_todo.add("/".join(test_name_parts[:-1]))
+            todo_next.add("/".join(test_name_parts[:-1]))
 
         prefix_leaves = []
         for k in cache.keys():
@@ -116,7 +116,9 @@ async def precompute_summaries_non_leaf(user_or_org_id):
             if (
                 # k.startswith(test_name_prefix)
                 test_name_prefix in k
-                and k != test_name_prefix
+                and len(k) > len(test_name_prefix)
+                and k[len(test_name_prefix)] == "/"
+                and "/" not in k[len(test_name_prefix) + 1 :]
                 and test_name_prefix != ""
             ):
                 prefix_leaves.append(k)
@@ -147,10 +149,12 @@ async def precompute_summaries_non_leaf(user_or_org_id):
                 summary["largest_test_name"] = leaf_summary["largest_test_name"]
                 summary["largest_change_point"] = leaf_summary["largest_change_point"]
 
-            non_leaf_cache[test_name_prefix] = summary
+            cache[test_name_prefix] = summary
 
-    # Finally just combine the two into one huge cache
-    cache.update(non_leaf_cache)
+            if len(test_name_prefix_todo) == 0:
+                test_name_prefix_todo = todo_next
+                todo_next = set()
+
     await store.save_summaries_cache(user_or_org_id, cache)
 
 

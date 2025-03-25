@@ -90,7 +90,6 @@ def assert_response_data_matches_expected(resp_data: List[Dict], req_data: List[
             assert resp == req
 
 
-
 def test_add_result(client):
     client.login()
 

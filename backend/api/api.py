@@ -123,13 +123,23 @@ async def get_subtree_summary_siblings(
     children = {}
     length = len(parent_test_name_prefix)
     for k, v in cache.items():
-        if len(k) >= length and k[:length] == parent_test_name_prefix:
+        if (
+            len(k) > length
+            and k[:length] == parent_test_name_prefix
+            and k[length] == "/"
+            and "/" not in k[length + 1 :]
+        ):
             children[k] = v
 
     if children:
         return children
 
-    raise HTTPException(status_code=404, detail="Not Found")
+    raise HTTPException(
+        status_code=404,
+        detail="Not Found (summarySiblings, no children for {})".format(
+            parent_test_name_prefix
+        ),
+    )
 
 
 @api_router.get("/results/precompute")
