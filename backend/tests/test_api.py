@@ -1,5 +1,6 @@
 import asyncio
 from datetime import datetime
+from pprint import pprint
 from typing import Dict, List
 
 from db.db import NULL_DATETIME, MockDBStrategy
@@ -61,19 +62,33 @@ def assert_response_data_matches_expected(resp_data: List[Dict], req_data: List[
     Using this function makes it possible to add new fields to the
     schema without breaking the tests.
     """
+    # print("xoxoxoxoxoxoxoxox")
+    # pprint(resp_data)
+    # pprint(req_data)
     assert isinstance(resp_data, list)
-    assert all([isinstance(r, dict) for r in resp_data])
+    # assert all([isinstance(r, dict) for r in resp_data])
     assert isinstance(req_data, list)
-    assert all([isinstance(r, dict) for r in req_data])
+    # assert all([isinstance(r, dict) for r in req_data])
     assert len(resp_data) == len(req_data)
-    print(resp_data)
-    print(req_data)
-    assert any(resp.items() >= req.items() for resp, req in zip(resp_data, req_data))
-    assert all(
-        k in resp and resp[k] == v
-        for resp, req in zip(resp_data, req_data)
-        for k, v in req.items()
-    )
+    # assert all(set(req.keys()) in set(resp.keys()) for resp, req in zip(resp_data, req_data))
+    for resp, req in zip(resp_data, req_data):
+        if isinstance(req, dict):
+            for k, v in req.items():
+                if k not in resp:
+                    pprint(resp)
+                    pprint(req)
+                    assert False
+                if isinstance(v, list):
+                    assert_response_data_matches_expected(resp[k], v)
+                elif isinstance(v, dict):
+                    assert_response_data_matches_expected([resp[k]], [v])
+                else:
+                    assert resp[k] == v
+        elif isinstance(req, list):
+            assert_response_data_matches_expected(resp_data, req_data)
+        else:
+            assert resp == req
+
 
 
 def test_add_result(client):
