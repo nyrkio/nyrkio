@@ -2,6 +2,7 @@ version: "3.8"
 
 services:
   mongodb:
+    hostname: mongodb.nyrkio.local
     container_name: mongodb
     image: mongodb/mongodb-community-server:latest
     environment:

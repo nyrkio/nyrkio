@@ -20,6 +20,11 @@ function unit() {
   pytest tests
 }
 
+function integration() {
+  echo "Run integration tests..."
+  pytest integration_tests
+}
+
 function perf() {
   echo "Run performance tests..."
   if $deploy -eq "true"
@@ -76,6 +81,9 @@ for opt in "$@"; do
       ;;
     unit)
       unit
+      ;;
+    int)
+      integration
       ;;
     perf)
       perf
