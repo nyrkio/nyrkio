@@ -661,12 +661,10 @@ export const SingleResultWithTestname = ({
   const [graphSize, setGraphSize] = useState(defaultGraphSize);
 
   const loadData = () => {
-    if(!loading){
     setLoading(true);
     fetchData().finally(() => {
       setLoading(false);
     });
-    }
   };
   useEffect(loadData, [location,redraw]);
 
