@@ -11,8 +11,71 @@ const Loading = ({loading}) => {
   return (<><div className="loading_done"></div></>);
 };
 
-export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTimestamp, loading }) => {
+export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTimestamp, loading, metricsData }) => {
   var rowData = [];
+
+  const directionMap = {};
+  if(Array.isArray(metricsData)){
+    metricsData.forEach((m)=>directionMap[m.name]=m.direction);
+  }
+  const direction = (metric)=>{
+      if(directionMap[metric]){
+        return directionMap[metric];
+      }
+      return null;
+  };
+  const directionFormatter = (value, metric) => {
+    let d = direction(metric);
+    if ( d == "higher_is_better"){
+      if (value>0){
+        return (<span className="bg-success nyrkio-change nyrkio-change-improvement">{value}</span>);
+      }
+      if (value<0){
+        return (<span className="bg-danger nyrkio-change nyrkio-change-regression">{value}</span>);
+      }
+      // Should not be possible!
+      return (<span className="nyrkio-change nyrkio-change-neutral">{value}</span>);
+    }
+    if ( d == "lower_is_better"){
+      if (value<0){
+        return (<span className="bg-success nyrkio-change nyrkio-change-improvement">{value}</span>);
+      }
+      if (value>0){
+        return (<span className="bg-danger nyrkio-change nyrkio-change-regression">{value}</span>);
+      }
+      // Should not be possible!
+      return (<span className="bg-success nyrkio-change nyrkio-change-neutral">{value}</span>);
+    }
+    return (<span className="nyrkio-change nyrkio-change-unknown">{value}</span>);
+  };
+  const directionColor = (value, metric) => {
+    let d = direction(metric);
+    if ( d == "higher_is_better"){
+      if (value>0){
+        return "#00ff0055";
+      }
+      if (value<0){
+        return "#ff000055";
+      }
+      // Should not be possible!
+      return "none";
+    }
+    if ( d == "lower_is_better"){
+      if (value<0){
+        return "#00ff0055";
+      }
+      if (value>0){
+        return "#ff000055";
+      }
+      // Should not be possible!
+      return "#fffff00";
+    }
+    return "#ffffff00";
+  };
+  const directionArrow = (metric) => {
+      if (directionMap[metric]=="higher_is_better") return <span title="higher is better">⇧</span>;
+      if (directionMap[metric]=="lower_is_better") return <span title="lower is better">⇩</span>;
+  }
 
   console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
@@ -29,11 +92,13 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
         }
 
         const repo = changePoint["attributes"]["git_repo"];
+        const changeValue = change["forward_change_percent"];
+        const metric_name = change["metric"];
         rowData.push({
           date: parseTimestamp(changePoint["time"]),
           commit: { commit, commit_msg, repo },
-          metric: change["metric"],
-          change: change["forward_change_percent"] + "%",
+          metric: metric_name,
+          change: { changeValue, metric_name }
         });
       });
     });
@@ -65,11 +130,27 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
         const metric_name = params.value;
         const url = "#"+metric_name;
         return (
-          <a href={url}>{metric_name}</a>
+          <>
+          <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
+          </>
         );
       }
     },
-    { field: "change" },
+    { field: "change",
+      cellRenderer: (params) => {
+        const { changeValue, metric_name } = params.value;
+        // const d = directionFormatter(changeValue, metric_name);
+        return (<>{changeValue} %</>);
+      },
+      cellStyle: (params) => {
+        const { changeValue, metric_name } = params.value;
+        const d = directionColor(changeValue, metric_name);
+        return {backgroundColor:d};
+      },
+      valueFormatter: (params)=>{
+        return "";
+      }
+    },
     {
       field: "commit",
       cellRenderer: (params) => {
@@ -82,6 +163,9 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
             {text}
           </a>
         );
+      },
+      valueFormatter: (params)=>{
+        return "";
       },
     },
   ];

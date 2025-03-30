@@ -285,6 +285,10 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
     const [redraw, setRedraw] = useState(1);
     const subtree = testNames.filter((n)=>{return (n.startsWith(prefix)&&prefix!==undefined)});
     const ariaExpanded = localStorage.getItem("showAllGraphs", "false");
+    const redrawGraphs = () => {
+      setRedraw(Math.random());
+    };
+
     if (subtree.length>0 && subtree.length<30)
         return(
           <>  <div style={{textAlign: "right"}}>
@@ -306,7 +310,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                   <Loading loading={loading} />
                   <DashboardSettings       dashboardType={dashboardType}
                     testName={testNames[0]}
-                    loadData={()=>{setRedraw(Math.random())}}
+                    loadData={()=>{redrawGraphs()}}
                     displayData={displayData}
                     embed={embed}
                     setGraphSize={setGraphSize}
@@ -698,8 +702,10 @@ export const SingleResultWithTestname = ({
   const orgName = testName.split("/")[0];  // Not used when not an org
 
 
-
-
+  let metricsData={};
+  if(displayData && displayData[displayData.length-1]){
+    metricsData = displayData[displayData.length-1].metrics;
+  }
   return (
     <>
           {embed == "yes" ? "" :
@@ -707,7 +713,7 @@ export const SingleResultWithTestname = ({
           }
           <div className="container">
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title}/>
+              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData}/>
             </div>
 
             {hideSettings?"":
