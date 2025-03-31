@@ -109,15 +109,25 @@ const ApiKey = () => {
 
 const noop = ()=>{return;};
 
+// When React redraws this component, try to set default value to what the sliders were,
+// rather than making them blink between 0 and real value
+const slidersCurrentValue = { min_magnitude_raw: 0, max_pvalue_raw: 0, min_magnitude: 0.05, max_pvalue: 0.001 };
+
 export const HunterSettings = ({callback=noop}) => {
   const saveHunterSettingsReal = async () => {
+    slidersCurrentValue.min_magnitude_raw = document.getElementById("nyrkio-min-magnitude-slider").value;
     const minMagnitude =
       getRealMinMagnitude(
-        document.getElementById("nyrkio-min-magnitude-slider").value,
+        slidersCurrentValue.min_magnitude_raw,
       ) / 100.0;
+
+    slidersCurrentValue.max_pvalue_raw = document.getElementById("nyrkio-p-value-slider").value;
     const pValue = getRealPValue(
-      document.getElementById("nyrkio-p-value-slider").value,
+      slidersCurrentValue.max_pvalue_raw,
     );
+    slidersCurrentValue.max_pvalue = pValue;
+    slidersCurrentValue.min_magnitude = minMagnitude;
+
     const configObject = {
       core: { min_magnitude: minMagnitude, max_pvalue: pValue },
     };
@@ -152,7 +162,8 @@ export const HunterSettings = ({callback=noop}) => {
     console.debug("GET /api/v0/user/config");
     // TODO(mfleming) It'd be nice to not hard code this.
     // TODO(hingo) yeah actually if we don't get values from the backend it should fail somehow. Now there's a risk of resetting stored values back to defaults. It should only be possible to POST after one successful GET first fetched current values.
-    const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
+    //const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
+    const defaultConfig = slidersCurrentValue;
     const response = await fetch("/api/v0/user/config", {
       headers: {
         "Content-type": "application/json",
@@ -186,17 +197,21 @@ export const HunterSettings = ({callback=noop}) => {
 
   // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
   const minMagnitudeUpdate = (rawValue) => {
-    document.getElementById("nyrkio-min-magnitude-value").innerHTML =
-      getRealMinMagnitude(rawValue);
+      if(rawValue>2250 && rawValue < 2950)
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = 0.5;
+      else
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = Math.round(getRealMinMagnitude(rawValue) );
+
     saveHunterSettings();
   };
-  const getRealMinMagnitude = (rawValue) => {
+  const getRealMinMagnitude = (rawValue, stoprecursion) => {
     const scaledDown = rawValue / 1000.0;
     const logScale = Math.pow(scaledDown, 4) / 100;
     const quantized = parseFloat(
       (Math.round(logScale * 2) / 2.0).toPrecision(2),
     );
-    //console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized));
+    if(!stoprecursion)
+      // console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized) + " " + getRealMinMagnitude(getRawMinMagnitude(quantized),true));
     return quantized;
   };
   const getRawMinMagnitude = (realValue) => {
@@ -205,10 +220,15 @@ export const HunterSettings = ({callback=noop}) => {
     return rawValue;
   };
   const minMagnitudeSet = (realValue) => {
-    const rawValue = getRawMinMagnitude(realValue);
+    let rawValue = getRawMinMagnitude(realValue);
+    if (getRealMinMagnitude(slidersCurrentValue.min_magnitude_raw) == realValue){
+      rawValue = slidersCurrentValue.min_magnitude_raw;
+    }
     if (document.getElementById("nyrkio-min-magnitude-value")){
-      document.getElementById("nyrkio-min-magnitude-value").innerHTML =
-        Math.round(realValue);
+      if(rawValue>2250 && rawValue < 2950)
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = 0.5;
+      else
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = Math.round(realValue );
       document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
     }
     return rawValue;
@@ -232,7 +252,8 @@ export const HunterSettings = ({callback=noop}) => {
     return rawValue;
   };
   const pvalueSet = (realValue) => {
-    const rawValue = getRawPValue(realValue);
+    let rawValue = getRawPValue(realValue);
+    slidersCurrentValue.max_pvalue_raw = rawValue;
     if (document.getElementById("nyrkio-p-value-value")){
       document.getElementById("nyrkio-p-value-value").innerHTML = realValue;
       document.getElementById("nyrkio-p-value-slider").value = rawValue;
@@ -259,7 +280,7 @@ export const HunterSettings = ({callback=noop}) => {
                 name="nyrkio-p-value-slider"
                 className="nyrkio-p-value-slider nyrkio-slider"
                 style={{ width: "100%" }}
-                defaultValue={0}
+                defaultValue={slidersCurrentValue.max_pvalue_raw}
                 min={100}
                 max={10100}
                 step={10}
@@ -270,7 +291,7 @@ export const HunterSettings = ({callback=noop}) => {
             </div>
             <div className="col col-md-2">
               <span id="nyrkio-p-value-value" className="form-label">
-                {0}
+                {slidersCurrentValue.max_pvalue}
               </span>
             </div>
           </div>
@@ -292,7 +313,7 @@ export const HunterSettings = ({callback=noop}) => {
                 name="nyrkio-min-magnitude-slider"
                 className="nyrkio-min-magnitude-slider nyrkio-slider"
                 style={{ width: "100%" }}
-                defaultValue={0}
+                defaultValue={slidersCurrentValue.min_magnitude_raw}
                 min={0}
                 max={10000}
                 step={50}
@@ -303,7 +324,7 @@ export const HunterSettings = ({callback=noop}) => {
             </div>
             <div className="col col-md-2">
               <span id="nyrkio-min-magnitude-value" className="form-label">
-                {0}
+                {slidersCurrentValue.min_magnitude*100}
               </span>
               <span className="form-label">%</span>
             </div>
