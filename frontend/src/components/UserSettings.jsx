@@ -210,7 +210,7 @@ export const HunterSettings = ({callback=noop}) => {
     const quantized = parseFloat(
       (Math.round(logScale * 2) / 2.0).toPrecision(2),
     );
-    if(!stoprecursion)
+    // if(!stoprecursion)
       // console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized) + " " + getRealMinMagnitude(getRawMinMagnitude(quantized),true));
     return quantized;
   };
