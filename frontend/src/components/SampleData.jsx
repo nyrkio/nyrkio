@@ -24,7 +24,8 @@ export const SampleData = ( { customerName, customerUrl } ) => {
   if (customerName=="Turso"){
     customerLogo = tursoLogo;
     orgRepo = "tursodatabase/limbo"
-    testName = "main/turso/main/mvcc-ops-throughput/read";
+    // testName = "main/turso/main/mvcc-ops-throughput/read";
+    testName = "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1";
   }
   return <SampleDataPublic
             customerName={customerName}
