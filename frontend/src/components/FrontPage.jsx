@@ -48,7 +48,7 @@ const FeatureHighlight = () => {
           Going crazy with too many false positives?<br />
           Nyrkiö Change Point Detection is state of the art technology for detecting
           regressions in software performance. Used by leading technology companies
-          around the world, including MongoDB and Netflix, and based on open source Apache Otava ®.
+          around the world, including MongoDB and Netflix, and based on open source Apache Otava&TM; (Incubating).
         </p>
       </div>
     </div>
