@@ -3,14 +3,14 @@
 Nyrkiö is an open source platform for change detection in a *Continuous Performance Engineering*
 workflow.
 
-- Submit results using a REST API or [GitHub Action][https://github.com/nyrkio/change-detection]
+- Submit results using a REST API or [GitHub Action][github-action]
 - Uses state of the art change point detection algorithm to find performance regressions and improvements in noisy data.
   Nyrkiö can find even small regressions down to 0.5% - 1%.
 - Integrates with GitHub to identify the git commit that caused a change in performance
 
 ## Using Nyrkiö Change Detection
 
-This software runs [nyrkio.com][https://nyrkio.com]. Some links to get you started:
+This software runs [nyrkio.com][dotcom]. Some links to get you started:
 
 [Getting Started with Nyrkiö in 3 easy steps][nyrkio-getting-started]
 
@@ -22,7 +22,7 @@ This software runs [nyrkio.com][https://nyrkio.com]. Some links to get you start
 
 ### Apache Otava (incubating)
 
-Nyrkiö is a web service around the 8 year old, battle tested [Apache Otava (incubating)][https://otava.apache.org]
+Nyrkiö is a web service around the 8 year old, battle tested [Apache Otava (incubating)][otava]
 command line tool. Otava was created and open sourced by the performance teams at MongoDB (2017) and
 Datastax (2020). It is used by technology companies large and small, such as Netflix, Dremio, Hazelcast...
 
@@ -85,10 +85,12 @@ Please open a pull request with your changes against the `main` branch. PRs allo
 
 
 [product]: https://nyrkio.com/product
+[dotcom]: https://nyrkio.com
 [nyrkio-getting-started]: https://nyrkio.com/docs/getting-started
 [nyrkio-logo]: https://nyrkio.com/p/logo/full/Brown/NyrkioLogo_Final_Full_Brown-200px.png
 [nyrkio-footer-graph]: https://nyrkio.com/assets/footer-white-graphic-8R7Ap4-5.png
-
+[github-action]: https://github.com/nyrkio/change-detection
+[otava]: https://otava.apache.org
 
 ## License
 
