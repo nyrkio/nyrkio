@@ -1153,6 +1153,15 @@ class DBStore(object):
             {"_id": user_id}, {"$set": cache2}, upsert=True
         )
 
+    async def log_json_event(self, json_event, event_type="default"):
+        coll = self.db.event_log
+        wrapper = {
+            "event_type": event_type,
+            "nyrkio_datetime": datetime.now(tz=timezone.utc),
+            "json_event": json_event,
+        }
+        coll.insert_one(wrapper)
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
