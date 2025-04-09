@@ -15,6 +15,7 @@ from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.pull_request import pr_router
 from backend.api.user import user_router
+from backend.github.marketplace import market_router
 from backend.db.db import (
     DBStoreMissingRequiredKeys,
     DBStoreResultExists,
@@ -276,6 +277,7 @@ app.include_router(public_router, prefix="/api/v0")
 app.include_router(org_router, prefix="/api/v0")
 app.include_router(billing_router, prefix="/api/v0")
 app.include_router(pr_router, prefix="/api/v0")
+app.include_router(market_router, prefix="/api/v0")
 
 
 @app.on_event("startup")

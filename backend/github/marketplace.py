@@ -1,5 +1,5 @@
 from backend.db.db import DBStore
-from FastAPI import APIRouter
+from fastapi import APIRouter
 from typing import Dict
 
 market_router = APIRouter(prefix="/github")
