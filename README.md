@@ -3,7 +3,7 @@
 Nyrkiö is an open source platform for change detection in a *Continuous Performance Engineering*
 workflow.
 
-- Submit results using a REST API or [GitHub Action][github-action]
+- Submit results using a [REST API][nyrkio-getting-started] or [GitHub Action][github-action]
 - Uses state of the art change point detection algorithm to find performance regressions and improvements in noisy data.
   Nyrkiö can find even small regressions down to 0.5% - 1%.
 - Integrates with GitHub to identify the git commit that caused a change in performance
