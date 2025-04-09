@@ -120,7 +120,7 @@ export const Footer = () => {
                   className="mb-3 mb-md-0 text-body-secondary"
                   style={{ color: "#ffffff" }}
                 >
-                  &copy; 2024 Nyrkiö Oy<br />
+                  &copy; 2025 Nyrkiö Oy<br />
                   Nyrkiö is based on the open source Apache Otava (Incubating) project. Apache and Apache Otava are trademarks of the <a href="https://apache.org">Apache Software Foundation</a>.
                 </span>
               </div>
