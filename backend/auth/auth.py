@@ -175,7 +175,7 @@ async def github_callback(
         jwt.decode(state, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
     except jwt.DecodeError as e:
         logging.error(e)
-        DBStore.log_json_event(
+        await DBStore.log_json_event(
             {
                 "error": repr(e),
                 "type": "jwt.DecodeError",
