@@ -171,28 +171,28 @@ async def github_callback(
 ):
     token, state = access_token_state
     # Verify that we can decode the token so know it's valid
-    try:
-        jwt.decode(token, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
-    except jwt.DecodeError as e:
-        logging.error(e)
-        await DBStore().log_json_event(
-            {
-                "token": token,
-                "state": state,
-                "token_type": repr(type(token)),
-                "state_type": repr(type(state)),
-                "token_keys()": list(token.keys()),
-                "error": repr(e),
-                "type": "jwt.DecodeError",
-                "file": "auth.py",
-                "method": "github_callback",
-            },
-            "error",
-        )
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Couldn't decode Github Oauth response.",
-        )
+    # try:
+    #     jwt.decode(token, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
+    # except jwt.DecodeError as e:
+    #     logging.error(e)
+    #     await DBStore().log_json_event(
+    #         {
+    #             "token": token,
+    #             "state": state,
+    #             "token_type": repr(type(token)),
+    #             "state_type": repr(type(state)),
+    #             "token_keys()": list(token.keys()),
+    #             "error": repr(e),
+    #             "type": "jwt.DecodeError",
+    #             "file": "auth.py",
+    #             "method": "github_callback",
+    #         },
+    #         "error",
+    #     )
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail="Couldn't decode Github Oauth response.",
+    #     )
 
     account_id, account_email = await github_oauth.get_id_email(token["access_token"])
 
