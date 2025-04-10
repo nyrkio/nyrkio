@@ -181,6 +181,7 @@ async def github_callback(
                 "state": state,
                 "token_type": repr(type(token)),
                 "state_type": repr(type(state)),
+                "token_keys()": token.keys(),
                 "error": repr(e),
                 "type": "jwt.DecodeError",
                 "file": "auth.py",
