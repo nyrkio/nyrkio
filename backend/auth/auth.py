@@ -173,7 +173,17 @@ async def github_callback(
     # Verify that we can decode the token so know it's valid
     try:
         jwt.decode(state, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
-    except jwt.DecodeError:
+    except jwt.DecodeError as e:
+        logging.error(e)
+        DBStore.log_json_event(
+            {
+                "error": repr(e),
+                "type": "jwt.DecodeError",
+                "file": "auth.py",
+                "method": "github_callback",
+            },
+            "error",
+        )
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Couldn't decode Github Oauth response.",
