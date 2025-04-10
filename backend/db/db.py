@@ -1160,7 +1160,7 @@ class DBStore(object):
             "nyrkio_datetime": datetime.now(tz=timezone.utc),
             "json_event": json_event,
         }
-        coll.insert_one(wrapper)
+        await coll.insert_one(wrapper)
 
 
 # Will be patched by conftest.py if we're running tests
