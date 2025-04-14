@@ -449,7 +449,7 @@ button:focus-visible {
 .btn-success:focus,
 .btn-success.btn-primary,
 .btn-success {
-  color: var(--nyrkio-light-gray3);
+  color: var(--nyrkio-light-gray5);
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
