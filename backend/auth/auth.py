@@ -1,6 +1,5 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-import jwt
 import os
 from typing import Optional, Tuple
 import logging
@@ -19,7 +18,6 @@ from fastapi_users.authentication import (
     JWTStrategy,
 )
 from fastapi_users.exceptions import UserAlreadyExists
-from fastapi_users.router.oauth import STATE_TOKEN_AUDIENCE
 from fastapi_users.router.common import ErrorCode
 
 from pydantic import BaseModel
@@ -255,7 +253,7 @@ async def github_callback(
     response2 = await client.get(
         "https://api.github.com/user/installations",
         headers={"Authorization": f"Bearer {token['access_token']}"},
-        )
+    )
     if response.status_code != 200:
         logging.warn(
             f"Failed to fetch organizations from GitHub/user/installations: {response.status_code}: {response.text}"

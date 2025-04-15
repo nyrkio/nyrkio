@@ -10,3 +10,10 @@ async def marketplace_events(gh_event: Dict):
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub Marketplace Webhook")
     return {"success": "Thank you for using Nyrkiö. For Faster Software!"}
+
+
+@market_router.post("/webhook")
+async def github_events(gh_event: Dict):
+    store = DBStore()
+    await store.log_json_event(gh_event, "GitHub App Webhook")
+    return {"success": "Thank you for using Nyrkiö. For Faster Software!"}
