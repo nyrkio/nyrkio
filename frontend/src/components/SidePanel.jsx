@@ -159,7 +159,7 @@ const LoginSidePanel = ({ loggedIn }) => {
         Login
       </Link>
       <Link to="/signup" className="nav-link nav-link-login">
-        Sign up
+        Create account
       </Link>
     </>
   );

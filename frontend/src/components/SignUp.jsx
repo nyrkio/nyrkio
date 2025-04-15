@@ -1,7 +1,8 @@
 import { useState } from "react";
 import posthog from "posthog-js";
+import gh_permissions_img from "../static/github_permissions.png";
 
-export const SignUpPage = ({ setLoggedIn }) => {
+export const SignUpPage = () => {
   const formState = {
     Visible: "Visible",
     Registered: "Registered",
@@ -51,6 +52,7 @@ export const SignUpPage = ({ setLoggedIn }) => {
     });
   };
 
+  /*
   // TODO (mfleming) Move to lib
   const githubSubmit = async (e) => {
     e.preventDefault();
@@ -67,19 +69,47 @@ export const SignUpPage = ({ setLoggedIn }) => {
       })
       .catch((error) => console.log(error));
   };
+  */
+  const githubInstall = async(e) => {
+    e.preventDefault();
+    console.log("Github install");
+    const url = " https://github.com/apps/nyrkio/installations/new";
+    console.log(url);
+    window.location.href = url;
+  };
 
   if (showForm === formState.Visible) {
     return (
-      <div className="container">
+      <div id="signup" className="container">
         <div className="row">
           <div className="col">
-            <h3 className="text-center mt-5">Sign Up</h3>
+            <h3 className="text-center mt-5">Create new account</h3>
           </div>
         </div>
-        <div className="row">
-          <div className="col text-center mt-5">
+        <div className="row ">
+          <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
+            <hr />
+            <p>           <strong className="nyrkio-accent">Recommended:</strong><br /> Install Nyrkiö as a GitHub app <sup>*</sup>:</p>
+            <button className="btn btn-success" onClick={githubInstall}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              fill="currentColor"
+              className="bi bi-github"
+              viewBox="0 0 16 16"
+            >
+              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
+            </svg>{" "}
+              Install Nyrkiö GitHub app &nbsp;
+            </button>
+          </div>
+
+          {/*
+          <div className="text-center mt-5 col-lg-4  "  style={{"paddingLeft": "1em"}}>
+            <hr />
+            <p>GitHub OAuth login only:</p>
             <button className="btn btn-success" onClick={githubSubmit}>
-              GitHub
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="16"
@@ -89,13 +119,15 @@ export const SignUpPage = ({ setLoggedIn }) => {
                 viewBox="0 0 16 16"
               >
                 <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-              </svg>
+              </svg>{" "}
+              Login with GitHub &nbsp;
             </button>
           </div>
-        </div>
-        <hr className="col-md-5 mx-auto" />
-        <div className="row mt-5 justify-content-center">
-          <div className="col-md-4">
+          */}
+          <div className="text-justify  mt-5 mb-5 col-lg-6" style={{"paddingLeft": "2em"}}>
+            <hr />
+            <p><strong>Nyrkiö unplugged (no GitHub):</strong><br />
+            Just use your email address and choose a password:</p>
             <form onSubmit={signUpSubmit}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
@@ -103,7 +135,7 @@ export const SignUpPage = ({ setLoggedIn }) => {
                 </label>
                 <input
                   type="email"
-                  className="form-control"
+                  className="form-control w-50"
                   id="emailInput"
                   onChange={(e) => setEmail(e.target.value)}
                 />
@@ -112,7 +144,7 @@ export const SignUpPage = ({ setLoggedIn }) => {
                 </label>
                 <input
                   type="password"
-                  className="form-control"
+                  className="form-control w-50"
                   id="passwordInput"
                   onChange={(e) => setPassword(e.target.value)}
                 />
@@ -120,19 +152,25 @@ export const SignUpPage = ({ setLoggedIn }) => {
                   We'll send you an email once your account is ready.
                 </div>
               </div>
-              <div className="text-center">
+              <div className="text-justify">
                 <button type="submit" className="btn btn-success">
                   Submit
                 </button>
               </div>
             </form>
-            <div className="row pt-5">
-              <div className="form-text">
-                <p>
+            <div className="row pt-3">
+              <div className="form-text text-justify" >
                   Already have an acccount? <a href="/login">Log in here</a>
-                </p>
               </div>
             </div>
+          </div>
+        </div>
+        <div className="row">
+          <div className="text-justify col-lg-4">
+            <p><sup>*)</sup>GitHub will ask to grant Nyrkiö the following permissions:</p>
+            <img src={gh_permissions_img} alt="Github permissions dialog" width="100%"/>
+            <p>You can choose to not grant any one of those permissions. Nyrkiö will
+            continue to work without the particular feature.</p>
           </div>
         </div>
       </div>

@@ -526,19 +526,25 @@ const UserInfo = () => {
   useEffect(() => {
     getOrganizations().then((data) => {
       console.log(data);
+
+      var nOrgs = [];
+      var gOrgs = [];
+      if(data.forEach) {
+
       var temp = [];
       data.forEach((d) => {
         temp.push(d.organization.login);
       });
 
       setOrgs(temp);
-      var nOrgs = [];
-      var gOrgs = [];
       temp.forEach((o) => {
         nOrgs.push('<a href="/orgs/'+o+'">nyrkio.com/orgs/'+o+'</a>');
         nOrgs.push(' (<a href="/org/'+o+'">config</a>) <br />');
         gOrgs.push('<a href="https://github.com/orgs/'+o+'">'+o+'</a><br />');
       });
+
+
+      };
 
       if(nOrgs.length > 0)  setNyrkioOrgs(nOrgs);
       else setNyrkioOrgs(["😱"]);

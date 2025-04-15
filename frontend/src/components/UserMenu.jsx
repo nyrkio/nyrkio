@@ -62,7 +62,7 @@ export const UserMenu = ({ setLoggedIn }) => {
     getOrganizations().then((data) => {
 
       var temp = [];
-      if ( data !== undefined ){
+      if ( data !== undefined && data.forEach ){
         data.forEach((d) => {
           temp.push(d.organization.login);
         });

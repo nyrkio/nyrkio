@@ -251,6 +251,19 @@ async def github_callback(
         update = UserUpdate(oauth_accounts=data)
         user = await user_manager.update(update, user, safe=True)
 
+    # Apparently this should work too / list orgs where Nyrkiö was installed.
+    response2 = await client.get(
+        "https://api.github.com/user/installations",
+        headers={"Authorization": f"Bearer {token['access_token']}"},
+        )
+    if response.status_code != 200:
+        logging.warn(
+            f"Failed to fetch organizations from GitHub/user/installations: {response.status_code}: {response.text}"
+        )
+    else:
+        # TODO: maybe use this later
+        logging.debug(response2)
+
     response = await jwt_backend.login(get_jwt_strategy(), user)
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
