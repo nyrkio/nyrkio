@@ -183,6 +183,8 @@ export const HunterSettings = ({callback=noop}) => {
     const data = await response.json();
     console.debug(data);
     if (
+      data &&
+      data.core &&
       Object.keys(data).length > 0 &&
       data.hasOwnProperty("core") &&
       Object.keys(data.core).length > 0
