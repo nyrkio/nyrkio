@@ -126,7 +126,7 @@ export const SignUpPage = () => {
           */}
           <div className="text-justify  mt-5 mb-5 col-lg-6" style={{"paddingLeft": "2em"}}>
             <hr />
-            <p><strong>Nyrkiö unplugged (no GitHub):</strong><br />
+            <p><strong>Nyrkiö unplugged</strong> (no GitHub):<br />
             Just use your email address and choose a password:</p>
             <form onSubmit={signUpSubmit}>
               <div className="mb-3">
