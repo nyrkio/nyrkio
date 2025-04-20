@@ -2,7 +2,7 @@
 
 Now comes the main bit -- uploading performance test results.
 
-By far the easiest way to do this is our nyrkio/change-`detection@v2` GitHub action.
+By far the easiest way to do this is our `nyrkio/change-detection@v2` GitHub action.
 
 If you use any of the common benchmark frameworks (pytest-benchark, benchmark.js, Google and Catch2 C++ benchmark frameworks...)
 then you just pipe their output to the `change-detection` action and it will take care of the rest!

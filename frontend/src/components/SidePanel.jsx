@@ -123,6 +123,13 @@ const DocsSidePanel = ({ loggedIn }) => {
       <Link to="/docs/getting-started" className="nav-link">
         Getting started
       </Link>
+      <Link to="/docs/getting-started#getting-started-github-action" className="nav-link nav-level2">
+        GitHub action
+      </Link>
+      <Link to="/docs/getting-started#getting-started-curl" className="nav-link nav-level2">
+        Generic HTTP / curl
+      </Link>
+
       <Link to="/docs/working-with-graphs" className="nav-link">
         Working with the graphs
       </Link>

@@ -78,8 +78,8 @@ const LearnMore = () => {
 export const DemoVideo = () => {
   return (
     <iframe
-      width="560"
-      height="315"
+      width="933"
+      height="525"
       src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
       title="YouTube video player"
       frameBorder="0"

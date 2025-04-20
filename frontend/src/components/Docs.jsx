@@ -87,7 +87,7 @@ const FirstHalf = () => {
   return (
     <>
       <div>
-        <h1> Getting started in 3 easy steps</h1>
+        <h1 id="getting-started-github-action"> Getting started in 3 easy steps</h1>
 
         <p>
           The easiest way to use Nyrkiö Change Detection on GitHub is to add the <a
@@ -117,8 +117,8 @@ const FirstHalf = () => {
         <h2> 2. Create a JWT token</h2>
         <p>
           We use JWT to access the Nyrkiö API. Click again on the red button on
-          your top right. If you are logged in you can now select _User
-          Settings_.
+          your top right. If you are logged in you can now select <strong>User
+          Settings</strong>.
         </p>
 
         <img src={img3} />
@@ -129,8 +129,8 @@ const FirstHalf = () => {
 
         <img src={img4} />
 
-        <p>Now head to <code>https://github.com/<strong>USER_OR_ORG</strong>/<strong>PROJECT</strong>/settings/secrets/actions</code>
-           Store the token you just created either as a <em>Environment secret</em> or <em>Repository secret</em>. We'll use then
+        <p>Now head to <code>https://github.com/<strong>USER_OR_ORG</strong>/<strong>PROJECT</strong>/settings/secrets/actions</code>&nbsp;.
+           Store the token you just created either as a <em>Environment secret</em> or <em>Repository secret</em>. We'll use the
            variable name <code>NYRKIO_JWT_TOKEN</code> for it below.
         </p>
 
@@ -143,7 +143,7 @@ const FirstHalfCurl = () => {
   return (
     <>
       <div>
-        <h2> 1.Create a user account</h2>
+        <h2 id="getting-started-curl"> 1.Create a user account</h2>
 
         <p>Click on the Login button in the top right corner:</p>
 
