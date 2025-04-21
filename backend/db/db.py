@@ -777,9 +777,18 @@ class DBStore(object):
 
         We don't do any validation on the configuration, so it's up to the caller to
         ensure that the configuration is valid.
+
+        Note that the incoming config object in many cases will default to None for the fields
+        that user didn't set to any value. Hence None means such values should be ignored.
+        That again means that once set, a config option cannot be unset. But note that there's
+        a HTTP DELETE endpoint that will delete the entire config.
         """
         user_config = self.db.user_config
         editable = dict(config)
+        keys = list(editable.keys())
+        for k in keys:
+            if editable[k] is None:
+                del editable[k]
         editable["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
         await user_config.update_one({"user_id": id}, {"$set": editable}, upsert=True)
 
