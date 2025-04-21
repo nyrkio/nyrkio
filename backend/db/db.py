@@ -1239,10 +1239,17 @@ def filter_out_pr_results(results, pr_commit):
     """
     Filter out results that are not for the given PR commit.
     """
-    return list(
+    # TODO: I don't think this is needed anymore?
+    initial = len(results)
+    filtered = list(
         filter(
             lambda x: "pull_request" not in x
             or x["attributes"]["git_commit"] == pr_commit,
             results,
         )
     )
+    if len(filtered) < initial:
+        logging.warning(
+            "Filtered test results in python. This should happen at DB level."
+        )
+    return filtered
