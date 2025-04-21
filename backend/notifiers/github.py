@@ -1,8 +1,133 @@
+from typing import Dict
+from backend.hunter.hunter.series import AnalyzedSeries
 import logging
 import time
+from datetime import datetime
 
 import httpx
 import jwt
+
+from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
+
+import os
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+
+
+class GitHubIssueNotification(AbstractNotification):
+    pass
+
+
+class GitHubIssueNotifier(AbstractNotifier):
+    """
+    File one GitHub issue per commit, if commit has one or more regressions
+    """
+
+    def __init__(
+        self,
+        api_url,
+        gh_config,
+        since: datetime = None,
+        base_url: str = "https://nyrkio.com/result/",
+        public_base_url: str = None,
+        public_tests: list = None,
+    ):
+        super().__init__(
+            api_url, gh_config, since, base_url, public_base_url, public_tests
+        )
+        self.github = gh_config
+        self.token_url = gh_config["app"]["installation"]["access_tokens_url"]
+        self.client = httpx.AsyncClient()
+        self.owner = gh_config["app"]["installation"]["account"]["login"]
+        # Note that repo name will be filled in later
+        self.api_url = api_url.format(self.owner, "{}")
+
+    async def send_notifications(self, message, git_repo=None):
+        self.gh_access_token = await fetch_access_token(self.token_url)
+        self.headers = {"Authorization": f"Bearer {self.gh_access_token}"}
+        payload = {
+            "title": "Nyrkiö detected change points, on {}".format(
+                str(datetime.today())[:16]
+            ),
+            "body": message,
+            "labels": ["nyrkio"],
+        }
+        print(self.api_url, git_repo)
+        print(payload)
+        if message:
+            repo_name = git_repo.split("/")[-1]
+            url = self.api_url.format(repo_name)
+            response = await self.client.post(url, json=payload, headers=self.headers)
+
+            if response.status_code >= 400:
+                logging.error(
+                    f"Failed to post issue about performance change to GitHub: {response.status_code}: {response.text}"
+                )
+                logging.error(f"URL was: {url}")
+            data = response.text
+            print(data)
+            return data
+
+    def create_notifications(self, series: Dict[str, AnalyzedSeries]):
+        self.notification = GitHubIssueNotification(
+            series,
+            self.since,
+            self.base_url,
+            self.public_base_url,
+            self.public_tests,
+        )
+        message, git_repo = self.notification.create_message()
+        self.message = message
+        return message, git_repo
+
+    def create_markdown_message(self):
+        mdmessage = super().create_markdown_message()
+        mdmessage = mdmessage
+
+    async def notify(self, series):
+        message, git_repo = self.create_notifications(series)
+        await self.send_notifications(message, git_repo=git_repo)
+
+
+async def fetch_access_token(token_url):
+    """Grab an access token for the Nyrkio app installation."""
+    # See https://docs.github.com/
+    pem = "/usr/src/backend/keys/nyrkio.pem"
+    try:
+        with open(pem, "rb") as pem_file:
+            signing_key = pem_file.read()
+    except FileNotFoundError:
+        logging.error(f"Could not find GitHub app pem file: {pem}")
+        raise
+
+    payload = {
+        # Issued at time
+        "iat": int(time.time()),
+        # JWT expiration time (10 minutes maximum)
+        "exp": int(time.time()) + 600,
+        # GitHub App's identifier
+        "iss": 699959,
+    }
+
+    encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
+
+    client = httpx.AsyncClient()
+
+    response = await client.post(
+        token_url,
+        headers={
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"Bearer {encoded_jwt}",
+        },
+    )
+    if response.status_code != 201:
+        logging.error(
+            f"Failed to fetch access token: {response.status_code}: {response.json()}"
+        )
+        return None
+
+    access_token = response.json()["token"]
+    return access_token
 
 
 class GitHubCommentNotifier:

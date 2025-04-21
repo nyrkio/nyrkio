@@ -7,6 +7,7 @@ import logging
 import os
 from typing import Dict, List, Tuple, Optional, Any
 
+from bson.objectid import ObjectId
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
 import asyncio
@@ -859,16 +860,27 @@ class DBStore(object):
         test_config = self.db.test_config
         await test_config.delete_many({"user_id": id, "test_name": test_name})
 
-    async def get_public_results(self) -> Tuple[List[Dict], List[Dict]]:
+    async def get_public_results(
+        self, user_or_org_id=None
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Get all public results.
+
+        If user_or_org_id is given, return all public tests owned by that user.
 
         Returns an empty list if no results are found.
         """
         test_configs = self.db.test_config
         exclude_projection = {"_id": 0}
+        query = {"public": True}
+        if user_or_org_id is not None:
+            if not isinstance(user_or_org_id, int):
+                query["user_id"] = ObjectId(user_or_org_id)
+            else:
+                query["user_id"] = user_or_org_id
+
         results = (
-            await test_configs.find({"public": True}, exclude_projection)
+            await test_configs.find(query, exclude_projection)
             .sort("attributes, test_name")
             .to_list(None)
         )

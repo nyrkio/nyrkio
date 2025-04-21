@@ -991,13 +991,32 @@ def test_duplicate_result_message_includes_key(client):
 def test_add_and_get_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
+    config = {
+        "notifiers": {"slack": True, "github": False, "since_days": 14},
+        "core": {"min_magnitude": 0.01, "max_pvalue": 0.01},
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    assert response.json() == {**config, "billing": None}
+
+
+def test_add_and_get_partial_user_config(client):
+    """Ensure that we can store and retrieve user configuration"""
+    client.login()
     config = {"notifiers": {"slack": True, "github": False, "since_days": 14}}
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None, "billing": None}
+    assert response.json() == {
+        **config,
+        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
+        "billing": None,
+    }
 
 
 def test_update_existing_user_config(client):
@@ -1009,7 +1028,11 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "core": None, "billing": None}
+    assert response.json() == {
+        **config,
+        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
+        "billing": None,
+    }
 
     new_config = {"notifiers": {"slack": False, "github": True, "since_days": 14}}
     response = client.put("/api/v0/user/config", json=new_config)
@@ -1017,7 +1040,11 @@ def test_update_existing_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**new_config, "core": None, "billing": None}
+    assert response.json() == {
+        **new_config,
+        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
+        "billing": None,
+    }
 
 
 def test_create_test_result_with_slash_separator(client):

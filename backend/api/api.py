@@ -23,6 +23,7 @@ from backend.db.db import (
     DBStore,
 )
 from backend.notifiers.slack import SlackNotifier
+from backend.notifiers.github import GitHubIssueNotifier
 from backend.api.background import precompute_cached_change_points
 
 app = FastAPI(openapi_url="/openapi.json")
@@ -65,7 +66,22 @@ async def changes(
 ):
     store = DBStore()
     config, config_meta = await store.get_user_config(user.id)
-    notifiers = await get_notifiers(notify, config, user)
+
+    public_base_url = None
+    public_test_objects, public_test_objects_meta = await store.get_public_results(
+        user.id
+    )
+    print(public_test_objects)
+    if public_test_objects:
+        public_base_url = "https://nyrkio.com/public/"
+    public_test_names = [entry["test_name"] for entry in public_test_objects]
+    notifiers = await get_notifiers(
+        notify,
+        config,
+        user,
+        public_tests=public_test_names,
+        public_base_url=public_base_url,
+    )
     return await calc_changes(test_name, user.id, notifiers)
 
 
@@ -299,18 +315,54 @@ async def get_notifiers(
     config: dict,
     user: User,
     base_url: str = "https://nyrkio.com/result/",
+    public_base_url: str = None,
+    public_tests: list = None,
 ) -> list:
     notifiers = []
+    exceptions = []
+
     if notify:
         slack = config.get("slack", {})
-        print(f"slack {slack} for user {user.id}")
+        since_days = config.get("since_days", 14)
+        since = _since_days(since_days)
+        print(f"slack {slack} for user {user.id} since {since_days} days = {since}")
         if slack and slack.get("channel"):
             if not user.slack:
-                raise HTTPException(status_code=400, detail="Slack not configured")
+                exceptions.append(
+                    HTTPException(
+                        status_code=400,
+                        detail="Slack alerts were requested but Slack integration is not configured for this user ({})".format(
+                            user.model_dump()
+                        ),
+                    )
+                )
 
             url = user.slack["incoming_webhook"]["url"]
             channel = slack["channel"]
-            since = _since_days(config.get("since_days", 14))
             print(f"Appending slack notifier for {url} and {channel}")
-            notifiers.append(SlackNotifier(url, [channel], since, base_url))
+            notifiers.append(
+                SlackNotifier(
+                    url, [channel], since, base_url, public_base_url, public_tests
+                )
+            )
+        gh = config.get("github", {})
+        print(f"github {gh} for user {user.id}")
+        if gh and gh.get("app"):
+            print(f"Appending github issue notifier for {user.id}")
+            api_url = "https://api.github.com/repos/{}/{}/issues"
+            notifiers.append(
+                GitHubIssueNotifier(
+                    api_url, gh, since, base_url, public_base_url, public_tests
+                )
+            )
+
+    if len(exceptions) > 0:
+        if len(exceptions) > 1:
+            print(
+                "Multiple errors when trying to notify about recent regressions. Only the first one was returned over HTTP to the client:"
+            )
+        for exc in exceptions:
+            print(exc)
+        raise exceptions[0]
+
     return notifiers
