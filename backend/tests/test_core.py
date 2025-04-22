@@ -322,9 +322,10 @@ def test_notifiers_get_notified():
     class Notifier:
         notified = False
 
-        async def notify(self, analyzed_series):
+        async def notify(self, analyzed_series, user_or_org_id):
             self.notified = True
             output = {}
+            output["user_or_org_id"] = user_or_org_id
             for k, v in analyzed_series.items():
                 output[k] = v.change_points_by_time
             self.expected_output = output

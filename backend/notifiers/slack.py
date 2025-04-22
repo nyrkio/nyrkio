@@ -204,7 +204,8 @@ class SlackNotifier(AbstractNotifier):
         self.since = since
         self.base_url = base_url
 
-    async def notify(self, series):
+    async def notify(self, series, user_or_org_id):
+        _ = user_or_org_id
         dispatches = SlackNotification(
             series,
             since=self.since,

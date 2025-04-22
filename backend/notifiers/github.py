@@ -3,13 +3,14 @@ from backend.hunter.hunter.series import AnalyzedSeries
 import logging
 import time
 from datetime import datetime
+import os
 
 import httpx
 import jwt
 
 from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
+from backend.db.db import DBStore
 
-import os
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 
@@ -33,7 +34,12 @@ class GitHubIssueNotifier(AbstractNotifier):
         public_tests: list = None,
     ):
         super().__init__(
-            api_url, gh_config, since, base_url, public_base_url, public_tests
+            api_url,
+            gh_config,
+            since,
+            base_url,
+            public_base_url,
+            public_tests,
         )
         self.github = gh_config
         self.token_url = gh_config["app"]["installation"]["access_tokens_url"]
@@ -52,8 +58,7 @@ class GitHubIssueNotifier(AbstractNotifier):
             "body": message,
             "labels": ["nyrkio"],
         }
-        print(self.api_url, git_repo)
-        print(payload)
+
         if message:
             repo_name = git_repo.split("/")[-1]
             url = self.api_url.format(repo_name)
@@ -64,17 +69,28 @@ class GitHubIssueNotifier(AbstractNotifier):
                     f"Failed to post issue about performance change to GitHub: {response.status_code}: {response.text}"
                 )
                 logging.error(f"URL was: {url}")
-            data = response.text
-            print(data)
+
+            data = response.json()
+            # print(data)
+            if "url" in data:
+                issue_url = data["url"]
+                for c in self.notification.commits:
+                    for test_name, obj in self.notification.reported_commits[c].items():
+                        if (
+                            "issue_url" not in obj
+                            and obj["date"] == self.notification.batch_timestamp
+                        ):
+                            obj["issue_url"] = issue_url
             return data
 
-    def create_notifications(self, series: Dict[str, AnalyzedSeries]):
+    def create_notifications(self, series: Dict[str, AnalyzedSeries], reported_commits):
         self.notification = GitHubIssueNotification(
             series,
             self.since,
             self.base_url,
             self.public_base_url,
             self.public_tests,
+            reported_commits,
         )
         message, git_repo = self.notification.create_message()
         self.message = message
@@ -82,11 +98,20 @@ class GitHubIssueNotifier(AbstractNotifier):
 
     def create_markdown_message(self):
         mdmessage = super().create_markdown_message()
-        mdmessage = mdmessage
+        return mdmessage
 
-    async def notify(self, series):
-        message, git_repo = self.create_notifications(series)
+    async def notify(self, series, user_or_org_id):
+        reported_commits = None
+        if user_or_org_id is not None:
+            db = DBStore()
+            reported_commits = await db.get_reported_commits(user_or_org_id)
+            if reported_commits is None:
+                reported_commits = {}
+
+        message, git_repo = self.create_notifications(series, reported_commits)
         await self.send_notifications(message, git_repo=git_repo)
+        if reported_commits is not None:
+            await db.save_reported_commits(reported_commits, user_or_org_id)
 
 
 async def fetch_access_token(token_url):

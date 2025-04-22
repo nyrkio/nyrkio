@@ -220,9 +220,9 @@ class PerformanceTestResultSeries:
         else:
             return old_data
 
-    async def calculate_changes(self, notifiers=None):
+    async def calculate_changes(self, notifiers=None, user_or_org_id=None):
         change_points = self.calculate_change_points()
-        reports = await self.produce_reports(change_points, notifiers)
+        reports = await self.produce_reports(change_points, notifiers, user_or_org_id)
         return reports
 
     def calculate_change_points(
@@ -293,11 +293,14 @@ class PerformanceTestResultSeries:
         return all_change_points
 
     async def produce_reports(
-        self, all_change_points: Dict[str, AnalyzedSeries], notifiers: list
+        self,
+        all_change_points: Dict[str, AnalyzedSeries],
+        notifiers: list,
+        user_or_org_id,
     ) -> list:
         if notifiers:
             for notifier in notifiers:
-                await notifier.notify(all_change_points)
+                await notifier.notify(all_change_points, user_or_org_id)
 
         reports = []
         for metric_name, analyzed_series in all_change_points.items():

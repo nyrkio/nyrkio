@@ -1183,6 +1183,27 @@ class DBStore(object):
         }
         await coll.insert_one(wrapper)
 
+    async def get_reported_commits(self, user_or_org_id):
+        coll = self.db.reported_commits
+        query = {}
+        if not isinstance(user_or_org_id, int):
+            query["user_id"] = ObjectId(user_or_org_id)
+        else:
+            query["user_id"] = user_or_org_id
+
+        return await coll.find_one(query)
+
+    async def save_reported_commits(self, reported_commits, user_or_org_id):
+        coll = self.db.reported_commits
+        query = {}
+        if not isinstance(user_or_org_id, int):
+            query["user_id"] = ObjectId(user_or_org_id)
+        else:
+            query["user_id"] = user_or_org_id
+        if not isinstance(reported_commits, dict):
+            raise ValueError("reported_commits must be a dictionary {}")
+        return await coll.update_one(query, {"$set": reported_commits}, upsert=True)
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

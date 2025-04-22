@@ -1,8 +1,9 @@
-from typing import Dict
+from typing import Dict, Any
 from datetime import datetime
 from pytz import UTC
 from backend.hunter.hunter.series import AnalyzedSeries
 from backend.api.public import extract_public_test_name
+from backend.db.db import DBStore
 
 import httpx
 
@@ -15,17 +16,18 @@ class AbstractNotification:
         base_url: str = "https://nyrkio.com/result/",
         public_base_url: str = None,
         public_tests: list = None,
+        reported_commits=None,
     ):
-        self.git_repo = None
-        """
-        Used to smuggle out git_repo from the test data to the top level notifier class
-        """
         self.since = since
         self.base_url = base_url
         self.tests_with_insufficient_data = []
         self.test_analyzed_series = dict()
         self.public_tests = public_tests if public_tests is not None else []
         self.public_base_url = public_base_url
+        self.reported_commits = reported_commits
+        self.batch_timestamp = datetime.today()
+        self.commits = []
+
         for test, series in test_analyzed_series.items():
             if series:
                 self.test_analyzed_series[test] = series
@@ -39,6 +41,24 @@ class AbstractNotification:
                 if self.since and cpg_time < self.since:
                     continue
                 date_str = cpg_time.strftime("%Y-%m-%dT%H:%M:%S")
+                commit = group.attributes["git_commit"]
+                if self.reported_commits is not None:
+                    if (
+                        commit in self.reported_commits
+                        and test_name in self.reported_commits[commit]
+                    ):
+                        continue
+                    else:
+                        if commit not in self.reported_commits:
+                            self.reported_commits[commit] = {}
+                        else:
+                            self.reported_commits[commit][test_name] = {
+                                "date": self.batch_timestamp
+                            }
+                            # Later on in the sequency we add also the github issue url above
+
+                    self.commits.append(commit)
+
                 if test_name not in self.dates_change_points:
                     self.dates_change_points[test_name] = {}
                 if metric_name not in self.dates_change_points[test_name]:
@@ -277,21 +297,14 @@ class AbstractNotifier:
         self.public_tests = public_tests if public_tests is not None else []
 
         self.client = httpx.AsyncClient()
-        # self.headers = {"Authorization": f"Bearer {token['access_token']}"}
 
-    # def create_notifications(self, series: Dict[str, AnalyzedSeries]):
-    #     self.notification = AbstractNotification(
-    #         series,
-    #         self.since,
-    #         self.base_url,
-    #         self.public_base_url,
-    #         self.public_tests,
-    #     )
-    #     self.dispatches = self.notification.create_dispatches()
-
-    # async def send_notifications(self):
-    #     return await self.client.post(self.api_url, headers=self.headers)
-
-    async def notify(self, series):
-        self.create_notifications(series)
-        await self.send_notifications(git_repo=self.notification.git_repo)
+    async def notify(
+        self, series: Dict[str, AnalyzedSeries], user_or_org_id: Any = None
+    ):
+        reported_commits = None
+        if user_or_org_id is not None:
+            db = DBStore()
+            reported_commits = db.get_reported_commits(user_or_org_id)
+        message, git_repo = self.create_notifications(series, reported_commits)
+        await self.send_notifications(message, git_repo=git_repo)
+        await db.save_reported_commits(reported_commits, user_or_org_id)
