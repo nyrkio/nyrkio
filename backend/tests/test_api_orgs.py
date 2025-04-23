@@ -423,7 +423,12 @@ def test_org_config(gh_client):
     response = gh_client.get("/api/v0/orgs/org/nyrkio")
     assert response.status_code == 200
     json = response.json()
-    assert json == data
+    assert json == {
+        "core": {
+            "min_magnitude": 1.0,
+            "max_pvalue": 0.05,
+        }
+    }
 
 
 @pytest.mark.skip("Pydantic model isn't validating correctly")

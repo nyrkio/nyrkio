@@ -7,6 +7,7 @@ import logging
 import os
 from typing import Dict, List, Tuple, Optional, Any
 
+from bson.objectid import ObjectId
 import motor.motor_asyncio
 from pymongo.errors import BulkWriteError
 import asyncio
@@ -777,9 +778,18 @@ class DBStore(object):
 
         We don't do any validation on the configuration, so it's up to the caller to
         ensure that the configuration is valid.
+
+        Note that the incoming config object in many cases will default to None for the fields
+        that user didn't set to any value. Hence None means such values should be ignored.
+        That again means that once set, a config option cannot be unset. But note that there's
+        a HTTP DELETE endpoint that will delete the entire config.
         """
         user_config = self.db.user_config
         editable = dict(config)
+        keys = list(editable.keys())
+        for k in keys:
+            if editable[k] is None:
+                del editable[k]
         editable["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
         await user_config.update_one({"user_id": id}, {"$set": editable}, upsert=True)
 
@@ -850,16 +860,27 @@ class DBStore(object):
         test_config = self.db.test_config
         await test_config.delete_many({"user_id": id, "test_name": test_name})
 
-    async def get_public_results(self) -> Tuple[List[Dict], List[Dict]]:
+    async def get_public_results(
+        self, user_or_org_id=None
+    ) -> Tuple[List[Dict], List[Dict]]:
         """
         Get all public results.
+
+        If user_or_org_id is given, return all public tests owned by that user.
 
         Returns an empty list if no results are found.
         """
         test_configs = self.db.test_config
         exclude_projection = {"_id": 0}
+        query = {"public": True}
+        if user_or_org_id is not None:
+            if not isinstance(user_or_org_id, int):
+                query["user_id"] = ObjectId(user_or_org_id)
+            else:
+                query["user_id"] = user_or_org_id
+
         results = (
-            await test_configs.find({"public": True}, exclude_projection)
+            await test_configs.find(query, exclude_projection)
             .sort("attributes, test_name")
             .to_list(None)
         )
@@ -1162,6 +1183,37 @@ class DBStore(object):
         }
         await coll.insert_one(wrapper)
 
+    async def get_reported_commits(self, user_or_org_id):
+        coll = self.db.reported_commits
+        query = {}
+        if not isinstance(user_or_org_id, int):
+            query["user_id"] = ObjectId(user_or_org_id)
+        else:
+            query["user_id"] = user_or_org_id
+
+        return await coll.find_one(query)
+
+    async def save_reported_commits(self, reported_commits, user_or_org_id):
+        coll = self.db.reported_commits
+        query = {}
+        if not isinstance(user_or_org_id, int):
+            query["user_id"] = ObjectId(user_or_org_id)
+        else:
+            query["user_id"] = user_or_org_id
+        if not isinstance(reported_commits, dict):
+            raise ValueError("reported_commits must be a dictionary {}")
+        return await coll.update_one(query, {"$set": reported_commits}, upsert=True)
+
+    async def set_github_installation(self, gh_id, gh_event):
+        coll = self.db.github_installations
+        return await coll.update_one(
+            {"_id": int(gh_id)}, {"$set": gh_event}, upsert=True
+        )
+
+    async def get_github_installation(self, gh_id):
+        coll = self.db.github_installations
+        return await coll.find_one({"_id": int(gh_id)})
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
@@ -1230,10 +1282,17 @@ def filter_out_pr_results(results, pr_commit):
     """
     Filter out results that are not for the given PR commit.
     """
-    return list(
+    # TODO: I don't think this is needed anymore?
+    initial = len(results)
+    filtered = list(
         filter(
             lambda x: "pull_request" not in x
             or x["attributes"]["git_commit"] == pr_commit,
             results,
         )
     )
+    if len(filtered) < initial:
+        logging.warning(
+            "Filtered test results in python. This should happen at DB level."
+        )
+    return filtered

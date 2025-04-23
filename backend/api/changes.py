@@ -195,7 +195,7 @@ async def calc_changes(
     series, changes, is_cached = await _calc_changes(
         test_name, user_id, pull_request, pr_commit
     )
-    reports = await series.produce_reports(changes, notifiers)
+    reports = await series.produce_reports(changes, notifiers, user_id)
     return reports
 
 

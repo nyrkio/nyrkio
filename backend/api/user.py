@@ -1,9 +1,10 @@
-from typing import Optional
+from typing import Optional, Dict
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from backend.auth import auth
 from backend.db.db import User, DBStore
+from backend.core.config import Config
 
 user_router = APIRouter(prefix="/user")
 
@@ -30,10 +31,20 @@ class Billing(BaseModel):
     plan: str
 
 
+class GitHubConfig(BaseModel):
+    """
+    Holds the json received by /github/webhook when user installed Nyrkiö as a GitHub app
+    """
+
+    # The app config has lots of stuff so don't even try to lock down more than it's a json object
+    app: Dict
+
+
 class UserConfig(BaseModel):
     notifiers: Optional[Notifiers] = None
-    core: Optional[Core] = None
+    core: Optional[Core] = Config()
     billing: Optional[Billing] = None
+    github: Optional[GitHubConfig] = None
 
 
 def validate_config(config: UserConfig):
@@ -44,7 +55,10 @@ def validate_config(config: UserConfig):
         )
 
     if config.billing is not None:
-        raise HTTPException(status_code=400, detail="Cannot set billing plan")
+        raise HTTPException(status_code=400, detail="You cannot set billing plan")
+
+    if config.github is not None:
+        raise HTTPException(status_code=400, detail="You cannot set github app config")
 
 
 @user_router.get("/config")
@@ -57,6 +71,7 @@ async def get_user_config(user: User = Depends(auth.current_active_user)):
     return config
 
 
+# Note: Someone was lazy and under the hood we do an upsert both for post and put
 @user_router.post("/config")
 async def set_user_config(
     config: UserConfig, user: User = Depends(auth.current_active_user)

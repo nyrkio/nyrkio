@@ -1,48 +1,29 @@
 from slack_sdk.webhook.async_client import AsyncWebhookClient
 from typing import Dict
 from datetime import datetime
-from pytz import UTC
 from backend.hunter.hunter.series import AnalyzedSeries
+from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
 
 import logging
 import json
 
 
-class SlackNotification:
+class SlackNotification(AbstractNotification):
     def __init__(
         self,
         test_analyzed_series: Dict[str, AnalyzedSeries],
-        data_selection_description: str = None,
         since: datetime = None,
         base_url: str = "https://nyrkio.com/result/",
+        public_base_url: str = None,
+        public_tests: list = None,
     ):
-        self.data_selection_description = data_selection_description
-        self.since = since
-        self.base_url = base_url
-        self.tests_with_insufficient_data = []
-        self.test_analyzed_series = dict()
-        for test, series in test_analyzed_series.items():
-            if series:
-                self.test_analyzed_series[test] = series
-            else:
-                self.tests_with_insufficient_data.append(test)
-
-        self.dates_change_points = {}
-        for metric_name, analyzed_series in self.test_analyzed_series.items():
-            test_name = analyzed_series.test_name()
-            for group in analyzed_series.change_points_by_time:
-                cpg_time = datetime.fromtimestamp(group.time, tz=UTC)
-                if self.since and cpg_time < self.since:
-                    continue
-
-                date_str = cpg_time.strftime("%Y-%m-%dT%H:%M:%S")
-                if test_name not in self.dates_change_points:
-                    self.dates_change_points[test_name] = {}
-                if metric_name not in self.dates_change_points[test_name]:
-                    self.dates_change_points[test_name][metric_name] = {}
-                self.dates_change_points[test_name][metric_name][date_str] = group
-
-        self.make_intro()
+        super().__init__(
+            test_analyzed_series,
+            since,
+            base_url,
+            public_base_url,
+            public_tests,
+        )
 
     def make_intro(self):
         self.intro = [
@@ -143,9 +124,8 @@ class SlackNotification:
                                                     metric,
                                                     round(change_percent, 1),
                                                 ),
-                                                "url": "{}{}?commit={}&timestamp={}#{}".format(
-                                                    self.base_url,
-                                                    test_name,
+                                                "url": "{}?commit={}&timestamp={}#{}".format(
+                                                    self.get_test_url(test_name),
                                                     commit,
                                                     timestamp,
                                                     metric,
@@ -181,7 +161,7 @@ class SlackNotification:
             txt_msg = ""
             delimiter = ""
             for test in self.tests_with_insufficient_data:
-                txt_msg += "{}[{}]({}{})".format(delimiter, test, self.base_url, test)
+                txt_msg += "{}[{}]({})".format(delimiter, test, self.get_test_url(test))
                 delimiter = ", "
 
             return [
@@ -204,22 +184,30 @@ class SlackNotification:
             return []
 
 
-class SlackNotifier:
+class SlackNotifier(AbstractNotifier):
     """
     An asynchroneous notifier for Slack that uses Hunter's SlackNotification
     to send messages.
     """
 
-    def __init__(self, url, channels, since=None, base_url="https://nyrkio.com/result"):
-        self.client = AsyncWebhookClient(url)
-        self.channels = channels
+    def __init__(
+        self,
+        api_url,
+        channels=None,
+        since=None,
+        base_url="https://nyrkio.com/result",
+        public_base_url=None,
+        public_tests=None,
+    ):
+        self.client = AsyncWebhookClient(api_url)
+        self.channels = channels if channels is not None else []
         self.since = since
         self.base_url = base_url
 
-    async def notify(self, series):
+    async def notify(self, series, user_or_org_id):
+        _ = user_or_org_id
         dispatches = SlackNotification(
             series,
-            data_selection_description=None,
             since=self.since,
             base_url=self.base_url,
         ).create_dispatches()
@@ -229,34 +217,6 @@ class SlackNotifier:
             )
             return
 
-        # test = [
-        #     {
-        #         "type": "section",
-        #         "text": {
-        #             "type": "mrkdwn",
-        #             "text": "A message *with some bold text* and _some italicized text_.",
-        #         },
-        #     }
-        # ]
-        # test_block = [
-        #     {
-        #         "blocks": [
-        #             {
-        #                 "type": "section",
-        #                 "text": {
-        #                     "text": "A message *with some bold text* and _some italicized text_.",
-        #                     "type": "mrkdwn",
-        #                 },
-        #                 "fields": [
-        #                     {"type": "mrkdwn", "text": "*Priority*"},
-        #                     {"type": "mrkdwn", "text": "*Type*"},
-        #                     {"type": "plain_text", "text": "High"},
-        #                     {"type": "plain_text", "text": "Silly"},
-        #                 ],
-        #             }
-        #         ]
-        #     }
-        # ]
         for blocks in dispatches:
             if not blocks:
                 continue

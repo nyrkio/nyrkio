@@ -76,8 +76,23 @@ async def changes(
 
     from backend.api.api import calc_changes, get_notifiers
 
+    public_base_url = None
+    public_test_objects, public_test_objects_meta = await store.get_public_results(
+        org["id"]
+    )
+    if public_test_objects:
+        # When an org owns a test, it already has the org name as prefix
+        public_base_url = "https://nyrkio.com/public/"
+    public_test_names = [entry["test_name"] for entry in public_test_objects]
+
     notifiers = await get_notifiers(
-        notify, config, user, base_url="https://nyrkio.com/orgs/"
+        notify,
+        config,
+        user,
+        base_url="https://nyrkio.com/orgs/",
+        public_base_url=public_base_url,
+        public_tests=public_test_names,
+        org=org,
     )
     return await calc_changes(test_name, org["id"], notifiers)
 
