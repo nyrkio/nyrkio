@@ -95,7 +95,7 @@ const FirstHalf = () => {
           action to your workflows.
         </p>
         <p>
-          Alternatively, you can use the HTTP API directly. <a href="curl">See
+          Alternatively, you can use the HTTP API directly. <a href="#curl">See
           below for a generic <code>curl</code> example</a>.
         </p>
 
