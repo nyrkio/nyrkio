@@ -193,9 +193,9 @@ async def github_callback(
     #     )
 
     account_id, account_email = await github_oauth.get_id_email(token["access_token"])
-    gh_profile = await github_oauth.get_profile(token["access_token"])
-    print("OAuth2 callback")
-    print(gh_profile)
+    # gh_profile = await github_oauth.get_profile(token["access_token"])
+    # print("OAuth2 callback")
+    # print(gh_profile)
 
     if account_email is None:
         raise HTTPException(
