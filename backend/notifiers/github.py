@@ -42,9 +42,9 @@ class GitHubIssueNotifier(AbstractNotifier):
             public_tests,
         )
         self.github = gh_config
-        self.token_url = gh_config["app"]["installation"]["access_tokens_url"]
+        self.token_url = gh_config["installation"]["access_tokens_url"]
         self.client = httpx.AsyncClient()
-        self.owner = gh_config["app"]["installation"]["account"]["login"]
+        self.owner = gh_config["installation"]["account"]["login"]
         # Note that repo name will be filled in later
         self.api_url = api_url.format(self.owner, "{}")
 

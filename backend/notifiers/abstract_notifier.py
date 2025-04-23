@@ -80,7 +80,7 @@ class AbstractNotification:
             return self.base_url + test_name
 
     def make_intro(self):
-        self.intro = "Changes since " + self.since.strftime("%Y-%m-%dT%H:%M:%S")
+        self.intro = "New changes since " + self.since.strftime("%Y-%m-%dT%H:%M:%S")
 
     def pop_intro(self):
         intro = self.intro
@@ -228,8 +228,7 @@ class AbstractNotification:
 
         footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/NyrkioLogo_Final_Logomark_RedTan_50x50.png)](https://nyrkio.com)"
 
-        commit_footer = "<sub>Listing all commits mentioned in this message for search and backlink purposes:\n\n"
-        commit_footer = commit_footer + ",".join(commits) + "</sub>"
+        commit_footer = "<sub>Nyrkiö only files one issue per commit. Please check nyrkio.com to see if there are more changes found than what is reported here.</sub>"
 
         if not message:
             return "", None
@@ -239,6 +238,7 @@ class AbstractNotification:
                 + table_head
                 + message
                 + self._get_markdown_tests_with_insufficient_data()
+                + commit_footer
                 + footer
             ), git_repo
 

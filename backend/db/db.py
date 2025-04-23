@@ -1204,6 +1204,16 @@ class DBStore(object):
             raise ValueError("reported_commits must be a dictionary {}")
         return await coll.update_one(query, {"$set": reported_commits}, upsert=True)
 
+    async def set_github_installation(self, gh_id, gh_event):
+        coll = self.db.github_installations
+        return await coll.update_one(
+            {"_id": int(gh_id)}, {"$set": gh_event}, upsert=True
+        )
+
+    async def get_github_installation(self, gh_id):
+        coll = self.db.github_installations
+        return await coll.find_one({"_id": int(gh_id)})
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

@@ -92,6 +92,7 @@ async def changes(
         base_url="https://nyrkio.com/orgs/",
         public_base_url=public_base_url,
         public_tests=public_test_names,
+        org=org,
     )
     return await calc_changes(test_name, org["id"], notifiers)
 

@@ -55,10 +55,10 @@ def validate_config(config: UserConfig):
         )
 
     if config.billing is not None:
-        raise HTTPException(status_code=400, detail="Cannot set billing plan")
+        raise HTTPException(status_code=400, detail="You cannot set billing plan")
 
     if config.github is not None:
-        raise HTTPException(status_code=400, detail="Cannot set github app config")
+        raise HTTPException(status_code=400, detail="You cannot set github app config")
 
 
 @user_router.get("/config")

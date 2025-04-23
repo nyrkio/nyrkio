@@ -317,6 +317,7 @@ async def get_notifiers(
     base_url: str = "https://nyrkio.com/result/",
     public_base_url: str = None,
     public_tests: list = None,
+    org: dict = None,
 ) -> list:
     notifiers = []
     exceptions = []
@@ -326,6 +327,8 @@ async def get_notifiers(
         since_days = config.get("since_days", 14)
         since = _since_days(since_days)
         print(f"slack {slack} for user {user.id} since {since_days} days = {since}")
+        # TODO: I'll leave the slack config to be attached to the user for now, because someone
+        # is already using this. Later we can allow also slack to be configured in the org
         if slack and slack.get("channel"):
             if not user.slack:
                 exceptions.append(
@@ -345,16 +348,35 @@ async def get_notifiers(
                     url, [channel], since, base_url, public_base_url, public_tests
                 )
             )
-        gh = config.get("github", {})
-        print(f"github {gh} for user {user.id}")
-        if gh and gh.get("app"):
-            print(f"Appending github issue notifier for {user.id}")
-            api_url = "https://api.github.com/repos/{}/{}/issues"
-            notifiers.append(
-                GitHubIssueNotifier(
-                    api_url, gh, since, base_url, public_base_url, public_tests
+        gh_id = None
+        # If org was passed, this is coming from api/organization.py
+        if org is not None:
+            gh_id = org["id"]
+        else:
+            if user.oauth_accounts:
+                for account in user.oauth_accounts:
+                    if account.oauth_name != "github" or not account.account_id:
+                        continue
+                    gh_id = account.account_id
+
+        print(f"github {gh_id} for user {user.id}")
+        if gh_id is not None:
+            db = DBStore()
+            gh_config = await db.get_github_installation(gh_id)
+            print(gh_config)
+            if gh_config:
+                print(f"Appending github issue notifier {gh_id} for {user.id}")
+                api_url = "https://api.github.com/repos/{}/{}/issues"
+                notifiers.append(
+                    GitHubIssueNotifier(
+                        api_url,
+                        gh_config,
+                        since,
+                        base_url,
+                        public_base_url,
+                        public_tests,
+                    )
                 )
-            )
 
     if len(exceptions) > 0:
         if len(exceptions) > 1:
