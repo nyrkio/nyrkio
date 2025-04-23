@@ -228,7 +228,7 @@ class AbstractNotification:
 
         footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/NyrkioLogo_Final_Logomark_RedTan_50x50.png)](https://nyrkio.com)"
 
-        commit_footer = "<sub>Nyrkiö only files one issue per commit. Please check nyrkio.com to see if there are more changes found than what is reported here.</sub>"
+        commit_footer = "\n\n<sub>Nyrkiö only files one issue per commit. Please check nyrkio.com to see if there are more changes found than what is reported here.</sub>"
 
         if not message:
             return "", None
