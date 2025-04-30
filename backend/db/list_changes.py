@@ -17,8 +17,8 @@ async def change_points_per_commit(
     query = _set_parameters(user_or_org_id, test_name_prefix, commit)
 
     res = await store.get_collection_valid_change_points(query)
-    docs = res.to_list([])
-    return docs
+    docs = res.to_list(None)
+    return docs if docs is not None else []
 
 
 CHANGE_POINTS_PER_COMMIT = [
