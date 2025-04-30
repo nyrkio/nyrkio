@@ -1,6 +1,7 @@
 import { OrigTestList, TestList, SingleResultWithTestname } from "./Dashboard";
 import { createShortNames } from "../lib/utils";
 import { Breadcrumb } from "./Breadcrumb";
+import { AllChangePoints } from "./AllChangePoints";
 
 const Loading = ({loading}) => {
   if (loading) {
@@ -53,8 +54,6 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
         }
           <AllChangePoints
             testNamePrefix={decodeURIComponent(prefix).replace("https://github.com/", "")}
-            loading={loading}
-            setLoading={setLoading}
             />
           <OrigTestList
             baseUrls={baseUrls}

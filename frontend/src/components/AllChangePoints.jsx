@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 
-export const AllChangePoints = ({ testNamePrefix, loading, setLoading }) => {
-    const [changePointData, setChangePointData] = useState([])
+export const AllChangePoints = ({ testNamePrefix }) => {
+    const [changePointData, setChangePointData] = useState([]);
+    const [loading, setLoading] = useState(false);
     const fetchAllChanges = async () => {
       const response = await fetch("/api/v0/changes/perCommit/" + testNamePrefix, {
         headers: {
@@ -21,7 +22,8 @@ export const AllChangePoints = ({ testNamePrefix, loading, setLoading }) => {
     };
 
   const loadData = () => {
-    fetchData();
+      setLoading(true);
+      fetchData().finally(()=> setLoading(false));
   };
   useEffect(loadData, []);
 
