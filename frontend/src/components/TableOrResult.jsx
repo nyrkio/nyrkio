@@ -21,9 +21,9 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name)=>decodeURIComponent(name));
 
-//   console.debug(singleTestName);
-//   console.debug(prefix);
-//   console.debug(data);
+   console.debug(singleTestName);
+   console.debug(prefix);
+   console.debug(data);
 
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
@@ -53,7 +53,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
         <Breadcrumb testName={prefix} baseUrls={baseUrls} />
         }
           <AllChangePoints
-            testNamePrefix={decodeURIComponent(prefix).replace("https://github.com/", "")}
+            testNamePrefix={prefix}
             />
           <OrigTestList
             baseUrls={baseUrls}
