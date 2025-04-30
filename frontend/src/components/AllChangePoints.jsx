@@ -23,7 +23,7 @@ export const AllChangePoints = ({ testNamePrefix }) => {
 
   const loadData = () => {
       setLoading(true);
-      fetchData().finally(()=> setLoading(false));
+      fetchAllChanges().finally(()=> setLoading(false));
   };
   useEffect(loadData, []);
 
