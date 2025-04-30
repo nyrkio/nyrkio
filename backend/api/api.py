@@ -40,7 +40,7 @@ async def changes_per_commit(
     commit: str = None,
     user: User = Depends(auth.current_active_user),
 ):
-    return change_points_per_commit(user.id, test_name_prefix, commit)
+    return await change_points_per_commit(user.id, test_name_prefix, commit)
 
 
 @api_router.post("/result/{test_name:path}/changes/enable")

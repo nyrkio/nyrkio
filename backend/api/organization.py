@@ -64,7 +64,7 @@ async def changes_per_commit(
 ):
     user_orgs = get_user_orgs(user)
     org = get_org_with_raise(user_orgs, test_name_prefix.split("/")[0])
-    return change_points_per_commit(org["id"], test_name_prefix, commit)
+    return await change_points_per_commit(org["id"], test_name_prefix, commit)
 
 
 @org_router.get("/result/{test_name:path}/changes")

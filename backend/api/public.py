@@ -56,7 +56,7 @@ async def results() -> List[Dict]:
 @public_router.get("/changes/perCommit/{test_name_prefix:path}")
 async def changes_per_commit(test_name_prefix: str, commit: str = None):
     user_or_org_id, test_name_prefix = await _figure_out_user_and_test(test_name_prefix)
-    return change_points_per_commit(user_or_org_id, test_name_prefix, commit)
+    return await change_points_per_commit(user_or_org_id, test_name_prefix, commit)
 
 
 @public_router.get("/result/{test_name:path}/changes")
