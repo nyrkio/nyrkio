@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 
-export const AllChangePoints = ({ testNamePrefix }) => {
+export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
     const [changePointData, setChangePointData] = useState([]);
     const [loading, setLoading] = useState(false);
-    const fetchAllChanges = async () => {
-      const response = await fetch("/api/v0/changes/perCommit/" + testNamePrefix, {
+
+    const fetchAllChanges = async (testNamePfx) => {
+      const response = await fetch(baseUrls.apiRoot + "changes/perCommit/" + testNamePfx, {
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
@@ -23,7 +24,7 @@ export const AllChangePoints = ({ testNamePrefix }) => {
 
   const loadData = () => {
       setLoading(true);
-      fetchAllChanges().finally(()=> {setLoading(false); console.log("loading false");});
+      fetchAllChanges(testNamePrefix).finally(()=> {setLoading(false); console.log("loading false");});
   };
   useEffect(loadData, []);
 
@@ -31,11 +32,13 @@ export const AllChangePoints = ({ testNamePrefix }) => {
 
   return (
       <>
+      <div className="row justify-content-center">
       <ChangePointSummaryTable
         changeData={changePointData}
         loading={loading}
         title={"Temporary title"}
       />
+      </div>
       </>
     )
 };

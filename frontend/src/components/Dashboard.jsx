@@ -125,6 +125,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
   var testName=undefined;
 
   const baseUrls = {
+    apiRoot: "/api/v0/",
     api: "/api/v0/result/",
     tests: "tests",
     testRoot: "/",
