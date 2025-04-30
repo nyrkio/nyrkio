@@ -17,7 +17,7 @@ export const AllChangePoints = ({ testNamePrefix }) => {
         console.debug(response);
         return;
       }
-      data = await response.json();
+      const data = await response.json();
       setChangePointData(data);
     };
 
