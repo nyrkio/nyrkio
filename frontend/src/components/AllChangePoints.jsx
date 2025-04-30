@@ -12,7 +12,7 @@ export const AllChangePoints = ({ testNamePrefix }) => {
         },
       });
 
-´      if (response.status != 200) {
+      if (response.status != 200) {
         console.error(response.status + ": Failed to fetch all change points under path: " + testNamePrefix);
         console.debug(response);
         return;
