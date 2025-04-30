@@ -530,8 +530,8 @@ class DBStore(object):
 
         return separate_meta(results)
 
-    def get_collection_valid_change_points(self):
-        return self.db.v_valid_change_points
+    async def get_collection_valid_change_points(self, query):
+        return self.db.v_valid_change_points.aggregate(query)
 
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """

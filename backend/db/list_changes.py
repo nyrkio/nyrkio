@@ -8,7 +8,6 @@ async def change_points_per_commit(
     user_or_org_id: Any, test_name_prefix: str, commit: str = None
 ):
     store = DBStore()
-    coll = store.get_collection_valid_change_points()
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
@@ -17,7 +16,7 @@ async def change_points_per_commit(
 
     query = _set_parameters(user_or_org_id, test_name_prefix, commit)
 
-    res = await coll.aggregate(query)
+    res = await store.get_collection_valid_change_points(query)
     docs = res.to_list([])
     return docs
 
