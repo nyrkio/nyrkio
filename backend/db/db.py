@@ -530,6 +530,9 @@ class DBStore(object):
 
         return separate_meta(results)
 
+    def get_db(self):
+        return self.db
+
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
         Get a list of all test names for a given user. If id is None then
