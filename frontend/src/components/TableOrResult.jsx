@@ -51,6 +51,11 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
         {embed == "yes" ? "" :
         <Breadcrumb testName={prefix} baseUrls={baseUrls} />
         }
+          <AllChangePoints
+            testNamePrefix={decodeURIComponent(prefix).replace("https://github.com/", "")}
+            loading={loading}
+            setLoading={setLoading}
+            />
           <OrigTestList
             baseUrls={baseUrls}
             testNames={testNames}
