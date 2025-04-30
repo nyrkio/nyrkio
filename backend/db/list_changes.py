@@ -20,6 +20,7 @@ async def change_points_per_commit(
     docs = await db.v_valid_change_points.aggregate(query).to_list[None]
     return docs
 
+
 async def change_points_per_commit2(
     user_or_org_id: Any, test_name_prefix: str, commit: str = None
 ):
