@@ -531,7 +531,9 @@ class DBStore(object):
         return separate_meta(results)
 
     async def get_collection_valid_change_points(self, query):
-        res = await self.db.v_valid_change_points.aggregate(query)
+        # user_config is just to join pvalue and magnitude. Really this will $lookup the
+        # change_points collection
+        res = await self.db.user_config.aggregate(query)
         docs = res.to_list(None)
         return docs if docs is not None else []
 

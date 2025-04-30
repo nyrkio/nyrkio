@@ -19,12 +19,52 @@ async def change_points_per_commit(
     return await store.get_collection_valid_change_points(query)
 
 
-CHANGE_POINTS_PER_COMMIT = [
-    {
+def _set_parameters(user_or_org_id, test_name_prefix, commit=None):
+    uid = user_or_org_id
+    if isinstance(user_or_org_id, str):
+        uid = ObjectId(user_or_org_id)
+
+    # Mainly be careful not to modify the template itself
+    query = VIEW_WORKAROUND + CHANGE_POINTS_PER_COMMIT
+    query[0] = {
         "$match": {
-            "user_id": "XXXXXXXXXX",
+            "user_id": uid,
+        }
+    }
+    # Check if we're even close?
+    print(query[2+2])
+    query[2 + 2] = {"$match": {"test_name": {"$regex": f"^{test_name_prefix}.*"}}}
+    if commit is not None:
+        query.append({"$match": {"$_id.commit": commit}})
+    return query
+
+
+# MongoMotor or whatever it is we are using here, somehow didn't work with views. So we just
+# Prefix the view here.
+# Note that this needs to be run against user_config. The change_points are added with $lookup
+VIEW_WORKAROUND = [
+    {"$match": {"user_id": "XXXXXXXX"}},
+    {
+        "$lookup": {
+            "from": "change_points",
+            "let": {
+                "uid": "$user_id",
+                "p": "$core.max_pvalue",
+                "m": "$core.min_magnitude",
+                "lastmod": "$meta.last_modified",
+            },
+            "pipeline": [
+                {"$match": {"$expr": {"$eq": ["$_id.user_id", "$$uid"]}}},
+                {"$match": {"$expr": {"$eq": ["$_id.max_pvalue", "$$p"]}}},
+                {"$match": {"$expr": {"$eq": ["$_id.min_magnitude", "$$m"]}}},
+                {"$match": {"$expr": {"$gte": ["$meta.last_modified", "$$lastmod"]}}},
+            ],
+            "as": "change_points",
         }
     },
+]
+
+CHANGE_POINTS_PER_COMMIT = [
     {"$unwind": "$change_points"},
     {
         "$addFields": {
@@ -71,21 +111,3 @@ CHANGE_POINTS_PER_COMMIT = [
         }
     },
 ]
-
-
-def _set_parameters(user_or_org_id, test_name_prefix, commit=None):
-    uid = user_or_org_id
-    if isinstance(user_or_org_id, str):
-        uid = ObjectId(user_or_org_id)
-
-    # Mainly be careful not to modify the template itself
-    query = CHANGE_POINTS_PER_COMMIT
-    query[0] = {
-        "$match": {
-            "user_id": uid,
-        }
-    }
-    query[3] = {"$match": {"test_name": {"$regex": f"^{test_name_prefix}.*"}}}
-    if commit is not None:
-        query.append({"$match": {"$_id.commit": commit}})
-    return query
