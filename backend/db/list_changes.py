@@ -8,6 +8,22 @@ async def change_points_per_commit(
     user_or_org_id: Any, test_name_prefix: str, commit: str = None
 ):
     store = DBStore()
+    db = store.db
+
+    # the match is not on arbitrary prefix, rather only on full "parts", that is,
+    # if this was a path to something then each part is a directory name.
+    if test_name_prefix[-1] != "/":
+        test_name_prefix += "/"
+
+    query = _set_parameters(user_or_org_id, test_name_prefix, commit)
+
+    docs = await db.v_valid_change_points.aggregate(query).to_list[None]
+    return docs
+
+async def change_points_per_commit2(
+    user_or_org_id: Any, test_name_prefix: str, commit: str = None
+):
+    store = DBStore()
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
@@ -25,14 +41,15 @@ def _set_parameters(user_or_org_id, test_name_prefix, commit=None):
         uid = ObjectId(user_or_org_id)
 
     # Mainly be careful not to modify the template itself
-    query = VIEW_WORKAROUND + CHANGE_POINTS_PER_COMMIT
+    # query = VIEW_WORKAROUND + CHANGE_POINTS_PER_COMMIT
+    query = CHANGE_POINTS_PER_COMMIT
     query[0] = {
         "$match": {
             "user_id": uid,
         }
     }
     # Check if we're even close?
-    print(query[2 + 2])
+    # print(query[2+2])
     query[2 + 2] = {"$match": {"test_name": {"$regex": f"^{test_name_prefix}.*"}}}
     if commit is not None:
         query.append({"$match": {"$_id.commit": commit}})
