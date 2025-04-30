@@ -531,7 +531,7 @@ class DBStore(object):
         return separate_meta(results)
 
     async def get_collection_valid_change_points(self, query):
-        res = self.db.v_valid_change_points.aggregate(query)
+        res = await self.db.v_valid_change_points.aggregate(query)
         docs = res.to_list(None)
         return docs if docs is not None else []
 
