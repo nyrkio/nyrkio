@@ -7,8 +7,8 @@ from backend.db.db import DBStore
 async def change_points_per_commit(
     user_or_org_id: Any, test_name_prefix: str, commit: str = None
 ):
-    db = DBStore()
-    coll = db.v_valid_change_points
+    store = DBStore()
+    coll = store.db.v_valid_change_points
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
