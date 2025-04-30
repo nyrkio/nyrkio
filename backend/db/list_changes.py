@@ -32,7 +32,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, commit=None):
         }
     }
     # Check if we're even close?
-    print(query[2+2])
+    print(query[2 + 2])
     query[2 + 2] = {"$match": {"test_name": {"$regex": f"^{test_name_prefix}.*"}}}
     if commit is not None:
         query.append({"$match": {"$_id.commit": commit}})
