@@ -3,7 +3,7 @@ import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 
 export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
     const [changePointData, setChangePointData] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const [loading, setLoading] = useState(true);
 
     const fetchAllChanges = async (testNamePfx) => {
       const response = await fetch(baseUrls.apiRoot + "changes/perCommit/" + testNamePfx, {
