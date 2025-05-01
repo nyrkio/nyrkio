@@ -82,7 +82,7 @@ VIEW_WORKAROUND = [
 ]
 
 CHANGE_POINTS_PER_COMMIT = [
-    {"$unwind": "$change_points"},
+    {"$match": {"user_id": "XXXXXXXX"}},
     {
         "$addFields": {
             "cp": {"$objectToArray": "$change_points.change_points"},
@@ -125,6 +125,8 @@ CHANGE_POINTS_PER_COMMIT = [
             },
             "repo": {"$push": "$repo"},
             "branch": {"$push": "$branch"},
+            "commit_timestamp": {"$push": "$time"}
+            "change_points_timestamp": {"$max": "$meta.change_points_timestamp"}
         }
     },
 ]
