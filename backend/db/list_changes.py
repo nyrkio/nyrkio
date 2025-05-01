@@ -10,7 +10,7 @@ async def change_points_per_commit(
     store = DBStore()
     db = store.db
 
-    config = store.get_user_config(user_or_org_id)
+    config = await store.get_user_config(user_or_org_id)
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
