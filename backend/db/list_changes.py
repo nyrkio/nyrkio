@@ -24,21 +24,20 @@ async def change_points_per_commit(
     return docs
 
 
-
-
 def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None):
     uid = user_or_org_id
     if isinstance(user_or_org_id, str):
         uid = ObjectId(user_or_org_id)
 
-
     CHANGE_POINTS_PER_COMMIT = [
-        {"$match": {"_id.user_id": user_or_org_id,
-                    "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
-                    "_id.max_pvalue": config.get("core", {}).get("max_pvalue", 0.0001)                                                                          ,
-                    "_id.min_magnitude": config.get("core",{}).get("min_magnitude", 0.05),
-                    "meta.change_points_timestamp": meta["last_modified"],
-                    }
+        {
+            "$match": {
+                "_id.user_id": user_or_org_id,
+                "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
+                "_id.max_pvalue": config.get("core", {}).get("max_pvalue", 0.0001),
+                "_id.min_magnitude": config.get("core", {}).get("min_magnitude", 0.05),
+                "meta.change_points_timestamp": meta["last,{}d.get("],                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          , 0.05)
+            }
         },
         {
             "$addFields": {
@@ -86,8 +85,6 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
     ]
 
-
-
     query = CHANGE_POINTS_PER_COMMIT
     query[0] = {
         "$match": {
@@ -97,5 +94,3 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
     if commit is not None:
         query.append({"$match": {"$_id.commit": commit}})
     return query
-
-
