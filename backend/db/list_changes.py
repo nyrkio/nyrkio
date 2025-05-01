@@ -10,14 +10,14 @@ async def change_points_per_commit(
     store = DBStore()
     db = store.db
 
-    config = await store.get_user_config(user_or_org_id)
+    config, meta = await store.get_user_config(user_or_org_id)
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
     if test_name_prefix[-1] != "/":
         test_name_prefix += "/"
 
-    query = _set_parameters(user_or_org_id, test_name_prefix, config, commit)
+    query = _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit)
     print(query)
     docs = await db.v_valid_change_points.aggregate(query).to_list(None)
     print(docs)
@@ -26,7 +26,7 @@ async def change_points_per_commit(
 
 
 
-def _set_parameters(user_or_org_id, test_name_prefix, config, commit=None):
+def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None):
     uid = user_or_org_id
     if isinstance(user_or_org_id, str):
         uid = ObjectId(user_or_org_id)
@@ -35,9 +35,9 @@ def _set_parameters(user_or_org_id, test_name_prefix, config, commit=None):
     CHANGE_POINTS_PER_COMMIT = [
         {"$match": {"_id.user_id": user_or_org_id,
                     "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
-                    "_id.max_pvalue": config.core["max_pvalue"],
-                    "_id.min_magnitude": config.core["min_magnitude"],
-                    "meta.change_points_timestamp": config.meta["last_modified"],
+                    "_id.max_pvalue": config["core"]["max_pvalue"],
+                    "_id.min_magnitude": config["core"]["min_magnitude"],
+                    "meta.change_points_timestamp": meta["last_modified"],
                     }
         },
         {
