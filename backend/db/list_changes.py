@@ -43,33 +43,54 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
         {
             "$addFields": {
-                "cp": {"$objectToArray": "$change_points"},
+                "cp": {
+                    "$objectToArray": "$change_points",
+                },
                 "test_name": "$_id.test_name",
-            }
+            },
         },
-        {"$unwind": "$change_points"},
+        {
+            "$unwind": "$change_points",
+        },
+        {
+            "$addFields": {
+                "cpArr": {
+                    "$objectToArray": "$change_points",
+                },
+            },
+        },
         {
             "$addFields": {
                 "commitObjects": {
                     "$zip": {
                         "inputs": [
-                            "$change_points.v.attributes.git_commit",
-                            "$change_points.v.attributes.git_repo",
-                            "$change_points.v.attributes.branch",
-                            "$change_points.v.time",
-                        ]
-                    }
-                }
-            }
+                            "$cpArr.v.attributes.git_commit",
+                            "$cpArr.v.attributes.git_repo",
+                            "$cpArr.v.attributes.branch",
+                            "$cpArr.v.time",
+                        ],
+                    },
+                },
+            },
         },
-        {"$unwind": "$commitObjects"},
+        {
+            "$unwind": "$commitObjects",
+        },
         {
             "$addFields": {
-                "commit": {"$arrayElemAt": ["$commitObjects", 0]},
-                "repo": {"$arrayElemAt": ["$commitObjects", 1]},
-                "branch": {"$arrayElemAt": ["$commitObjects", 2]},
-                "time": {"$arrayElemAt": ["$commitObjects", 4]},
-            }
+                "commit": {
+                    "$arrayElemAt": ["$commitObjects", 0],
+                },
+                "repo": {
+                    "$arrayElemAt": ["$commitObjects", 1],
+                },
+                "branch": {
+                    "$arrayElemAt": ["$commitObjects", 2],
+                },
+                "time": {
+                    "$arrayElemAt": ["$commitObjects", 4],
+                },
+            },
         },
         {
             "$group": {
@@ -79,14 +100,21 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "max_pvalue": "$change_points._id.max_pvalue",
                     "min_magnitude": "$change_points._id.min_magnitude",
                 },
-                "repo": {"$push": "$repo"},
-                "branch": {"$push": "$branch"},
-                "commit_timestamp": {"$push": "$time"},
-                "change_points_timestamp": {"$max": "$meta.change_points_timestamp"},
-            }
+                "repo": {
+                    "$push": "$repo",
+                },
+                "branch": {
+                    "$push": "$branch",
+                },
+                "commit_timestamp": {
+                    "$push": "$time",
+                },
+                "change_points_timestamp": {
+                    "$max": "$meta.change_points_timestamp",
+                },
+            },
         },
     ]
-
     query = CHANGE_POINTS_PER_COMMIT
     query[0] = {
         "$match": {
