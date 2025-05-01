@@ -1,5 +1,7 @@
 from typing import Any
+
 from bson.objectid import ObjectId
+from datetime import datetime
 
 from backend.db.db import DBStore
 
@@ -32,22 +34,20 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
     CHANGE_POINTS_PER_COMMIT = [
         {
             "$match": {
-                "_id.user_id": user_or_org_id,
+                "_id.user_id": uid,
                 "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
                 "_id.max_pvalue": config.get("core", {}).get("max_pvalue", 0.0001),
                 "_id.min_magnitude": config.get("core", {}).get("min_magnitude", 0.05),
-                "meta.change_points_timestamp": meta.get(
-                    "change_points_timestamp", 0.05
-                ),
-            }
+                "meta.change_points_timestamp": {
+                    "$gte": meta.get("change_points_timestamp", datetime(1970, 1, 1)),
+                },
+            },
         },
         {
             "$addFields": {
-                "cp": {
-                    "$objectToArray": "$change_points",
-                },
+                "cp": {"$objectToArray": "$change_points"},
                 "test_name": "$_id.test_name",
-            },
+            }
         },
         {
             "$unwind": "$change_points",
