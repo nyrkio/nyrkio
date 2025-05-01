@@ -116,11 +116,6 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
     ]
     query = CHANGE_POINTS_PER_COMMIT
-    query[0] = {
-        "$match": {
-            "user_id": uid,
-        }
-    }
     if commit is not None:
         query.append({"$match": {"$_id.commit": commit}})
     return query
