@@ -36,7 +36,9 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
                 "_id.max_pvalue": config.get("core", {}).get("max_pvalue", 0.0001),
                 "_id.min_magnitude": config.get("core", {}).get("min_magnitude", 0.05),
-                "meta.change_points_timestamp": meta["last,{}d.get("],                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          , 0.05)
+                "meta.change_points_timestamp": meta.get(
+                    "change_points_timestamp", 0.05
+                ),
             }
         },
         {
