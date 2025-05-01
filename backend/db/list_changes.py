@@ -85,12 +85,12 @@ CHANGE_POINTS_PER_COMMIT = [
     {"$match": {"user_id": "XXXXXXXX"}},
     {
         "$addFields": {
-            "cp": {"$objectToArray": "$change_points.change_points"},
+            "cp": {"$objectToArray": "$change_points"},
             "test_name": "$change_points._id.test_name",
         }
     },
     {"$match": {"test_name": "XXXXXXXXXX"}},
-    {"$project": {"change_points.change_points": False}},
+    {"$project": {"change_points": False}},
     {"$unwind": "$cp"},
     {
         "$addFields": {
