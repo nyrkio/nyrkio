@@ -21,7 +21,7 @@ async def change_points_per_commit(
 
     query = _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit)
     print(query)
-    docs = await db.v_valid_change_points.aggregate(query).to_list(None)
+    docs = await db.change_points.aggregate(query).to_list(None)
     print(docs)
     return docs
 
