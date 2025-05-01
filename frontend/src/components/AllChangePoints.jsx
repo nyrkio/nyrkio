@@ -19,7 +19,9 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
         return;
       }
       const data = await response.json();
-      setChangePointData(data);
+      const wrapper = {};
+      wrapper[testNamePfx]
+      setChangePointData(wrapper);
     };
 
   const loadData = () => {
