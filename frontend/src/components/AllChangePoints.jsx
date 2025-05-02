@@ -25,8 +25,11 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
     };
 
   const loadData = () => {
+    if(testNamePrefix!==undefined){
       setLoading(true);
       fetchAllChanges(testNamePrefix).finally(()=> {setLoading(false); console.log("loading false");});
+
+    }
   };
   useEffect(loadData, [testNamePrefix]);
 

@@ -83,7 +83,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "$arrayElemAt": ["$commitObjects", 2],
                 },
                 "time": {
-                    "$arrayElemAt": ["$commitObjects", 4],
+                    "$arrayElemAt": ["$commitObjects", 3],
                 },
             },
         },
