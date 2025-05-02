@@ -101,13 +101,13 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "min_magnitude": "$change_points._id.min_magnitude",
                 },
                 "repo": {
-                    "$push": "$repo",
+                    "$last": {"$arrayElemAt": ["$repo", -1]}
                 },
                 "branch": {
-                    "$push": "$branch",
+                    "$last": {"$arrayElemAt": ["$branch", -1]},
                 },
                 "commit_timestamp": {
-                    "$push": "$time",
+                    "$last": {"$arrayElemAt": ["$time", -1]},
                 },
                 "change_points_timestamp": {
                     "$max": "$meta.change_points_timestamp",
