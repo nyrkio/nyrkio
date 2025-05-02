@@ -93,7 +93,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "commit": "$commit",
                     "user_id": "$_id.user_id",
                     "max_pvalue": "$_id.max_pvalue",
-                    "min_magnitude": "_id.min_magnitude",
+                    "min_magnitude": "$_id.min_magnitude",
                 },
                 "repo": {
                     "$last": "$repo",
