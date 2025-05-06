@@ -399,7 +399,6 @@ button:focus-visible {
   background-color: transparent;
   margin-bottom: 0.5em;
 }
-
 .border-top {
   border-top: 1px solid darkgreen !important;
   background-color: var(--nyrkio-arrow-brown);
@@ -411,11 +410,13 @@ button:focus-visible {
   padding-right: 0px;
 }
 
+.navbar-left.navbar-nav .nav-link {
+  padding-right: 0em;
+}
 .navbar-left.navbar-nav .nav-link,
 .navbar-light .navbar-nav .nav-link {
   display: block;
   padding-left: 0.5em;
-  padding-right: 0em;
   padding-top: 1em;
   padding-bottom: 0.3em;
   text-decoration: none;
@@ -424,6 +425,10 @@ button:focus-visible {
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
 }
+.navbar-light .navbar-nav .nav-link {
+  padding-right: 1em;
+}
+
 
 .navbar-left.navbar-nav .nav-level2,
 .nav-level2 {
@@ -453,7 +458,7 @@ button:focus-visible {
 .navbar-left .navbar-nav a.nyrkio-logo-nav-link,
 .navbar-light .navbar-nav a.nyrkio-logo-nav-link {
   margin: 0px;
-  padding-right: 0.5em;
+  padding-right: 1em;
 }
 
 .navbar-left.navbar-nav .nav-link a,
