@@ -56,6 +56,16 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
         {
             "$addFields": {
+                "cp2": {
+                    "$objectToArray": "$cp.metrics",
+                },
+                "cp3": {
+                    "$objectToArray": "$cp.change_points",
+                },
+            },
+        },
+        {
+            "$addFields": {
                 "commitObjects": {
                     "$zip": {
                         "inputs": [
@@ -65,6 +75,8 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                             "$cp.v.time",
                             ["$cp.k"],
                             ["$cp.v.test_name"],
+                            "$cp2.v",
+                            "$cp3.v",
                         ],
                     },
                 },
@@ -93,6 +105,12 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "test_name": {
                     "$arrayElemAt": ["$commitObjects", 5],
                 },
+                "metric_unit": {
+                    "$arrayElemAt": ["$commitObjects", 6],
+                },
+                "cp_values": {
+                    "$arrayElemAt": ["$commitObjects", 7],
+                },
             },
         },
         {
@@ -114,8 +132,11 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "branch": {
                     "$last": "$branch",
                 },
-                "commit_date": {
-                    "$last": "$time",
+                "metric_unit": {
+                    "$push": "$metric_unit",
+                },
+                "cp_values": {
+                    "$push": "$cp_values",
                 },
                 "change_points_timestamp": {
                     "$max": "$meta.change_points_timestamp",
@@ -134,11 +155,10 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "metric": {
                     "name":"$metric_name",
-                    "unit": "foo/bar",
-                    "value": 1.0
+                    "unit": "$metric_unit",
+                    "value": "$cp_values"
                 },
                 "test_name": True,
-                "commit_date": True,
                 "meta":{
                     "change_points_timestamp": "$change_points_timestamp"
                 }
