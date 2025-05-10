@@ -59,10 +59,10 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         {
             "$addFields": {
                 "cp2": {
-                    "$objectToArray": "$cp.metrics",
+                    "$objectToArray": "$cp.v.metrics",
                 },
                 "cp3": {
-                    "$objectToArray": "$cp.change_points",
+                    "$objectToArray": "$cp.v.change_points",
                 },
             },
         },
