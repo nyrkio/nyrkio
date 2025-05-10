@@ -25,11 +25,22 @@ from backend.db.db import (
 from backend.notifiers.slack import SlackNotifier
 from backend.notifiers.github import GitHubIssueNotifier
 from backend.api.background import precompute_cached_change_points
+from backend.db.list_changes import change_points_per_commit
 
 app = FastAPI(openapi_url="/openapi.json")
 
 
 api_router = APIRouter()
+
+
+# New 2025-05-01, trying not to overload /result/arbitrary path/additional_paths
+@api_router.get("/changes/perCommit/{test_name_prefix:path}")
+async def changes_per_commit(
+    test_name_prefix: str,
+    commit: str = None,
+    user: User = Depends(auth.current_active_user),
+):
+    return await change_points_per_commit(user.id, test_name_prefix, commit)
 
 
 @api_router.post("/result/{test_name:path}/changes/enable")

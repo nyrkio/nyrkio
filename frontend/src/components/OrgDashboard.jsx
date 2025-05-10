@@ -51,6 +51,7 @@ export const OrgDashboard = ({embed}) => {
   const baseUrls = {
     testRootTitle: "GH Repos",
     api: "/api/v0/orgs/result/",
+    apiRoot: "/api/v0/orgs/",
     testRoot: "/orgs",
     results: "/orgs",
     result: "orgs",

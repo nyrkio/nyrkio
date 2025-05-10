@@ -54,6 +54,7 @@ export const PublicDashboard = () => {
   const baseUrls = {
     testRootTitle: "GH Repos",
     api: "/api/v0/public/result/",
+    apiRoot: "/api/v0/public/",
     testRoot: "/public",
     results: "/public",
     result: "public",

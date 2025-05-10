@@ -15,6 +15,7 @@ from backend.api.pull_request import (
     _add_pr_result,
     _get_pr_changes,
 )
+from backend.db.list_changes import change_points_per_commit
 
 """
 Per-organization test result API endpoints.
@@ -53,6 +54,17 @@ def get_org_with_raise(orgs, org_string):
         if "organization" in o and o["organization"].get("login", None) == org_string:
             return o["organization"]
     raise HTTPException(status_code=404, detail="No such organization exists")
+
+
+@org_router.get("/changes/perCommit/{test_name_prefix:path}")
+async def changes_per_commit(
+    test_name_prefix: str,
+    commit: str = None,
+    user: User = Depends(auth.current_active_user),
+):
+    user_orgs = get_user_orgs(user)
+    org = get_org_with_raise(user_orgs, test_name_prefix.split("/")[0])
+    return await change_points_per_commit(org["id"], test_name_prefix, commit)
 
 
 @org_router.get("/result/{test_name:path}/changes")
