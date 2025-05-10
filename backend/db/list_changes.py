@@ -64,7 +64,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                             "$cp.v.attributes.branch",
                             "$cp.v.time",
                             "$cp.k",
-                            "$cp.v."
+                            "$cp.v.test_name"
                         ],
                     },
                 },
@@ -89,6 +89,9 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "metric_name": {
                     "$arrayElemAt": ["$commitObjects", 4],
+                },
+                "test_name": {
+                    "$arrayElemAt": ["$commitObjects", 5],
                 },
             },
         },
