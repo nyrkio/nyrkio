@@ -16,8 +16,10 @@ async def change_points_per_commit(
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
     # if this was a path to something then each part is a directory name.
-    if test_name_prefix=="" or test_name_prefix[-1] != "/":
+    if test_name_prefix!="" and test_name_prefix[-1] != "/":
         test_name_prefix += "/"
+    if test_name_prefix == "/":
+        test_name_prefix = "";
 
     query = _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit)
     print(query)
