@@ -63,7 +63,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                             "$cp.v.attributes.git_repo",
                             "$cp.v.attributes.branch",
                             "$cp.v.time",
-                            "$cp.k",
+                            ["$cp.k"],
                             ["$cp.v.test_name"],
                         ],
                     },
