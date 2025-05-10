@@ -131,7 +131,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "git_repo": "$git_repo",
                     "test_name": "$test_name",
                     "branch": "$branch",
-                }
+                },
                 "metric": {
                     "name":"$metric_name",
                     "unit": "foo/bar",
