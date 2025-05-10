@@ -87,6 +87,8 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                             "$cp2.v",
                             "$cp3.v",
                         ],
+                        "useLongestLength":True,
+                        "defaults":["XXXX","XXXX","XXXX","XXXX","XXXX","XXXX","XXXX","XXXX"]
                     },
                 },
             },
