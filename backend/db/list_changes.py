@@ -23,6 +23,7 @@ async def change_points_per_commit(
     print(query)
     docs = await db.change_points.aggregate(query).to_list(None)
     print(docs)
+    print("------------------------------------------------------------------")
     return docs
 
 
@@ -53,6 +54,25 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
         {
             "$unwind": "$cp",
+        },
+        {
+            "$addFields": {
+                "commitObjects": {
+                    "$zip": {
+                        "inputs": [
+                            "$cp.v.attributes.git_commit",
+                            "$cp.v.attributes.git_repo",
+                            "$cp.v.attributes.branch",
+                            "$cp.v.time",
+                            "$cp.k",
+                            "$cp.v."
+                        ],
+                    },
+                },
+            },
+        },
+        {
+            "$unwind": "$commitObjects",
         },
     ]
 
