@@ -23,7 +23,6 @@ async def change_points_per_commit(
     print(query)
     docs = await db.change_points.aggregate(query).to_list(None)
     print(docs)
-    print("------------------------------------------------------------------")
     return docs
 
 
@@ -73,6 +72,59 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
         {
             "$unwind": "$commitObjects",
+        },
+        {
+            "$addFields": {
+                "commit": {
+                    "$arrayElemAt": ["$commitObjects", 0],
+                },
+                "repo": {
+                    "$arrayElemAt": ["$commitObjects", 1],
+                },
+                "branch": {
+                    "$arrayElemAt": ["$commitObjects", 2],
+                },
+                "time": {
+                    "$arrayElemAt": ["$commitObjects", 3],
+                },
+                "metric_name": {
+                    "$arrayElemAt": ["$commitObjects", 4],
+                },
+            },
+        },
+        {
+            "$group": {
+                "_id": {
+                    "git_commit": "$commit",
+                    "user_id": "$_id.user_id",
+                    "max_pvalue": "$_id.max_pvalue",
+                    "min_magnitude": "$_id.min_magnitude",
+                },
+                "time": {"$last": "$time" },
+                "time_min_max": [{"$min": "$time"}, {"$max": "$time"}],
+                "test_name": {
+                    "$push": "$test_name"
+                },
+                "metric_name": {
+                    "$push": "$metric_name"
+                },
+                "attributes" : {
+                    "git_repo": {
+                        "$last": "$repo",
+                    },
+                    "branch": {
+                        "$last": "$branch",
+                    },
+                    "commit_date": {
+                        "$last": "$time",
+                    },
+                },
+                "meta": {
+                    "change_points_timestamp": {
+                        "$max": "$meta.change_points_timestamp",
+                    },
+                },
+            },
         },
     ]
 
