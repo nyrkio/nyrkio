@@ -108,24 +108,43 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "time_max": {"$max": "$time"},
                 "test_name": {"$push": "$test_name"},
                 "metric_name": {"$push": "$metric_name"},
-                "attributes": {
-                    "git_repo": {
-                        "$last": "$repo",
-                    },
-                    "branch": {
-                        "$last": "$branch",
-                    },
-                    "commit_date": {
-                        "$last": "$time",
-                    },
+                "git_repo": {
+                    "$last": "$repo",
                 },
-                "meta": {
-                    "change_points_timestamp": {
-                        "$max": "$meta.change_points_timestamp",
-                    },
+                "branch": {
+                    "$last": "$branch",
+                },
+                "commit_date": {
+                    "$last": "$time",
+                },
+                "change_points_timestamp": {
+                    "$max": "$meta.change_points_timestamp",
                 },
             },
         },
+        {
+            "$project": {
+                "_id":True,
+                "time":True,
+                "time_min_max": ["$time_min", "$time_max"],
+                "attributes": {
+                    "git_repo": "$git_repo",
+                    "test_name": "$test_name",
+                    "branch": "$branch",
+                }
+                "metric": {
+                    "name":"$metric_name",
+                    "unit": "foo/bar",
+                    "value": 1.0
+                },
+                "test_name": True,
+                "commit_date": True,
+                "meta":{
+                    "change_points_timestamp": "$change_points_timestamp"
+                }
+
+            }
+        }
     ]
 
     query = CHANGE_POINTS_PER_COMMIT
