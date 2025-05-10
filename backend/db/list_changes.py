@@ -64,7 +64,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                             "$cp.v.attributes.branch",
                             "$cp.v.time",
                             "$cp.k",
-                            "$cp.v.test_name"
+                            "$cp.v.test_name",
                         ],
                     },
                 },
@@ -103,15 +103,12 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "max_pvalue": "$_id.max_pvalue",
                     "min_magnitude": "$_id.min_magnitude",
                 },
-                "time": {"$last": "$time" },
-                "time_min_max": [{"$min": "$time"}, {"$max": "$time"}],
-                "test_name": {
-                    "$push": "$test_name"
-                },
-                "metric_name": {
-                    "$push": "$metric_name"
-                },
-                "attributes" : {
+                "time": {"$last": "$time"},
+                "time_min": {"$min": "$time"},
+                "time_max": {"$max": "$time"},
+                "test_name": {"$push": "$test_name"},
+                "metric_name": {"$push": "$metric_name"},
+                "attributes": {
                     "git_repo": {
                         "$last": "$repo",
                     },
