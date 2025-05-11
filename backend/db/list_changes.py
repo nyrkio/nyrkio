@@ -15,11 +15,13 @@ async def change_points_per_commit(
     config, meta = await store.get_user_config(user_or_org_id)
 
     # the match is not on arbitrary prefix, rather only on full "parts", that is,
-    # if this was a path to something then each part is a directory name.
-    if test_name_prefix != "" and test_name_prefix[-1] != "/":
-        test_name_prefix += "/"
-    if test_name_prefix == "/":
-        test_name_prefix = ""
+    # # if this was a path to something then each part is a directory name.
+    # if test_name_prefix != "" and test_name_prefix[-1] != "/":
+    #     test_name_prefix += "/"
+    # if test_name_prefix == "/":
+    #     test_name_prefix = ""
+    if test_name_prefix != "" and test_name_prefix[-1] == "/":
+        test_name_prefix = test_name_prefix[:-1]
 
     query = _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit)
     print(query)
@@ -37,7 +39,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         {
             "$match": {
                 "_id.user_id": uid,
-                "_id.test_name": {"$regex": f"^{test_name_prefix}.*"},
+                "_id.test_name": {"$regex": f"^{test_name_prefix}(/.*)?"},
                 "_id.max_pvalue": config.get("core", {}).get("max_pvalue", 0.001),
                 "_id.min_magnitude": config.get("core", {}).get("min_magnitude", 0.05),
                 "meta.change_points_timestamp": {

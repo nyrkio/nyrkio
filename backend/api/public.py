@@ -28,16 +28,27 @@ same data series:
 """
 
 
-async def _figure_out_user_and_test(public_test_name):
+async def _figure_out_user_and_test(public_test_name, prefix=False):
     test_name = public_test_name
     store = DBStore()
-    test_entry = await lookup_public_test(store, test_name)
+    test_entry = False
+    all_matching = []
+    if prefix:
+        all_matching = await lookup_public_test_prefix(store, test_name)
+        if all_matching:
+            test_entry = all_matching[0]
+    else:
+        test_entry = await lookup_public_test(store, test_name)
     if not test_entry:
         raise HTTPException(status_code=404, detail="No such test exists")
 
     user_id = test_entry["user_id"]
     if is_user_id(user_id):
         test_name = test_entry["test_name"]
+
+    if prefix:
+        return user_id, all_matching
+
     return user_id, test_name
 
 
@@ -55,8 +66,17 @@ async def results() -> List[Dict]:
 
 @public_router.get("/changes/perCommit/{test_name_prefix:path}")
 async def changes_per_commit(test_name_prefix: str, commit: str = None):
-    user_or_org_id, test_name_prefix = await _figure_out_user_and_test(test_name_prefix)
-    return await change_points_per_commit(user_or_org_id, test_name_prefix, commit)
+    test_name_prefix = test_name_prefix.replace("https://github.com/", "")
+    test_name_prefix = test_name_prefix.replace("https:/github.com/", "")
+    user_or_org_id, all_matching = await _figure_out_user_and_test(
+        test_name_prefix, prefix=True
+    )
+    all_changes = []
+    for r in all_matching:
+        all_changes += await change_points_per_commit(
+            user_or_org_id, r["test_name"], commit
+        )
+    return all_changes
 
 
 @public_router.get("/result/{test_name:path}/changes")
@@ -131,6 +151,16 @@ async def lookup_public_test(store, test_name):
         if build_public_test_name(r) == test_name:
             return r
     return None
+
+
+async def lookup_public_test_prefix(store, test_name):
+    results, _ = await store.get_public_results()
+    all_matching = []
+    for r in results:
+        public_test = build_public_test_name(r)
+        if public_test.startswith(test_name):
+            all_matching.append(r)
+    return all_matching
 
 
 def extract_public_test_name(attributes):
