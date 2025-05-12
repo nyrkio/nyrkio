@@ -130,7 +130,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     { field: "test",
       cellRenderer: (params) => {
         let test_name = params.value.test_name;
-        const url = test_name;
+        const url = "/" + baseUrls.result + "/" + test_name;
         if(test_name.length>12){
           test_name = "..." + test_name.substring(-12);
         }
@@ -141,20 +141,23 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         );
       },
       valueFormatter: (params)=>{
-        return "";
+        return params.value.test_name;
       },
     },
     { field: "metric",
       cellRenderer: (params) => {
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
-        const url = test_name +"#"+metric_name;
+        const url = "/" + baseUrls.result + "/" + test_name +"#"+ metric_name;
         return (
           <>
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
           </>
         );
-      }
+      },
+      valueFormatter: (params)=>{
+        return params.value.metric_name;
+      },
     },
     { field: "change",
       cellRenderer: (params) => {
@@ -168,8 +171,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         return {backgroundColor:d};
       },
       valueFormatter: (params)=>{
-        return "";
-      }
+        return params.value.change_value;
+      },
     },
     {
       field: "commit",
@@ -185,7 +188,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         );
       },
       valueFormatter: (params)=>{
-        return "";
+        return params.value.commit;
       },
     },
   ];
