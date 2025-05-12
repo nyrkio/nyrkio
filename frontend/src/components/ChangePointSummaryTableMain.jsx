@@ -130,7 +130,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     { field: "test",
       cellRenderer: (params) => {
         let test_name = params.value.test_name;
-        const url = test_name;
+        const url = "/" + baseUrls.result + "/" + test_name;
         if(test_name.length>12){
           test_name = "..." + test_name.substring(-12);
         }
@@ -148,7 +148,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       cellRenderer: (params) => {
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
-        const url = test_name +"#"+metric_name;
+        const url = "/" + baseUrls.result + "/" + test_name +"#"+ metric_name;
         return (
           <>
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
