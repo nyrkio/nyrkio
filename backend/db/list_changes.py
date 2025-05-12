@@ -133,6 +133,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     },
                     "max_pvalue": "$_id.max_pvalue",
                     "min_magnitude": "$_id.min_magnitude",
+                    "test_name": "$test_name",
                 },
                 "time": {
                     "$last": "$time",
@@ -142,9 +143,6 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "time_max": {
                     "$max": "$time",
-                },
-                "test_name": {
-                    "$first": "$test_name",
                 },
                 "metric_name": {
                     "$push": "$metric_name",
@@ -177,10 +175,10 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "_id": True,
                 "time": True,
                 "time_min_max": ["$time_min", "$time_max"],
-                "test_name": True,
+                "test_name": "$_id.test_name",
                 "attributes": {
                     "git_repo": "$git_repo",
-                    "test_name": "$test_name",
+                    "test_name": "$_id.test_name",
                     "branch": "$branch",
                 },
                 "metric": {
