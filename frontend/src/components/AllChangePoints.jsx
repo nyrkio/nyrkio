@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { ChangePointSummaryTableMain } from "./ChangePointSummaryTableMain";
 import { useLocation } from "react-router-dom";
-import { useSearchParams } from "react-router-dom";
+// import { useSearchParams } from "react-router-dom";
 
 export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
-    const [searchParams, setSearchParams] = useSearchParams();
-    if(!searchParams.has("preview")){
-      return (<><div className="row justify-content-center"></div></>);
-    }
+    // const [searchParams, setSearchParams] = useSearchParams();
+    // if(!searchParams.has("preview")){
+    //  return (<><div className="row justify-content-center"></div></>);
+    // }
     const location = useLocation();
     if(testNamePrefix===undefined) testNamePrefix="/";
 
