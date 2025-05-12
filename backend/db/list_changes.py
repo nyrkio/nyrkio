@@ -133,7 +133,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     },
                     "max_pvalue": "$_id.max_pvalue",
                     "min_magnitude": "$_id.min_magnitude",
-                    "test_name": "$test_name"
+                    "test_name": "$test_name",
                 },
                 "time": {
                     "$last": "$time",
