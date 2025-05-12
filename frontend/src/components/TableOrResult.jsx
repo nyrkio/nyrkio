@@ -1,6 +1,7 @@
 import { OrigTestList, TestList, SingleResultWithTestname } from "./Dashboard";
 import { createShortNames } from "../lib/utils";
 import { Breadcrumb } from "./Breadcrumb";
+import { AllChangePoints } from "./AllChangePoints";
 
 const Loading = ({loading}) => {
   if (loading) {
@@ -20,9 +21,9 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name)=>decodeURIComponent(name));
 
-//   console.debug(singleTestName);
-//   console.debug(prefix);
-//   console.debug(data);
+   console.debug(singleTestName);
+   console.debug(prefix);
+   console.debug(data);
 
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
@@ -51,6 +52,10 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
         {embed == "yes" ? "" :
         <Breadcrumb testName={prefix} baseUrls={baseUrls} />
         }
+          <AllChangePoints
+            testNamePrefix={prefix}
+            baseUrls={baseUrls}
+            />
           <OrigTestList
             baseUrls={baseUrls}
             testNames={testNames}
