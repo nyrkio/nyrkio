@@ -141,7 +141,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         );
       },
       valueFormatter: (params)=>{
-        return "";
+        return params.value.test_name;
       },
     },
     { field: "metric",
@@ -154,7 +154,10 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
           </>
         );
-      }
+      },
+      valueFormatter: (params)=>{
+        return params.value.metric_name;
+      },
     },
     { field: "change",
       cellRenderer: (params) => {
@@ -168,8 +171,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         return {backgroundColor:d};
       },
       valueFormatter: (params)=>{
-        return "";
-      }
+        return params.value.change_value;
+      },
     },
     {
       field: "commit",
@@ -185,7 +188,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         );
       },
       valueFormatter: (params)=>{
-        return "";
+        return params.value.commit;
       },
     },
   ];
