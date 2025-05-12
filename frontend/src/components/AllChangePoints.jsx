@@ -1,12 +1,24 @@
 import { useEffect, useState } from "react";
-import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
+import { ChangePointSummaryTableMain } from "./ChangePointSummaryTableMain";
+import { useLocation } from "react-router-dom";
 
 export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
+    const location = useLocation();
+    if(testNamePrefix===undefined) testNamePrefix="/";
+
+    if ( baseUrls.apiRoot.endsWith("public/") && testNamePrefix=="/") return (<></>);
+    if ( baseUrls.apiRoot.endsWith("orgs/") && testNamePrefix=="/") return (<></>);
+
     const [changePointData, setChangePointData] = useState([]);
     const [loading, setLoading] = useState(true);
 
     const fetchAllChanges = async (testNamePfx) => {
-      const response = await fetch(baseUrls.apiRoot + "changes/perCommit/" + testNamePfx, {
+      let url = baseUrls.apiRoot + "changes/perCommit/" + testNamePfx;
+      if (testNamePfx!=="" && testNamePfx.substring(0,1) == "/" ) {
+        url = baseUrls.apiRoot + "changes/perCommit" + testNamePfx;
+      }
+
+      const response = await fetch(url, {
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
@@ -16,86 +28,37 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
       if (response.status != 200) {
         console.error(response.status + ": Failed to fetch all change points under path: " + testNamePrefix);
         console.debug(response);
-        return;
+        return false;
       }
-//       console.debug(changePoint);
-//       const changes = changePoint["changes"];
-//       console.debug(changes);
-//       changes.map((change) => {
-//         const commit = changePoint["attributes"]["git_commit"];
-//
-//         let commit_msg = "";
-//         if (changePoint["attributes"].hasOwnProperty("commit_msg")) {
-//           commit_msg = changePoint["attributes"]["commit_msg"];
-//         }
-//
-//         const repo = changePoint["attributes"]["git_repo"];
-//         const changeValue = change["forward_change_percent"];
-//         const metric_name = change["metric"];
-//         rowData.push({
-//           date: parseTimestamp(changePoint["time"]),
-//           commit: { commit, commit_msg, repo },
-//           metric: metric_name,
-//           change: { changeValue, metric_name }
-//         });
-//       });
-//     });
-//   });
-//
-
-// branch
-// :
-// "master"
-// change_points_timestamp
-// :
-// "2025-01-02T00:25:02.305000"
-// commit_timestamp
-// :
-// 1694449670
-// repo
-// :
-// "https://github.com/facebook/rocksdb"
-// _id
-// :
-// commit
-// :
-// "ed5b6c0d99f7cba6ac4c49c2ace8ea094f3884ba"
-// max_pvalue
-// :
-// 0.001
-// min_magnitude
-// :
-// 0.05
-// user_id
-// :
-// 5477410
-
 
       const data = await response.json();
 
       const wrapper = {};
       wrapper[testNamePfx] = data;
       setChangePointData(wrapper);
+      return true;
     };
 
   const loadData = () => {
+    console.log("testNamePrefix: " + testNamePrefix);
     if(testNamePrefix!==undefined){
+      setChangePointData({});
       setLoading(true);
-      fetchAllChanges(testNamePrefix).finally(()=> {setLoading(false); console.log("loading false");});
+      fetchAllChanges(testNamePrefix).then((result)=> {if(result){setLoading(false); console.log("loading false");}});
 
     }
   };
-  useEffect(loadData, [testNamePrefix]);
+  useEffect(loadData, [location]);
 
 
 
   return (
       <>
       <div className="row justify-content-center">
-      <ChangePointSummaryTable
+      <ChangePointSummaryTableMain
         changeData={changePointData}
         loading={loading}
-        title={"Temporary title"}
+        baseUrls={baseUrls}
       />
       </div>
       </>
