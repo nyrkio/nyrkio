@@ -184,6 +184,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "branch": "$branch",
                 },
                 "metric": {
+                    "_name_control": "$metric_name_control",
                     "name": "$metric_name",
                     "unit": "(omitted)",
                     "value": "$data_value",
