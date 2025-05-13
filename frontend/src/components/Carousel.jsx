@@ -8,7 +8,7 @@ import Marketplace_GHA from '../static/Nyrkio-GHA-Marketplace-Listing.png'
 function NyrkioCarousel() {
   return (
     <Carousel interval={10*1000}>
-      <Carousel.Item interval={60*1000}>
+      <Carousel.Item interval={30*1000}>
         <a href="/docs/getting-started">
         <img src={Marketplace_GHA} className="w-50" />
         </a>
