@@ -221,6 +221,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
           style={{width: "100%"}}
+          className="w-100"
         />
       </div>
     </>

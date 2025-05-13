@@ -190,6 +190,8 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
           columnDefs={colDefs}
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
+          style={{width: "100%"}}
+          className="w-100"
         />
       </div>
     </>
