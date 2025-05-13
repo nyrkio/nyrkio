@@ -81,6 +81,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   Object.entries(changeData).forEach(([shortName, obj]) => {
     obj.forEach((changePoint) => {
         console.debug(changePoint);
+        const branchName = changePoint["attributes"]["branch"]
         const test_name = changePoint["test_name"];
         const changes = changePoint["cp_values"];
         console.debug(changes);
@@ -98,8 +99,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           rowData.push({
             date: parseTimestamp(changePoint["time"]),
             commit: { commit, commit_msg, repo },
-            test: { test_name },
-            metric: { test_name, metric_name },
+            test: { test_name, branchName },
+            metric: { test_name, metric_name, branchName },
             change: { changeValue, metric_name }
           });
       });
@@ -130,7 +131,13 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     { field: "test",
       cellRenderer: (params) => {
         let test_name = params.value.test_name;
-        const url = "/" + baseUrls.result + "/" + test_name;
+        const branchName = params.value.branchName;
+        let url = baseUrls.resultsWithOrg + "/" + test_name;
+        console.log(baseUrls);
+        if (baseUrls.results=="/public"){
+          url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name;
+        }
+
         if(test_name.length>12){
           test_name = "..." + test_name.substring(-12);
         }
@@ -148,7 +155,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       cellRenderer: (params) => {
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
-        const url = "/" + baseUrls.result + "/" + test_name +"#"+ metric_name;
+        const url = baseUrls.resultsWithOrg + "/" + test_name +"#"+ metric_name;
         return (
           <>
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}

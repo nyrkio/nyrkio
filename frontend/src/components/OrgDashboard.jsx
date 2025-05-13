@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
-import { dashboardTypes } from "../lib/utils";
+import { dashboardTypes, getOrg } from "../lib/utils";
 
 export const OrgDashboard = ({embed}) => {
   const location = useLocation();
@@ -57,6 +57,7 @@ export const OrgDashboard = ({embed}) => {
     result: "orgs",
     tests: "orgs",
     breadcrumbTestRootTitle: "Github Org",
+    resultsWithOrg: "/orgs",
   };
 
   return (

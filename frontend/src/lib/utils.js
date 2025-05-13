@@ -112,3 +112,21 @@ export const applyHash = () => {
     }, 2000);
   }
 };
+
+// Return the org / namespace prefix of a public project. To be used in links and such.
+export const getOrgRepo = (name) => {
+      if(name===undefined) return "";
+      name = decodeURIComponent(name).replace("https://github.com/","");
+      const parts = name.split("/");
+      const orgRepo = parts[0] + "/" + parts[1];
+
+      return encodeURIComponent("https://github.com/" + orgRepo);
+}
+// Return the org prefix of an /org public project. To be used in links and such.
+export const getOrg = (name) => {
+      if(name===undefined) return "";
+      name = decodeURIComponent(name).replace("https://github.com/","");
+      const parts = name.split("/");
+      const org = parts[0];
+      return org;
+}

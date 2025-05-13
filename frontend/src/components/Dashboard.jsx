@@ -133,6 +133,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     results: "/results",
     result: "result",
     breadcrumbTestRootTitle: "",
+    resultsWithOrg: "/result"
   };
   if (path=="/result/") {
       testName = location.pathname.substring(8);
