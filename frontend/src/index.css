@@ -176,6 +176,11 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-width:100%;
   object-fit: contain;
 }
+
+.frontpage .carousel-caption a {
+  color: var(--nyrkio-text);
+  text-shadow: 1px 1px var(--nyrkio-text-light);
+}
 .frontpage .carousel-caption {
   color: var(--nyrkio-text);
   text-shadow: 1px 1px var(--nyrkio-text-light);
