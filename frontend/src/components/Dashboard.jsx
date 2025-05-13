@@ -348,7 +348,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
   return (
     <>
-      <div className="container-fluid p-5 text-center benchmark-select col-sm-12 col-lg-11 col-xl-10">
+      <div className="container-fluid pt-5 text-center benchmark-select col-sm-12 col-lg-12 col-xl-12">
             <div className="container-fluid">
               <div className="card">
                 <div className="card-header w-100">Select tests</div>
