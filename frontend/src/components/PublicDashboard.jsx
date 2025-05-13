@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
+import { parseGitHubRepo, dashboardTypes, getOrgRepo } from "../lib/utils";
 import { TableOrResult } from "./TableOrResult";
 
 export const PublicDashboard = () => {
@@ -60,6 +60,7 @@ export const PublicDashboard = () => {
     result: "public",
     tests: "public",
     breadcrumbTestRootTitle: "GitHub Repos",
+    resultsWithOrg: "/public/" + getOrgRepo(prefix),
   };
 
   return (
