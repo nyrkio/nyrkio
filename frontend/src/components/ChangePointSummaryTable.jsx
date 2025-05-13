@@ -172,7 +172,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
 
   const autoSizeStrategy = useMemo(() => {
     return {
-      type: "fitCellContents",
+      type: "fitGridWidth",
     };
   });
 
