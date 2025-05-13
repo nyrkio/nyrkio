@@ -176,14 +176,8 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-width:100%;
   object-fit: contain;
 }
-
-.frontpage .carousel-caption a {
-  color: var(--nyrkio-text);
-  text-shadow: 1px 1px #ffffffaa;
-}
 .frontpage .carousel-caption {
-  color: var(--nyrkio-text);
-  text-shadow: 1px 1px #ffffffaa;
+  color: var(--nyrkio-tattoo-red);
   position: absolute;
   bottom: 0px;
   padding: 0px;
