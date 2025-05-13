@@ -179,11 +179,11 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
 
 .frontpage .carousel-caption a {
   color: var(--nyrkio-text);
-  text-shadow: 1px 1px var(--nyrkio-text-light);
+  text-shadow: 1px 1px #ffffffaa;
 }
 .frontpage .carousel-caption {
   color: var(--nyrkio-text);
-  text-shadow: 1px 1px var(--nyrkio-text-light);
+  text-shadow: 1px 1px #ffffffaa;
   position: absolute;
   bottom: 0px;
   padding: 0px;
