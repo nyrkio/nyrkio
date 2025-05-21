@@ -31,6 +31,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
+import { LogoSlogan, LogoSloganNarrow } from "./components/Logo";
 
 function MainApp({ loggedIn, setLoggedIn }) {
   let location = useLocation();
@@ -123,7 +124,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         >
           <Routes>
             <Route path="/" element={loggedIn ? <Dashboard path="/" /> : <Nothing />} />
-            <Route path="/frontpage" element={<Nothing />} />
+            <Route path="/frontpage" element={<LogoSloganNarrow />} />
             <Route
               path="/tests/*"
               element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
@@ -165,7 +166,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <FrontPage />} />
+            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage /></>} />
             <Route path="/frontpage" element={<FrontPage />} />
             <Route path="*" element={<Nothing />} />
           </Routes>

@@ -141,6 +141,7 @@ body #root div.container-fluid {
 }
 
 
+.nyrkio-title.nyrkio-logo,
 div.frontpage div.nyrkio-logo {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -152,6 +153,7 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-height: 33%;
 }
 
+.nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   font-size: 2em;
   letter-spacing: 0.5rem;
@@ -413,7 +415,6 @@ button:focus-visible {
 .navbar-light .navbar-nav .nav-link {
   display: block;
   padding-left: 0.5em;
-  padding-top: 1em;
   padding-bottom: 0.3em;
   text-decoration: none;
   transition:
@@ -423,6 +424,7 @@ button:focus-visible {
 }
 .navbar-light .navbar-nav .nav-link {
   padding-right: 1em;
+  padding-top: 1em;
 }
 
 
