@@ -138,9 +138,6 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name;
         }
 
-        if(test_name.length>12){
-          test_name = "..." + test_name.substring(-12);
-        }
         return (
           <>
           <a href={url}>{test_name}</a>
@@ -206,6 +203,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     };
   });
 
+  const gridHeightPx = 135 + Math.min(rowData.length, 50) * 50;
   return (
     <>
       <div className="row text-center">
@@ -213,7 +211,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       </div>
       <div
         className="ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
-        style={{ height: 500, width: "100%" }}
+        style={{ width: "100%", height: gridHeightPx, minHeight: "13em", maxHeight: "90vh" }}
       >
         <AgGridReact
           rowData={rowData}
