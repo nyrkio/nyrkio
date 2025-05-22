@@ -771,10 +771,26 @@ div.card div.card-header {
 .ag-root-wrapper {
   margin-top: 1em;
   margin-bottom: 3em;
-  border: none;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+  border-left: 1px solid var(--nyrkio-horn-light-brown);
+  border-radius: 15px;
   width: 100%;
 /*  min-height: 4em;
   max-height: 30em; */
+}
+
+.ag-main-cp-table .ag-row {
+  border: none;
+
+}
+
+.ag-main-cp-table .ag-row.ag-row-is-new {
+  border-top: 1px solid var(--nyrkio-horn-light-brown);
+}
+
+.ag-main-cp-table .ag-row.ag-row-is-same {
 }
 
 .chart-wrapper {
