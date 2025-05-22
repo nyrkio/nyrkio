@@ -6,15 +6,6 @@ import commit from "../static/commit.png";
 import { Logo } from "./Logo";
 import NyrkioCarousel from "./Carousel";
 
-const Banner = () => {
-  return (
-    <div className="container-fluid text-center nyrkio-title">
-      <Logo color="Brown" filetype="png" />
-      <h1>For Faster Software</h1>
-    </div>
-  );
-};
-
 const FeatureHighlight = () => {
   return (
     <>
@@ -189,7 +180,6 @@ export const FrontPage = () => {
     <>
       <div className="frontpage container-fluid text-center w-100">
         <div className="container-fluid text-center w-100">
-          <Banner />
           <NyrkioCarousel />
           <div className="padding-block-sm frontpage-triplet"></div>
           <FeatureHighlight />

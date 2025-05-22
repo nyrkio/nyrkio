@@ -16,6 +16,7 @@ import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
+import { DocsTeams } from "./components/DocsTeams.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
 import { LegalPage } from "./components/LegalPage.jsx";
@@ -31,6 +32,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
+import { LogoSlogan, LogoSloganNarrow } from "./components/Logo";
 
 function MainApp({ loggedIn, setLoggedIn }) {
   let location = useLocation();
@@ -92,6 +94,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
             />
             <Route path="/docs/getting-started" element={<Docs />} />
             <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
+            <Route path="/docs/teams" element={<DocsTeams />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
             <Route
@@ -123,7 +126,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         >
           <Routes>
             <Route path="/" element={loggedIn ? <Dashboard path="/" /> : <Nothing />} />
-            <Route path="/frontpage" element={<Nothing />} />
+            <Route path="/frontpage" element={<LogoSloganNarrow />} />
             <Route
               path="/tests/*"
               element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
@@ -154,6 +157,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
             <Route path="/result/*" element={<Dashboard path="/result/"/>} />
             <Route path="/docs/getting-started" element={<Docs />} />
             <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
+            <Route path="/docs/teams" element={<DocsTeams />} />
             <Route path="/user/settings" element={<UserSettings />} />
             <Route path="/admin/*" element={<AdminDashboard />} />
             <Route
@@ -165,7 +169,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <FrontPage />} />
+            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage /></>} />
             <Route path="/frontpage" element={<FrontPage />} />
             <Route path="*" element={<Nothing />} />
           </Routes>

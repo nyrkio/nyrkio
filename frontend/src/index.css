@@ -140,11 +140,8 @@ body #root div.container-fluid {
   padding-right: 0px;
 }
 
-#main-content2 .nyrkio-title {
-  position: relative;
-  top: -50px;
-}
 
+.nyrkio-title.nyrkio-logo,
 div.frontpage div.nyrkio-logo {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
@@ -156,6 +153,7 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-height: 33%;
 }
 
+.nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   font-size: 2em;
   letter-spacing: 0.5rem;
@@ -417,7 +415,6 @@ button:focus-visible {
 .navbar-light .navbar-nav .nav-link {
   display: block;
   padding-left: 0.5em;
-  padding-top: 1em;
   padding-bottom: 0.3em;
   text-decoration: none;
   transition:
@@ -427,6 +424,7 @@ button:focus-visible {
 }
 .navbar-light .navbar-nav .nav-link {
   padding-right: 1em;
+  padding-top: 1em;
 }
 
 
@@ -773,10 +771,26 @@ div.card div.card-header {
 .ag-root-wrapper {
   margin-top: 1em;
   margin-bottom: 3em;
-  border: none;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+  border-left: 1px solid var(--nyrkio-horn-light-brown);
+  border-radius: 15px;
   width: 100%;
-  min-height: 4em;
-  max-height: 30em;
+/*  min-height: 4em;
+  max-height: 30em; */
+}
+
+.ag-main-cp-table .ag-row {
+  border: none;
+
+}
+
+.ag-main-cp-table .ag-row.ag-row-is-new {
+  border-top: 1px solid var(--nyrkio-horn-light-brown);
+}
+
+.ag-main-cp-table .ag-row.ag-row-is-same {
 }
 
 .chart-wrapper {
@@ -1165,8 +1179,4 @@ div.blog-rss-widget .nyrkio-blog-header span {
   margin-top: 2em;
   margin-bottom: 2em;
 
-}
-
-div.loading.summary-table {
-  height: 565px;
 }
