@@ -3,6 +3,7 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
+import { commitUrl } from "../lib/github";
 
 const Loading = ({loading}) => {
   if (loading) {
@@ -156,7 +157,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
       cellRenderer: (params) => {
         const { commit, commit_msg, repo } = params.value;
 
-        const url = repo + "/commit/" + commit;
+        const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
         return (
           <a href={url} target="_blank">

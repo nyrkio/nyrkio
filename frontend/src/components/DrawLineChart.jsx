@@ -10,6 +10,9 @@ import zoomPlugin from 'chartjs-plugin-zoom';
 import { parseTimestamp } from "../lib/utils";
 ChartJS.register(zoomPlugin);
 
+import { commitUrl, branchUrl } from "../lib/github";
+
+
 const nyrkio_dark_red = "#a34111";
 const nyrkio_bright_red = "#dc3d06";
 const nyrkio_tattoo_red = "#973212";
@@ -176,8 +179,7 @@ export const DrawLineChart = ({
     const unit = metric.unit;
     const value = metric.value;
 
-    const gh_link =
-      result.attributes.git_repo + "/commit/" + result.attributes.git_commit;
+    const gh_link = commitUrl(result.attributes.git_repo, result.attributes.git_commit);
 
     const get_flat_map = (index, changePointData) => {
           if(!isChangePoint(index)) return null;
@@ -272,7 +274,7 @@ export const DrawLineChart = ({
             <p className="commit-url">
             <a href={result.attributes.git_repo} title="git_repo">{result.attributes.git_repo}</a>/{" "}
 
-            <a href={result.attributes.git_repo+"/tree/"+result.attributes.branch}>({result.attributes.branch})</a> {" "}
+            <a href={branchUrl(result.attributes.git_repo,result.attributes.branch)}>({result.attributes.branch})</a> {" "}
             /commit/<a href={gh_link}>{result.attributes.git_commit}</a>
             </p>
             <hr />

@@ -3,6 +3,7 @@ import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
+import { commitUrl } from "../lib/github";
 
 const Loading = ({loading}) => {
   if (loading) {
@@ -217,7 +218,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         const { commit, commit_msg, repo } = params.value;
         const isSame = params.value.isSame;
 
-        const url = repo + "/commit/" + commit;
+        const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
         if (isSame.date && isSame.test && ! isSame.userSort) {
           return "";
