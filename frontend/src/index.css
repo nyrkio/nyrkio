@@ -315,7 +315,6 @@ a {
 }
 
 .card a:not(.btn-success) {
-  color: var(--nyrkio-arrow-brown);
 }
 @media (prefers-color-scheme: light) {
   a:hover {
