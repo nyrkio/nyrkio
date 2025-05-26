@@ -114,7 +114,7 @@ img.nyyrikki-original-art {
 
 body .footer,
 body.section-about .footer {
-  background-image: url(/src/static/36215479721_4beda5c4ae_k.jpg);
+  background-image: url(/src/static/36215479721_4beda5c4ae_k.compressed.25.jpg);
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-position: center;
@@ -315,7 +315,6 @@ a {
 }
 
 .card a:not(.btn-success) {
-  color: var(--nyrkio-arrow-brown);
 }
 @media (prefers-color-scheme: light) {
   a:hover {
