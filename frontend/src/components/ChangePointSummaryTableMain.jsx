@@ -186,7 +186,11 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       cellRenderer: (params) => {
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
-        const url = baseUrls.resultsWithOrg + "/" + test_name +"#"+ metric_name;
+        const branchName = params.value.branchName;
+        let url = baseUrls.resultsWithOrg + "/" + test_name +"#"+ metric_name;
+        if (baseUrls.results=="/public"){
+          url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name +"#"+ metric_name;
+        }
         return (
           <>
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
