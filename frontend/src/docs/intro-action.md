@@ -36,9 +36,24 @@ Then add the following YAML after the actual benchmark:
               tool: 'go'
               output-file-path: output.txt
               # Pick up your token at https://nyrkio.com/docs/getting-started
+              # Then head to https://github.com/USER_OR_ORG/PROJECT/settings/secrets/actions
+              # Store the token you just created as a Repository secret. We'll use the variable name `NYRKIO_JWT_TOKEN` for it below.
               nyrkio-token: ${{ secrets.NYRKIO_JWT_TOKEN }}
 
 ```
+Each programming language and framework has its own documentation. Please see:
+
+[benchmarkdotnet](https://github.com/nyrkio/change-detection/blob/master/examples/benchmarkdotnet) |
+[benchmarkjs](https://github.com/nyrkio/change-detection/blob/master/examples/benchmarkjs) |
+[catch2](https://github.com/nyrkio/change-detection/blob/master/examples/catch2) |
+[cpp](https://github.com/nyrkio/change-detection/blob/master/examples/cpp) |
+[go](https://github.com/nyrkio/change-detection/blob/master/examples/go) |
+[java jmh](https://github.com/nyrkio/change-detection/blob/master/examples/java) |
+[julia](https://github.com/nyrkio/change-detection/blob/master/examples/julia) |
+[pytest](https://github.com/nyrkio/change-detection/blob/master/examples/pytest) |
+[rust](https://github.com/nyrkio/change-detection/blob/master/examples/rust) |
+[time](https://github.com/nyrkio/change-detection/blob/master/.github/workflows/time.yml) |
+
 
 ### Submit NyrkioJson directly
 
