@@ -409,13 +409,13 @@ async def cached_get(repo, commit):
         commit_msg = response.json()["commit"]["message"].split("\n")[0]
         logging.debug("Adding commit message {} to {}".format(commit_msg, commit))
     else:
-        logging.error(
+        logging.info(
             f"Failed to fetch commit message for {repo}/{commit}: {response.status_code}"
         )
         mask = "None"
         if token is not None:
             mask = token[:9] + ("x" * len(token))
-        logging.error(f"Token was {mask}")
+        logging.info(f"Token was {mask}")
 
         # Check x-ratelimit-used and x-ratelimit-remaining headers
         remaining = response.headers.get("x-ratelimit-remaining")
