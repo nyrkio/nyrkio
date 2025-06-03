@@ -224,7 +224,7 @@ class SlackNotifier(AbstractNotifier):
             # blocks = {"blocks": blocks}
 
             logging.debug(f"Sending Slack notification to {self.channels}: {blocks}")
-            print(json.dumps(blocks))
+            # print(json.dumps(blocks))
             response = await self.client.send(text=json.dumps(blocks), blocks=blocks)
             if response.status_code != 200 or response.body != "ok":
                 logging.error(
