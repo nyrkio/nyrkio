@@ -82,7 +82,7 @@ async def changes(
     public_test_objects, public_test_objects_meta = await store.get_public_results(
         user.id
     )
-    print(public_test_objects)
+    # print(public_test_objects)
     if public_test_objects:
         public_base_url = "https://nyrkio.com/public/"
     public_test_names = [entry["test_name"] for entry in public_test_objects]

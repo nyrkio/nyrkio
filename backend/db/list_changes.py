@@ -24,9 +24,9 @@ async def change_points_per_commit(
         test_name_prefix = test_name_prefix[:-1]
 
     query = _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit)
-    print(query)
+    # print(query)
     docs = await db.change_points.aggregate(query).to_list(None)
-    print(docs)
+    # print(docs)
     return docs
 
 
