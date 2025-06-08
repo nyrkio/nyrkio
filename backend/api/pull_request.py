@@ -190,17 +190,6 @@ async def _delete_pr_result(
             )
     return []
 
-
-@pr_router.get("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
-async def get_pr_result(
-    test_name: str,
-    repo: str,
-    pull_number: int,
-    user: User = Depends(auth.current_active_user),
-):
-    return await _get_pr_result(test_name, repo, pull_number, user.id)
-
-
 @pr_router.get(
     "/pulls/{repo:path}/{pull_number}/result/{git_commit}/test/{test_name:path}"
 )
@@ -214,6 +203,17 @@ async def get_pr_commit_result(
     return await _get_pr_result(
         test_name, repo, pull_number, user.id, pr_commit=git_commit
     )
+
+
+@pr_router.get("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+async def get_pr_result(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    user: User = Depends(auth.current_active_user),
+):
+    return await _get_pr_result(test_name, repo, pull_number, user.id)
+
 
 
 async def _get_pr_result(
