@@ -505,13 +505,12 @@ class DBStore(object):
             )
 
             if not pr_commit:
-                logging.error(
-                    f"pr_commit is None for pull request {pull_request}."
-                    " Defaulting to last result."
-                )
-                pr_commit = list(filter(lambda x: "pull_request" in x, results))[-1][
-                    "attributes"
-                ]["git_commit"]
+                logging.error(f"pr_commit is None for pull request {pull_request}.")
+                if len(results) > 0:
+                    logging.info("Defaulting to last result.")
+                    pr_commit = list(filter(lambda x: "pull_request" in x, results))[
+                        -1
+                    ]["attributes"]["git_commit"]
 
             results = filter_out_pr_results(results, pr_commit)
         else:
