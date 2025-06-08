@@ -201,34 +201,35 @@ async def get_pr_result(
     return await _get_pr_result(test_name, repo, pull_number, user.id)
 
 
+@pr_router.get(
+    "/pulls/{repo:path}/{pull_number}/result/{git_commit}/test/{test_name:path}"
+)
+async def get_pr_commit_result(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    git_commit: str,
+    user: User = Depends(auth.current_active_user),
+):
+    return await _get_pr_result(
+        test_name, repo, pull_number, user.id, pr_commit=git_commit
+    )
+
+
 async def _get_pr_result(
     test_name: str,
     repo: str,
     pull_number: int,
     user_or_org_id: Any = None,
+    pr_commit: str = None,
 ):
     store = DBStore()
-    pulls = await store.get_pull_requests(user_or_org_id)
-
-    a = list(
-        filter(
-            lambda x: x["git_repo"] == repo and x["pull_number"] == pull_number, pulls
-        )
+    results, _ = await store.get_results(
+        user_or_org_id, test_name, pull_request=pull_number, pr_commit=pr_commit
     )
-    if not list(filter(lambda x: test_name in x["test_names"], a)):
+    if not len(results) > 0:
         raise HTTPException(status_code=404, detail="Not Found")
 
-    results, _ = await store.get_results(
-        user_or_org_id, test_name, pull_request=pull_number
-    )
-
-    # Filter out the results that are not from the repo
-    # TODO(mfleming): We should push this down into the query to the db.
-    results = [
-        r
-        for r in results
-        if r["attributes"]["git_repo"] == "https://github.com/" + repo
-    ]
     return results
 
 
