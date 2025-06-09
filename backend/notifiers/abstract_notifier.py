@@ -2,10 +2,17 @@ from typing import Dict, Any
 from datetime import datetime
 from pytz import UTC
 from backend.hunter.hunter.series import AnalyzedSeries
-from backend.api.public import extract_public_test_name
 from backend.db.db import DBStore
 
 import httpx
+
+
+# Copy paste to break a circular import
+def extract_public_test_name(attributes):
+    # TODO(mfleming) we assume a https://github.com repo
+    name = attributes["git_repo"].replace("https://github.com/", "")
+    name += "/" + attributes["branch"]
+    return name
 
 
 class AbstractNotification:
