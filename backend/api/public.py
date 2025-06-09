@@ -3,6 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
+from backend.api.pull_request import _get_pr_results, _get_pr_result
 
 """
 Test results can be made publicly available to everyone so that users can
@@ -144,6 +145,38 @@ async def get_result(test_name: str) -> List[Dict]:
     return data
 
 
+@public_router.get(
+    "/pulls/{repo:path}/{pull_number}/result/{git_commit}/test/{test_name:path}"
+)
+async def get_pr_commit_result(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    git_commit: str,
+):
+    user_or_org_id, repo, branch, test_name = get_public_namespace_parts(test_name)
+    return await _get_pr_result(
+        test_name, repo, pull_number, user_or_org_id, pr_commit=git_commit
+    )
+
+
+@public_router.get("/pulls/{test_name_public_prefix}")
+async def get_pr_results(test_name_public_prefix: str):
+    if len(test_name_public_prefix) == 0:
+        raise HTTPException(
+            status_code=404,
+            detail="For /public/result/pulls/* you must append at least the username or org name component of the path´",
+        )
+
+    user_or_org_id, repo, branch, test_name = get_public_namespace_parts(
+        test_name_public_prefix
+    )
+    test_name_list = [test_name] if test_name else []
+    return await _get_pr_results(
+        user_or_org_id, repo=repo, branch=branch, test_names=test_name_list
+    )
+
+
 # TODO(Henrik): Add a query to `store` where we use test_name in the query, not here
 async def lookup_public_test(store, test_name):
     results, _ = await store.get_public_results()
@@ -195,7 +228,8 @@ def build_public_test_name(test_entry):
 
 
 def internal_test_name(user_id, public_test_name):
-    if is_user_id("user_id"):
+    name = None
+    if is_user_id(user_id):
         name = public_test_name.replace("https://github.com/", "")
         name = name.replace("https:/github.com/", "")
         parts = name.split("/")
@@ -206,3 +240,13 @@ def internal_test_name(user_id, public_test_name):
             return "/".join(parts[3:])
 
     return name
+
+
+def get_public_namespace_parts(public_test_name):
+    public_test_name = public_test_name.replace("https://github.com/", "")
+    public_test_name = public_test_name.replace("https:/github.com/", "")
+
+    parts = public_test_name.split("/")
+    org, repo, branch = parts.get(0), parts.get(1), parts.get(2)
+    test_name = "/".join(parts[3:]) if len(parts) >= 3 else None
+    return org, repo, branch, test_name

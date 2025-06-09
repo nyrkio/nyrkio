@@ -1054,7 +1054,13 @@ class DBStore(object):
         )
 
     async def get_pull_requests(
-        self, user_id, repo=None, git_commit=None, pull_number=None
+        self,
+        user_id,
+        repo=None,
+        git_commit=None,
+        pull_number=None,
+        branch=None,
+        test_names=None,
     ) -> List[Dict]:
         """
         Get a list of pull requests for a given user.
@@ -1073,6 +1079,9 @@ class DBStore(object):
 
         Return an empty list if no results are found.
         """
+        if test_names is None:
+            test_names = []
+
         pr_tests = self.db.pr_tests
         # Do a lookup on the primary key if we have all the fields
         if repo and git_commit and pull_number:
@@ -1087,8 +1096,16 @@ class DBStore(object):
             test_names = await pr_tests.find_one({"_id": primary_key})
             return build_pulls([test_names]) if test_names else []
 
-        # Otherwise, do a lookup on the user_id
-        pulls = await pr_tests.find({"user_id": user_id}).to_list(None)
+        # Otherwise, do a lookup on the user_id and any other attributes
+        query = {"user_id": user_id}
+        if repo:
+            query["git_repo"] = repo
+        if branch:
+            query["branch"] = branch
+        if test_names:
+            query["test_name"] = {"$in": test_names}
+
+        pulls = await pr_tests.find(query).to_list(None)
         return build_pulls(pulls)
 
     async def delete_pull_requests(self, user_id: Any, repo: str, pull_number: int):
