@@ -243,5 +243,5 @@ async def _get_pr_results(
 ):
     store = DBStore()
     return await store.get_pull_requests(
-        user_or_org_id, repo=repo, branch=branch, test_names=[test_name]
+        user_or_org_id, repo=repo, branch=branch, test_names=[test_names]
     )
