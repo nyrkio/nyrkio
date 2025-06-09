@@ -160,7 +160,7 @@ async def get_pr_commit_result(
     )
 
 
-@public_router.get("/pulls/{test_name_public_prefix}")
+@public_router.get("/pulls/{test_name_public_prefix:path}")
 async def get_pr_results(test_name_public_prefix: str):
     if len(test_name_public_prefix) == 0:
         raise HTTPException(
