@@ -247,6 +247,8 @@ def get_public_namespace_parts(public_test_name):
     public_test_name = public_test_name.replace("https:/github.com/", "")
 
     parts = public_test_name.split("/")
-    org, repo, branch = parts.get(0), parts.get(1), parts.get(2)
-    test_name = "/".join(parts[3:]) if len(parts) >= 3 else None
+    org = parts.pop(0) if parts else None
+    repo = parts.pop(0) if parts else None
+    branch = parts.pop(0) if parts else None
+    test_name = "/".join(parts) if parts else None
     return org, repo, branch, test_name
