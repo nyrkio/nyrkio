@@ -179,7 +179,7 @@ async def get_pr_results(test_name_public_prefix: str):
             detail="For /public/result/pulls/* you must append at least the username or org name component of the path´",
         )
 
-    user_or_org_id, _, _ = _get_user_from_prefix(test_name_public_prefix)
+    user_or_org_id, _, _ = await _get_user_from_prefix(test_name_public_prefix)
     return await _get_pr_results(user_or_org_id)
 
 
