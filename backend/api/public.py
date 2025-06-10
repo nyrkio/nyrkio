@@ -119,7 +119,7 @@ async def get_subtree_summary_siblings(parent_test_name_prefix: str) -> Dict:
     Like /summary but client will ask for the parent prefix, and we return all children of that parent.
     This allows a single call to replace separate HTTP calls for each list entry.
     """
-    user_or_org_id, public_test_prefix, int_parent_name = _get_user_from_prefix(
+    user_or_org_id, public_test_prefix, int_parent_name = await _get_user_from_prefix(
         parent_test_name_prefix
     )
 
