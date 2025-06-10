@@ -98,14 +98,14 @@ async def get_subtree_summary_siblings_root() -> Dict:
 
 async def _get_user_from_prefix(test_name_prefix: str):
     user_or_org_id = None
-    internal_name = None
+    int_test_name = None
     public_test_prefix = None
     store = DBStore()
     public_results, _ = await store.get_public_results()
 
     for test_result in public_results:
         int_test_name = internal_test_name(test_result["user_id"], test_name_prefix)
-        if test_result["test_name"].startswith(internal_name):
+        if test_result["test_name"].startswith(int_test_name):
             user_or_org_id = test_result["user_id"]
             public_test_prefix = extract_public_test_name(test_result["attributes"])
             break
