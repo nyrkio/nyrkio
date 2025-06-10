@@ -165,9 +165,10 @@ async def get_pr_commit_result(
     pull_number: int,
     git_commit: str,
 ):
-    user_or_org_id, repo, branch, test_name = get_public_namespace_parts(test_name)
+    user_or_org_id, int_test_name = await _figure_out_user_and_test(test_name)
+    _, just_repo, branch, _ = get_public_namespace_parts(test_name)
     return await _get_pr_result(
-        test_name, repo, pull_number, user_or_org_id, pr_commit=git_commit
+        int_test_name, just_repo, pull_number, user_or_org_id, pr_commit=git_commit
     )
 
 
@@ -176,7 +177,7 @@ async def get_pr_results(test_name_public_prefix: str):
     if len(test_name_public_prefix) == 0:
         raise HTTPException(
             status_code=404,
-            detail="For /public/result/pulls/* you must append at least the username or org name component of the path´",
+            detail="For /public/pulls/* you must append at least the username or org name component of the path´",
         )
 
     user_or_org_id, _, _ = await _get_user_from_prefix(test_name_public_prefix)
