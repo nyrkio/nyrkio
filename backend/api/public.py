@@ -96,29 +96,40 @@ async def get_subtree_summary_siblings_root() -> Dict:
     return {}
 
 
+async def _get_user_from_prefix(test_name_prefix: str):
+    user_or_org_id = None
+    internal_name = None
+    public_test_prefix = None
+    store = DBStore()
+    public_results, _ = await store.get_public_results()
+
+    for test_result in public_results:
+        int_test_name = internal_test_name(test_result["user_id"], test_name_prefix)
+        if test_result["test_name"].startswith(internal_name):
+            user_or_org_id = test_result["user_id"]
+            public_test_prefix = extract_public_test_name(test_result["attributes"])
+            break
+
+    return user_or_org_id, public_test_prefix, int_test_name
+
+
 @public_router.get("/result/{parent_test_name_prefix:path}/summarySiblings")
 async def get_subtree_summary_siblings(parent_test_name_prefix: str) -> Dict:
     """
     Like /summary but client will ask for the parent prefix, and we return all children of that parent.
     This allows a single call to replace separate HTTP calls for each list entry.
     """
-    user_or_org_id = None
-    int_parent_name = None
-    public_test_prefix = None
-    store = DBStore()
-    public_results, _ = await store.get_public_results()
+    user_or_org_id, public_test_prefix, int_parent_name = _get_user_from_prefix(
+        parent_test_name_prefix
+    )
 
-    for test_result in public_results:
-        int_parent_name = internal_test_name(
-            test_result["user_id"], parent_test_name_prefix
-        )
-        if test_result["test_name"].startswith(int_parent_name):
-            user_or_org_id = test_result["user_id"]
-            public_test_prefix = extract_public_test_name(test_result["attributes"])
-            break
+    store = DBStore()
 
     if not user_or_org_id:
-        raise HTTPException(status_code=404, detail="No such test exists")
+        raise HTTPException(
+            status_code=404,
+            detail="No such test exists {}".format(parent_test_name_prefix),
+        )
 
     cache = await store.get_summaries_cache(user_or_org_id)
     # This is a public API but we're holding the names of all the non-public tests and change points
@@ -168,13 +179,8 @@ async def get_pr_results(test_name_public_prefix: str):
             detail="For /public/result/pulls/* you must append at least the username or org name component of the path´",
         )
 
-    user_or_org_id, repo, branch, test_name = get_public_namespace_parts(
-        test_name_public_prefix
-    )
-    test_name_list = [test_name] if test_name else []
-    return await _get_pr_results(
-        user_or_org_id, repo=repo, branch=branch, test_names=test_name_list
-    )
+    user_or_org_id, _, _ = _get_user_from_prefix(test_name_public_prefix)
+    return await _get_pr_results(user_or_org_id)
 
 
 # TODO(Henrik): Add a query to `store` where we use test_name in the query, not here
