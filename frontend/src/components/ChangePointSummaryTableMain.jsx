@@ -82,7 +82,6 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   //   console.debug(changeData);
   Object.entries(changeData).forEach(([shortName, obj]) => {
     obj.forEach((changePoint) => {
-        // console.debug(changePoint);
         const branchName = changePoint["attributes"]["branch"]
         const test_name = changePoint["test_name"];
         const changes = changePoint["cp_values"];
@@ -110,7 +109,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
             changePoint["__isSameIndex"] = 1 + (previousRow["__isSameIndex"] === undefined ? 0 : previousRow["__isSameIndex"]);
             isSame.index += changePoint["__isSameIndex"];
           }
-
+          //console.log(changePoint["__isSameIndex"] + JSON.stringify(changePoint["_id"]));
           rowData.push({
             date: { date, isSame },
             commit: { commit, commit_msg, repo, isSame },
@@ -224,7 +223,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
         const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
-        if (isSame.date && isSame.test && ! isSame.userSort) {
+        if (isSame.date && isSame.commit && ! isSame.userSort) {
           return "";
         }
         else {
@@ -254,14 +253,14 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         return isSame.date && isSame.commit;
       },
       'ag-row-is-new': (params) => {
-        // console.log(params);
+        //console.log(params.data.date);
         const isSame = params.data.date.isSame;
         return ! (isSame.date && isSame.commit);
       }
   };
   const getRowStyle = (params) => {
         const isSame = params.data.date.isSame;
-//         console.log(params.node);
+         //console.log(params.data.date);
         if ( (isSame.date && isSame.commit) ){
           const oldh = params.node.rowHeight;
           const h = 25;
