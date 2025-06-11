@@ -1107,7 +1107,7 @@ class DBStore(object):
 
         pulls = (
             await pr_tests.find(query)
-            .sort({"_id.pull_number": -1})
+            .sort({"pull_number": -1})
             .limit(50)
             .to_list(None)
         )
