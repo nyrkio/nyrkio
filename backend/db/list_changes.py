@@ -193,6 +193,13 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
             },
         },
+        {
+            "$sort": {
+                "time": -1,
+                "_id.git_commit": 1,
+                "test_name": 1,
+            }
+        },
     ]
 
     query = CHANGE_POINTS_PER_COMMIT
