@@ -1106,10 +1106,7 @@ class DBStore(object):
             query["test_name"] = {"$in": test_names}
 
         pulls = (
-            await pr_tests.find(query)
-            .sort({"pull_number": -1})
-            .limit(50)
-            .to_list(None)
+            await pr_tests.find(query).sort({"pull_number": -1}).limit(50).to_list(None)
         )
         return build_pulls(pulls)
 
