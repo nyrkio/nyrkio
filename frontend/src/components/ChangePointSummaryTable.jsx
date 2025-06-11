@@ -80,10 +80,11 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
 
   console.debug(changeData);
   Object.entries(changeData).forEach(([testName, value]) => {
+    // console.debug(value);
     value.forEach((changePoint) => {
-      console.debug(changePoint);
+      // console.debug(changePoint);
       const changes = changePoint["changes"];
-      console.debug(changes);
+      // console.debug(changes);
       changes.map((change) => {
         const commit = changePoint["attributes"]["git_commit"];
 

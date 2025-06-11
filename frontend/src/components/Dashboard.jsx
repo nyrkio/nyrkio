@@ -14,6 +14,7 @@ import { OrgDashboard } from "./OrgDashboard";
 import { PublicDashboard } from "./PublicDashboard";
 import { TableOrResult } from "./TableOrResult";
 import { Breadcrumb } from "./Breadcrumb";
+import { Pulls } from "./PullRequest";
 
 import graph_4x4 from "../static/icons/graph-4x4.png";
 import graph_nx1 from "../static/icons/graph-nx1.png";
@@ -543,20 +544,27 @@ const ManyResultWithTestname = ({
       displayData,
       embed,
       setGraphSize,
+      sendSelectedPr,
+      baseUrls,
+      breadcrumbName
   })=>{
 
     const orgName = testName.split("/")[0];  // Not used when not an org
 
     return (<>
-            <div className="text-end mt-3 mb-3" id="dashboard_settings">
+            <div className="text-end" id="dashboard_settings">
 
-            <p id="linkToGraphs" style={{textAlign: "right"}}><a title="Link here" href="#graphs" style={{float: "right"}}>¶</a></p>
-            <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
-            >
-            <p className="inactive-label small">Configure...</p>
-            <span className="bi bi-gear-fill"> </span>
-            </button>
-            <div id="graphs" className="row">
+            <div className="row prWidgets justify-content-end">
+              <span className="col-sm-1 col-md-1 col-lg-1"></span>
+              <Pulls testName={testName} sendSelectedPr={sendSelectedPr} baseUrls={baseUrls} breadcrumbName={breadcrumbName} dashboardType={dashboardType} />
+              <div className="col-sm-3 col-md-3 col-lg-3">
+              <span className="inactive-label small">Configure...&nbsp;</span>
+              <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
+              >
+              <span className="bi bi-gear-fill"> </span>
+              </button>
+              <a id="linkToGraphs" title="Link here" href="#graphs">¶</a>
+              </div>
             </div>
 
             <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
@@ -621,6 +629,7 @@ export const SingleResultWithTestname = ({
   const [displayData, setDisplayData] = useState([]);
   const [changePointData, setChangePointData] = useState([]);
   const [notFound, setNotFound] = useState(false);
+  const [selectedPr, sendSelectedPr ] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
   const numericTimestamp = searchParams.get("timestamp");
   const textTimestamp = parseTimestamp(numericTimestamp);
@@ -631,7 +640,16 @@ export const SingleResultWithTestname = ({
 
   const fetchData = async () => {
     console.debug("Fetching data for " + testName);
-    const response = await fetch(baseUrls.api + testName, {
+    var url = baseUrls.api + testName;
+    var url2 = baseUrls.api + testName + "/changes";
+    console.debug("selectedPr: " + selectedPr);
+    if (selectedPr) {
+      const [repo, pull_number] = selectedPr[0].split("/pull/");
+      const pr_commit = selectedPr[1];
+      url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/result/${pr_commit}/test/${testName}`;
+      url2 = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${pr_commit}/test/${testName}`;
+    }
+    const response = await fetch(url, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -649,18 +667,25 @@ export const SingleResultWithTestname = ({
     // them on the graphs now. Perhaps a slider to select a time range is needed after all.
     setDisplayData(resultData.slice(-300));
 
-    const changes = await fetch(baseUrls.api + testName + "/changes", {
+    const changes = await fetch(url2, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-    const changeData = await changes.json();
+    var changeData = await changes.json();
     if (changes.status != 200) {
       console.error("Failed to fetch change point data: " + changes.status);
       return;
     }
+    // Fix: needs unwrapping. TODO: fix backend.
+    if(selectedPr && changeData){
+      const keylist = Object.keys(changeData[0]);
+      changeData = changeData[0]; //[keylist[0]];
+    }
     setChangePointData(changeData);
+//     console.log(resultData);
+//     console.log(changeData);
   };
 
   const defaultGraphSize = localStorage.getItem("graphSize") || "2x1"
@@ -672,7 +697,7 @@ export const SingleResultWithTestname = ({
       setLoading(false);
     });
   };
-  useEffect(loadData, [location,redraw]);
+  useEffect(loadData, [location,redraw,selectedPr]);
 
   if (!loading && notFound) {
     return <NoMatch />;
@@ -708,6 +733,7 @@ export const SingleResultWithTestname = ({
   if(displayData && displayData[displayData.length-1]){
     metricsData = displayData[displayData.length-1].metrics;
   }
+
   return (
     <>
           {embed == "yes" ? "" :
@@ -719,12 +745,16 @@ export const SingleResultWithTestname = ({
             </div>
 
             {hideSettings?"":
-            <DashboardSettings       dashboardType={dashboardType}
+            <DashboardSettings
+              dashboardType={dashboardType}
               setGraphSize={setGraphSize}
               testName={testName}
               loadData={loadData}
               displayData={displayData}
               embed={embed}
+              sendSelectedPr={sendSelectedPr}
+              baseUrls={baseUrls}
+              breadcrumbName={breadcrumbName}
             />
             }
 

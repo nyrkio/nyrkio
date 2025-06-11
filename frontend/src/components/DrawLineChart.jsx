@@ -34,6 +34,7 @@ const nyrkio_text_light = "#6c757d";
 
 const nyrkio_chart_line_color = nyrkio_horn_light_brown;
 const nyrkio_chart_cp_color = nyrkio_tattoo_red;
+const nyrkio_chart_pr_color = nyrkio_text_light;
 
 export const DrawLineChart = ({
   metric,
@@ -42,7 +43,8 @@ export const DrawLineChart = ({
   displayData,
   changePointData,
   searchParams,
-  graphSize
+  graphSize,
+  breadcrumbName
 }) => {
   const chartRef = useRef();
   const metricName = metric["name"];
@@ -57,6 +59,9 @@ export const DrawLineChart = ({
   let metricAndDirection = metricUnit;
   if (metric.direction=="higher_is_better") metricAndDirection = metricUnit + " >";
   if (metric.direction=="lower_is_better") metricAndDirection = "< " + metricUnit;
+
+  console.log(changePointData);
+
   const parseData = (data, metricName) => {
     const value_map = data.map(
       (result) =>
@@ -137,9 +142,19 @@ export const DrawLineChart = ({
     });
   };
 
+  const isPr = (index) => {
+    return displayData[index].pull_request !== undefined;
+  };
+
   const pointRadius = (index) => {
     if (modalIndex==index){
       return 7;
+    }
+    if (isPr(index)) {
+      if (isChangePoint(index)) {
+        return 9;
+      }
+      return 5;
     }
     if (isChangePoint(index)) {
       return 3;
@@ -285,10 +300,8 @@ export const DrawLineChart = ({
                 <ChangePointBox index={result_index} changePointData={changePointData} metricName={metric.name} what="changes"/>
               </div>
               <div className="col-sm">
-                  <p>
                   {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<label>extra_info</label>:""}
                   {result&&result.extra_info&&Object.keys(result.extra_info).length>0?<pre>{JSON.stringify(result.extra_info, null, 2)}</pre>:""}
-                  </p>
               </div>
             </div>
 
@@ -525,14 +538,25 @@ export const DrawLineChart = ({
                   return gradient;
                 },
                 pointBorderColor: (context) => {
-                  return isChangePoint(context.dataIndex)
-                    ? nyrkio_chart_cp_color
-                    : nyrkio_chart_line_color;
+                  if (isPr(context.dataIndex)) {
+                    if (isChangePoint(context.dataIndex)) {
+                      return "#ff0000";
+                    }
+                    return nyrkio_chart_line_color;
+                  }
+                  if (isChangePoint(context.dataIndex)) {
+                    return nyrkio_chart_cp_color;
+                  }
+                  return nyrkio_chart_line_color;
                 },
                 pointBackgroundColor: (context) => {
-                  return isChangePoint(context.dataIndex)
-                    ? nyrkio_chart_cp_color
-                    : nyrkio_chart_line_color;
+                  if (isPr(context.dataIndex)) {
+                    return "#00aa00"
+                  };
+                  if (isChangePoint(context.dataIndex)) {
+                    return nyrkio_chart_cp_color;
+                  }
+                  return nyrkio_chart_line_color;
                 },
                 pointRadius: (context) => {
                   return pointRadius(context.dataIndex);
