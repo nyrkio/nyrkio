@@ -1105,7 +1105,7 @@ class DBStore(object):
         if test_names:
             query["test_name"] = {"$in": test_names}
 
-        pulls = await pr_tests.find(query).to_list(None)
+        pulls = await pr_tests.find(query).sort({"_id.pull_number":-1}).limit(50).to_list(None)
         return build_pulls(pulls)
 
     async def delete_pull_requests(self, user_id: Any, repo: str, pull_number: int):
