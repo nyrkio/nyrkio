@@ -43,6 +43,21 @@ from backend.notifiers.github import GitHubCommentNotifier
 pr_router = APIRouter()
 
 
+@pr_router.get(
+    "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
+)
+async def get_pr_changes_test_name(
+    test_name: str,
+    pull_number: int,
+    git_commit: str,
+    repo: str,
+    notify: Union[int, None] = None,
+    user: User = Depends(auth.current_active_user),
+):
+    _ = test_name
+    return await _get_pr_changes(pull_number, git_commit, repo, notify, user.id)
+
+
 @pr_router.get("/pulls/{repo:path}/{pull_number}/changes/{git_commit}")
 async def get_pr_changes(
     pull_number: int,

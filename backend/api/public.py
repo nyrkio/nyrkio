@@ -3,7 +3,8 @@ from fastapi import APIRouter, HTTPException
 
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
-from backend.api.pull_request import _get_pr_results, _get_pr_result
+from backend.api.pull_request import _get_pr_results, _get_pr_result, _get_pr_changes
+
 
 """
 Test results can be made publicly available to everyone so that users can
@@ -154,6 +155,21 @@ async def get_result(test_name: str) -> List[Dict]:
 
     data, _ = await store.get_results(id, test_name)
     return data
+
+
+@public_router.get(
+    "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
+)
+async def get_pr_changes(
+    test_name: str,
+    repo: str,
+    pull_number: int,
+    git_commit: str,
+):
+    user_or_org_id, _ = await _figure_out_user_and_test(test_name)
+    return await _get_pr_changes(
+        pull_number, git_commit, repo, notify=None, user_or_org_id=user_or_org_id
+    )
 
 
 @public_router.get(
