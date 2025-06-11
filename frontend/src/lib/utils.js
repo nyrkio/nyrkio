@@ -122,6 +122,14 @@ export const getOrgRepo = (name) => {
 
       return encodeURIComponent("https://github.com/" + orgRepo);
 }
+export const getOrgRepoShort = (name) => {
+      if(name===undefined) return "";
+      name = decodeURIComponent(name).replace("https://github.com/","");
+      const parts = name.split("/");
+      const orgRepo = parts[0] + "/" + parts[1];
+
+      return orgRepo;
+}
 // Return the org prefix of an /org public project. To be used in links and such.
 export const getOrg = (name) => {
       if(name===undefined) return "";
@@ -129,4 +137,16 @@ export const getOrg = (name) => {
       const parts = name.split("/");
       const org = parts[0];
       return org;
+}
+
+// Return the org / namespace prefix of a public project. To be used in links and such.
+export const getOrgRepoBranch = (name) => {
+      if(name===undefined) return "";
+      name = decodeURIComponent(name).replace("https://github.com/","");
+      const parts = name.split("/");
+      const orgRepoBranch = (parts.length > 0 ? parts[0] : "")
+                            + (parts.length > 1 ? "/" + parts[1] : "")
+                            + (parts.length > 2 ? "/" + parts[2] : "");
+
+      return orgRepoBranch;
 }

@@ -662,6 +662,30 @@ div.card div.card-header {
   border-color: 1px solid var(--nyrkio-dark-gray);
 }
 
+#dashboard_settings .prWidgets select {
+  border: solid 1px var(--nyrkio-dark-gray);
+  background-color: var(--nyrkio-light-gray);
+  display: inline;
+}
+#dashboard_settings .prWidgets select option {
+    background: var(--nyrkio-light-gray);
+}
+
+#dashboard_settings .prWidgets select:focus,
+#dashboard_settings .prWidgets select:hover,
+#dashboard_settings .prWidgets select:active {
+  border: solid 1px var(--nyrkio-bear-brown);
+  box-shadow: none;
+}
+
+#dashboard_settings .prWidgets select#commitPicker:focus,
+#dashboard_settings .prWidgets select#commitPicker:hover,
+#dashboard_settings .prWidgets select#commitPicker:active,
+#dashboard_settings .prWidgets select#commitPicker {
+  background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" version="1.1"><circle class="myCircle" cx="10" cy="6" r="5" fill="%23007700" stroke="%2350320d"/></svg>') ;
+}
+
+
 .list-group .list-group-item {
   border-bottom: 1px solid var(--nyrkio-light-gray2);
   width: 100%;
@@ -1061,11 +1085,6 @@ div.card.people-card .card-header img {
 
 #dashboard_settings .inactive-label {
   color: var(--nyrkio-horn-dark-brown);
-  position: absolute;
-  top: 0rem;
-  right: 3.5rem;
-  width: 25rem;
-  text-align: right;
   transition: 5s;
   opacity:0;
 }
@@ -1074,20 +1093,15 @@ div.card.people-card .card-header img {
   transition: 0.2s;
   opacity:1;
 }
+
 #dashboard_settings .btn[aria-expanded=true]  .inactive-label {
     opacity: 0;
     transition: 2s;
     shadow: darkgreen;
 }
 
-#dashboard_settings #linkToGraphs a {
-    color: var(--nyrkio-light-gray);
-}
 #dashboard_settings #linkToGraphs {
-    background-color: var(--nyrkio-horn-light-brown);
-    position: relative;
-    top: -.7rem;
-    right: .3rem;
+    color: var(--nyrkio-light-gray);
 }
 
 #dashboard_settings #dashboardSettingsButton.btn {
@@ -1095,10 +1109,10 @@ div.card.people-card .card-header img {
     border-color: var(--nyrkio-dark-gray);
     background-color: var(--nyrkio-light-gray);
     margin: 0px;
-    z-index: 10;
-    position: relative;
-    right: 1rem;
+    margin-right: 0.5em;
+    margin-left: 0.4em;
     box-shadow: none;
+    display: inline;
 }
 
 #dashboard_settings #dashboardSettingsButton.btn.show {
@@ -1179,3 +1193,4 @@ div.blog-rss-widget .nyrkio-blog-header span {
   margin-bottom: 2em;
 
 }
+
