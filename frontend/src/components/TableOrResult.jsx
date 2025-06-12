@@ -24,6 +24,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
    console.debug(singleTestName);
    console.debug(prefix);
    console.debug(data);
+   console.debug(baseUrls);
 
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
