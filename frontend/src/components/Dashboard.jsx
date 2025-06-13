@@ -317,6 +317,8 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                     displayData={displayData}
                     embed={embed}
                     setGraphSize={setGraphSize}
+                    baseUrls={baseUrls}
+                    breadcrumbName={breadcrumbName}
                   />
                   { localStorage.getItem("showAllGraphs")!="true"? "": (
                   <ManyResultWithTestname
