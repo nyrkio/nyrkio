@@ -29,6 +29,8 @@ from backend.db.list_changes import change_points_per_commit
 
 app = FastAPI(openapi_url="/openapi.json")
 
+logging_out = logging.StreamHandler(stream=sys.stdout)
+logging_out.setLevel(logging.INFO)
 
 api_router = APIRouter()
 
