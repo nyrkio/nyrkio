@@ -1,6 +1,8 @@
 # Copyright (c) 2024, Nyrkiö Oy
 from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Union
+import logging
+import sys
 
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
@@ -31,6 +33,9 @@ app = FastAPI(openapi_url="/openapi.json")
 
 logging_out = logging.StreamHandler(stream=sys.stdout)
 logging_out.setLevel(logging.INFO)
+root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
+root_logger.addHandler(logging_out)
 
 api_router = APIRouter()
 
