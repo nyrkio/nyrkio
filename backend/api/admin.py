@@ -16,6 +16,7 @@ admin_router = APIRouter(prefix="/admin")
 logging_out = logging.StreamHandler(stream=sys.stdout)
 logging_out.setLevel(logging.INFO)
 root_logger = logging.getLogger()
+root_logger.setLevel(logging.INFO)
 root_logger.addHandler(logging_out)
 
 
