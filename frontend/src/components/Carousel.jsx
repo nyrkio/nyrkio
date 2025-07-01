@@ -7,13 +7,13 @@ import Marketplace_GHA from '../static/Nyrkio-GHA-Marketplace-Listing.png'
 
 function NyrkioCarousel() {
   return (
-    <Carousel interval={10*1000}>
-      <Carousel.Item interval={30*1000}>
+    <Carousel interval={7*1000}>
+      <Carousel.Item>
         <a href="/docs/getting-started">
         <img src={Marketplace_GHA} className="w-50" />
         </a>
         <Carousel.Caption>
-        <div style={{"width":"20em", "position":"absolute", "left": "55%", "bottom":"0px", "text-align":"left"}}>
+        <div style={{"width":"20em", "position":"absolute", "left": "55%", "bottom":"0px", "textAlign":"left"}}>
         <p><a href="/docs/getting-started"><strong>NEW: </strong><br /> Adding Nyrkiö Change Detection to your GitHub .workflows just got easy!</a></p>
         <ol>
         <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
