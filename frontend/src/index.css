@@ -29,6 +29,10 @@
   --nyrkio-horn-light-brown: #b28b56;
   --nyrkio-skin-light-brown: #d2a376;
 
+  --nyrkio-dark-green: darkgreen;
+  --nyrkio-dark-green2: #114411;
+  --nyrkio-dark-green3: #004400;
+
   --nyrkio-text: #344767;
   --nyrkio-text-light: #6c757d;
   --nyrkio-border: var(--nyrkio-horn-dark-brown);
@@ -174,16 +178,23 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-width:100%;
   object-fit: contain;
 }
-.frontpage .carousel-caption {
-  color: var(--nyrkio-tattoo-red);
+.frontpage .carousel-caption
+{
+  color: var(--nyrkio-dark-green);
   position: absolute;
   bottom: 0px;
   padding: 0px;
   font-size:13px;
 }
 
-.frontpage .carousel-indicators {
-  }
+
+.frontpage .carousel-caption a
+{
+  color: var(--nyrkio-dark-green);
+  font-weight: bold;
+  text-shadow: 3px 5px 14px var(--nyrkio-dark-gray2);
+
+}
 
 .frontpage .carousel-caption {
   z-index: 4;
