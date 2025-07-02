@@ -199,7 +199,7 @@ export const FrontPage = () => {
         <h1>That's what users said</h1>'
         <UserCarousel />
         <div className="padding-block-sm "></div>
-        <SampleData customerName="Turso" customerUrl="https://turso.tech" />
+        <SampleData />
         <div className="padding-block "></div>
         <FeatureBanner2 />
         <LearnMore />
