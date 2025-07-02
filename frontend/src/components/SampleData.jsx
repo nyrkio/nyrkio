@@ -4,6 +4,7 @@ import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import tigerBeetleLogo from "../static/tb-logo-black.png";
 import tursoLogo from "../static/turso-banner.png";
+import kiekerLogo from "../static/kieker-logo.svg";
 import { OrigTestList } from "./Dashboard.jsx";
 import { PublicDashboard } from "./PublicDashboard";
 import { TableOrResult } from "./TableOrResult";
@@ -19,6 +20,8 @@ export const SampleData = ( { customerName, customerUrl } ) => {
     const publicCustomers = [
       ["TigerBeetle", "https://tigerbeetle.com", tigerBeetleLogo, "tigerbeetle/tigerbeetle", "main/devhub", "TPS" ],
       ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+      ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
+      ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
     ];
     const randomNum = Math.floor(Math.random() * (publicCustomers.length));
     console.debug(randomNum);
@@ -93,7 +96,7 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
       <div className="row"></div>
       <div className="col">
         <h1>See for yourself!</h1>
-        <p>Here is the benchmark data from our friends at </p>
+        <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
         <p><CustomerLogo customerName={customerName} customerUrl={customerUrl} customerLogo={customerLogo} /></p>
       </div>
       <div className="row justify-content-center text-center pt-5">
