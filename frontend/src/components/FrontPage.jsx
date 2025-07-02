@@ -4,7 +4,7 @@ import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
 import { Logo } from "./Logo";
-import NyrkioCarousel from "./Carousel";
+import { NyrkioCarousel, UserCarousel } from "./Carousel";
 
 const FeatureHighlight = () => {
   return (
@@ -83,21 +83,23 @@ export const DemoVideo = () => {
 
 const FeatureBanner1 = () => {
   return (
+    <>
+    <h2>Continuous Performance Engineering</h2>
     <div className="container-fluid p-5 text-center bg-light">
-      <div className="row justify-content-center">
+    <div className="row justify-content-center">
         <div className="col-md-4 col-sm-12 text-start align-text-bottom align-self-center">
           <p>
             Even the smallest performance changes can have a big impact on your
             users. Nyrkiö uses change point detection to identify every change
             in your performance data.
           </p>
-          <h2>Uncover every performance change</h2>
           <p>
             Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every regression and celebrate every
             gain.
           </p>
         </div>
+
         <div className="col-md-4 col-sm-12 align-items-end justify-content-end">
           <img
             style={{
@@ -111,6 +113,7 @@ const FeatureBanner1 = () => {
         </div>
       </div>
     </div>
+    </>
   );
 };
 
@@ -180,17 +183,21 @@ export const FrontPage = () => {
     <>
       <div className="frontpage container-fluid text-center w-100">
         <div className="container-fluid text-center w-100">
-          <NyrkioCarousel />
-          <div className="padding-block-sm frontpage-triplet"></div>
-          <FeatureHighlight />
-          <button className="btn btn-success">
-            <a className="btn-link" href="/signup">
-              Sign up
-            </a>
-          </button>
-        </div>
+        <NyrkioCarousel />
         <div className="padding-block "></div>
+        <div className="padding-block-sm frontpage-triplet"></div>
+        <button className="btn btn-success">
+        <a className="btn-link" href="/signup">
+        Create User Account
+        </a>
+        </button>
+        </div>
+        <div className="padding-block-sm "></div>
+        <div className="padding-block-sm "></div>
         <FeatureBanner1 />
+        <div className="padding-block-sm "></div>
+        <h1>That's what users said</h1>'
+        <UserCarousel />
         <div className="padding-block-sm "></div>
         <SampleData customerName="Turso" customerUrl="https://turso.tech" />
         <div className="padding-block "></div>
