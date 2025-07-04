@@ -73,7 +73,7 @@
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
-  font-size: var(--bs-body-font-size);
+  offfont-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
   line-height: var(--bs-body-line-height);
   letter-spacing: 0.0rem;
@@ -180,7 +180,9 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
 }
 .frontpage .carousel-caption
 {
-  color: var(--nyrkio-dark-green);
+  color: var(--nyrkio-tattoo-red);
+  text-shadow: 1px 0px 0px var(--nyrkio-tattoo-red);
+  font-weight: bold;
   position: absolute;
   bottom: 0px;
   padding: 0px;
@@ -190,9 +192,8 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
 
 .frontpage .carousel-caption a
 {
-  color: var(--nyrkio-dark-green);
-  font-weight: bold;
-  text-shadow: 3px 5px 14px var(--nyrkio-dark-gray2);
+  color: var(--nyrkio-tattoo-red);
+  text-shadow: 1px 0px 0px var(--nyrkio-tattoo-red);
 
 }
 
@@ -624,8 +625,15 @@ table.pricing-table td {
 }
 
 .bg-nyrkio-dark-gray {
-  color: white;
-  background-color: var(--nyrkio-dark-gray) !important;
+  color: var(--nyrkio-bear-brown);
+  background-color: var(--nyrkio-dark-gray);
+  font-size: 130%;
+}
+
+.bg-nyrkio-light-gray {
+  color: var(--nyrkio-bear-brown);
+  background-color: var(--nyrkio-light-gray);
+  font-size: 130%;
 }
 
 .bg-nyrkio-dark-red {
@@ -802,6 +810,19 @@ div.card div.card-header {
   */
 }
 
+.section-front .nyrkio-public-sample {
+  background-color: var(--nyrkio-light-gray5);
+  border-radius: 10px;
+  border: 1px solid var(--nyrkio-bear-brown);
+  box-shadow: 4px 8px 8px var(--nyrkio-dark-gray);
+}
+.section-front .nyrkio-public-sample-title {
+  font-size: 120%;
+  background-color: var(--nyrkio-light-gray);
+  border-radius: 10px;
+  border: 1px solid var(--nyrkio-bear-brown);
+  box-shadow: 4px 8px 8px var(--nyrkio-dark-gray);
+}
 .ag-root-wrapper {
   margin-top: 1em;
   margin-bottom: 3em;

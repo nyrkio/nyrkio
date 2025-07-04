@@ -5,10 +5,38 @@ import Pierre from '../static/Pierre_lake.jpg';
 import { DemoVideo } from './FrontPage'
 import Marketplace_GHA from '../static/Nyrkio-GHA-Marketplace-Listing.png'
 
+
+export function NyrkioCarouselCols() {
+  return (
+    <div className="row">
+    <div className="col p-5">
+    <a href="/docs/getting-started">
+    <img src={Marketplace_GHA} className="w-100" />
+    </a>
+    <div>
+
+    <div style={{"width":"20em", "maxHeight":"1em", "position":"relative", "left": "55%", "top":"-20em", "textAlign":"left"}}>
+    <p><a href="/docs/getting-started"><strong>NEW: </strong><br />Adding Nyrkiö Change Detection to your GitHub .workflows just got easy!</a></p>
+    <ol>
+    <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
+    <li><a href="/docs/getting-started">Add 10 lines of Yaml</a></li>
+    <li><a href="/docs/getting-started">Remember to pass the JWT token.</a></li>
+    </ol>
+    <p><a href="/docs/getting-started">That's all.</a></p>
+    </div>
+    </div>
+    </div>
+    <div className="col p-5">
+    <DemoVideo />
+    </div>
+    </div>
+  );
+}
+
 export function NyrkioCarousel() {
   return (
-    <Carousel interval={7*1000}>
-    <Carousel.Item  interval={15*1000}>
+    <Carousel interval={10*1000} slide={1500}>
+      <Carousel.Item>
         <a href="/docs/getting-started">
         <img src={Marketplace_GHA} className="w-50" />
         </a>
@@ -16,9 +44,9 @@ export function NyrkioCarousel() {
         <div style={{"width":"20em", "position":"absolute", "left": "55%", "bottom":"0px", "textAlign":"left"}}>
         <p><a href="/docs/getting-started"><strong>NEW: </strong><br /> Adding Nyrkiö Change Detection to your GitHub .workflows just got easy!</a></p>
         <ol>
-        <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
-        <li><a href="/docs/getting-started">Add 10 lines of Yaml</a></li>
-        <li><a href="/docs/getting-started">Remember to pass the JWT token.</a></li>
+          <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
+          <li><a href="/docs/getting-started">Add 10 lines of Yaml</a></li>
+          <li><a href="/docs/getting-started">Remember to pass the JWT token.</a></li>
         </ol>
         <p><a href="/docs/getting-started">That's all.</a></p>
         </div>

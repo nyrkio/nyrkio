@@ -11,21 +11,21 @@ import { TableOrResult } from "./TableOrResult";
 import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
 
 
-export const SampleData = ( { customerName, customerUrl } ) => {
+const publicCustomers = [
+  ["TigerBeetle", "https://tigerbeetle.com", tigerBeetleLogo, "tigerbeetle/tigerbeetle", "main/devhub", "TPS" ],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
+  ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
+];
+
+export const SampleData = ( { customerName } ) => {
   let customerLogo = tursoLogo;
   let orgRepo = "tursodatabase/limbo"
+  let customerUrl = "https://turso.tech";
   let testName = "main/turso/main/mvcc-ops-throughput/read";
   let graphName = "time";
   if (customerName === undefined) {
-    const publicCustomers = [
-      ["TigerBeetle", "https://tigerbeetle.com", tigerBeetleLogo, "tigerbeetle/tigerbeetle", "main/devhub", "TPS" ],
-      ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
-      ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
-      ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
-    ];
     const randomNum = Math.floor(Math.random() * (publicCustomers.length));
-    console.debug(randomNum);
-    console.debug(publicCustomers);
     const c = publicCustomers[randomNum];
     customerName = c[0];
     customerUrl = c[1];
@@ -33,6 +33,20 @@ export const SampleData = ( { customerName, customerUrl } ) => {
     orgRepo = c[3]
     testName = c[4];
     graphName = c[5]; // May be undefined
+  }
+  else {
+    for(let i=0; i<publicCustomers.length; i++){
+      if ( publicCustomers[i][0] == customerName ) {
+        const c = publicCustomers[randomNum];
+        customerName = c[0];
+        customerUrl = c[1];
+        customerLogo = c[2];
+        orgRepo = c[3]
+        testName = c[4];
+        graphName = c[5]; // May be undefined
+        break;
+      }
+    }
   }
   return <SampleDataPublic
             customerName={customerName}
@@ -92,13 +106,10 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
   }, [location]);
 
   return (
-    <div className="container mt-5 text-center">
-      <div className="row"></div>
-      <div className="col">
-        <h1>See for yourself!</h1>
-        <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
+    <div className="row">
+    <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample  p-3 ">
+    <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
         <p><CustomerLogo customerName={customerName} customerUrl={customerUrl} customerLogo={customerLogo} /></p>
-      </div>
       <div className="row justify-content-center text-center pt-5">
         {loading ? (
           <p>Loading...</p>
@@ -121,9 +132,10 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
         <a href="/public">
           More public test results from other Nyrkiö users...
         </a>
-      </div>
       <hr />
-    </div>
+      </div>
+      </div>
+      </div>
   );
 };
 

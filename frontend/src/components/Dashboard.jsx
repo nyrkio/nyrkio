@@ -742,9 +742,7 @@ export const SingleResultWithTestname = ({
 
   return (
     <>
-          {embed == "yes" ? "" :
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
-          }
           <div className="container">
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData}/>
