@@ -126,7 +126,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         >
           <Routes>
             <Route path="/" element={loggedIn ? <Dashboard path="/" /> : <Nothing />} />
-            <Route path="/frontpage" element={<><LogoSloganNarrow /><div className="col-md-2 col-xl-3" ></div></>} />
+            <Route path="/frontpage" element={<><LogoSloganNarrow /></>} />
             <Route
               path="/tests/*"
               element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
