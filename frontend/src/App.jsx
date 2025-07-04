@@ -169,7 +169,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage /></>} />
+            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSloganNarrow /><FrontPage /></>} />
             <Route path="/frontpage" element={<FrontPage />} />
             <Route path="*" element={<Nothing />} />
           </Routes>
