@@ -16,7 +16,7 @@ const Loading = ({loading}) => {
 //
 // Otherwise, treat the pathname as a prefix for a name in data and list
 // all tests with that prefix upto the next "/".
-export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, loading, setLoading,summaries,setSummaries,singleTestName }) => {
+export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, loading, setLoading,summaries,setSummaries,singleTestName, graphName }) => {
   const testNames = data;
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name)=>decodeURIComponent(name));
@@ -35,6 +35,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
       <>
         <SingleResultWithTestname
           testName={path}
+          graphName={graphName}
           baseUrls={baseUrls}
           breadcrumbName={prefix}
           dashboardType={dashboardType}

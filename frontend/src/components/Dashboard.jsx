@@ -47,6 +47,7 @@ export const TestList = ({
   // Check for invalid test name in url
   if (!loading && prefix !== undefined && !validTestName(prefix, testNames)) {
       return <NoMatch />;
+
   }
   if (shortNames.length == 0) {
     return (
@@ -624,7 +625,8 @@ export const SingleResultWithTestname = ({
   dashboardType,
   embed,
   hideSettings,
-  redraw
+  redraw,
+  graphName,
 }) => {
   const location = useLocation();
   const [loading, setLoading] = useState(true);
@@ -711,9 +713,11 @@ export const SingleResultWithTestname = ({
 
   var metricMap = [];
   displayData.map((result) => {
-    result.metrics.map((metric) => {
-      metricMap.push({ name: metric.name, unit: metric.unit, direction: metric.direction });
-    });
+      result.metrics.map((metric) => {
+        if (graphName===undefined || graphName==metric.name){
+          metricMap.push({ name: metric.name, unit: metric.unit, direction: metric.direction });
+        }
+      });
   });
 
   // Only want unique metric names
@@ -738,9 +742,7 @@ export const SingleResultWithTestname = ({
 
   return (
     <>
-          {embed == "yes" ? "" :
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
-          }
           <div className="container">
             <div className="row justify-content-center">
               <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData}/>

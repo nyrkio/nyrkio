@@ -49,20 +49,24 @@ const FeatureHighlight = () => {
 
 const LearnMore = () => {
   return (
-    <div className="container pt-5 text-center">
-      <div className="row pt-5">
+    <div className="row pt-5 text-center">
+      <div className="col-xs-12 col-md-3">
         <h3>Ready to try it?</h3>
-      </div>
-      <div className="row pt-2">
         <Link to="/docs/getting-started">Getting started guide</Link>
       </div>
-      <div className="row pt-5">
-        <h3>Want to learn more?</h3>
+      <div className="col-xs-12 col-md-3">
+      <h3>Want to learn more?</h3>
+      <Link to="/product">Read about how it works</Link>
       </div>
-      <div className="row pt-2">
-        <Link to="/product">Read about change detection</Link>
+      <div className="col-xs-12 col-md-3">
+      <h3>Need help?</h3>
+      <Link to="/services">We offer consulting packages to get you started. </Link>
       </div>
-    </div>
+      <div className="col-xs-12 col-md-3">
+      <h3>Get involved?</h3>
+      <Link to="/">TODO: Pages about open source ecosystem</Link>
+      </div>
+      </div>
   );
 };
 
@@ -84,23 +88,28 @@ export const DemoVideo = () => {
 const FeatureBanner1 = () => {
   return (
     <>
-    <h2>Continuous Performance Engineering</h2>
-    <div className="container-fluid p-5 text-center bg-light">
+    <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
     <div className="row justify-content-center">
-        <div className="col-md-4 col-sm-12 text-start align-text-bottom align-self-center">
+        <h2>Continuous Benchmarking with Confidence</h2>
+        <div className="col-xl-5 col-lg-6 col-sm-12 text-start align-text-bottom align-self-center">
           <p>
             Even the smallest performance changes can have a big impact on your
-            users. Nyrkiö uses change point detection to identify every change
-            in your performance data.
+            users. And if you allow them to compound, your performance risks facing death by a thousand paper cuts...
+            But small 1-5% performance regressions are hard to spot in testing, especially when shifting left to do automatedd testing.
+            when the random variation in your benchmarking results is often bigger than that.
           </p>
           <p>
+            Nyrkiö uses <big>Change Point Detection</big> to identify every change
+            in your performance data.
             Our change point detection algorithm is designed to work with noisy performance
-            data which means you can catch every regression and celebrate every
-            gain.
+            data which means you can catch every performance regression, however small or large.
           </p>
+          <p>Other similar systems usually catch only the largest performance regressions, 20% or even 50%,
+          and even then come with a high false positive rate. Nyrkiö can reliably catch even a 1% regression.
+          All automatic, even filing the GitHub issue for you, when a regression was caught.</p>
         </div>
 
-        <div className="col-md-4 col-sm-12 align-items-end justify-content-end">
+        <div className="col-xl-5 col-lg-6 col-sm-12 align-items-end justify-content-end">
           <img
             style={{
               width: "100%",
@@ -119,7 +128,7 @@ const FeatureBanner1 = () => {
 
 const FeatureBanner2 = () => {
   return (
-    <div className="container-fluid p-5 text-center bg-nyrkio-dark-gray bg-dark">
+    <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
       <div className="row text-end justify-content-center pt-5">
         <div className="col-md-4 col-sm-12 align-self-center">
           <div className="row text-center">
@@ -181,28 +190,37 @@ const FeatureBanner2 = () => {
 export const FrontPage = () => {
   return (
     <>
+
       <div className="frontpage container-fluid text-center w-100">
         <div className="container-fluid text-center w-100">
-        <NyrkioCarousel />
-        <div className="padding-block "></div>
-        <div className="padding-block-sm frontpage-triplet"></div>
-        <button className="btn btn-success">
-        <a className="btn-link" href="/signup">
-        Create User Account
-        </a>
-        </button>
+           <div className="padding-block "></div>
+
+          <NyrkioCarousel />
+          <div className="padding-block-sm "></div>
+          <div className="padding-block-sm "></div>
+
+          <FeatureBanner1 />
+
+
+
+          <h1>What our users say</h1>
+          <UserCarousel />
+
+          <div className="padding-block-sm "></div>
+          <div className="row">
+          <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample-title  p-3 ">
+          <h2>See it for yourself</h2>
+          <p>You can browse <em>real, live</em> benchmark results from other Nyrkiö users. The red dots are Change Points reported by Nyrkiö.</p>
+
+          </div>
+          </div>
+          <SampleData />
+
+          <div className="padding-block "></div>
+
+          <FeatureBanner2 />
+          <LearnMore />
         </div>
-        <div className="padding-block-sm "></div>
-        <div className="padding-block-sm "></div>
-        <FeatureBanner1 />
-        <div className="padding-block-sm "></div>
-        <h1>That's what users said</h1>'
-        <UserCarousel />
-        <div className="padding-block-sm "></div>
-        <SampleData customerName="Turso" customerUrl="https://turso.tech" />
-        <div className="padding-block "></div>
-        <FeatureBanner2 />
-        <LearnMore />
       </div>
     </>
   );
