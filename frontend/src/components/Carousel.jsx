@@ -48,7 +48,7 @@ export function NyrkioCarousel() {
           <li><a href="/docs/getting-started">Add 10 lines of Yaml</a></li>
           <li><a href="/docs/getting-started">Remember to pass the JWT token.</a></li>
         </ol>
-        <p><a href="/docs/getting-started">That's all.</a></p>
+        <p><a href="/docs/getting-started">Get started right away...</a></p>
         </div>
         </Carousel.Caption>
       </Carousel.Item>
