@@ -102,7 +102,9 @@ body.nyyrikki-banner-right.section-about {
 
 body:not(.section-front),
 body.nyyrikki-banner-right-bw,
-main .nyyrikki-banner-right-bw {
+main .nyyrikki-banner-right-bw {}
+
+off-body.nyyrikki-banner-right.section-about{
   background-image: url(https://nyrkio.com/p/nyyrikki/nyyrikki-vertical-medium-outline.png);
   background-repeat: no-repeat;
   background-attachment: fixed;
@@ -157,6 +159,8 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   max-height: 33%;
 }
 
+.nyrkio-logo.nyrkio-title h2,
+.frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   font-size: 2em;
@@ -741,7 +745,7 @@ div.card div.card-header {
   --ag-secondary-foreground-color: var(--nyrkio-bear-brown);
   --ag-data-color: var(--nyrkio-bear-brown);
   --ag-header-foreground-color: var(--nyrkio-bear-brown);
-  --ag-header-background-color: transparent;
+  --ag-header-background-color: var(--nyrkio-light-gray);
   --ag-grid-size: 8px;
   --ag-list-item-height: 42px;
   --ag-border-color: var(--nyrkio-horn-light-brown);
