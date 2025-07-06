@@ -7,7 +7,7 @@ export default defineConfig({
   assetsInclude: ["**/*.md"],
   server: {
     proxy: {
-      "/p/": {target: "http://51.20.96.129/"},
+      // "/p/": {target: "http://51.20.96.129/"},
       "/api": {
         target: "https://nyrk.io",
         //target: "https://staging.nyrkio.com",
