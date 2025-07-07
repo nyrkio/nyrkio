@@ -129,6 +129,10 @@ body.section-about .footer {
   height: 600px;
 }
 
+.forestText, .forestVideoWrapper {
+  background-color: var(--nyrkio-horn-light-brown);
+}
+
 #forestVideoBackground {
   position: relative;
   object-position: 0px 0px;
