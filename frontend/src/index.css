@@ -163,8 +163,9 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
-  font-size: 2em;
-  letter-spacing: 0.5rem;
+  color: var(--nyrkio-tattoo-red);
+  font-size: 2.5em;
+  letter-spacing: 0.8rem;
   margin-top: 1em;
   margin-bottom: 0.5em;
 }
@@ -461,11 +462,13 @@ button:focus-visible {
 
 .navbar-top .nyrkio-logo-img {
   max-width: 6em;
-  max-height: 1.7em;
+  max-height: 2.1em;
 }
 .navbar-top .nyrkio-logo {
   position: relative;
-  top: -0.5em;
+  top: -0.8em;
+  border: solid 8px #d2a476;
+  border-radius: 33px;
 }
 
 .navbar-left .navbar-nav a.nyrkio-logo-nav-link,
@@ -814,14 +817,16 @@ div.card div.card-header {
   */
 }
 
+.section-product .nyrkio-public-sample,
 .section-front .nyrkio-public-sample {
-  background-color: var(--nyrkio-light-gray5);
+    background-color: var(--nyrkio-light-gray5);
   border-radius: 10px;
   border: 1px solid var(--nyrkio-bear-brown);
   box-shadow: 4px 8px 8px var(--nyrkio-dark-gray);
 }
+.section-product .nyrkio-public-sample-title,
 .section-front .nyrkio-public-sample-title {
-  font-size: 120%;
+    font-size: 120%;
   background-color: var(--nyrkio-light-gray);
   border-radius: 10px;
   border: 1px solid var(--nyrkio-bear-brown);
@@ -1198,7 +1203,7 @@ div.blog-rss-widget .nyrkio-blog-body a {
 div.blog-rss-widget .author,
 div.blog-rss-widget .date {
   color: var(--nyrkio-dark-gray2);
-  font-size: 60%;
+  font-size: 75%;
   display:block;
   text-align:right;
 }

@@ -1,7 +1,8 @@
 import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import grafanaDashboard from "../static/Grafana_dashboard.png";
 import image1 from "../static/50776727286_cdd63903f4_w.jpg";
-import { Logo } from "./Logo";
+import { LogoBrown } from "./Logo";
+import { SampleData } from "./SampleData";
 
 export const ProductPage = () => {
 
@@ -146,7 +147,7 @@ export const ProductPage = () => {
         </div>
 
         <div className="col nyrkio-logo-productpage text-center">
-          <Logo />
+          <LogoBrown />
         </div>
       </div>
       <div className="row col-md-10 p-2">
@@ -166,31 +167,22 @@ export const ProductPage = () => {
         </div>
       </div>
       <div className="row col-md-10 p-2">
-        <div className="col">
-          <h3>Watch Nyrkiö users in action</h3>
-        </div>
+      <div className="col">
+      <h3>Watch Nyrkiö users in action</h3>
       </div>
-      <div className="row col-md-10 p-5">
-        <div className="col">
-          <center>
-            <img
-              style={{
-                width: "80%",
-                border: "#efefeb 10px solid",
-                borderRadius: "5px",
-              }}
-              src={tigerbeetle}
-            />
-          </center>
-        </div>
       </div>
       <div className="row col-md-10 p-2">
-        <div className="col">
-          <p>
-            Some Nyrkiö users have chosen to{" "}
-            <a href="/public">publish their performance testing results</a>.
-            This way anyone can verify the performance of their software.
-          </p>
+      <div className="col">
+      <p>
+      Some Nyrkiö users have chosen to{" "}
+      <a href="/public">publish their performance testing results</a>.
+      This way anyone can verify the performance of their software.
+      </p>
+      </div>
+      </div>
+      <div className="container-fluid text-center col-sm-12 p-3 ">
+      <div className="col">
+        <SampleData />
         </div>
       </div>
       <div className="row col-md-10 offset-md-1 mt-5">

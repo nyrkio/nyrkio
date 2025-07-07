@@ -5,9 +5,10 @@ import react from "@vitejs/plugin-react";
 export default defineConfig({
   plugins: [react()],
   assetsInclude: ["**/*.md"],
+  publicDir: "public",
   server: {
     proxy: {
-      "/p/": {target: "http://51.20.96.129/"},
+      // "/p/": {target: "http://51.20.96.129/"},
       "/api": {
         target: "https://nyrk.io",
         //target: "https://staging.nyrkio.com",
