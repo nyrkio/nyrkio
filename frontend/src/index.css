@@ -467,8 +467,12 @@ button:focus-visible {
 .navbar-top .nyrkio-logo {
   position: relative;
   top: -0.8em;
-  border: solid 8px #d2a476;
+  border: solid 7px var(--nyrkio-light-gray);
   border-radius: 33px;
+
+}
+.navbar-top .nyrkio-logo:hover {
+  border-color: var(--nyrkio-active);
 }
 
 .navbar-left .navbar-nav a.nyrkio-logo-nav-link,
@@ -826,7 +830,7 @@ div.card div.card-header {
 }
 .section-product .nyrkio-public-sample-title,
 .section-front .nyrkio-public-sample-title {
-    font-size: 120%;
+  font-size: 120%;
   background-color: var(--nyrkio-light-gray);
   border-radius: 10px;
   border: 1px solid var(--nyrkio-bear-brown);
