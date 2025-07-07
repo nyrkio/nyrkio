@@ -123,7 +123,6 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
             loading={loading}
             setLoading={setLoading}
             embed="yes"
-            graphName={graphName}
           />
         )}
       </div>

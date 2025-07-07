@@ -9,9 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: staging
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout this repo (nyrkio)
+        uses: actions/checkout@v2
         with:
           submodules: "true"
+
+      - name: Check out nyrkio-proprietary
+        uses: actions/checkout@master
+        with:
+          repository: nyrkio/nyrkio-proprietary
+          path: p
+          token: ${{ secrets.CHECKOUTP }}
 
       - name: Run lscpu
         run: lscpu -J > extra_info.json
@@ -50,6 +58,8 @@ jobs:
           PULL_NUMBER: ${{ github.event.number }}
           GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
         run: |
+          mv p/frontend/src/static/* p/
+
           export GIT_TARGET_BRANCH=${GITHUB_BASE_REF}
           echo "commit is $GIT_COMMIT"
           echo "target branch is $GIT_TARGET_BRANCH"

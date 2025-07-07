@@ -8,9 +8,17 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout this repo (nyrkio)
+        uses: actions/checkout@v2
         with:
           submodules: "true"
+
+      - name: Check out nyrkio-proprietary
+        uses: actions/checkout@master
+        with:
+          repository: nyrkio/nyrkio-proprietary
+          path: p
+          token: ${{ secrets.CHECKOUTP }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
@@ -36,6 +44,8 @@ jobs:
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
           ENV: prod
         run: |
+          mv p/frontend/src/static/* p/
+
           # Build a docker container and push it to ECR
           echo "$NYRKIO_ENV_PROD" > .env.backend
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
