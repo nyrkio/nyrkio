@@ -52,7 +52,7 @@ export const Footer = () => {
       <div className="container-fluid border-top pt-0 g-0 px-0 footer">
        <div className="forestVideoWrapper">
         <video autoPlay muted loop id="forestVideoBackground" >
-        <source src=" /video/pitkospuut-wide.mp4" type="video/mp4" poster={footerUpperCrust} />
+        <source src="/video/pitkospuut-wide.mp4" type="video/mp4" poster={footerUpperCrust} />
         </video>
        </div>
        <div className="container forestText">
