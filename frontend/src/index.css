@@ -147,9 +147,10 @@ body.section-about .footer {
 body .footer .container {
   font-size: 120%;
   position: relative;
-  bottom: +90%;
+  bottom: 60%;
   width: 100%;
-  padding: 10%;
+  padding-left: 10%;
+  padding-right: 10%;
 }
 body .footer .container a {
   color: var(--nyrkio-light-gray2);
