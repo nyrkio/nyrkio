@@ -120,13 +120,40 @@ img.nyyrikki-original-art {
 
 body .footer,
 body.section-about .footer {
-  background-image: url(/src/static/36215479721_4beda5c4ae_k.compressed.25.jpg);
+  xxxbackground-image: url(/src/static/36215479721_4beda5c4ae_k.compressed.25.jpg);
   background-repeat: no-repeat;
   background-attachment: scroll;
   background-position: center;
   background-size: cover;
-  background-opacity: 0.5;
+  background-color: transparent;
   height: 600px;
+}
+
+#forestVideoBackground {
+  position: relative;
+  object-position: 0px 0px;
+  object-fit: cover;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  min-width: 100%;
+  max-height: 600px;
+  z-index: -10;
+}
+
+body .footer .container {
+  font-size: 120%;
+  position: relative;
+  bottom: +90%;
+  width: 100%;
+  padding: 10%;
+}
+body .footer .container a {
+  color: var(--nyrkio-light-gray2);
+  text-decoration: underline;
 }
 
 body #root div.container-fluid {
@@ -1238,4 +1265,3 @@ div.blog-rss-widget .nyrkio-blog-header span {
   margin-bottom: 2em;
 
 }
-
