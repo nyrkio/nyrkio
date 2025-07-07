@@ -3,7 +3,7 @@ import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import { Link } from "react-router-dom";
 import footerUpperCrust from "../static/footer-white-graphic.png";
 import { RssWidget } from "./RssWidget.jsx";
-import { backgroundVideo } from "../static/video/pitkospuut-wide.mp4";
+import backgroundVideo from "../static/video/pitkospuut-wide.mp4";
 
 export const Footer = () => {
   return (
