@@ -50,12 +50,12 @@ export const Footer = () => {
 
       <RssWidget />
       <div className="container-fluid border-top pt-0 g-0 px-0 footer">
-       <div className="">
+       <div className="forestVideoWrapper">
         <video autoPlay muted loop id="forestVideoBackground" >
         <source src="http://localhost:5173/src/static/video/pitkospuut-wide.mp4" type="video/mp4" poster={footerUpperCrust} />
         </video>
        </div>
-       <div className="container">
+       <div className="container forestText">
           <footer className="row justify-content-center align-items-center my-4 ">
           <div className="row justify-content-center text-center">
             </div>
