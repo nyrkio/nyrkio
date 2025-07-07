@@ -138,18 +138,19 @@ body.section-about .footer {
   left: 0;
   top: 0;
   width: 100%;
-  height: 100%;
+  height: 200vi;
   min-width: 100%;
   max-height: 600px;
   z-index: -10;
 }
 
 body .footer .container {
-  font-size: 120%;
   position: relative;
-  bottom: +90%;
+  bottom: 30em;
   width: 100%;
-  padding: 10%;
+  padding-top: 0em;
+  padding-left: 2vmin;
+  padding-right: 2vmin;
 }
 body .footer .container a {
   color: var(--nyrkio-light-gray2);
@@ -174,15 +175,18 @@ body #root div.container-fluid {
 }
 
 
-.nyrkio-title.nyrkio-logo,
-div.frontpage div.nyrkio-logo {
+#main-content .nyrkio-title.nyrkio-logo,
+#main-content div.nyrkio-logo,
+#main-content2 .nyrkio-title.nyrkio-logo,
+#main-content2 div.nyrkio-logo {
   margin-top: 1.5em;
   margin-bottom: 0.5em;
 }
 
-div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
-  width: 20rem;
-  max-width: 90%;
+#main-content div.nyrkio-logo img.nyrkio-logo-img,
+#main-content2 div.nyrkio-logo img.nyrkio-logo-img {
+  width: 90%;
+  max-width: 40rem;
   max-height: 33%;
 }
 
@@ -235,26 +239,67 @@ div.frontpage div.nyrkio-logo img.nyrkio-logo-img {
   bottom: -0.5em;
   font-size: 1.5em;
 }
-@media (max-width: 799px) {
-  .frontpage .carousel-caption {
-    font-size: 0.7em;
-  }
-  .frontpage .carousel img {
+.frontpage .carousel-caption .carousel-gha {
+  width: 20em;
+  max-height: 1em;
+  position: relative;
+  left: 45%;
+  top: -10em;
+  text-align: left;
+
+}
+.frontpage .carousel-caption iframe {
+    max-width: 100%;
     width: 100%;
-    min-width: 90%;
-    max-height: 200px;
+}
+
+@media (max-width: 799px) {
+
+
+  .frontpage .carousel-caption {
+    font-size: 3vmin;
   }
   .frontpage .carousel {
-    height:200px;
+    min-height:600px;
   }
+  .frontpage .nyrkio-carousel .carousel img {
+    opacity: 0.1;
+    width: 100%;
+    min-width: 100%;
+    object-fit: cover;
+  }
+  .frontpage .user-carousel .carousel img {
+    width: 100%;
+    min-width: 100%;
+    object-fit: cover;
+  }
+  .frontpage .carousel iframe {
+    display: none;
+  }
+  .frontpage .carousel-caption .carousel-gha  {
+    width: 100%;
+    min-width: 90%;
+    position: relative;
+    left: 1px;
+  }
+}
+
+.carousel .slide {
+  max-width: 100%;
 }
 
 .frontpage .carousel-caption.pierre {
   position: absolute;
-  right: 20px;
-  text-align: right;
+  text-align: left;
   padding: 0px;
 }
+.frontpage .carousel img.pierre {
+  width: 100%;
+  min-height: 50vi;
+  position: sticky;
+  object-position: right;
+}
+
 
 div.nyrkio-logo-productpage div.nyrkio-logo img.nyrkio-logo-img {
   max-width: 80%;
