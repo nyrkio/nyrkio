@@ -132,6 +132,8 @@ body.section-about .footer {
 .forestVideoWrapper {
   background-color: var(--nyrkio-horn-light-brown);
   z-index: -10;
+  position: relative;
+  top: 5px;
 }
 
 #forestVideoBackground {
@@ -491,7 +493,6 @@ button:focus-visible {
   margin-bottom: 0.5em;
 }
 .border-top {
-  border-top: 1px solid darkgreen !important;
   background-color: var(--nyrkio-arrow-brown);
   color: black;
 }
