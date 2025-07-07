@@ -2,7 +2,7 @@ export const Logo = () => {
   return (
     <div className="nyrkio-logo nyrkio-logo-default">
     <img
-    src="/p/logo/full/new/NyrkiöLogo_Final_Full_Brown46-contour-500.png"
+    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-contour-500.png"
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-default"
     />
