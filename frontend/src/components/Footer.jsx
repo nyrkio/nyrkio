@@ -3,6 +3,7 @@ import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import { Link } from "react-router-dom";
 import footerUpperCrust from "../static/footer-white-graphic.png";
 import { RssWidget } from "./RssWidget.jsx";
+import backgroundVideo from "../static/video/pitkospuut-wide.mp4";
 
 export const Footer = () => {
   return (
@@ -52,7 +53,7 @@ export const Footer = () => {
       <div className="container-fluid border-top pt-0 g-0 px-0 footer">
        <div className="forestVideoWrapper">
         <video autoPlay muted loop id="forestVideoBackground" >
-        <source src="http://localhost:5173/src/static/video/pitkospuut-wide.mp4" type="video/mp4" poster={footerUpperCrust} />
+        <source src={backgroundVideo} type="video/mp4" poster={footerUpperCrust} />
         </video>
        </div>
        <div className="container forestText">
