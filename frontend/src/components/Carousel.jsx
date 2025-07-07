@@ -15,7 +15,7 @@ export function NyrkioCarouselCols() {
     </a>
     <div>
 
-    <div style={{"width":"20em", "maxHeight":"1em", "position":"relative", "left": "55%", "top":"-20em", "textAlign":"left"}}>
+    <div className="carousel-gha">
     <p><a href="/docs/getting-started"><strong>NEW: </strong><br />Adding Nyrkiö Change Detection to your GitHub .workflows just got easy!</a></p>
     <ol>
     <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
@@ -41,7 +41,7 @@ export function NyrkioCarousel() {
         <img src={Marketplace_GHA} className="w-50" />
         </a>
         <Carousel.Caption>
-        <div style={{"width":"20em", "position":"absolute", "left": "55%", "bottom":"0px", "textAlign":"left"}}>
+        <div className="carousel-gha">
         <p><a href="/docs/getting-started"><strong>NEW: </strong><br /> Adding Nyrkiö Change Detection to your GitHub .workflows just got easy!</a></p>
         <ol>
           <li><a href="/docs/getting-started">Install Nyrkiö as GitHub app.</a></li>
@@ -53,7 +53,8 @@ export function NyrkioCarousel() {
         </Carousel.Caption>
       </Carousel.Item>
       <Carousel.Item>
-        <DemoVideo />
+      <DemoVideo />
+      <p className="mt-5"><a href="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ">▶ Nyrkiö introduction (YouTube)</a></p>
       </Carousel.Item>
     </Carousel>
   );
@@ -75,10 +76,10 @@ export function UserCarousel() {
     </Carousel.Caption>
     </Carousel.Item>
     <Carousel.Item>
-    <img src={Pierre} className="" />
+    <img src={Pierre} className="pierre" />
     <Carousel.Caption className="pierre">
     <p className="pierre"><em><a href="https://blog.nyrkio.com/2025/03/25/interview-with-pierre-laporte-part-i/">Pierre Laporte,
-    Senior Staff Software Engineer, Dremio<br />Read more...</a></em></p>
+      Staff Software Engineer, Dremio<br />Read more...</a></em></p>
     </Carousel.Caption>
     </Carousel.Item>
     </Carousel>

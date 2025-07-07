@@ -195,16 +195,19 @@ export const FrontPage = () => {
         <div className="container-fluid text-center w-100">
            <div className="padding-block "></div>
 
-          <NyrkioCarousel />
+           <div className="nyrkio-carousel">
+           <NyrkioCarousel />
+           </div>
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
 
           <FeatureBanner1 />
 
 
-
+          <div className="user-carousel">
           <h1>What our users say</h1>
           <UserCarousel />
+          </div>
 
           <div className="padding-block-sm "></div>
           <div className="row">
