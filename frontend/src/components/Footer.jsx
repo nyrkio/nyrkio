@@ -50,7 +50,7 @@ export const Footer = () => {
 
 
       <RssWidget />
-      <div className="container-fluid border-top pt-0 g-0 px-0 footer">
+      <div className="container-fluid top pt-0 g-0 px-0 footer">
        <div className="forestVideoWrapper">
         <video autoPlay muted loop id="forestVideoBackground" >
         <source src={backgroundVideo} type="video/mp4" poster={footerUpperCrust} />
