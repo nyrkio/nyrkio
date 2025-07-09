@@ -1,5 +1,5 @@
-const cols = "col-sm-6 col-md-4";
-const style = {paddingRight: "2em"};
+const cols = "col-sm-6 col-md-4 oss-user-card";
+const style = {paddingRight: "3em", marginTop: "4em"};
 
 export const MongoDB = () => {
     return (<>
