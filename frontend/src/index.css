@@ -538,15 +538,15 @@ button:focus-visible {
 }
 
 .navbar-top .nyrkio-logo-img {
-  max-width: 6em;
-  max-height: 2.1em;
+  max-width: 3em;
+  max-height: 2.6em;
+  border: solid 3px var(--nyrkio-skin-light-brown);
+  border-radius: 28px;
+
 }
 .navbar-top .nyrkio-logo {
   position: relative;
   top: -0.8em;
-  border: solid 7px var(--nyrkio-light-gray);
-  border-radius: 33px;
-
 }
 .navbar-top .nyrkio-logo:hover {
   border-color: var(--nyrkio-active);
