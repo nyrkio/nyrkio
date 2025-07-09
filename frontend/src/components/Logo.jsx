@@ -2,7 +2,7 @@ export const Logo = () => {
   return (
     <div className="nyrkio-logo nyrkio-logo-default">
     <img
-    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-contour-500.png"
+    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-default"
     />
@@ -13,7 +13,7 @@ export const LogoBrown = () => {
   return (
     <div className="nyrkio-logo nyrkio-logo-brown">
     <img
-    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-300.png"
+    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-brown"
     />
@@ -38,7 +38,7 @@ export const LogoSlogan = () => {
   return (
     <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default">
     <img
-    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-contour-500.png"
+    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-small "
     />
@@ -50,7 +50,7 @@ export const LogoBrownSlogan = () => {
   return (
     <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default">
     <img
-    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-300.png"
+    src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-small "
     />
@@ -63,7 +63,7 @@ export const LogoSloganNarrow = () => {
   return (
     <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default col-sm-12 col-md-10">
       <img
-        src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-contour-500.png"
+        src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
         alt="Nyrkiö (logo)"
         className="nyrkio-logo-img nyrkio-logo-img-small "
       />

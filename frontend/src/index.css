@@ -1317,10 +1317,10 @@ div.blog-rss-widget .nyrkio-blog-header span {
 }
 
 
-.otava {
-    margin-top: 7vi;
+.oss-user-card h4 {
+  margin-bottom: 2em;
+  text-align: center;
 }
-
 .section-ecosystem .row {
   --bs-gutter-x: 0;
   padding: 0px;
