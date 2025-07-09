@@ -1,7 +1,7 @@
 import imgStars from "../static/tahdenlento_blogi.webp";
 import imgGHA from "../static/Nyrkio_GHA.png";
 
-import { MongoDB, Netflix, Datastax, Confluent, RedHat } from "./OssUsers.jsx"
+import { MongoDB, Netflix, Datastax, Confluent, RedHat, Tarantool } from "./OssUsers.jsx"
 
 export const EcosystemPage = () => {
   return (<>
@@ -38,6 +38,7 @@ export const EcosystemPage = () => {
         <Datastax />
         <Confluent />
         <RedHat />
+        <Tarantool />
 
         </div>
         </div>

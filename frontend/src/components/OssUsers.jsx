@@ -97,3 +97,21 @@ export const RedHat = () => {
 };
 
 
+
+export const Tarantool = () => {
+    return (<>
+    <div className={cols} style={style}>
+    <h4>Tarantool</h4>
+    <p>Tarantool is a NoSQL database and Lua application server. It's known as a high performance application platform. To guard against performance regressions, they recently added Apache Otava to their CI pipeline.</p>
+
+    <p>Read more...</p>
+
+    <ul>
+    <li><a href="https://github.com/tarantool/tarantool/pull/11408">Project discussion about how to best use Apache Otava</a></li>
+    </ul>
+    </div>
+    </>
+    );
+};
+
+
