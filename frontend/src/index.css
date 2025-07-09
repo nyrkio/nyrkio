@@ -1315,3 +1315,14 @@ div.blog-rss-widget .nyrkio-blog-header span {
   margin-bottom: 2em;
 
 }
+
+
+.otava {
+    margin-top: 7vi;
+}
+
+.section-ecosystem .row {
+  --bs-gutter-x: 0;
+  padding: 0px;
+  padding-left: 0px;
+}
