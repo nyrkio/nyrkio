@@ -147,10 +147,13 @@ const AboutSidePanel = ({ loggedIn }) => {
   return (
     <>
       <Link to="/about" className="nav-link">
-        About Us
+        About Nyrkiö Oy
+      </Link>
+      <Link to="/about/ecosystem" className="nav-link">
+      Open Source Ecosystem
       </Link>
       <Link to="/legal" className="nav-link">
-        Legal
+      Legal
       </Link>
       <Link to="/legend" className="nav-link">
         The Legend of Nyyrikki

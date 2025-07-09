@@ -21,6 +21,7 @@ import { ProductPage } from "./components/ProductPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
 import { LegalPage } from "./components/LegalPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
+import { EcosystemPage } from "./components/EcosystemPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { ServicesPage } from "./components/ServicesPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
@@ -72,6 +73,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<ServicesPage loggedIn={loggedIn} />}
             />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/about/ecosystem" element={<EcosystemPage />} />
             <Route path="/legal" element={<LegalPage />} />
             <Route path="/legend" element={<LegendPage />} />
             <Route
@@ -141,6 +143,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<ServicesPage loggedIn={loggedIn} />}
             />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/about/ecosystem" element={<EcosystemPage />} />
             <Route path="/legal" element={<LegalPage />} />
             <Route path="/legend" element={<LegendPage />} />
             <Route
