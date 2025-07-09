@@ -55,17 +55,18 @@ const LearnMore = () => {
         <Link to="/docs/getting-started">Getting started guide</Link>
       </div>
       <div className="col-xs-12 col-md-3">
-      <h3>Want to learn more?</h3>
-      <Link to="/product">Read about how it works</Link>
+        <h3>Want to learn more?</h3>
+        <Link to="/product">Read about how it works</Link>
       </div>
       <div className="col-xs-12 col-md-3">
-      <h3>Need help?</h3>
-      <Link to="/services">We offer consulting packages to get you started. </Link>
+        <h3>Need help?</h3>
+        <Link to="/services">We offer consulting packages to get you started. </Link>
       </div>
-      <div className="col-xs-12 col-md-3">
-      <h3>Get involved?</h3>
-      <Link to="/">TODO: Pages about open source ecosystem</Link>
-      </div>
+        <div className="col-xs-12 col-md-3">
+          <h3>Get involved!</h3>
+          <Link to="/about/ecosystem">Open Source Ecosystem </Link>
+          <p>Read about how Netflix, Red Hat and Confluent use change point detection to stay on top of performance.</p>
+        </div>
       </div>
   );
 };
