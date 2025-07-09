@@ -544,6 +544,11 @@ button:focus-visible {
   border-radius: 28px;
 
 }
+
+.navbar-top .nyrkio-logo-img:hover {
+  border: solid 3px var(--nyrkio-light-gray);
+  opacity: 0.8;
+}
 .navbar-top .nyrkio-logo {
   position: relative;
   top: -0.8em;
