@@ -18,6 +18,7 @@ import { Docs } from "./components/Docs.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
 import { DocsTeams } from "./components/DocsTeams.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
+import { UsersPage } from "./components/UsersPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
 import { LegalPage } from "./components/LegalPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
@@ -64,6 +65,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<Dashboard loggedIn={loggedIn} embed={embed} path="/tests/"/>}
             />
             <Route path="/product" element={<ProductPage />} />
+            <Route path="/product/user-testimonials" element={<UsersPage />} />
             <Route
               path="/pricing"
               element={<PricingPage loggedIn={loggedIn} />}
@@ -134,6 +136,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
               element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
             />
             <Route path="/product" element={<ProductPage />} />
+            <Route path="/product/user-testimonials" element={<UsersPage />} />
             <Route
               path="/pricing"
               element={<PricingPage loggedIn={loggedIn} />}

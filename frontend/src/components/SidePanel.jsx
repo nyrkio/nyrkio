@@ -101,7 +101,10 @@ const ProductSidePanel = ({ loggedIn }) => {
         Pricing
       </Link>
       <Link to="/product" className="nav-link">
-        Nyrkiö Change Detection
+      Nyrkiö Change Detection
+      </Link>
+      <Link to="/product/user-testimonials" className="nav-link">
+      What our users say
       </Link>
       <Link to="/public" className="nav-link">
         Public Dashboards
