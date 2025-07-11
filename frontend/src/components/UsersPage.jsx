@@ -3,6 +3,7 @@ export const UsersPage = () => {
     <div className="row">
     <Turso />
     <Dremio />
+    <Tigerbeetle />
     </div>
     </>)
 };
@@ -84,6 +85,45 @@ export const Dremio = () => {
     </li>
     <li>
     <a href="https://blog.nyrkio.com/2025/03/31/interview-with-pierre-laporte-part-2/">Interview with Pierre Laporte (part 2)</a>
+    </li>
+    </ul>
+    </div>
+    </>
+    );
+};
+
+export const TigerbeetleQuote = () =>{
+    return (
+        <div className="row nyrkio-user-photo-quote">
+        <p><img src={tigerbeetleJoran} style={{maxWidth: "100%"}} className="col-xs-12 col-lg-6"/>
+        <br />
+        <span style={{fontSize: "4em"}}>&nbsp;</span>
+        <br />
+
+        <q>Nyrkiö did a better job than our internal graphs.</q></p>
+        <p className="user quote-attribution">Joran Dirk Greef, Founder & CEO, Tigerbeetle</p>
+        </div>
+    );
+};
+
+import tigerbeetleLogo from "../static/tb-logo-black.png";
+import tigerbeetleJoran from "../static/people/Joran-600x800.jpg";
+export const Tigerbeetle = () => {
+    return (<>
+    <div className={cols} style={style}>
+    <h4 style={imgTitleStyle}><img src={tigerbeetleLogo} style={imgStyle} /></h4>
+
+    <p>TigerBeetle is a specialized transactions database, designed for safety and 1000x performance, to power the future of online transaction processing (OLTP). The architecture is based on the realization that batching multiple transactions into one large commit can achieve much faster velocity than a traditional general purpose database. A notable property in Tigerbeetle's use of Nyrkiö: they track 100% percentile latency (so max latency) and variation in this is
+    considered a regression!</p>
+
+    <TigerbeetleQuote />
+
+    <ul>
+    <li>
+    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a>
+    </li>
+    <li>
+    <a href="https://matklad.github.io/2024/03/22/basic-things.html">Basic Things</a>, (Alex "matklad" Kladov includes Nyrkiö in his list of basic tooling every software project should use)
     </li>
     </ul>
     </div>
