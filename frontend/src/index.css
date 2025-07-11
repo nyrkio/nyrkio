@@ -1331,3 +1331,43 @@ div.blog-rss-widget .nyrkio-blog-header span {
   padding: 0px;
   padding-left: 0px;
 }
+
+
+#main-content div.nyrkio-user-photo-quote ,
+#main-content2 div.nyrkio-user-photo-quote ,
+.nyrkio-user-photo-quote {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  padding-left: 2.5em;
+}
+
+.nyrkio-user-photo-quote img {
+  border: 1px solid var(--nyrkio-dark-gray);
+  border-radius: 20px;
+  box-shadow: 3px 3px 4px var(--nyrkio-light-gray);
+  float: left;
+  margin-right: 2.5em;
+  margin-bottom: 1em;
+}
+
+
+#main-content .nyrkio-user-photo-quote p,
+#main-content2 .nyrkio-user-photo-quote  p,
+.nyrkio-user-photo-quote p {
+}
+
+#main-content .nyrkio-user-photo-quote p.user,
+#main-content2 .nyrkio-user-photo-quote  p.user,
+.nyrkio-user-photo-quote p.user {
+  font-weight: bold;
+  text-align: right;
+}
+
+#main-content .nyrkio-user-photo-quote p q,
+#main-content2 .nyrkio-user-photo-quote  p q,
+.nyrkio-user-quote p q{
+  padding-top: 50%;
+  font-family: script, cursive;
+  font-style: italic;
+  font-size: 140%;
+}
