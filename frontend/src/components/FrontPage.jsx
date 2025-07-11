@@ -209,7 +209,11 @@ export const FrontPage = () => {
           <h1>What our users say</h1>
           <UserCarousel />
           </div>
+          <div className="padding-block-sm "></div>
+          <div className="padding-block-sm "></div>
+          <p><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
 
+          <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
           <div className="row">
           <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample-title  p-3 ">
