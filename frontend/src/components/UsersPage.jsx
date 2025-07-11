@@ -9,7 +9,7 @@ export const UsersPage = () => {
 };
 
 
-const cols = "col-sm-12 col-md-6 col-xl-4 nyrkio-user-card";
+const cols = "col-sm-12 col-lg-6 col-xl-4 nyrkio-user-card";
 const style = {paddingLeft: "1em", paddingRight: "3em", marginTop: "10em"};
 const imgStyle = {maxWidth: "300px", maxHeight: "300px", borderRadius: "50px"};
 const imgTitleStyle = {textAlign: "center", height: "250px", paddingRight: "1.5em"};
