@@ -61,7 +61,7 @@ export const LogoBrownSlogan = () => {
 
 export const LogoSloganNarrow = () => {
   return (
-    <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default col-sm-12 col-md-4 col-xl-6 w-100">
+    <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default col-sm-12 col-md-10">
       <img
         src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-500.png"
         alt="Nyrkiö (logo)"
