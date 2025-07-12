@@ -66,7 +66,6 @@ const LearnMore = () => {
         <div className="col-xs-12 col-md-3">
           <h3>Get involved!</h3>
           <Link to="/about/ecosystem">Open Source Ecosystem </Link>
-          <p>Read about how Netflix, Red Hat and Confluent use change point detection to stay on top of performance.</p>
         </div>
       </div>
   );
@@ -214,6 +213,7 @@ export const FrontPage = () => {
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
           <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
+          <p style={{fontSize: "150%"}}><a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent use <strong>change point detection</strong> to stay on top of performance.</a></p>
 
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>

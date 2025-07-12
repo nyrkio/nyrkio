@@ -120,7 +120,7 @@ export const DremioMini = ({addClassName=""}) => {
     <DremioLogo />
     <DremioQuote />
     <p>
-    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Dremio public benchmark results on Nyrkiö</a>
+    <a href="https://blog.nyrkio.com/2025/03/25/interview-with-pierre-laporte-part-i/">Interview with Pierre Laporte (part 1)</a>
     </p>
     </div>
     </>);
