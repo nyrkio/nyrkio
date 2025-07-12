@@ -34,11 +34,37 @@ import tursoPekka from "../static/people/PekkaEnberg-600x800.jpg";
 export const Turso = () => {
     return (<>
     <div className={cols} style={style}>
-    <h4 style={imgTitleStyle}><img src={tursoLogo} style={imgStyle} /></h4>
-    <p>Turso Database is an active open source project that is rewriting good old SQLite in Rust. With over 200 contributors each month, this project is merging a dozen patches each day. To move fast with confidence they need airthight test coverage also for performance. TPC-H, Clickbench and various self made test queries run after each merge. The company behind the open source project is also operating a Database as a Service.</p>
-
+    <TursoLogo />
+    <TursoDescription />
     <TursoQuote />
+    <TursoLinks />
+    </div>
+    </>);
+};
 
+export const TursoMini = () => {
+    return (<>
+        <TursoLogo />
+        <TursoQuote />
+        <ul>
+        <li>
+        <a href="/public/https%3A%2F%2Fgithub.com%2Ftursodatabase%2Flimbo/main/">View public benchmark results from Turso</a>
+        </li>
+        </ul>
+        </>);
+};
+
+export const TursoLogo = () => {
+    return (<h4 style={imgTitleStyle}><img src={tursoLogo} style={imgStyle} /></h4>);
+};
+export const TursoDescription = () => {
+    return (<>
+    <p>Turso Database is an active open source project that is rewriting good old SQLite in Rust. With over 200 contributors each month, this project is merging a dozen patches each day. To move fast with confidence they need airthight test coverage also for performance. TPC-H, Clickbench and various self made test queries run after each merge. The company behind the open source project is also operating a Database as a Service.</p>
+    </>);
+};
+
+export const TursoLinks = () => {
+    return (<>
     <ul>
     <li>
     <a href="/public/https%3A%2F%2Fgithub.com%2Ftursodatabase%2Flimbo/main/">View public benchmark results from Turso</a>
@@ -47,7 +73,6 @@ export const Turso = () => {
     <a href="https://www.youtube.com/watch?v=iiS0KoYc_Zc">Pekka (founder of Turso Database) and Henrik (founder of Nyrkiö) went to a bar...</a>
     </li>
     </ul>
-    </div>
     </>
     );
 };
@@ -74,11 +99,39 @@ import dremioPierre from "../static/people/Pierre-Dog-600x800.jpg";
 export const Dremio = () => {
     return (<>
     <div className={cols} style={style}>
-    <h4 style={imgTitleStyle}><img src={dremioLogo} style={imgStyle} /></h4>
+    <DremioLogo />
+    <DremioDescription />
+    <DremioQuote />
+    <DremioLinks />
+    </div>
+    </>
+    );
+};
+
+export const DremioMini = () => {
+    return (<>
+    <DremioLogo />
+    <DremioQuote />
+    <ul>
+    <li>
+    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Dremio public benchmark results on Nyrkiö</a>
+    </li>
+    </ul>
+    </>);
+};
+
+export const DremioLogo = () => {
+    return (<h4 style={imgTitleStyle}><img src={dremioLogo} style={imgStyle} /></h4>);
+};
+export const DremioDescription = () => {
+    return (<>
     <p>Dremio develops and sells Big Data solutions based on Apache Iceberg. To ensure that there aren't any performance regressions, a TPC-H benchmark is run weekly. Dremio were one of the first users to try Nyrkio the very same day we launched, and when testing Nyrkiö with some old benchmark results,
     Nyrkiö was able to find a regression the team had not noticed before!</p>
+    </>);
+};
 
-    <DremioQuote />
+export const DremioLinks = () => {
+    return (<>
     <ul>
     <li>
     <a href="https://blog.nyrkio.com/2025/03/25/interview-with-pierre-laporte-part-i/">Interview with Pierre Laporte (part 1)</a>
@@ -87,10 +140,10 @@ export const Dremio = () => {
     <a href="https://blog.nyrkio.com/2025/03/31/interview-with-pierre-laporte-part-2/">Interview with Pierre Laporte (part 2)</a>
     </li>
     </ul>
-    </div>
     </>
     );
 };
+
 
 export const TigerbeetleQuote = () =>{
     return (
@@ -111,13 +164,39 @@ import tigerbeetleJoran from "../static/people/Joran-600x800.jpg";
 export const Tigerbeetle = () => {
     return (<>
     <div className={cols} style={style}>
-    <h4 style={imgTitleStyle}><img src={tigerbeetleLogo} style={imgStyle} /></h4>
+    <TigerbeetleLogo />
+    <TigerbeetleDescription />
+    <TigerbeetleQuote />
+    <TigerbeetleLinks />
+    </div>
+    </>
+    );
+};
 
+export const TigerbeetleMini = () => {
+    return (<>
+    <TigerbeetleLogo />
+    <TigerbeetleQuote />
+    <ul>
+    <li>
+    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a>
+    </li>
+    </ul>
+    </>);
+};
+
+export const TigerbeetleLogo = () => {
+    return (<h4 style={imgTitleStyle}><img src={tigerbeetleLogo} style={imgStyle} /></h4>);
+};
+export const TigerbeetleDescription = () => {
+    return (<>
     <p>TigerBeetle is a specialized transactions database, designed for safety and 1000x performance, to power the future of online transaction processing (OLTP). The architecture is based on the realization that batching multiple transactions into one large commit can achieve much faster velocity than a traditional general purpose database. A notable property in Tigerbeetle's use of Nyrkiö: they track 100% percentile latency (so max latency) and variation in this is
     considered a regression!</p>
+    </>);
+};
 
-    <TigerbeetleQuote />
-
+export const TigerbeetleLinks = () => {
+    return (<>
     <ul>
     <li>
     <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a>
@@ -126,7 +205,8 @@ export const Tigerbeetle = () => {
     <a href="https://matklad.github.io/2024/03/22/basic-things.html">Basic Things</a>, (Alex "matklad" Kladov includes Nyrkiö in his list of basic tooling every software project should use)
     </li>
     </ul>
-    </div>
     </>
     );
 };
+
+
