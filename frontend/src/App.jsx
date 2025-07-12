@@ -3,6 +3,7 @@ import {
   BrowserRouter as Router,
   Routes,
   Route,
+  Navigate,
   useLocation,
   useParams,
   useSearchParams
@@ -58,7 +59,8 @@ function MainApp({ loggedIn, setLoggedIn }) {
           id="main-content"
         >
           <Routes>
-            <Route path="/" element={loggedIn ? <Dashboard embed={embed} path="/"/> : <Nothing />} />
+            <Route path="/" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/frontpage" />} />
+            <Route path="/dash" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/public"/> } />
             <Route path="/frontpage" element={<Nothing />} />
             <Route
               path="/tests/*"
@@ -129,8 +131,9 @@ function MainApp({ loggedIn, setLoggedIn }) {
           id="main-content"
         >
           <Routes>
-            <Route path="/" element={loggedIn ? <Dashboard path="/" /> : <Nothing />} />
-            <Route path="/frontpage" element={<LogoSloganNarrow />} />
+            <Route path="/" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/frontpage" />} />
+            <Route path="/dash" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/public"/> } />
+            <Route path="/frontpage" element={<Nothing />} />
             <Route
               path="/tests/*"
               element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
@@ -175,8 +178,8 @@ function MainApp({ loggedIn, setLoggedIn }) {
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage /></>} />
-            <Route path="/frontpage" element={<FrontPage />} />
+            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage loggedIn={loggedIn}/></>} />
+            <Route path="/frontpage" element={<><LogoSlogan /><FrontPage loggedIn={loggedIn}/></>} />
             <Route path="*" element={<Nothing />} />
           </Routes>
         </div>

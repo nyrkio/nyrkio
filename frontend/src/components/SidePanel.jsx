@@ -6,25 +6,27 @@ export const SidePanel = ({ loggedIn }) => {
     <div className="navbar-nav navbar-left justify-content-start">
       <Routes>
         <Route path="/" element={<FrontPageSidePanel loggedIn={loggedIn} />} />
+        <Route path="/dash" element={<DashSidePanel loggedIn={loggedIn} />} />
+
         <Route
           path="/frontpage"
           element={<FrontPageSidePanel loggedIn={loggedIn} />}
         />
         <Route
           path="/tests/*"
-          element={<FrontPageSidePanel loggedIn={loggedIn} />}
+          element={<DashSidePanel loggedIn={loggedIn} />}
         />
         <Route
           path="/result/*"
-          element={<FrontPageSidePanel loggedIn={loggedIn} />}
+          element={<DashSidePanel loggedIn={loggedIn} />}
         />
         <Route
           path="/public/*"
-          element={<FrontPageSidePanel loggedIn={loggedIn} />}
+          element={<DashSidePanel loggedIn={loggedIn} />}
         />
         <Route
           path="/orgs/*"
-          element={<FrontPageSidePanel loggedIn={loggedIn} />}
+          element={<DashSidePanel loggedIn={loggedIn} />}
         />
 
         <Route
@@ -71,18 +73,6 @@ const FrontPageSidePanel = ({ loggedIn }) => {
   if (loggedIn) {
     return (
       <>
-        <Link to="/tests" className="nav-link">
-          My Dashboard
-        </Link>
-        <Link to="/orgs" className="nav-link">
-          Org Dashboards
-        </Link>
-        <Link to="/public" className="nav-link">
-          Public Dashboards
-        </Link>
-        <Link to="/frontpage" className="nav-link">
-          Front page
-        </Link>
       </>
     );
   }
@@ -93,18 +83,56 @@ const FrontPageSidePanel = ({ loggedIn }) => {
   }
 };
 
+const DashSidePanel = ({ loggedIn }) => {
+  document.body.classList.add("section-front");
+  if (loggedIn) {
+    return (
+      <>
+      <Link to="/tests" className="nav-link">
+      My Dashboard
+      </Link>
+      <Link to="/orgs" className="nav-link">
+      Org Dashboards
+      </Link>
+      <Link to="/public" className="nav-link">
+      Public Dashboards
+      </Link>
+      <Link to="/frontpage" className="nav-link">
+      Front page
+      </Link>
+      </>
+    );
+  }
+  // The default front page has no menu for visual reasons.
+  // Login button is on the top right, which is the most important element.
+  else {
+    return (<>
+    <Link to="/docs/getting-started" className="nav-link">
+    Create My Dashboard
+    </Link>
+    <Link to="/public" className="nav-link">
+    Public Dashboards
+    </Link>
+    <Link to="/frontpage" className="nav-link">
+    Front page
+    </Link>
+    </>
+    );
+  }
+};
+
 const ProductSidePanel = ({ loggedIn }) => {
   document.body.classList.add("section-product");
   return (
     <>
-      <Link to="/pricing" className="nav-link">
-        Pricing
-      </Link>
       <Link to="/product" className="nav-link">
       Nyrkiö Change Detection
       </Link>
       <Link to="/product/user-testimonials" className="nav-link">
       What our users say
+      </Link>
+      <Link to="/pricing" className="nav-link">
+      Pricing
       </Link>
       <Link to="/public" className="nav-link">
         Public Dashboards

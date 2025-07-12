@@ -187,7 +187,7 @@ const FeatureBanner2 = () => {
   );
 };
 
-export const FrontPage = () => {
+export const FrontPage = ({loggedIn}) => {
   return (
     <>
 
@@ -197,11 +197,13 @@ export const FrontPage = () => {
 
           <DemoVideo />
           <div className="padding-block-sm "></div>
-          <button className="btn btn-success">
-          <a className="btn-link" href="/signup">
-          Create account &amp; get started
-          </a>
-          </button>
+          {loggedIn? "" :
+            (<button className="btn btn-success">
+                <a className="btn-link" href="/signup">
+                Create account &amp; get started
+                </a>
+                </button>
+                )}
           <div className="padding-block-sm "></div>
 
           <FeatureBanner1 />
