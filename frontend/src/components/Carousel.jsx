@@ -5,6 +5,7 @@ import Joran from '../static/Screenshot_Joran_Dirk_Greef.png';
 import Pierre from '../static/Pierre_lake.jpg';
 import { DemoVideo } from './FrontPage'
 import Marketplace_GHA from '../static/Nyrkio-GHA-Marketplace-Listing.png'
+import { useEffect, useState } from "react";
 
 
 export function NyrkioCarouselCols() {
@@ -62,14 +63,84 @@ export function NyrkioCarousel() {
 }
 
 export function UserCarousel() {
+    const [loading, setLoading] =useState(true);
+    const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
 
-  return (
-    <div className="row" style={{}}>
-      <TigerbeetleMini addClassName="carousel-postview" />
+    const setT = () => {
+      window.setTimeout(()=>{setLoading(false);next();setT()}, 30000);
+    }
+    // By definition: [] is at end of loading
+    useEffect(()=>{setLoading(false); setT()},[]);
+
+    const next = () => {
+      console.log("next",loading);
+      if(loading) return;
+      if (currentCarouselCard == "Turso"){
+        setLoading(true);
+        setCurrentCarouselCard("Dremio")
+      }
+      if (currentCarouselCard == "Dremio"){
+        setLoading(true);
+        setCurrentCarouselCard("Tigerbeetle")
+      }
+      if (currentCarouselCard == "Tigerbeetle"){
+        setLoading(true);
+        setCurrentCarouselCard("Turso")
+      }
+
+    };
+    const prev = () => {
+      if(loading) return;
+
+      if (currentCarouselCard == "Turso"){
+        setLoading(true);
+        setCurrentCarouselCard("Tigerbeetle")
+      }
+      if (currentCarouselCard == "Tigerbeetle"){
+        setLoading(true);
+        setCurrentCarouselCard("Dremio")
+      }
+      if (currentCarouselCard == "Dremio"){
+        setLoading(true);
+        setCurrentCarouselCard("Turso")
+      }
+    };
+
+
+  if (currentCarouselCard == "Turso") {
+    return (
+      <div className="row">
+      <div style={{position: "absolute", left: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);prev();}}></div>
+      <TigerbeetleMini addClassName="carousel-postview"  onClick={prev()}/>
       <TursoMini />
-      <DremioMini addClassName="carousel-preview" />
+      <DremioMini addClassName="carousel-preview" onClick={next()}/>
+      <div style={{position: "absolute", right: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);next();}}></div>
       </div>
-  );
+    );
+  }
+  if (currentCarouselCard == "Dremio") {
+    return (
+      <div className="row">
+      <div style={{position: "absolute", left: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);prev();}}></div>
+      <TursoMini addClassName="carousel-postview"  onClick={prev()} />
+      <DremioMini />
+      <TigerbeetleMini addClassName="carousel-preview"  onClick={next()} />
+      <div style={{position: "absolute", right: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);next();}}></div>
+      </div>
+    );
+  }
+  if (currentCarouselCard == "Tigerbeetle") {
+    return (
+      <div className="row">
+      <div style={{position: "absolute", left: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);prev();}}></div>
+      <DremioMini addClassName="carousel-postview"  onClick={prev()} />
+      <TigerbeetleMini />
+      <TursoMini addClassName="carousel-preview"  onClick={next()} />
+      <div style={{position: "absolute", right: "0px", height: "100%", width: "25%", cursor: "pointer"}} onClick={()=>{setLoading(false);next();}}></div>
+      </div>
+    );
+  }
+  return (<></>);
 }
 
 export default NyrkioCarousel;

@@ -53,11 +53,9 @@ export const TursoMini = ( {addClassName=""} ) => {
         <div className={addClassName + " " + colsCarousel} style={style}>
         <TursoLogo />
         <TursoQuote />
-        <ul>
-        <li>
+        <p>
         <a href="/public/https%3A%2F%2Fgithub.com%2Ftursodatabase%2Flimbo/main/">View public benchmark results from Turso</a>
-        </li>
-        </ul>
+        </p>
         </div>
         </>);
 };
@@ -121,11 +119,9 @@ export const DremioMini = ({addClassName=""}) => {
     <div className={addClassName + " " + colsCarousel} style={style}>
     <DremioLogo />
     <DremioQuote />
-    <ul>
-    <li>
+    <p>
     <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Dremio public benchmark results on Nyrkiö</a>
-    </li>
-    </ul>
+    </p>
     </div>
     </>);
 };
@@ -188,11 +184,7 @@ export const TigerbeetleMini = ({addClassName=""}) => {
     <div className={addClassName + " " + colsCarousel} style={style}>
     <TigerbeetleLogo />
     <TigerbeetleQuote />
-    <ul>
-    <li>
-    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a>
-    </li>
-    </ul>
+    <p><a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a></p>
     </div>
     </>);
 };
