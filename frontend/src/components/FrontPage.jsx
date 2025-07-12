@@ -74,8 +74,7 @@ const LearnMore = () => {
 export const DemoVideo = () => {
   return (
     <iframe
-      width="933"
-      height="525"
+      style={{maxWidth: "93vw", maxHeight: "52vw", width:"47vw", height: "27vw", minWidth: "450px", minHeight: "250px"}}
       src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
       title="YouTube video player"
       frameBorder="0"
@@ -197,10 +196,13 @@ export const FrontPage = () => {
         <div className="container-fluid text-center w-100">
            <div className="padding-block "></div>
 
-           <div className="nyrkio-carousel">
-           <NyrkioCarousel />
-           </div>
+          <DemoVideo />
           <div className="padding-block-sm "></div>
+          <button className="btn btn-success">
+          <a className="btn-link" href="/signup">
+          Create account &amp; get started
+          </a>
+          </button>
           <div className="padding-block-sm "></div>
 
           <FeatureBanner1 />
