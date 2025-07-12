@@ -14,9 +14,10 @@ export const UsersPage = () => {
 
 
 const cols = "col-sm-12 col-lg-6 col-xl-4 nyrkio-user-card";
-const style = {paddingLeft: "1em", paddingRight: "3em", marginTop: "10em"};
+const colsCarousel = "col-sm-12 col-lg-4 col-xl-4 nyrkio-user-card";
+const style = {paddingLeft: "1em", paddingRight: "3em"};
 const imgStyle = {maxWidth: "300px", maxHeight: "300px", borderRadius: "50px"};
-const imgTitleStyle = {textAlign: "center", height: "250px", paddingRight: "1.5em"};
+const imgTitleStyle = {textAlign: "center", paddingRight: "1.5em"};
 
 export const TursoQuote = () =>{
     return (
@@ -46,8 +47,10 @@ export const Turso = () => {
     </>);
 };
 
-export const TursoMini = () => {
+export const TursoMini = ( {addClassName=""} ) => {
     return (<>
+
+        <div className={addClassName + " " + colsCarousel} style={style}>
         <TursoLogo />
         <TursoQuote />
         <ul>
@@ -55,11 +58,12 @@ export const TursoMini = () => {
         <a href="/public/https%3A%2F%2Fgithub.com%2Ftursodatabase%2Flimbo/main/">View public benchmark results from Turso</a>
         </li>
         </ul>
+        </div>
         </>);
 };
 
 export const TursoLogo = () => {
-    return (<h4 style={imgTitleStyle}><img src={tursoLogo} style={imgStyle} /></h4>);
+    return (<h4 className="customer-logo-title" style={imgTitleStyle}><img src={tursoLogo} style={imgStyle} className="customer-logo" /></h4>);
 };
 export const TursoDescription = () => {
     return (<>
@@ -87,7 +91,7 @@ export const DremioQuote = () =>{
     <div className="row nyrkio-user-photo-quote">
     <p><img src={dremioPierre} style={{maxWidth: "100%"}} className="col-xs-12 col-lg-6"/>
     <br />
-    <span style={{fontSize: "4em"}}>&nbsp;</span>
+    <span s-tyle={{fontSize: "4em"}}>&nbsp;</span>
     <br />
 
     <q>Nyrkiö is able to detect change points even in high-variance data.
@@ -112,8 +116,9 @@ export const Dremio = () => {
     );
 };
 
-export const DremioMini = () => {
+export const DremioMini = ({addClassName=""}) => {
     return (<>
+    <div className={addClassName + " " + colsCarousel} style={style}>
     <DremioLogo />
     <DremioQuote />
     <ul>
@@ -121,6 +126,7 @@ export const DremioMini = () => {
     <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Dremio public benchmark results on Nyrkiö</a>
     </li>
     </ul>
+    </div>
     </>);
 };
 
@@ -177,8 +183,9 @@ export const Tigerbeetle = () => {
     );
 };
 
-export const TigerbeetleMini = () => {
+export const TigerbeetleMini = ({addClassName=""}) => {
     return (<>
+    <div className={addClassName + " " + colsCarousel} style={style}>
     <TigerbeetleLogo />
     <TigerbeetleQuote />
     <ul>
@@ -186,6 +193,7 @@ export const TigerbeetleMini = () => {
     <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a>
     </li>
     </ul>
+    </div>
     </>);
 };
 
