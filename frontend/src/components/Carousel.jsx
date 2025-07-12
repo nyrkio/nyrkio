@@ -73,7 +73,6 @@ export function UserCarousel() {
     useEffect(()=>{setLoading(false); setT()},[]);
 
     const next = () => {
-      console.log("next",loading);
       if(loading) return;
       if (currentCarouselCard == "Turso"){
         setLoading(true);
