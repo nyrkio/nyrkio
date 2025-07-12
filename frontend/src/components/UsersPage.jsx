@@ -4,6 +4,10 @@ export const UsersPage = () => {
     <Turso />
     <Dremio />
     <Tigerbeetle />
+    <hr />
+    <div className="row">
+    <p>Want more? Read about how Netflix, Confluent, RedHat, MongoDB, DataStax and Tarantool use Change Point Detection in their Continuous Performance Engineering workflows over at <a href="/about/ecosystem">our Open Source Ecosystem page</a>.</p>
+    </div>
     </div>
     </>)
 };
