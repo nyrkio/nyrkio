@@ -4,7 +4,7 @@ import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
 import { Logo } from "./Logo";
-import { NyrkioCarousel, UserCarousel } from "./Carousel";
+import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
 
 const FeatureHighlight = () => {
@@ -188,7 +188,6 @@ const FeatureBanner2 = () => {
 };
 
 export const FrontPage = () => {
-  const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
   return (
     <>
 
@@ -210,7 +209,7 @@ export const FrontPage = () => {
 
           <div className="user-carousel">
           <h1>What our users say</h1>
-          <UserCarousel currentCarouselCard={currentCarouselCard} setCurrentCarouselCard={setCurrentCarouselCard}/>
+          <MyUserCarousel />
           </div>
           <div className="padding-block-sm "></div>
           <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
