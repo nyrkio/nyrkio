@@ -168,15 +168,14 @@ body #root div.container-fluid {
   padding-right: 0px;
 }
 #main-content,
-#main-content div {
+#main-content {
   margin-left: 0px;
   margin-right: 0px;
+}
+#main-content > div {
+  margin-left: 5px;
+  margin-right: 5px;
   padding-left: 0px;
-}
-#main-content div {
-  padding-right: 0px;
-}
-#main-content {
   padding-right: 0px;
 }
 
@@ -1330,6 +1329,7 @@ div.blog-rss-widget .nyrkio-blog-header span {
   --bs-gutter-x: 0;
   padding: 0px;
   padding-left: 0px;
+  margin-left:1em;
 }
 
 
@@ -1338,7 +1338,7 @@ div.blog-rss-widget .nyrkio-blog-header span {
 .nyrkio-user-photo-quote {
   margin-top: 3em;
   margin-bottom: 3em;
-  padding-left: 2.5em;
+  padding-left: .5em;
 }
 
 h4.customer-logo-title{
@@ -1362,10 +1362,6 @@ h4.customer-logo-title{
   margin-top: 1em;
 }
 
-.section-front  .nyrkio-user-card img.customer-logo {
-  margin-top: 1em;
-  border: "solid purple 5px";
-}
 
 .section-front #main-content div.nyrkio-user-photo-quote ,
 .section-front #main-content2 div.nyrkio-user-photo-quote ,
