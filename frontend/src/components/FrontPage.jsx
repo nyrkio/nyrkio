@@ -5,6 +5,7 @@ import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
 import { Logo } from "./Logo";
 import { NyrkioCarousel, UserCarousel } from "./Carousel";
+import { useEffect, useState } from "react";
 
 const FeatureHighlight = () => {
   return (
@@ -189,6 +190,7 @@ const FeatureBanner2 = () => {
 };
 
 export const FrontPage = () => {
+  const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
   return (
     <>
 
@@ -207,11 +209,11 @@ export const FrontPage = () => {
 
           <div className="user-carousel">
           <h1>What our users say</h1>
-          <UserCarousel />
+          <UserCarousel currentCarouselCard={currentCarouselCard} setCurrentCarouselCard={setCurrentCarouselCard}/>
           </div>
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
-          <p><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
+          <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
 
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
