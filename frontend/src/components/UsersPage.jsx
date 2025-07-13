@@ -1,5 +1,6 @@
 export const UsersPage = () => {
   return (<>
+    <h1 style={{textAlign: "center"}}>What Nyrkiö users are saying</h1>
     <div className="row">
     <Turso />
     <Dremio />
@@ -15,7 +16,7 @@ export const UsersPage = () => {
 
 const cols = "col-sm-12 col-lg-6 col-xl-4 nyrkio-user-card";
 const colsCarousel = "col-sm-12 col-lg-4 col-xl-4 nyrkio-user-card";
-const style = {paddingLeft: "1em", paddingRight: "3em"};
+const style = {paddingLeft: "1em", paddingRight: "3em", cursor: "pointer"};
 const imgStyle = {maxWidth: "300px", maxHeight: "300px", borderRadius: "50px"};
 const imgTitleStyle = {textAlign: "center", paddingRight: "1.5em"};
 
@@ -47,10 +48,10 @@ export const Turso = () => {
     </>);
 };
 
-export const TursoMini = ( {addClassName=""} ) => {
+export const TursoMini = ( {addClassName="", onClick} ) => {
     return (<>
 
-        <div className={addClassName + " " + colsCarousel} style={style}>
+        <div className={addClassName + " " + colsCarousel} style={style} onClick={onClick}>
         <TursoLogo />
         <TursoQuote />
         <p>
@@ -114,13 +115,13 @@ export const Dremio = () => {
     );
 };
 
-export const DremioMini = ({addClassName=""}) => {
+export const DremioMini = ({addClassName="", onClick}) => {
     return (<>
-    <div className={addClassName + " " + colsCarousel} style={style}>
+    <div className={addClassName + " " + colsCarousel} style={style} onClick={onClick}>
     <DremioLogo />
     <DremioQuote />
     <p>
-    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Dremio public benchmark results on Nyrkiö</a>
+    <a href="https://blog.nyrkio.com/2025/03/25/interview-with-pierre-laporte-part-i/">Interview with Pierre Laporte (part 1)</a>
     </p>
     </div>
     </>);
@@ -179,9 +180,9 @@ export const Tigerbeetle = () => {
     );
 };
 
-export const TigerbeetleMini = ({addClassName=""}) => {
+export const TigerbeetleMini = ({addClassName="", onClick}) => {
     return (<>
-    <div className={addClassName + " " + colsCarousel} style={style}>
+    <div className={addClassName + " " + colsCarousel} style={style} onClick={onClick}>
     <TigerbeetleLogo />
     <TigerbeetleQuote />
     <p><a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub">Tigerbeetle public benchmark results on Nyrkiö</a></p>

@@ -23,16 +23,21 @@ const NavigationItems = () => {
             <a
               className="nav-link nyrkio-logo-nav-link"
               aria-current="page"
-              href="/"
-              title="Dashboards"
+              href="/frontpage"
+              title="frontpage"
             >
               <SmallLogo />
             </a>
           </li>
           <li className="nav-item">
-            <a className="nav-link" href="/pricing">
-              Product
-            </a>
+          <a className="nav-link" href="/dash">
+          Dashboards
+          </a>
+          </li>
+          <li className="nav-item">
+          <a className="nav-link" href="/product">
+          Product
+          </a>
           </li>
           <li className="nav-item">
             <a className="nav-link" href="/services">

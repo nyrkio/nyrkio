@@ -106,7 +106,9 @@ async def _get_user_from_prefix(test_name_prefix: str):
 
     for test_result in public_results:
         int_test_name = internal_test_name(test_result["user_id"], test_name_prefix)
-        if test_result["test_name"].startswith(int_test_name):
+        if int_test_name is not None and test_result["test_name"].startswith(
+            int_test_name
+        ):
             user_or_org_id = test_result["user_id"]
             public_test_prefix = extract_public_test_name(test_result["attributes"])
             break

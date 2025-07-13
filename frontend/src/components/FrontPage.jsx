@@ -4,7 +4,7 @@ import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import cicd from "../static/cicd.png";
 import commit from "../static/commit.png";
 import { Logo } from "./Logo";
-import { NyrkioCarousel, UserCarousel } from "./Carousel";
+import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
 
 const FeatureHighlight = () => {
@@ -66,7 +66,6 @@ const LearnMore = () => {
         <div className="col-xs-12 col-md-3">
           <h3>Get involved!</h3>
           <Link to="/about/ecosystem">Open Source Ecosystem </Link>
-          <p>Read about how Netflix, Red Hat and Confluent use change point detection to stay on top of performance.</p>
         </div>
       </div>
   );
@@ -75,8 +74,7 @@ const LearnMore = () => {
 export const DemoVideo = () => {
   return (
     <iframe
-      width="933"
-      height="525"
+      style={{maxWidth: "93vw", maxHeight: "52vw", width:"47vw", height: "27vw", minWidth: "450px", minHeight: "250px"}}
       src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
       title="YouTube video player"
       frameBorder="0"
@@ -189,8 +187,7 @@ const FeatureBanner2 = () => {
   );
 };
 
-export const FrontPage = () => {
-  const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
+export const FrontPage = ({loggedIn}) => {
   return (
     <>
 
@@ -198,10 +195,15 @@ export const FrontPage = () => {
         <div className="container-fluid text-center w-100">
            <div className="padding-block "></div>
 
-           <div className="nyrkio-carousel">
-           <NyrkioCarousel />
-           </div>
+          <DemoVideo />
           <div className="padding-block-sm "></div>
+          {loggedIn? "" :
+            (<button className="btn btn-success">
+                <a className="btn-link" href="/signup">
+                Create account &amp; get started
+                </a>
+                </button>
+                )}
           <div className="padding-block-sm "></div>
 
           <FeatureBanner1 />
@@ -209,11 +211,13 @@ export const FrontPage = () => {
 
           <div className="user-carousel">
           <h1>What our users say</h1>
-          <UserCarousel currentCarouselCard={currentCarouselCard} setCurrentCarouselCard={setCurrentCarouselCard}/>
+          <MyUserCarousel />
           </div>
           <div className="padding-block-sm "></div>
-          <div className="padding-block-sm "></div>
           <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
+          <div className="padding-block-sm "></div>
+          <div className="padding-block-sm "></div>
+          <p style={{fontSize: "150%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
 
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>

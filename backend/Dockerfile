@@ -1,4 +1,4 @@
-FROM python:3.8.6-slim as base
+FROM python:3.8-slim as base
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -40,9 +40,6 @@ RUN /venv/bin/pip install dist/*.whl
 #########
 
 FROM base as final
-
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends netcat libpq-dev
 
 # create the app user
 RUN addgroup --system app && adduser --system --group app
