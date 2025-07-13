@@ -41,9 +41,6 @@ RUN /venv/bin/pip install dist/*.whl
 
 FROM base as final
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends netcat libpq-dev
-
 # create the app user
 RUN addgroup --system app && adduser --system --group app
 
