@@ -74,7 +74,8 @@ const LearnMore = () => {
 export const DemoVideo = () => {
   return (
     <iframe
-      style={{maxWidth: "93vw", maxHeight: "52vw", width:"47vw", height: "27vw", minWidth: "450px", minHeight: "250px"}}
+      id="demo-video"
+      style={{maxWidth: "95%", maxHeight: "95%", minWidth: "400px", minHeight: "225px"}}
       src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
       title="YouTube video player"
       frameBorder="0"
@@ -192,7 +193,6 @@ export const FrontPage = ({loggedIn}) => {
     <>
 
       <div className="frontpage container-fluid text-center w-100">
-        <div className="container-fluid text-center w-100">
            <div className="padding-block "></div>
 
           <DemoVideo />
@@ -235,7 +235,6 @@ export const FrontPage = ({loggedIn}) => {
           <FeatureBanner2 />
           <LearnMore />
         </div>
-      </div>
     </>
   );
 };

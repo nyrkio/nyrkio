@@ -210,101 +210,32 @@ body #root div.container-fluid {
   letter-spacing: 0.1rem;
 }
 
-.frontpage .carousel {
-  margin-top: 2em;
-}
-.frontpage .carousel img {
-  margin-top: 2em;
-  max-height: 500px;
-  max-width:100%;
-  object-fit: contain;
-}
-.frontpage .carousel-caption
-{
-  color: var(--nyrkio-tattoo-red);
-  text-shadow: 1px 0px 0px var(--nyrkio-tattoo-red);
-  font-weight: bold;
-  position: absolute;
-  bottom: 0px;
-  padding: 0px;
-  font-size:13px;
+#demo-video {
+  width: 933px;
+  height: 525px;
 }
 
+@media (max-width: 932px) {
 
-.frontpage .carousel-caption a
-{
-  color: var(--nyrkio-tattoo-red);
-  text-shadow: 1px 0px 0px var(--nyrkio-tattoo-red);
-
-}
-
-.frontpage .carousel-caption {
-  z-index: 4;
-  position: absolute;
-  bottom: -0.5em;
-  font-size: 1.5em;
-}
-.frontpage .carousel-caption .carousel-gha {
-  width: 20em;
-  max-height: 1em;
-  position: relative;
-  left: 45%;
-  top: -10em;
-  text-align: left;
-
-}
-.frontpage .carousel-caption iframe {
-    max-width: 100%;
-    width: 100%;
-}
-
-@media (max-width: 799px) {
-
-
-  .frontpage .carousel-caption {
-    font-size: 3vmin;
-  }
-  .frontpage .carousel {
-    min-height:600px;
-  }
-  .frontpage .nyrkio-carousel .carousel img {
-    opacity: 0.1;
-    width: 100%;
-    min-width: 100%;
-    object-fit: cover;
-  }
-  .frontpage .user-carousel .carousel img {
-    width: 100%;
-    min-width: 100%;
-    object-fit: cover;
-  }
-  .frontpage .carousel iframe {
-    display: none;
-  }
-  .frontpage .carousel-caption .carousel-gha  {
-    width: 100%;
-    min-width: 90%;
-    position: relative;
-    left: 1px;
+  #demo-video {
+  width: 750px;
+  height: 420px;
   }
 }
+@media (max-width: 749px) {
 
-.carousel .slide {
-  max-width: 100%;
+  #demo-video {
+  width: 600px;
+  height: 210px;
+  }
 }
+@media (max-width: 599px) {
 
-.frontpage .carousel-caption.pierre {
-  position: absolute;
-  text-align: left;
-  padding: 0px;
+  #demo-video {
+  width: 375px;
+  height: 210px;
+  }
 }
-.frontpage .carousel img.pierre {
-  width: 100%;
-  min-height: 50vi;
-  position: sticky;
-  object-position: right;
-}
-
 
 div.nyrkio-logo-productpage div.nyrkio-logo img.nyrkio-logo-img {
   max-width: 80%;
