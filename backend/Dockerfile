@@ -1,4 +1,4 @@
-FROM python:3.8.6-slim as base
+FROM python:3.8-slim as base
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
