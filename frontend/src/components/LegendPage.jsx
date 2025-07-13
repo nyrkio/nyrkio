@@ -67,12 +67,8 @@ export const LegendPage = () => {
               />
             </center>
             <p>
-              <small>
-                All Nyyrikki imagery on this site by{" "}
-                <a href="https://www.deviantart.com/tuherrus/gallery">
-                  tuherrus of Deviant Art
-                </a>
-                .
+              <small><a href="https://www.deviantart.com/stash/02f67f0g3400">Nyyrikki by Finnish artist "tuherrus"</a>, <a href="https://www.deviantart.com/nyrkio/exclusives">acquired exclusively for Nyrkiö</a> when we incorporated.<br />
+                It seems after abandoning DA, <a href="https://tuherrus.tumblr.com/post/699567413557149696/nyyrikki-is-the-deity-of-hunting-in-finnish">tuherrus nowadays is active on tumbler</a>, in case you want to follow this powerful artist.
               </small>
             </p>
           </div>
