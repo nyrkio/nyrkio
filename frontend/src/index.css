@@ -200,6 +200,7 @@ body #root div.container-fluid {
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
+  max-width:90%;
   color: var(--nyrkio-tattoo-red);
   font-size: 3em;
   letter-spacing: 0.6rem;
@@ -227,25 +228,25 @@ body #root div.container-fluid {
 }
 
 #demo-video {
-  width: 933px;
-  height: 525px;
+  width: 960px;
+  height: 540px;
 }
 
-@media (max-width: 932px) {
-
-  #demo-video {
-  width: 750px;
-  height: 420px;
-  }
-}
-@media (max-width: 749px) {
+@media (max-width: 1079px) {
 
   #demo-video {
-  width: 600px;
-  height: 210px;
+  width: 800px;
+  height: 405px;
   }
 }
-@media (max-width: 599px) {
+@media (max-width: 899px) {
+
+  #demo-video {
+  width: 480px;
+  height: 270px;
+  }
+}
+@media (max-width: 539px) {
 
   #demo-video {
   width: 375px;
