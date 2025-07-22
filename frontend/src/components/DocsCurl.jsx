@@ -11,15 +11,14 @@ import img3 from "../static/getting-started-UserSettings.png";
 import img4 from "../static/getting-started-API-key.png";
 import gh_permissions_img from "../static/github_permissions.png";
 
-export const Docs = () => {
+export const DocsCurl = () => {
   const [content, setContent] = useState("");
-  const [contentAction, setContentAction] = useState("");
 
   useEffect(() => {
-    fetch(introDocAction)
+    fetch(introDoc)
       .then((response) => response.text())
       .then((text) => {
-        setContentAction(text);
+        setContent(text);
       });
   });
 
@@ -27,10 +26,13 @@ export const Docs = () => {
   return (
     <>
       <div className="row mt-4 m-2 p-0 col-lg-10">
-        <FirstHalf />
+        <h1>Using Nyrkiö with curl HTTP requests</h1>
+        <p>If you don't use GitHub or <a href="/docs/getting-started">GitHub actions for Continuous Integration</a>,
+           below is a tutorial using generic HTTP requests with <code>curl</code>:</p>
+        <FirstHalfCurl />
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
-          children={contentAction}
+          children={content}
           components={{
             code({ node, inline, className, children, ...props }) {
               const match = /language-(\w+)/.exec(className || "");
@@ -109,3 +111,38 @@ const FirstHalf = () => {
   );
 };
 
+const FirstHalfCurl = () => {
+  return (
+    <>
+      <div>
+        <h2 id="getting-started-curl"> 1.Create a user account</h2>
+
+        <p>Click on the Login button in the top right corner:</p>
+
+        <img src={img1} />
+
+        <p>
+          Choose between GitHub OAuth or traditional username + password logins.
+        </p>
+
+        <img src={img2} />
+
+        <h2> 2. Create a JWT token</h2>
+
+        <p>
+          We use JWT to access the Nyrkiö API. Click again on the red button on
+          your top right. If you are logged in you can now select _User
+          Settings_.
+        </p>
+
+        <img src={img3} />
+        <p>
+          Create a new API key and make sure to copy paste it and save it
+          somewhere.
+        </p>
+
+        <img src={img4} />
+      </div>
+    </>
+  );
+};

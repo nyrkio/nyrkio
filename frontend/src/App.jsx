@@ -16,7 +16,9 @@ import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
+import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
+import { DocsGitPerfPlugin } from "./components/DocsGitPerfPlugin.jsx";
 import { DocsTeams } from "./components/DocsTeams.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { UsersPage } from "./components/UsersPage.jsx";
@@ -37,12 +39,13 @@ import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
 import { LogoSlogan, LogoSloganNarrow } from "./components/Logo";
 
+const Nothing = () => {
+  return <></>;
+};
+
 function MainApp({ loggedIn, setLoggedIn }) {
   let location = useLocation();
 
-  const Nothing = () => {
-    return <></>;
-  };
 
   React.useEffect(() => {
     posthog.capture("$pageview");
@@ -58,57 +61,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
           className="col-sm-12 col-md-9 col-xl-10 container-fluid"
           id="main-content"
         >
-          <Routes>
-            <Route path="/" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/frontpage" />} />
-            <Route path="/dash" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/public"/> } />
-            <Route path="/frontpage" element={<Nothing />} />
-            <Route
-              path="/tests/*"
-              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/tests/"/>}
-            />
-            <Route path="/product" element={<ProductPage />} />
-            <Route path="/product/user-testimonials" element={<UsersPage />} />
-            <Route
-              path="/pricing"
-              element={<PricingPage loggedIn={loggedIn} />}
-            />
-            <Route
-              path="/services"
-              element={<ServicesPage loggedIn={loggedIn} />}
-            />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/about/ecosystem" element={<EcosystemPage />} />
-            <Route path="/legal" element={<LegalPage />} />
-            <Route path="/legend" element={<LegendPage />} />
-            <Route
-              path="/signup"
-              element={<SignUpPage setLoggedIn={setLoggedIn} />}
-            />
-            <Route path="/public/*"
-              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
-            />
-            <Route path="/org/*" element={<OrgSettings />} />
-            <Route path="/orgs/*"
-              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/orgs/"/>}
-            />
-            <Route
-              path="/login"
-              element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
-            />
-            <Route path="/result/*"
-              element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
-            />
-            <Route path="/docs/getting-started" element={<Docs />} />
-            <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
-            <Route path="/docs/teams" element={<DocsTeams />} />
-            <Route path="/user/settings" element={<UserSettings />} />
-            <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
-            <Route
-              path="/billing"
-              element={<BillingPage loggedIn={loggedIn} />}
-            />
-            <Route path="*" element={<NoMatch />} />
-          </Routes>
+        <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         </div>
         <ScrollToTop />
       </div>
@@ -130,51 +83,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
           className="col-sm-12 col-md-9 col-xl-10 container-fluid"
           id="main-content"
         >
-          <Routes>
-            <Route path="/" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/frontpage" />} />
-            <Route path="/dash" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/public"/> } />
-            <Route path="/frontpage" element={<Nothing />} />
-            <Route
-              path="/tests/*"
-              element={<Dashboard loggedIn={loggedIn} path="/tests/" />}
-            />
-            <Route path="/product" element={<ProductPage />} />
-            <Route path="/product/user-testimonials" element={<UsersPage />} />
-            <Route
-              path="/pricing"
-              element={<PricingPage loggedIn={loggedIn} />}
-            />
-            <Route
-              path="/services"
-              element={<ServicesPage loggedIn={loggedIn} />}
-            />
-            <Route path="/about" element={<AboutPage />} />
-            <Route path="/about/ecosystem" element={<EcosystemPage />} />
-            <Route path="/legal" element={<LegalPage />} />
-            <Route path="/legend" element={<LegendPage />} />
-            <Route
-              path="/signup"
-              element={<SignUpPage setLoggedIn={setLoggedIn} />}
-            />
-            <Route path="/public/*" element={<Dashboard path="/public/"/>} />
-            <Route path="/org/*" element={<OrgSettings />} />
-            <Route path="/orgs/*" element={<Dashboard path="/orgs/"/>} />
-            <Route
-              path="/login"
-              element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
-            />
-            <Route path="/result/*" element={<Dashboard path="/result/"/>} />
-            <Route path="/docs/getting-started" element={<Docs />} />
-            <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
-            <Route path="/docs/teams" element={<DocsTeams />} />
-            <Route path="/user/settings" element={<UserSettings />} />
-            <Route path="/admin/*" element={<AdminDashboard />} />
-            <Route
-              path="/billing"
-              element={<BillingPage loggedIn={loggedIn} />}
-            />
-            <Route path="*" element={<NoMatch />} />
-          </Routes>
+        <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
@@ -187,6 +96,64 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <Footer />
       </div>
     </>
+  );
+}
+
+function RouteMap({loggedIn, embed, setLoggedIn, }) {
+  return (
+    <Routes>
+      <Route path="/" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/frontpage" />} />
+      <Route path="/dash" element={loggedIn ? <Navigate to="/tests"/> : <Navigate to="/public"/> } />
+      <Route path="/frontpage" element={<Nothing />} />
+      <Route
+      path="/tests/*"
+      element={<Dashboard loggedIn={loggedIn} embed={embed} path="/tests/"/>}
+      />
+      <Route path="/product" element={<ProductPage />} />
+      <Route path="/product/user-testimonials" element={<UsersPage />} />
+      <Route
+      path="/pricing"
+      element={<PricingPage loggedIn={loggedIn} />}
+      />
+      <Route
+      path="/services"
+      element={<ServicesPage loggedIn={loggedIn} />}
+      />
+      <Route path="/about" element={<AboutPage />} />
+      <Route path="/about/ecosystem" element={<EcosystemPage />} />
+      <Route path="/legal" element={<LegalPage />} />
+      <Route path="/legend" element={<LegendPage />} />
+      <Route
+      path="/signup"
+      element={<SignUpPage setLoggedIn={setLoggedIn} />}
+      />
+      <Route path="/public/*"
+      element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
+      />
+      <Route path="/org/*" element={<OrgSettings />} />
+      <Route path="/orgs/*"
+      element={<Dashboard loggedIn={loggedIn} embed={embed} path="/orgs/"/>}
+      />
+      <Route
+      path="/login"
+      element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />}
+      />
+      <Route path="/result/*"
+      element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
+      />
+      <Route path="/docs/getting-started" element={<Docs />} />
+      <Route path="/docs/getting-started-http" element={<DocsCurl />} />
+      <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
+      <Route path="/docs/git-perf-plugin" element={<DocsGitPerfPlugin />} />
+      <Route path="/docs/teams" element={<DocsTeams />} />
+      <Route path="/user/settings" element={<UserSettings />} />
+      <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
+      <Route
+      path="/billing"
+      element={<BillingPage loggedIn={loggedIn} />}
+      />
+      <Route path="*" element={<NoMatch />} />
+    </Routes>
   );
 }
 
