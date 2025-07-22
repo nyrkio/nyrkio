@@ -18,6 +18,7 @@ import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
+import { DocsGitPerfPlugin } from "./components/DocsGitPerfPlugin.jsx";
 import { DocsTeams } from "./components/DocsTeams.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { UsersPage } from "./components/UsersPage.jsx";
@@ -143,6 +144,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       <Route path="/docs/getting-started" element={<Docs />} />
       <Route path="/docs/getting-started-http" element={<DocsCurl />} />
       <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
+      <Route path="/docs/git-perf-plugin" element={<DocsGitPerfPlugin />} />
       <Route path="/docs/teams" element={<DocsTeams />} />
       <Route path="/user/settings" element={<UserSettings />} />
       <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />

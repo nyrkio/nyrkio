@@ -161,8 +161,12 @@ const DocsSidePanel = ({ loggedIn }) => {
       </Link>
 
       <Link to="/docs/working-with-graphs" className="nav-link">
-        Working with the graphs
+      Working with the graphs
       </Link>
+      <Link to="/docs/git-perf-plugin" className="nav-link">
+        git-perf plugin
+      </Link>
+
       <Link to="/docs/teams" className="nav-link">
         Teams / Orgs
       </Link>
