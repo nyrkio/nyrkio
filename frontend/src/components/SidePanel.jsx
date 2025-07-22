@@ -43,7 +43,7 @@ export const SidePanel = ({ loggedIn }) => {
         />
         <Route
           path="/services"
-          element={<ServicesSidePanel loggedIn={loggedIn} />}
+          element={<ProductSidePanel loggedIn={loggedIn} />}
         />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
         <Route
@@ -134,16 +134,15 @@ const ProductSidePanel = ({ loggedIn }) => {
       <Link to="/pricing" className="nav-link">
       Pricing
       </Link>
+      <Link to="/services" className="nav-link">
+      Services
+      </Link>
       <Link to="/public" className="nav-link">
         Public Dashboards
         <br /> from other users
       </Link>
     </>
   );
-};
-const ServicesSidePanel = ({ loggedIn }) => {
-  document.body.classList.add("section-services");
-  return <></>;
 };
 
 const DocsSidePanel = ({ loggedIn }) => {
