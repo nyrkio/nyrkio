@@ -16,6 +16,7 @@ import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
+import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
 import { DocsTeams } from "./components/DocsTeams.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
@@ -140,6 +141,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
       />
       <Route path="/docs/getting-started" element={<Docs />} />
+      <Route path="/docs/getting-started-http" element={<DocsCurl />} />
       <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
       <Route path="/docs/teams" element={<DocsTeams />} />
       <Route path="/user/settings" element={<UserSettings />} />

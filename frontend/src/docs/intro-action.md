@@ -61,45 +61,9 @@ If you are using something else than the supported benchmark frameworks, then yo
 the `nyrkio/change-detection@v2` GitHub action to upload the results. You can store your results
 directly in the JSON format used by Nyrkiö. Just use `tool: NyrkioJson`
 
-Please refer to the official [API docs](https://nyrkio.com/openapi) for the full documentation of
-`NyrkioJson`. Below is a simple example:
-
-Main required parts:
-
-| Field      | Description                            |
-| ---------- | -------------------------------------- |
-| timestamp  | Unix timestamp (secs since Jan 1 1970) |
-| metrics    | A list of dictionaries of metrics      |
-| attributes | A dictionary of attributes             |
-
-Example payload:
-
-```json
-           [{"timestamp": 1706220908,
-             "metrics": [
-               {"name": "p50", "unit": "us", "value": 56 },
-               {"name": "p90", "unit": "us", "value": 125 },
-               {"name": "p99", "unit": "us", "value": 280 }
-             ],
-             "attributes": {
-               "git_repo": "https://github.com/nyrkio/nyrkio",
-               "branch": "main",
-               "git_commit": "6995e2de6891c724bfeb2db33d7b87775f913ad1"
-             }
-       }]
-```
-
-(You can submit multiple results in the same request, that's why the payload is always a list.)
-
-There are a few things to keep in mind when working with test result data:
-
-`timestamp` should be the time of the _git commit_ that was tested, not the timestamp of the test execution. Using the git commit timestamp allows you to accurately pinpoint which commit (or sequence of commits) introduced a change in performance. In other words, you should use the timestamp of when the commits were merged to the branch being monitored. This you can get with the following command:
-
-    commit_date=$(cd $GIT_REPO; git rev-list --format=format:"%ci" --max-count=1 $githash|grep -v commit)
-
-The `git_commit` attribute is special. If you include it and the `git_repo` attribute, then Nyrkiö will link to the url for that commit whenever it's part of a change point.
-
-The units for each metric is arbitrary and can be anything, e.g. "ns", "us", "instructions", "request/s", etc. The `direction` is optional. Nyrkiö will alert for both regressions and improvements.
+Please refer to [the generic HTTP / curl tutorial](/docs/getting-started-http) and the official
+[API docs](https://nyrkio.com/openapi) for the full documentation of
+`NyrkioJson`.
 
 
 ## 4. View the charts in the dashboard
