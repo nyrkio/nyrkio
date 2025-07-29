@@ -10,7 +10,7 @@ export const DocsGitPerfPlugin = () => {
         <p>git-perf plugin will extend your normal git output with performance data from Nyrkiö's <a href="https://nyrkio.com/openapi#/default/changes_per_commit_api_v0_changes_perCommit__test_name_prefix__get"><code>changes/perCommit</code></a> API call. You need to be first using Nyrkiö to benefit from git-perf plugin. And Initially only repositories with <a href="/public/">public performance results</a> are supported. (So to test, you can clone a TigerBeetle or Turso repo.)</p>
         <h2>Installation</h2>
 
-        <pre><code>curl https://raw.githubusercontent.com/nyrkio/git-perf/refs/heads/main/src/git-perf > $HOME/bin/git-perf<br />
+        <pre><code>curl https://raw.githubusercontent.com/nyrkio/git-perf/refs/heads/main/src/git-perf &gt; $HOME/bin/git-perf<br />
         chmod a+x $HOME/bin/git-perf</code></pre>
 
         <h2>Example</h2>
@@ -24,8 +24,8 @@ export const DocsGitPerfPlugin = () => {
         core/translate: Fix "misuse of aggregate function" error message<br />
         <br />
         ```<br />
-        sqlite> CREATE TABLE test1(f1, f2);<br />
-        sqlite> SELECT SUM(min(f1)) FROM test1;<br />
+        sqlite&gt; CREATE TABLE test1(f1, f2);<br />
+        sqlite&gt; SELECT SUM(min(f1)) FROM test1;<br />
         Parse error: misuse of aggregate function min()<br />
         SELECT SUM(min(f1)) FROM test1;<br />
         ^--- error here<br />
@@ -48,7 +48,7 @@ export const DocsGitPerfPlugin = () => {
         <br />
         perf change:           https://nyrk.io/gh/tursodatabase%252Fturso/main<br />
         turso/main/Prepare__SELECT_1_/limbo_parse_query/SELECT_1:<br />
-        time: +64.63 %   1.2342->2.0319<br />
+        time: +64.63 %   1.2342-&gt;2.0319<br />
         <br />
         commit 7a259957ac6fc1fe3484a5356968fd3a70c61c96<br />
         Merge: 1333fc88 832f9fb8<br />
