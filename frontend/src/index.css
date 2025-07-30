@@ -120,46 +120,27 @@ img.nyyrikki-original-art {
 
 body .footer,
 body.section-about .footer {
-  xxxbackground-image: url(/src/static/36215479721_4beda5c4ae_k.compressed.25.jpg);
+  background-image: url(/src/static/Sayhteella.jpg);
   background-repeat: no-repeat;
   background-attachment: scroll;
-  background-position: center;
+  background-position: top left;
   background-size: cover;
   background-color: transparent;
-  height: 600px;
 }
 
-.forestVideoWrapper {
-  background-color: var(--nyrkio-horn-light-brown);
-  z-index: -10;
-  padding: 0px;
+body .footer  {
+  width: 100vw;
+  padding-bottom: 300px;
 }
-
-#forestVideoBackground {
-  position: relative;
-  object-position: 0px 0px;
-  object-fit: cover;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 200vi;
-  min-width: 100%;
-  max-height: 600px;
-  z-index: 0;
+body .footer ul,
+body .footer div {
+  color: var(--nyrkio-light-gray5);
+  width: 66%;
+  margin-left: 3em;
 }
-
-body .footer .container {
-  position: relative;
-  bottom: 30em;
-  width: 100%;
-  padding-top: 0em;
-  padding-left: 2vmin;
-  padding-right: 2vmin;
-}
-body .footer .container a {
-  color: var(--nyrkio-light-gray2);
+body .footer a {
+  color: var(--nyrkio-light-gray4);
+  font-weight: bold;
   text-decoration: underline;
 }
 
@@ -1147,9 +1128,6 @@ div.card.people-card .card-header img {
 .footer .footer-legal {
   font-size: small;
 }
-.footer .footer-legal a {
-  color: var(--nyrkio-dark-gray);
-}
 
 #nyrkio-settings-userinfo label {
   font-weight: bold;
@@ -1301,7 +1279,6 @@ h4.customer-logo-title{
 
 .nyrkio-user-card {
   margin-top: 10em;
-  border: "solid purple 5px";
 }
 
 .section-front  .nyrkio-user-card {
