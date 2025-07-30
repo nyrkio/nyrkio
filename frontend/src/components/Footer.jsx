@@ -53,11 +53,9 @@ export const Footer = () => {
       <div className="container-fluid top pt-0 g-0 px-0 footer">
 
       <img src={footerUpperCrust} style={{position: "relative", top: "-5px", width: "100%"}}/>
-        <div className="container">
-          <footer className="row justify-content-center align-items-center my-4 ">
-            <div className="row justify-content-center text-center">
-              <ul className="nav justify-content-center col-md-4 ">
-                <li className="ms-3">
+          <footer className="row my-4 ">
+              <ul className="nav justify-content-left">
+                <li className="ms-5">
                   <a
                     className="text-body-secondary"
                     target="_blank"
@@ -68,7 +66,7 @@ export const Footer = () => {
                     </svg>
                   </a>
                 </li>
-                <li className="ms-3">
+                <li className="ms-5">
                   <a
                     className="text-body-secondary"
                     target="_blank"
@@ -79,7 +77,7 @@ export const Footer = () => {
                     </svg>
                   </a>
                 </li>
-                <li className="ms-3">
+                <li className="ms-5">
                   <a
                     className="text-body-secondary"
                     target="_blank"
@@ -90,7 +88,7 @@ export const Footer = () => {
                     </svg>
                   </a>
                 </li>
-                <li className="ms-3">
+                <li className="ms-5">
                   <a
                     className="text-body-secondary"
                     target="_blank"
@@ -101,7 +99,7 @@ export const Footer = () => {
                     </svg>
                   </a>
                 </li>
-                <li className="ms-3">
+                <li className="ms-5">
                   <a
                     className="text-body-secondary"
                     target="_blank"
@@ -113,19 +111,16 @@ export const Footer = () => {
                   </a>
                 </li>
               </ul>
-            </div>
-            <div className="row justify-content-center p-3">
-              <div className="align-items-center text-center">
+            <div className="row p-3 mt-5">
                 <span
-                  className="mb-3 mb-md-0 text-body-secondary"
+                  className="mb-3 text-body-secondary"
                 >
                   &copy; 2025 Nyrkiö Oy<br />
                   Nyrkiö is based on the open source Apache Otava (Incubating) project. Apache and Apache Otava are trademarks of the <a href="https://apache.org">Apache Software Foundation</a>.
                 </span>
-              </div>
             </div>
-            <div className="row justify-content-center p-3 mb-5">
-              <div className="align-items-center text-center footer-legal">
+            <div className="row p-3 mb-5">
+              <div className="align-items-center footer-legal">
                 <Link to={ToS} target="_blank">
                   Terms of Service
                 </Link>
@@ -136,7 +131,6 @@ export const Footer = () => {
               </div>
             </div>
           </footer>
-        </div>
       </div>
     </>
   );

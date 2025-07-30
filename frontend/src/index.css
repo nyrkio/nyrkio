@@ -123,17 +123,24 @@ body.section-about .footer {
   background-image: url(/src/static/Sayhteella.jpg);
   background-repeat: no-repeat;
   background-attachment: scroll;
-  background-position: center;
+  background-position: top left;
   background-size: cover;
   background-color: transparent;
 }
 
-body .footer .container {
-  color: #fafaff;
-  width: 100%;
+body .footer  {
+  width: 100vw;
+  padding-bottom: 300px;
 }
-body .footer .container a {
+body .footer ul,
+body .footer div {
+  color: var(--nyrkio-light-gray5);
+  width: 66%;
+  margin-left: 3em;
+}
+body .footer a {
   color: var(--nyrkio-light-gray4);
+  font-weight: bold;
   text-decoration: underline;
 }
 
@@ -1121,9 +1128,6 @@ div.card.people-card .card-header img {
 .footer .footer-legal {
   font-size: small;
 }
-.footer .footer-legal a {
-  color: var(--nyrkio-dark-gray);
-}
 
 #nyrkio-settings-userinfo label {
   font-weight: bold;
@@ -1275,7 +1279,6 @@ h4.customer-logo-title{
 
 .nyrkio-user-card {
   margin-top: 10em;
-  border: "solid purple 5px";
 }
 
 .section-front  .nyrkio-user-card {
