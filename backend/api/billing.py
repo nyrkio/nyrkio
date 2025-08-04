@@ -116,8 +116,8 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
         session = stripe.billing_portal.Session.create(
             customer=customer_id, return_url=stripe_return_url()
         )
-        return {"customer_id": customer_id, "session": session};
-        # return RedirectResponse(session.url, status_code=303)
+        return {"customer_id": customer_id, "session": session}
+    # return RedirectResponse(session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating portal session: {e}")
         raise HTTPException(status_code=500, detail="Error creating portal session")
