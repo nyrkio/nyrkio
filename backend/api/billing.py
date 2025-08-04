@@ -87,7 +87,7 @@ async def subscribe_success(
 
 def stripe_success_url():
     server = os.environ["SERVER_NAME"]
-    return server + "/billing?subscribe_success=true?session_id={CHECKOUT_SESSION_ID}"
+    return server + "/billing?subscribe_success=true&session_id={CHECKOUT_SESSION_ID}"
 
 
 def stripe_cancel_url():
