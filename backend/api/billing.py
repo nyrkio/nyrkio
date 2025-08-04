@@ -109,14 +109,15 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
         logging.error(f"User {user.email} has no billing information")
         raise HTTPException(status_code=400, detail="User has no billing information")
 
-    session_id = user.billing["session_id"]
-    # customer_id = user.billing["customer_id"]
+    # session_id = user.billing["session_id"]
+    customer_id = user.billing["customer_id"]
     try:
-        checkout_session = stripe.checkout.Session.retrieve(session_id)
+        # checkout_session = stripe.checkout.Session.retrieve(session_id)
         session = stripe.billing_portal.Session.create(
-            customer=checkout_session.customer, return_url=stripe_return_url()
+            customer=customer_id, return_url=stripe_return_url()
         )
-        return RedirectResponse(session.url, status_code=303)
+        return {"customer_id": customer_id, "session": session}
+    # return RedirectResponse(session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating portal session: {e}")
         raise HTTPException(status_code=500, detail="Error creating portal session")
