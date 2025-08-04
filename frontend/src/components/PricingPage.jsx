@@ -134,7 +134,7 @@ export const PricingPage = ({ loggedIn }) => {
                     />
                     <input type="hidden" name="quantity" value="1" />
                     <button
-                      id="checkout-and-portal-button"
+                      id="checkout-and-portal-button-business"
                       type="submit"
                       className="w-100 btn btn-lg btn-success"
                       onClick={(e) => {
@@ -197,7 +197,7 @@ export const PricingPage = ({ loggedIn }) => {
                     />
                     <input type="hidden" name="quantity" value="1" />
                     <button
-                      id="checkout-and-portal-button"
+                      id="checkout-and-portal-button-enterprise"
                       type="submit"
                       className="w-100 btn btn-lg btn-success"
                     >
@@ -378,6 +378,38 @@ export const PricingPage = ({ loggedIn }) => {
             </div>
           </div>
         </div>
+      </div>
+      <div style={{opacity: 0.2}} >
+      {loggedIn ? (
+        <form
+        action="/api/v0/billing/create-checkout-session?mode=subscription"
+        method="POST"
+        >
+        <input
+        type="hidden"
+        name="lookup_key"
+        value={"simple_test_yearly"}
+        />
+        <input type="hidden" name="quantity" value="1" />
+        <button
+        id="checkout-and-portal-button-test"
+        type="submit"
+        className="w-100 btn btn-lg btn-success"
+        style={{width: "50px", maxWidth: "100px", backgroundColor: "#dddddd", position: "absolute", right: "0px", border: "white 1px solid"}}
+        >
+        Test
+        </button>
+        </form>
+      ) : (
+        <button
+        type="button"
+        className="w-100 btn btn-lg btn-success"
+        >
+        <a className="btn-link" href="/signup">
+        Sign up
+        </a>
+        </button>
+      )}
       </div>
     </>
   );
