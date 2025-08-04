@@ -116,6 +116,18 @@ const UserBillingPage = () => {
     window.location.href = response.url;
   };
 
+  const BillingButton = ({plan}) => {
+    if(plan="free") {
+      return (
+        <a className="btn btn-success" href="/pricing">
+          Upgrade to Nyrkiö Business
+        </a>
+
+      );
+    }
+
+  };
+
   return (
     <div className="container text-center">
       <div className="row justify-content-center">
@@ -125,13 +137,11 @@ const UserBillingPage = () => {
         </div>
       </div>
       <div className="row p-5">
-        <div className="card">
+        <div className="card nyrkio-billing">
           <div className="card-body shadow">
             <h5 className="card-title">Current plan</h5>
             <p className="card-text">{planMap[billingPlan]}</p>
-            <a className="btn btn-success" onClick={onClick}>
-              Manage subscription
-            </a>
+            <BillingButton plan={planMap[billingPlan]}/>
           </div>
         </div>
       </div>

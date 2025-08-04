@@ -374,6 +374,17 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.nyrkio-billing .card-body  {
+  background-color: var(--nyrkio-light-gray);
+  padding: 3.5em;
+  border-radius: 10px;
+  border: solid 1px var(--nyrkio-dark-gray);
+}
+.nyrkio-billing .card-body .btn {
+  border: solid 2px var(--nyrkio-dark-red);
+  box-shadow: 3px 3px 5px var(--nyrkio-dark-gray);
+}
+
 .nyrkio-services .card .card-body .card-body-text {
   height: 15em;
   overflow: scroll;
