@@ -75,7 +75,7 @@ async def subscribe_success(
         print(subscription)
         items = subscription["items"]
         plan = items["data"][0]["price"]["lookup_key"]
-        customer_id = session["customer"]
+        # customer_id = session["customer"]
         billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
         update = UserUpdate(billing=billing)
         user.billing = billing
