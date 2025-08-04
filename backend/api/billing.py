@@ -52,7 +52,9 @@ async def create_checkout_session(
         return RedirectResponse(checkout_session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail="Error creating checkout session {e}")
+        raise HTTPException(
+            status_code=500, detail="Error creating checkout session {e}"
+        )
 
 
 class SubscriptionData(BaseModel):
