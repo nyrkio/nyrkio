@@ -75,7 +75,7 @@ async def subscribe_success(
         print(subscription)
         items = subscription["items"]
         plan = items["data"][0]["price"]["lookup_key"]
-        # customer_id = session["customer"]
+        customer_id = session["customer"]
         billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
         update = UserUpdate(billing=billing)
         user.billing = billing
@@ -108,7 +108,7 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
         raise HTTPException(status_code=400, detail="User has no billing information")
 
     session_id = user.billing["session_id"]
-    customer_id = user.billing["customer_id"]
+    # customer_id = user.billing["customer_id"]
     try:
         checkout_session = stripe.checkout.Session.retrieve(session_id)
         session = stripe.billing_portal.Session.create(
