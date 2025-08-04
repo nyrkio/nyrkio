@@ -92,11 +92,11 @@ const UserBillingPage = () => {
 
   const planMap = {
     free: "Free",
-    simple_business_monthly: "Nyrkiö Business (monthly)",
+    simple_business_monthly: "Nyrkiö Business (Monthly)",
     simple_business_yearly: "Nyrkiö Business (Annual)",
-    simple_enterprise_monthly: "Nyrkiö Enterprise (monthly)",
+    simple_enterprise_monthly: "Nyrkiö Enterprise (Monthly)",
     simple_enterprise_yearly: "Nyrkiö Enterprise (Annual)",
-    simple_test_monthly: "Nyrkiö Test subscriptions (monthly)",
+    simple_test_monthly: "Nyrkiö Test subscriptions (Monthly)",
     simple_test_yearly: "Nyrkiö Test subscriptions (Annual)",
   };
 
@@ -108,6 +108,8 @@ const UserBillingPage = () => {
       },
     });
 
+    let portalSession = await response.json();
+    console.debug(portalSession);
     if (!response.ok) {
       console.error(
         "Failed to create portal session: " +
@@ -117,7 +119,7 @@ const UserBillingPage = () => {
       );
       return;
     }
-    window.location.href = response.url;
+    window.location.href = portalSession.session.url;
   };
 
   const BillingButton = ({plan}) => {
@@ -131,7 +133,7 @@ const UserBillingPage = () => {
     }else{
       return (
         <a className="btn btn-success" onClick={onClick}>
-        Manage subscription
+        Manage subscription (Stripe)
         </a>
       );
     }
