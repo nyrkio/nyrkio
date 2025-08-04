@@ -376,13 +376,23 @@ button:focus-visible {
 
 .nyrkio-billing .card-body  {
   background-color: var(--nyrkio-light-gray);
-  padding: 3.5em;
+  padding: 3em;
   border-radius: 10px;
   border: solid 1px var(--nyrkio-dark-gray);
 }
 .nyrkio-billing .card-body .btn {
   border: solid 2px var(--nyrkio-dark-red);
   box-shadow: 3px 3px 5px var(--nyrkio-dark-gray);
+}
+.nyrkio-billing .card-body h3 {
+  margin-top: 8px;
+}
+.nyrkio-billing .card-body .card-body-text {
+  margin-top: 3em;
+  margin-bottom: 3em;
+  color: var(--nyrkio-horn-dark-brown);
+
+
 }
 
 .nyrkio-services .card .card-body .card-body-text {
