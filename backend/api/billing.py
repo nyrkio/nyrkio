@@ -71,6 +71,8 @@ async def subscribe_success(
     try:
         session = stripe.checkout.Session.retrieve(session_id)
         subscription = stripe.Subscription.retrieve(session.subscription)
+        print(session)
+        print(subscription)
         items = subscription["items"]
         plan = items["data"][0]["price"]["lookup_key"]
         billing = {"plan": plan, "session_id": session_id}
