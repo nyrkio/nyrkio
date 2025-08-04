@@ -92,8 +92,12 @@ const UserBillingPage = () => {
 
   const planMap = {
     free: "Free",
-    business_monthly: "Business (monthly)",
-    business_yearly: "Business (Annual)",
+    simple_business_monthly: "Nyrkiö Business (monthly)",
+    simple_business_yearly: "Nyrkiö Business (Annual)",
+    simple_enterprise_monthly: "Nyrkiö Enterprise (monthly)",
+    simple_enterprise_yearly: "Nyrkiö Enterprise (Annual)",
+    simple_test_monthly: "Nyrkiö Test subscriptions (monthly)",
+    simple_test_yearly: "Nyrkiö Test subscriptions (Annual)",
   };
 
   const onClick = async () => {
@@ -117,12 +121,18 @@ const UserBillingPage = () => {
   };
 
   const BillingButton = ({plan}) => {
-    if(plan="free") {
+    if(plan=="free") {
       return (
         <a className="btn btn-success" href="/pricing">
           Upgrade to Nyrkiö Business
         </a>
 
+      );
+    }else{
+      return (
+        <a className="btn btn-success" onClick={onClick}>
+        Manage subscription
+        </a>
       );
     }
 
@@ -139,8 +149,8 @@ const UserBillingPage = () => {
       <div className="row p-5">
         <div className="card nyrkio-billing">
           <div className="card-body shadow">
-            <h5 className="card-title">Current plan</h5>
-            <p className="card-text">{planMap[billingPlan]}</p>
+            <h3 className="card-title">Current plan</h3>
+            <p className="card-body-text">{planMap[billingPlan]}</p>
             <BillingButton plan={planMap[billingPlan]}/>
           </div>
         </div>

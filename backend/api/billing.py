@@ -52,7 +52,9 @@ async def create_checkout_session(
         return RedirectResponse(checkout_session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail="Error creating checkout session")
+        raise HTTPException(
+            status_code=500, detail="Error creating checkout session {e}"
+        )
 
 
 class SubscriptionData(BaseModel):
@@ -75,13 +77,14 @@ async def subscribe_success(
         print(subscription)
         items = subscription["items"]
         plan = items["data"][0]["price"]["lookup_key"]
-        billing = {"plan": plan, "session_id": session_id}
+        customer_id = session["customer"]
+        billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
         update = UserUpdate(billing=billing)
         user.billing = billing
         user = await user_manager.update(update, user, safe=True)
     except Exception as e:
         logging.error(f"Error subscribing user: {e}")
-        raise HTTPException(status_code=500, detail="Error subscribing user")
+        raise HTTPException(status_code=500, detail="Error subscribing user: {e}")
     return {}
 
 
@@ -107,6 +110,7 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
         raise HTTPException(status_code=400, detail="User has no billing information")
 
     session_id = user.billing["session_id"]
+    # customer_id = user.billing["customer_id"]
     try:
         checkout_session = stripe.checkout.Session.retrieve(session_id)
         session = stripe.billing_portal.Session.create(

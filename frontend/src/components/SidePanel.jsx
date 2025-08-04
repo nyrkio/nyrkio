@@ -1,7 +1,47 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Routes, Route, Link } from "react-router-dom";
 
 export const SidePanel = ({ loggedIn }) => {
+  const [orgs, setOrgs] = useState([]);
+  const getOrganizations = async () => {
+    const url = "/api/v0/orgs/";
+    console.debug("GET " + url);
+    const response = await fetch(url, {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    if (response.status !== 200) {
+      console.error("Failed to GET User's organizations");
+      console.log(response);
+      return response;
+    } else console.debug(response);
+
+    const data = await response.json();
+    console.debug(data);
+    if ( Array.isArray(data)  ) {
+      return data;
+    } else {
+      return ["Fetching your organizations failed."];
+    }
+  };
+
+  useEffect(() => {
+     getOrganizations().then((data) => {
+
+      var temp = [];
+      if ( data !== undefined && data.forEach ){
+        data.forEach((d) => {
+          temp.push(d.organization.login);
+        });
+      }
+      setOrgs(temp);
+    } );
+  }, []);
+
+
   return (
     <div className="navbar-nav navbar-left justify-content-start">
       <Routes>
@@ -63,7 +103,10 @@ export const SidePanel = ({ loggedIn }) => {
           element={<LoginSidePanel loggedIn={loggedIn} />}
         />
         <Route path="/login" element={<LoginSidePanel loggedIn={loggedIn} />} />
-      </Routes>
+        <Route path="/billing" element={<SettingsSidePanel loggedIn={loggedIn} orgs={orgs}/>} />
+        <Route path="/user/settings" element={<SettingsSidePanel loggedIn={loggedIn} orgs={orgs}/>} />
+        <Route path="/org/*" element={<SettingsSidePanel loggedIn={loggedIn} orgs={orgs}/>} />
+        </Routes>
     </div>
   );
 };
@@ -207,4 +250,31 @@ const LoginSidePanel = ({ loggedIn }) => {
       </Link>
     </>
   );
+};
+
+const SettingsSidePanel = ({ loggedIn, orgs }) => {
+  document.body.classList.add("section-settings");
+  return (
+    <>
+    <Link to="/user/settings" className="nav-link nav-link-login">
+    <span className="bi bi-person-fill"></span> User Settings
+    </Link>
+    <OrgsList orgs={orgs}/>
+    <Link to="/billing" className="nav-link nav-link-login">
+    <span className="bi bi-credit-card"></span> Billing
+    </Link>
+    </>
+  );
+};
+const OrgsList = ({orgs}) => {
+  const orgsHtml = [];
+  for (let i=0; i<orgs.length; i++){
+    const thisOrg = orgs[i];
+    orgsHtml.push(
+      <Link to={"/org/"+thisOrg}  className="nav-link nav-link-login" key={i}>
+      <span className="bi bi-people-fill"></span> {thisOrg} Settings
+      </Link>
+    );
+  }
+  return (<>{orgsHtml}</>);
 };
