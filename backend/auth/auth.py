@@ -474,6 +474,6 @@ def create_challenge(claim: NoTokenClaim) -> str:
     workflowstr = f"/{claim.repo_owner}/{claim.repo}/actions/runs/{claim.run_id}"
 
     line1 = "NoTokenHandshake between github.com and nyrkio.com:\n"
-    line2 = "I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
+    line2 = f"I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
 
     return line1 + line2
