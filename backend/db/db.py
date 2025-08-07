@@ -29,10 +29,60 @@ class User(BeanieBaseUser, Document):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     superuser: Optional[Dict[str, str]] = Field(None)
+    github_username: Optional[str] = Field(None)
+    is_cph_user: Optional[bool] = None
+    is_repo_owner: Optional[bool] = False
+
+
+# class BeanieBaseUser(BaseModel):
+#     email: str
+#     hashed_password: str
+#     is_active: bool = True
+#     is_superuser: bool = False
+#     is_verified: bool = False
+#
+#     class Settings:
+#         email_collation = Collation("en", strength=2)
+#         indexes = [
+#             IndexModel(
+#                 "email",
+#                 name="case_insensitive_email_index",
+#                 collation=email_collation,
+#                 unique=True,
+#             ),
+#         ]
+
+
+class NyrkioUserDatabase(BeanieUserDatabase):
+    def __init__(self):
+        super().__init__(User, OAuthAccount)
+        self.store = DBStore()
+        self.User = self.store.db.User
+
+    async def get_by_github_username(self, github_username: str):
+        res = await self.User.find_one({github_username: github_username})
+        if res:
+            return User(**res)
+
+        res = await self.User.find(
+            {"oauth_accounts.organizations.user.login": github_username}
+        ).to_list(99)
+
+        if len(res) == 1:
+            obj = res[0]
+            return User(**obj)
+
+        if len(res) > 1:
+            raise DBStoreMultipleResults(
+                f"Failed to get user by their github_username '{github_username}'. Query returned more than one result."
+            )
+
+        return None
 
 
 async def get_user_db():
-    yield BeanieUserDatabase(User, OAuthAccount)
+    # yield BeanieUserDatabase(User, OAuthAccount)
+    yield NyrkioUserDatabase()
 
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):
@@ -45,6 +95,7 @@ class UserCreate(schemas.BaseUserCreate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    github_username: Optional[str] = Field(None)
 
 
 class UserUpdate(schemas.BaseUserUpdate):
@@ -268,6 +319,14 @@ class DBStoreMissingRequiredKeys(Exception):
 
     def __init__(self, missing_keys):
         self.missing_keys = missing_keys
+
+
+class DBStoreMultipleResults(Exception):
+    """
+    Raised when a single record is expected or at least desired, and DB returning multiple leads to ambiguity.
+    """
+
+    pass
 
 
 class DBStore(object):
