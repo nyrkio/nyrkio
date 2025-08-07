@@ -375,3 +375,105 @@ async def get_user(id):
 @auth_router.post("/token")
 async def gen_token(user: User = Depends(current_active_user)):
     return await jwt_backend.login(get_jwt_strategy(), user)
+
+
+class NoTokenSession(BaseModel):
+    username: str
+    client_secret: str
+    server_secret: str
+
+
+class NoTokenClaim(BaseModel):
+    username: str
+    client_secret: str
+
+    repo_owner: str
+    repo_name: str
+    repo_owner_email: str
+    repo_owner_full_name: str
+    workflow_name: str
+    event_name: str
+    run_number: int
+    run_id: int
+
+
+class NoTokenChallenge(BaseModel):
+    session: NoTokenSession
+    public_challenge: str
+    claimed_identity: NoTokenClaim
+
+
+@auth_router.post("/github/notoken/claim")
+async def notoken_claim(claim: NoTokenClaim) -> NoTokenChallenge:
+    """
+    First part of a "No Token Github authentication Handshake".
+
+    Note that this is like a login end point, so coming here, user is unknown and unauthenticated
+    """
+    await verify_workflow_run(claim)
+    challenge = create_challenge(claim)
+    server_secret = create_secret()
+    session = NoTokenSession(
+        username=NoTokenClaim.username,
+        client_secret=claim.client_secret,
+        server_secret=server_secret,
+    )
+    return NoTokenChallenge(
+        session=session, public_challenge=challenge, claimed_identity=claim
+    )
+
+
+async def verify_workflow_run(claim: NoTokenClaim):
+    client = httpx.AsyncClient()
+    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo}/actions/runs/{claim.run_id}"
+    # TODO: We can also support private repos, need to supply our github app token
+    # headers={"Authorization": f"Bearer {token['access_token']}"},)
+    response = await client.get(uri)
+    if response.status_code != 200:
+        logging.error(
+            f"NoTokenHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
+        )
+        logging.error(dict(claim))
+        raise HTTPException(
+            status_code=424,
+            detail=f"NoTokenHandshake: Could not find the Github workflow you claim to be running: {uri}",
+        )
+    # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
+    workflow = response.data
+    # TODO: Debug - remove later
+    print(workflow)
+    if workflow["event"] == "pull_request":
+        workflow_username = workflow["actor"]["login"]
+        if workflow_username != claim.username:
+            logging.error(
+                f"NoTokenHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+            )
+            raise HTTPException(
+                status_code=401,
+                detail=f"NoTokenHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+            )
+
+    if workflow["event"] == "push":
+        workflow_username = workflow["repository"]["owner"]["login"]
+        if workflow_username != claim.username:
+            logging.error(
+                f"NoTokenHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+            )
+            raise HTTPException(
+                status_code=401,
+                detail=f"NoTokenHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+            )
+
+
+def create_secret() -> str:
+    return uuid.uuid4()
+
+
+def create_challenge(claim: NoTokenClaim) -> str:
+    randomstr = uuid.uuid4()
+    workflowstr = f"/{claim.repo_owner}/{claim.repo}/actions/runs/{claim.run_id}"
+
+    line1 = "NoTokenHandshake between github.com and nyrkio.com:\n"
+    line2 = "I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
+
+    return line1 + line2
