@@ -439,7 +439,7 @@ async def verify_workflow_run(claim: NoTokenClaim):
             detail=f"NoTokenHandshake: Could not find the Github workflow you claim to be running: {uri}",
         )
     # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
-    workflow = response.data
+    workflow = response.json()
     # TODO: Debug - remove later
     print(workflow)
     if workflow["event"] == "pull_request":
