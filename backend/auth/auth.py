@@ -471,7 +471,7 @@ def create_secret() -> str:
 
 def create_challenge(claim: NoTokenClaim) -> str:
     randomstr = uuid.uuid4()
-    workflowstr = f"/{claim.repo_owner}/{claim.repo}/actions/runs/{claim.run_id}"
+    workflowstr = f"/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
 
     line1 = "NoTokenHandshake between github.com and nyrkio.com:\n"
     line2 = f"I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
