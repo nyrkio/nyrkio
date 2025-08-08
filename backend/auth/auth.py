@@ -389,8 +389,8 @@ class NoTokenClaim(BaseModel):
 
     repo_owner: str
     repo_name: str
-    repo_owner_email: Optional[str]
-    repo_owner_full_name: Optional[str]
+    # repo_owner_email: Optional[str]
+    # repo_owner_full_name: Optional[str]
     workflow_name: str
     event_name: str
     run_number: int
