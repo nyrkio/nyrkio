@@ -466,7 +466,7 @@ async def verify_workflow_run(claim: NoTokenClaim):
 
 
 def create_secret() -> str:
-    return uuid.uuid4()
+    return str(uuid.uuid4())
 
 
 def create_challenge(claim: NoTokenClaim) -> str:
