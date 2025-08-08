@@ -414,7 +414,7 @@ async def notoken_claim(claim: NoTokenClaim) -> NoTokenChallenge:
     challenge = create_challenge(claim)
     server_secret = create_secret()
     session = NoTokenSession(
-        username=NoTokenClaim.username,
+        username=claim.username,
         client_secret=claim.client_secret,
         server_secret=server_secret,
     )
