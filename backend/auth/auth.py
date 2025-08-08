@@ -389,8 +389,8 @@ class NoTokenClaim(BaseModel):
 
     repo_owner: str
     repo_name: str
-    # repo_owner_email: Optional[str]
-    # repo_owner_full_name: Optional[str]
+    repo_owner_email: Optional[str] = None
+    repo_owner_full_name: Optional[str] = None
     workflow_name: str
     event_name: str
     run_number: int
@@ -425,7 +425,7 @@ async def notoken_claim(claim: NoTokenClaim) -> NoTokenChallenge:
 
 async def verify_workflow_run(claim: NoTokenClaim):
     client = httpx.AsyncClient()
-    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo}/actions/runs/{claim.run_id}"
+    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
     # TODO: We can also support private repos, need to supply our github app token
     # headers={"Authorization": f"Bearer {token['access_token']}"},)
     response = await client.get(uri)
