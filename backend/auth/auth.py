@@ -586,7 +586,9 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
     previous_chunk = ""
     try:
         # Each step is a separate text file inside the zip archive
-        for file_name, file_size, unzipped_chunks in stream_unzip(zipped_chunks(log_url)):
+        for file_name, file_size, unzipped_chunks in stream_unzip(
+            zipped_chunks(log_url)
+        ):
             # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
             # It's ok, what we are looking for is probably toward the end anyway
             for chunk in unzipped_chunks:
