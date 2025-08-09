@@ -427,14 +427,17 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
         server_secret=server_secret,
     )
     challenge = TokenlessChallenge(
-        session=session, public_challenge=public_challenge, public_message=public_message, claimed_identity=claim
+        session=session,
+        public_challenge=public_challenge,
+        public_message=public_message,
+        claimed_identity=claim,
     )
-    if not session.username in handshake_ongoing_map:
+    if session.username not in handshake_ongoing_map:
         handshake_ongoing_map[session.username] = {}
-    if not session.client_secret in handshake_ongoing_map[session.username]:
+    if session.client_secret not in handshake_ongoing_map[session.username]:
         raise HTTPException(
             status_code=409,
-            detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice."
+            detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice.",
         )
     handshake_ongoing_map[session.username][session.client_secret] = challenge
 
@@ -442,7 +445,9 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 
 
 @auth_router.post("/github/tokenless/complete")
-async def tokenless_complete(session: TokenlessSession, artifact_id: string) -> TokenlessChallenge:
+async def tokenless_complete(
+    session: TokenlessSession, artifact_id: str
+) -> TokenlessChallenge:
     """
     second part
 
@@ -469,18 +474,17 @@ async def tokenless_complete(session: TokenlessSession, artifact_id: string) -> 
 
     # Note: user is still unauthenticated as handshake isn't complete. This check is equivalent
     # to checking the session credentials for a logged in user.
-    if not session.username in handshake_ongoing_map:
+    if session.username not in handshake_ongoing_map:
         raise HTTPException(
             status_code=401,
-            detail=f"Username {session.username} doesn't have any Tokenless handshakes ongoing."
+            detail=f"Username {session.username} doesn't have any Tokenless handshakes ongoing.",
         )
-    challenge = handshake_ongoing_map[session.username].get(session.client_secret,None)
+    challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
     if challenge is None:
         # Makes it a bit harder to brute force (but doesn't prevent parallellism)
         await asyncio.sleep(10)
         raise HTTPException(
-            status_code=401,
-            detail="Tokenless handshake failed: wrong client_secret"
+            status_code=401, detail="Tokenless handshake failed: wrong client_secret"
         )
 
     challenge.artifact_id = artifact_id
@@ -493,10 +497,11 @@ async def tokenless_complete(session: TokenlessSession, artifact_id: string) -> 
         return {
             "message": "Tokenless Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
             "github_username": challenge.session.username,
-            "jwt_token": jwt_token
+            "jwt_token": jwt_token,
         }
     else:
         return {"message": "Shouldn't happen. You should've already received a 401."}
+
 
 async def verify_workflow_run(claim: TokenlessClaim):
     client = httpx.AsyncClient()
@@ -553,25 +558,30 @@ def create_challenge(claim: TokenlessClaim) -> str:
 
     return randomstr, line1 + line2
 
+
 async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
     artifact_url = f"https://api.github.com/{challenge.claim.repo_owner}/{challenge.claim.repo_name}/actions/runs/{challenge.claim.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
-    response = await client.get(uri)
+    response = await client.get(artifact_url)
     if response.status_code != 200:
         logging.error(
             f"TokenlessHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
         )
         raise HTTPException(
             status_code=424,
-            detail=f"TokenlessHandshake: Could not find the artifact fail you should have published in your github action: {uri}",
+            detail=f"TokenlessHandshake: Could not find the artifact fail you should have published in your github action: {artifact_url}",
         )
     artifact_contents = response.data
-    if artifact_contents.find(challenge.public_message) and artifact_contents.find(challenge.public_challenge):
-        logging.debug(f"Successful TokenlessHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward.")
+    if artifact_contents.find(challenge.public_message) and artifact_contents.find(
+        challenge.public_challenge
+    ):
+        logging.debug(
+            f"Successful TokenlessHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward."
+        )
         return True
-    else
+    else:
         raise HTTPException(
             status_code=401,
-            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch."
+            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch.",
         )
