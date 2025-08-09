@@ -512,7 +512,7 @@ async def tokenless_complete(
 
 async def verify_workflow_run(claim: TokenlessClaim):
     client = httpx.AsyncClient()
-    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
+    uri = f"https://github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
     # TODO: We can also support private repos, need to supply our github app token
     # headers={"Authorization": f"Bearer {token['access_token']}"},)
     response = await client.get(uri)
