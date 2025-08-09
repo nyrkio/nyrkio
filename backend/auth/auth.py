@@ -605,6 +605,7 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
     i = challenge.claimed_identity
     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
 
+    challenge_as_bytes = challenge.public_challenge.encode('utf-8')
     found = False
     client = httpx.AsyncClient()
     response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
@@ -622,7 +623,7 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
     for filename in z.namelist():
         print(filename)
         log = z.read(filename)
-        if check_match(log, challenge.public_challenge):
+        if check_match(log, challenge_as_bytes):
             print("FOUND IT FOUND IT")
             found = True
 
