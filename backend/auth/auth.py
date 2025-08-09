@@ -525,8 +525,6 @@ async def verify_workflow_run(claim: TokenlessClaim) -> int:
         )
     # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
     workflow = response.json()
-    # TODO: Debug - remove later
-    print(workflow)
     if workflow["event"] == "pull_request":
         workflow_username = workflow["actor"]["login"]
         if workflow_username != claim.username:
@@ -569,7 +567,7 @@ def create_challenge(claim: TokenlessClaim) -> str:
 
 def zipped_chunks(url):
     # Iterable that yields the bytes of a zip file
-    with httpx.stream("GET", url, headers=HTTP_HEADERS) as r:
+    with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
         print("yielding chunks from the zip now")
         yield from r.iter_bytes(chunk_size=65536)
 
@@ -618,7 +616,7 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
             status_code=424,
             detail=f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
         )
-    log_contents_zipped = response.data
+    log_contents_zipped = response.content
     z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
     print("have z now no need to write to  disk")
     for filename in z.namelist():
