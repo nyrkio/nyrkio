@@ -405,9 +405,9 @@ class TokenlessChallenge(BaseModel):
     public_message: str
     claimed_identity: TokenlessClaim
 
-
-class TokenlessHandshakeComplete(BaseModel):
+ete(BaseModel):ssSession                   :
     session: TokenlessSession
+    artifact_id: int
     artifact_id: int
 
 
@@ -449,7 +449,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
     return challenge
 
 
-@auth_router.post("/github/tokenless/complete")
+@autsession_and_more: TokenlessHandshakeComplete
 async def tokenless_complete(
     session_and_more: TokenlessHandshakeComplete,
 ) -> TokenlessChallenge:
@@ -476,11 +476,11 @@ async def tokenless_complete(
     In short, the run_id that was stored from the claim, is the one piece of data that we
     have to make sure we are reading a file that must have been written by the PR author /repo owner.
     """
-
-    # Note: user is still unauthenticated as handshake isn't complete. This check is equivalent
-    # to checking the session credentials for a logged in user.
+    # Note: user is still unauthenticated as handshake isn't co
 
     session = session_and_more.session
+    artifact_id = session_and_more.artifact_id
+mplete. This check is equivalentals for a logged in user.    session = session_and_more.session
     artifact_id = session_and_more.artifact_id
 
     if session.username not in handshake_ongoing_map:
@@ -569,7 +569,7 @@ def create_challenge(claim: TokenlessClaim) -> str:
 
 
 async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
-    artifact_url = f"https://api.github.com/{challenge.claim.repo_owner}/{challenge.claim.repo_name}/actions/runs/{challenge.claim.run_id}/artifacts/{challenge.artifact_id}"
+    artifact_url = f"https://api.github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
     response = await client.get(artifact_url)
