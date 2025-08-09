@@ -405,6 +405,9 @@ class TokenlessChallenge(BaseModel):
     public_message: str
     claimed_identity: TokenlessClaim
 
+class TokenlessHandshakeComplete(BaseModel):
+    session: TokenlessSession
+    artifact_id: int
 
 # TODO: Store in Mongodb some other day ;-)
 handshake_ongoing_map = {}
@@ -446,7 +449,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 
 @auth_router.post("/github/tokenless/complete")
 async def tokenless_complete(
-    session: TokenlessSession, artifact_id: int
+    session_and_more: TokenlessHandshakeComplete
 ) -> TokenlessChallenge:
     """
     second part
@@ -474,6 +477,10 @@ async def tokenless_complete(
 
     # Note: user is still unauthenticated as handshake isn't complete. This check is equivalent
     # to checking the session credentials for a logged in user.
+
+    session = session_and_more.session
+    artifact_id = session_and_more.artifact_id
+
     if session.username not in handshake_ongoing_map:
         raise HTTPException(
             status_code=401,
