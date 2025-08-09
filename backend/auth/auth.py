@@ -1,5 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
+import asyncio
 import os
 from typing import Optional, Tuple
 import logging
@@ -377,13 +378,13 @@ async def gen_token(user: User = Depends(current_active_user)):
     return await jwt_backend.login(get_jwt_strategy(), user)
 
 
-class NoTokenSession(BaseModel):
+class TokenlessSession(BaseModel):
     username: str
     client_secret: str
     server_secret: str
 
 
-class NoTokenClaim(BaseModel):
+class TokenlessClaim(BaseModel):
     username: str
     client_secret: str
 
@@ -397,33 +398,107 @@ class NoTokenClaim(BaseModel):
     run_id: int
 
 
-class NoTokenChallenge(BaseModel):
-    session: NoTokenSession
+class TokenlessChallenge(BaseModel):
+    session: TokenlessSession
     public_challenge: str
-    claimed_identity: NoTokenClaim
+    artifact_id: Optional[str] = None
+    public_message: str
+    claimed_identity: TokenlessClaim
 
 
-@auth_router.post("/github/notoken/claim")
-async def notoken_claim(claim: NoTokenClaim) -> NoTokenChallenge:
+# TODO: Store in Mongodb some other day ;-)
+handshake_ongoing_map = {}
+tokenless_users_map = {}
+
+
+@auth_router.post("/github/tokenless/claim")
+async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
     """
-    First part of a "No Token Github authentication Handshake".
+    First part of a "Tokenless Github Action Authentication Handshake".
 
     Note that this is like a login end point, so coming here, user is unknown and unauthenticated
     """
     await verify_workflow_run(claim)
-    challenge = create_challenge(claim)
+    public_challenge, public_message = create_challenge(claim)
     server_secret = create_secret()
-    session = NoTokenSession(
+    session = TokenlessSession(
         username=claim.username,
         client_secret=claim.client_secret,
         server_secret=server_secret,
     )
-    return NoTokenChallenge(
-        session=session, public_challenge=challenge, claimed_identity=claim
+    challenge = TokenlessChallenge(
+        session=session, public_challenge=public_challenge, public_message=public_message, claimed_identity=claim
     )
+    if not session.username in handshake_ongoing_map:
+        handshake_ongoing_map[session.username] = {}
+    if not session.client_secret in handshake_ongoing_map[session.username]:
+        raise HTTPException(
+            status_code=409,
+            detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice."
+        )
+    handshake_ongoing_map[session.username][session.client_secret] = challenge
+
+    return challenge
 
 
-async def verify_workflow_run(claim: NoTokenClaim):
+@auth_router.post("/github/tokenless/complete")
+async def tokenless_complete(session: TokenlessSession, artifact_id: string) -> TokenlessChallenge:
+    """
+    second part
+
+    Can't trust the incoming data anymore: Just use the username and client secret
+    to lookup and match corresponding server_secret.
+
+    The main task is to verify that the public_challenge is found in the artifact file uploaded by
+    the client who his claiming the identity of, well essentially claiming to be the process running
+    the workflow. We already store the run_id as part of the initial claim, and it is important
+    that we stored and will use it as it was supplied as part of the claim. It is the one piece of
+    information that solid links the client to the running workflow and therefore with eithr the PR
+    author, or repo owner, in the case of a push event.
+
+    Note that to read the file, we also need an artifact_id, which is only now being sent to us.
+    We will use it as part of the URL, we have no choice, but note that this id in itself doesn't
+    prove anything about anyone's identity. At this point in time there could already be race
+    conditions from antagonistic clients, who have read the artifact file already and therefore
+    want to pretend they knew the public_challenge, or alternatively, someone might try to
+    submit an artifact_id linked to a completely different file in a different workflow.
+
+    In short, the run_id that was stored from the claim, is the one piece of data that we
+    have to make sure we are reading a file that must have been written by the PR author /repo owner.
+    """
+
+    # Note: user is still unauthenticated as handshake isn't complete. This check is equivalent
+    # to checking the session credentials for a logged in user.
+    if not session.username in handshake_ongoing_map:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Username {session.username} doesn't have any Tokenless handshakes ongoing."
+        )
+    challenge = handshake_ongoing_map[session.username].get(session.client_secret,None)
+    if challenge is None:
+        # Makes it a bit harder to brute force (but doesn't prevent parallellism)
+        await asyncio.sleep(10)
+        raise HTTPException(
+            status_code=401,
+            detail="Tokenless handshake failed: wrong client_secret"
+        )
+
+    challenge.artifact_id = artifact_id
+    jwt_token = "TODO"
+
+    if await validate_public_challenge(challenge):
+        # If this user doesn't exist at all, create now
+        # Create a new short lived JWT token for this user to use for the rest of the workflow run.
+
+        return {
+            "message": "Tokenless Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
+            "github_username": challenge.session.username,
+            "jwt_token": jwt_token
+        }
+    else:
+        return {"message": "Shouldn't happen. You should've already received a 401."}
+
+async def verify_workflow_run(claim: TokenlessClaim):
     client = httpx.AsyncClient()
     uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
     # TODO: We can also support private repos, need to supply our github app token
@@ -431,12 +506,12 @@ async def verify_workflow_run(claim: NoTokenClaim):
     response = await client.get(uri)
     if response.status_code != 200:
         logging.error(
-            f"NoTokenHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
+            f"TokenlessHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
         )
         logging.error(dict(claim))
         raise HTTPException(
             status_code=424,
-            detail=f"NoTokenHandshake: Could not find the Github workflow you claim to be running: {uri}",
+            detail=f"TokenlessHandshake: Could not find the Github workflow you claim to be running: {uri}",
         )
     # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
     workflow = response.json()
@@ -446,22 +521,22 @@ async def verify_workflow_run(claim: NoTokenClaim):
         workflow_username = workflow["actor"]["login"]
         if workflow_username != claim.username:
             logging.error(
-                f"NoTokenHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+                f"TokenlessHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
             )
             raise HTTPException(
                 status_code=401,
-                detail=f"NoTokenHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+                detail=f"TokenlessHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
 
     if workflow["event"] == "push":
         workflow_username = workflow["repository"]["owner"]["login"]
         if workflow_username != claim.username:
             logging.error(
-                f"NoTokenHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+                f"TokenlessHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
             )
             raise HTTPException(
                 status_code=401,
-                detail=f"NoTokenHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+                detail=f"TokenlessHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
 
 
@@ -469,11 +544,34 @@ def create_secret() -> str:
     return str(uuid.uuid4())
 
 
-def create_challenge(claim: NoTokenClaim) -> str:
+def create_challenge(claim: TokenlessClaim) -> str:
     randomstr = str(uuid.uuid4())
     workflowstr = f"/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
 
-    line1 = "NoTokenHandshake between github.com and nyrkio.com:\n"
+    line1 = "TokenlessHandshake between github.com and nyrkio.com:\n"
     line2 = f"I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
 
-    return line1 + line2
+    return randomstr, line1 + line2
+
+async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
+    artifact_url = f"https://api.github.com/{challenge.claim.repo_owner}/{challenge.claim.repo_name}/actions/runs/{challenge.claim.run_id}/artifacts/{challenge.artifact_id}"
+    logging.info(f"GET: {artifact_url}")
+    client = httpx.AsyncClient()
+    response = await client.get(uri)
+    if response.status_code != 200:
+        logging.error(
+            f"TokenlessHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
+        )
+        raise HTTPException(
+            status_code=424,
+            detail=f"TokenlessHandshake: Could not find the artifact fail you should have published in your github action: {uri}",
+        )
+    artifact_contents = response.data
+    if artifact_contents.find(challenge.public_message) and artifact_contents.find(challenge.public_challenge):
+        logging.debug(f"Successful TokenlessHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward.")
+        return True
+    else
+        raise HTTPException(
+            status_code=401,
+            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch."
+        )
