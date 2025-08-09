@@ -2,7 +2,7 @@
 
 import asyncio
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Dict
 import logging
 import uuid
 
@@ -26,6 +26,8 @@ from pydantic import BaseModel
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
 from stream_unzip import stream_unzip
+import zipfile
+import io
 
 from backend.db.db import (
     User,
@@ -457,7 +459,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 @auth_router.post("/github/tokenless/complete")
 async def tokenless_complete(
     session_and_more: TokenlessHandshakeComplete,
-) -> TokenlessChallenge:
+) -> Dict:
     """
     second part
 
@@ -578,7 +580,7 @@ def check_match(log_chunks, randomstr):
     return False
 
 
-async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
+async def validate_public_challenge_STREAM_OFF(challenge: TokenlessChallenge) -> bool:
     i = challenge.claimed_identity
     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
 
@@ -600,17 +602,33 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
 
     return found
 
-    # client = httpx.AsyncClient()
-    # response = await client.get(log_url)
-    # if response.status_code != 200:
-    #     logging.error(
-    #         f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
-    #     )
-    #     raise HTTPException(
-    #         status_code=424,
-    #         detail=f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
-    #     )
-    # log_contents_zipped = response.data
+
+async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
+    i = challenge.claimed_identity
+    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
+
+    found = False
+    client = httpx.AsyncClient()
+    response = await client.get(log_url, headers=HTTP_HEADERS)
+    if response.status_code != 200:
+        logging.error(
+            f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
+        )
+        raise HTTPException(
+            status_code=424,
+            detail=f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
+        )
+    log_contents_zipped = response.data
+    z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
+    print("have z now no need to write to  disk")
+    for filename in z.namelist():
+        print(filename)
+        log = z.read(filename)
+        if check_match(log, challenge.public_challenge):
+            print("FOUND IT FOUND IT")
+            found = True
+
+    return found
 
 
 async def validate_via_artifacts_NOT_USED(challenge: TokenlessChallenge) -> bool:
