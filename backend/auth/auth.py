@@ -512,7 +512,7 @@ async def tokenless_complete(
 
 async def verify_workflow_run(claim: TokenlessClaim):
     client = httpx.AsyncClient()
-    uri = f"https://github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
+    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
     # TODO: We can also support private repos, need to supply our github app token
     # headers={"Authorization": f"Bearer {token['access_token']}"},)
     response = await client.get(uri)
@@ -567,7 +567,7 @@ def create_challenge(claim: TokenlessClaim) -> str:
 
 
 async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
-    artifact_url = f"https://api.github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
+    artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
     response = await client.get(artifact_url)
