@@ -434,7 +434,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
     )
     if session.username not in handshake_ongoing_map:
         handshake_ongoing_map[session.username] = {}
-    if session.client_secret not in handshake_ongoing_map[session.username]:
+    if session.client_secret in handshake_ongoing_map[session.username]:
         raise HTTPException(
             status_code=409,
             detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice.",
