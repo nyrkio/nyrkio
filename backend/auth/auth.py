@@ -609,7 +609,7 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
 
     found = False
     client = httpx.AsyncClient()
-    response = await client.get(log_url, headers=HTTP_HEADERS)
+    response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
     if response.status_code != 200:
         logging.error(
             f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
