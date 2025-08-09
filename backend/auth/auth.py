@@ -446,7 +446,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 
 @auth_router.post("/github/tokenless/complete")
 async def tokenless_complete(
-    session: TokenlessSession, artifact_id: str
+    session: TokenlessSession, artifact_id: int
 ) -> TokenlessChallenge:
     """
     second part
