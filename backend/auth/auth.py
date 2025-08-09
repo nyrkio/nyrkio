@@ -568,6 +568,7 @@ def create_challenge(claim: TokenlessClaim) -> str:
 def zipped_chunks(url):
     # Iterable that yields the bytes of a zip file
     with httpx.stream("GET", url, headers=HTTP_HEADERS) as r:
+        print("yielding chunks from the zip now")
         yield from r.iter_bytes(chunk_size=65536)
 
 
@@ -583,14 +584,17 @@ async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
 
     found = False
     previous_chunk = ""
-    # Each step is a separate text file inside the zip archive
-    for file_name, file_size, unzipped_chunks in stream_unzip(zipped_chunks(log_url)):
-        # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
-        # It's ok, what we are looking for is probably toward the end anyway
-        for chunk in unzipped_chunks:
-            if check_match(previous_chunk + chunk, challenge.public_challenge):
-                found = True
-            previous_chunk = chunk
+    try:
+        # Each step is a separate text file inside the zip archive
+        for file_name, file_size, unzipped_chunks in stream_unzip(zipped_chunks(log_url)):
+            # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
+            # It's ok, what we are looking for is probably toward the end anyway
+            for chunk in unzipped_chunks:
+                if check_match(previous_chunk + chunk, challenge.public_challenge):
+                    found = True
+                previous_chunk = chunk
+    except Exception as any_exception:
+        print(any_exception)
 
     return found
 
