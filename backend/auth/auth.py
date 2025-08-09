@@ -405,9 +405,11 @@ class TokenlessChallenge(BaseModel):
     public_message: str
     claimed_identity: TokenlessClaim
 
+
 class TokenlessHandshakeComplete(BaseModel):
     session: TokenlessSession
     artifact_id: int
+
 
 # TODO: Store in Mongodb some other day ;-)
 handshake_ongoing_map = {}
@@ -449,7 +451,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 
 @auth_router.post("/github/tokenless/complete")
 async def tokenless_complete(
-    session_and_more: TokenlessHandshakeComplete
+    session_and_more: TokenlessHandshakeComplete,
 ) -> TokenlessChallenge:
     """
     second part
