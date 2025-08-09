@@ -25,6 +25,7 @@ from pydantic import BaseModel
 
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
+from stream_unzip import stream_unzip
 
 from backend.db.db import (
     User,
@@ -50,6 +51,9 @@ cookie_transport = CookieTransport(cookie_name=COOKIE_NAME)
 
 SECRET = os.environ.get("SECRET_KEY", "fooba")
 SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
+
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
 
 def get_jwt_strategy() -> JWTStrategy:
@@ -396,6 +400,7 @@ class TokenlessClaim(BaseModel):
     event_name: str
     run_number: int
     run_id: int
+    run_attempt: Optional[int] = None
 
 
 class TokenlessChallenge(BaseModel):
@@ -423,7 +428,7 @@ async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
 
     Note that this is like a login end point, so coming here, user is unknown and unauthenticated
     """
-    await verify_workflow_run(claim)
+    claim.run_attempt = await verify_workflow_run(claim)
     public_challenge, public_message = create_challenge(claim)
     server_secret = create_secret()
     session = TokenlessSession(
@@ -459,22 +464,9 @@ async def tokenless_complete(
     Can't trust the incoming data anymore: Just use the username and client secret
     to lookup and match corresponding server_secret.
 
-    The main task is to verify that the public_challenge is found in the artifact file uploaded by
-    the client who his claiming the identity of, well essentially claiming to be the process running
-    the workflow. We already store the run_id as part of the initial claim, and it is important
-    that we stored and will use it as it was supplied as part of the claim. It is the one piece of
-    information that solid links the client to the running workflow and therefore with eithr the PR
-    author, or repo owner, in the case of a push event.
+    At this point client should have printed public_message into its main log, aka stdout.
+    Our job is to read the log and find the public_challenge in it.
 
-    Note that to read the file, we also need an artifact_id, which is only now being sent to us.
-    We will use it as part of the URL, we have no choice, but note that this id in itself doesn't
-    prove anything about anyone's identity. At this point in time there could already be race
-    conditions from antagonistic clients, who have read the artifact file already and therefore
-    want to pretend they knew the public_challenge, or alternatively, someone might try to
-    submit an artifact_id linked to a completely different file in a different workflow.
-
-    In short, the run_id that was stored from the claim, is the one piece of data that we
-    have to make sure we are reading a file that must have been written by the PR author /repo owner.
     """
     # Note: user is still unauthenticated as handshake isn't co
 
@@ -495,11 +487,11 @@ async def tokenless_complete(
         )
 
     challenge.artifact_id = artifact_id
-    jwt_token = "TODO"
 
     if await validate_public_challenge(challenge):
         # If this user doesn't exist at all, create now
         # Create a new short lived JWT token for this user to use for the rest of the workflow run.
+        jwt_token = "TODO"
 
         return {
             "message": "Tokenless Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
@@ -510,12 +502,16 @@ async def tokenless_complete(
         return {"message": "Shouldn't happen. You should've already received a 401."}
 
 
-async def verify_workflow_run(claim: TokenlessClaim):
+async def verify_workflow_run(claim: TokenlessClaim) -> int:
+    """
+    Verify that a workflow run exists where repo_owner and run_id match what we were given.
+
+    Note: repo_owner isn't necessarily the username we are authenticating.
+    Note: This also checks early that we can read the workflow APIs, e.g. this is not a private repo.
+    """
     client = httpx.AsyncClient()
     uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
-    # TODO: We can also support private repos, need to supply our github app token
-    # headers={"Authorization": f"Bearer {token['access_token']}"},)
-    response = await client.get(uri)
+    response = await client.get(uri, headers=HTTP_HEADERS)
     if response.status_code != 200:
         logging.error(
             f"TokenlessHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
@@ -551,6 +547,9 @@ async def verify_workflow_run(claim: TokenlessClaim):
                 detail=f"TokenlessHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
 
+    # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
+    return workflow["run_attempt"]
+
 
 def create_secret() -> str:
     return str(uuid.uuid4())
@@ -566,11 +565,53 @@ def create_challenge(claim: TokenlessClaim) -> str:
     return randomstr, line1 + line2
 
 
+def zipped_chunks(url):
+    # Iterable that yields the bytes of a zip file
+    with httpx.stream("GET", url, headers=HTTP_HEADERS) as r:
+        yield from r.iter_bytes(chunk_size=65536)
+
+
+def check_match(log_chunks, randomstr):
+    if randomstr in log_chunks:
+        return True
+    return False
+
+
 async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
+    i = challenge.claimed_identity
+    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
+
+    found = False
+    previous_chunk = ""
+    # Each step is a separate text file inside the zip archive
+    for file_name, file_size, unzipped_chunks in stream_unzip(zipped_chunks(log_url)):
+        # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
+        # It's ok, what we are looking for is probably toward the end anyway
+        for chunk in unzipped_chunks:
+            if check_match(previous_chunk + chunk, challenge.public_challenge):
+                found = True
+            previous_chunk = chunk
+
+    return found
+
+    # client = httpx.AsyncClient()
+    # response = await client.get(log_url)
+    # if response.status_code != 200:
+    #     logging.error(
+    #         f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
+    #     )
+    #     raise HTTPException(
+    #         status_code=424,
+    #         detail=f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
+    #     )
+    # log_contents_zipped = response.data
+
+
+async def validate_via_artifacts_NOT_USED(challenge: TokenlessChallenge) -> bool:
     artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
-    response = await client.get(artifact_url)
+    response = await client.get(artifact_url, headers=HTTP_HEADERS)
     if response.status_code != 200:
         logging.error(
             f"TokenlessHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
