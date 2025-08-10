@@ -84,14 +84,14 @@ class ChallengePublishClaim(BaseModel):
 class ChallengePublishChallenge(BaseModel):
     session: ChallengePublishSession
     public_challenge: str
-    artifact_id: Optional[str] = None
+    # artifact_id: Optional[str] = None
     public_message: str
     claimed_identity: ChallengePublishClaim
 
 
 class ChallengePublishHandshakeComplete(BaseModel):
     session: ChallengePublishSession
-    artifact_id: int
+    artifact_id: Optional[int]
 
 
 # TODO: Store in Mongodb some other day ;-)
@@ -135,7 +135,7 @@ async def challenge_publish_claim(
 
 @cph_router.post("/github/complete")
 async def challenge_publish_complete(
-    session: ChallengePublishSession,
+    sessionplus: ChallengePublishHandshakeComplete,
 ) -> Dict:
     """
     second part
@@ -148,6 +148,7 @@ async def challenge_publish_complete(
 
     """
     # Note: user is still unauthenticated as handshake isn't co
+    session = sessionplus.session
 
     if session.username not in handshake_ongoing_map:
         raise HTTPException(
@@ -157,14 +158,14 @@ async def challenge_publish_complete(
     challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
     if challenge is None:
         # Makes it a bit harder to brute force (but doesn't prevent parallellism)
-        #await asyncio.sleep(25)
+        await asyncio.sleep(25)
         raise HTTPException(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
         )
     # Make sure to never reuse the secrets (replay attacks and what have you)
     del handshake_ongoing_map[session.username][session.client_secret]
-    asyncio.sleep(15)
+    await asyncio.sleep(25)
     if await validate_public_challenge(challenge):
         github_username = challenge.session.username
         # This user may be a real / full on user that first created a user account on nyrkio.com
@@ -176,7 +177,6 @@ async def challenge_publish_complete(
             # User doesn't exist at all, create now a lightweight CphUser
             # TODO: For the repo owner...
             user = create_cph_user(github_username, is_repo_owner=False)
-
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
         jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
@@ -236,7 +236,6 @@ async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
                 detail=f"ChallengePublishHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
 
-
     # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
     return workflow["run_attempt"]
 
@@ -293,7 +292,7 @@ async def validate_public_challenge_STREAM_OFF(
     return found
 
 
-async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> bool:
+async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
     i = challenge.claimed_identity
     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
 
@@ -325,7 +324,7 @@ async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> 
     return found
 
 
-async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
+async def validate_via_artifacts_NOT_USED(challenge: ChallengePublishChallenge) -> bool:
     artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
