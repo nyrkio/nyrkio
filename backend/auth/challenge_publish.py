@@ -334,7 +334,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
     artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
-    response = await client.get(artifact_url, headers=HTTP_HEADERS)
+    response = await client.get(artifact_url, headers=HTTP_HEADERS, follow_redirects=True)
     if response.status_code != 200:
         logging.error(
             f"ChallengePublishHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
