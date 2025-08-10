@@ -101,7 +101,7 @@ class ChallengePublishChallenge(BaseModel):
 handshake_ongoing_map = {}
 
 
-@cph_router.post("/challenge_publish/github/claim")
+@cph_router.post("/github/claim")
 async def challenge_publish_claim(
     claim: ChallengePublishClaim,
 ) -> ChallengePublishChallenge:
@@ -136,7 +136,7 @@ async def challenge_publish_claim(
     return challenge
 
 
-@cph_router.post("/challenge_publish/github/complete")
+@cph_router.post("/github/complete")
 async def challenge_publish_complete(
     session: ChallengePublishSession,
 ) -> Dict:
