@@ -84,14 +84,14 @@ class ChallengePublishClaim(BaseModel):
 class ChallengePublishChallenge(BaseModel):
     session: ChallengePublishSession
     public_challenge: str
-    # artifact_id: Optional[str] = None
+    artifact_id: Optional[str] = None
     public_message: str
     claimed_identity: ChallengePublishClaim
 
 
-# class ChallengePublishHandshakeComplete(BaseModel):
-#     session: ChallengePublishSession
-#     artifact_id: int
+class ChallengePublishHandshakeComplete(BaseModel):
+    session: ChallengePublishSession
+    artifact_id: int
 
 
 # TODO: Store in Mongodb some other day ;-)
@@ -157,7 +157,7 @@ async def challenge_publish_complete(
     challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
     if challenge is None:
         # Makes it a bit harder to brute force (but doesn't prevent parallellism)
-        await asyncio.sleep(25)
+        #await asyncio.sleep(25)
         raise HTTPException(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
@@ -293,7 +293,7 @@ async def validate_public_challenge_STREAM_OFF(
     return found
 
 
-async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
+async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> bool:
     i = challenge.claimed_identity
     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
 
@@ -325,7 +325,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
     return found
 
 
-async def validate_via_artifacts_NOT_USED(challenge: ChallengePublishChallenge) -> bool:
+async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
     artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
