@@ -343,7 +343,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
             status_code=424,
             detail=f"ChallengePublishHandshake: Failed to fetch the list of artifact files from GitHub: {artifact_url}",
         )
-    artifact_list = response.data
+    artifact_list = response.json()
     for one_artifact in artifact_list["artifacts"]:
         if one_artifact["id"] == challenge.artifact_id:
             parts = one_artifact["name"].split(".")
