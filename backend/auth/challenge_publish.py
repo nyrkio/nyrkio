@@ -17,6 +17,7 @@ import os
 
 import httpx
 from fastapi import HTTPException, APIRouter, Depends
+from fastapi_users.db import BeanieUserDatabase
 from pydantic import BaseModel
 import zipfile
 import io
@@ -33,7 +34,9 @@ from backend.auth.common import (
 cph_router = APIRouter(prefix="/challenge_publish")
 
 
-async def get_user_by_github_username(github_username: str, user_db: BeanieUserDatabase = Depends(get_user_db)):
+async def get_user_by_github_username(
+    github_username: str, user_db: BeanieUserDatabase = Depends(get_user_db)
+):
     manager = get_user_manager(user_db)
     return await manager.get_by_github_username(github_username)
 
