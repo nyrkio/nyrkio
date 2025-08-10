@@ -157,7 +157,7 @@ async def challenge_publish_complete(
     challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
     if challenge is None:
         # Makes it a bit harder to brute force (but doesn't prevent parallellism)
-        await asyncio.sleep(10)
+        await asyncio.sleep(25)
         raise HTTPException(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
