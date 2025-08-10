@@ -17,7 +17,7 @@ import uuid
 import os
 
 import httpx
-from fastapi import HTTPException
+from fastapi import HTTPException, APIRouter
 from fastapi_users.db import BeanieUserDatabase
 from pydantic import BaseModel
 from stream_unzip import stream_unzip
@@ -31,7 +31,6 @@ from backend.db.db import (
 )
 
 from backend.auth.common import (
-    auth_router,
     get_user_manager,
     UserManager,
     jwt_backend,
@@ -41,6 +40,8 @@ from backend.auth.common import (
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+
+cph_router = APIRouter(prefix="/challenge_publish")
 
 
 async def get_user_by_github_username(github_username: str):
@@ -100,7 +101,7 @@ class ChallengePublishChallenge(BaseModel):
 handshake_ongoing_map = {}
 
 
-@auth_router.post("/challenge_publish/github/claim")
+@cph_router.post("/challenge_publish/github/claim")
 async def challenge_publish_claim(
     claim: ChallengePublishClaim,
 ) -> ChallengePublishChallenge:
@@ -135,7 +136,7 @@ async def challenge_publish_claim(
     return challenge
 
 
-@auth_router.post("/challenge_publish/github/complete")
+@cph_router.post("/challenge_publish/github/complete")
 async def challenge_publish_complete(
     session: ChallengePublishSession,
 ) -> Dict:

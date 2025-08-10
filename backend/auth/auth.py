@@ -8,7 +8,7 @@ import uuid
 import httpx
 
 # from fastapi import Depends, APIRouter, Request, HTTPException, status
-from fastapi import Depends, Request, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status, APIRouter
 from fastapi.responses import RedirectResponse
 from fastapi_users import BaseUserManager, FastAPIUsers, models, exceptions, schemas
 from fastapi_users.db import BeanieUserDatabase
@@ -36,7 +36,6 @@ from backend.auth.github import github_oauth
 from backend.auth.superuser import SuperuserStrategy
 
 from backend.auth.common import (
-    auth_router,
     UserManager,
     get_user_manager,
     jwt_backend,
@@ -60,6 +59,8 @@ cookie_backend = AuthenticationBackend(
     transport=cookie_transport,
     get_strategy=get_jwt_strategy,
 )
+
+auth_router = APIRouter(prefix="/auth")
 
 
 def get_superuser_strategy() -> SuperuserStrategy:

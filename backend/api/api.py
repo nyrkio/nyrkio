@@ -7,8 +7,8 @@ import sys
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 
-from backend.auth import common
 from backend.auth import auth
+from backend.auth import challenge_publish
 from backend.api.admin import admin_router
 from backend.api.billing import billing_router
 from backend.api.changes import calc_changes
@@ -318,7 +318,8 @@ async def default_changes(test_name: str):
 
 # Must come at the end, once we've setup all the routes
 app.include_router(api_router, prefix="/api/v0")
-app.include_router(common.auth_router, prefix="/api/v0")
+app.include_router(auth.auth_router, prefix="/api/v0")
+app.include_router(challenge_publish.cph_router, prefix="/api/v0")
 app.include_router(user_router, prefix="/api/v0")
 app.include_router(admin_router, prefix="/api/v0")
 app.include_router(config_router, prefix="/api/v0")
