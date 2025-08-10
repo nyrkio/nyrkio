@@ -32,7 +32,6 @@ from backend.auth.common import (
 )
 
 
-
 cph_router = APIRouter(prefix="/challenge_publish")
 
 
@@ -293,6 +292,7 @@ def check_match(log_chunks, randomstr):
 #     return found
 #
 
+
 async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> bool:
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
     HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
@@ -334,7 +334,9 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
     artifact_url = f"https://api.github.com/repos/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
-    response = await client.get(artifact_url, headers=HTTP_HEADERS, follow_redirects=True)
+    response = await client.get(
+        artifact_url, headers=HTTP_HEADERS, follow_redirects=True
+    )
     if response.status_code != 200:
         logging.error(
             f"ChallengePublishHandshake: Failed to fetch the list of artifact files from GitHub: {response.status_code}: {response.text}"
@@ -347,7 +349,11 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
     for one_artifact in artifact_list["artifacts"]:
         if one_artifact["id"] == challenge.artifact_id:
             parts = one_artifact["name"].split(".")
-            if len(parts) == 2 and parts[0] == "ChallengePublishHandshake" and parts[1] == challenge.public_challenge:
+            if (
+                len(parts) == 2
+                and parts[0] == "ChallengePublishHandshake"
+                and parts[1] == challenge.public_challenge
+            ):
                 # FOUND IT!
                 # Note we put the challenge in the artifact name already, no need to get the contents...
                 return True
