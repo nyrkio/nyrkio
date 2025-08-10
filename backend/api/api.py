@@ -7,7 +7,7 @@ import sys
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 
-from backend.auth import auth
+from backend.auth import common as auth
 from backend.api.admin import admin_router
 from backend.api.billing import billing_router
 from backend.api.changes import calc_changes
