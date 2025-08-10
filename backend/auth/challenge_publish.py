@@ -23,9 +23,10 @@ from pydantic import BaseModel
 import zipfile
 import io
 
-from backend.db.db import UserCreate, get_user_db
+from backend.db.db import UserCreate, NyrkioUserDatabase
 
 from backend.auth.common import (
+    UserManager,
     get_user_manager,
     jwt_backend,
     get_jwt_strategy,
@@ -36,12 +37,9 @@ cph_router = APIRouter(prefix="/challenge_publish")
 
 
 async def get_user_by_github_username(
-    github_username: str, user_db: Annotated[BeanieUserDatabase, Depends(get_user_db)]
+    github_username: str
 ):
-    import pprint
-
-    pprint.pprint(user_db)
-    manager = get_user_manager(user_db)
+    manager = UserManager(NyrkioUserDatabase())
     return await manager.get_by_github_username(github_username)
 
 
