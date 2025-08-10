@@ -36,7 +36,7 @@ cph_router = APIRouter(prefix="/challenge_publish")
 
 
 async def get_user_by_github_username(github_username: str):
-    manager = get_user_manager()
+    manager = get_user_manager(get_user_db())
     return await manager.get_by_github_username(github_username)
 
 
