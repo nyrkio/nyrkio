@@ -58,9 +58,9 @@ class ChallengePublishChallenge(BaseModel):
     claimed_identity: ChallengePublishClaim
 
 
-class ChallengePublishHandshakeComplete(BaseModel):
-    session: ChallengePublishSession
-    artifact_id: int
+# class ChallengePublishHandshakeComplete(BaseModel):
+#     session: ChallengePublishSession
+#     artifact_id: int
 
 
 # TODO: Store in Mongodb some other day ;-)
@@ -104,7 +104,7 @@ async def challenge_publish_claim(
 
 @auth_router.post("/challenge_publish/github/complete")
 async def challenge_publish_complete(
-    session_and_more: ChallengePublishSession,
+    session: ChallengePublishSession,
 ) -> Dict:
     """
     second part
@@ -117,9 +117,6 @@ async def challenge_publish_complete(
 
     """
     # Note: user is still unauthenticated as handshake isn't co
-
-    session = session_and_more.session
-    artifact_id = session_and_more.artifact_id
 
     if session.username not in handshake_ongoing_map:
         raise HTTPException(
@@ -134,8 +131,6 @@ async def challenge_publish_complete(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
         )
-
-    challenge.artifact_id = artifact_id
 
     if await validate_public_challenge(challenge):
         # If this user doesn't exist at all, create now
