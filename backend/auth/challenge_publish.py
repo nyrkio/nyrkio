@@ -330,28 +330,29 @@ async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> 
 async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
     HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
-    artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
+    # https://api.github.com/repos/henrikingo/change-detection/actions/runs/16852427913/artifacts
+    artifact_url = f"https://api.github.com/repos/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
     response = await client.get(artifact_url, headers=HTTP_HEADERS, follow_redirects=True)
     if response.status_code != 200:
         logging.error(
-            f"ChallengePublishHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
+            f"ChallengePublishHandshake: Failed to fetch the list of artifact files from GitHub: {response.status_code}: {response.text}"
         )
         raise HTTPException(
             status_code=424,
-            detail=f"ChallengePublishHandshake: Could not find the artifact file you should have published in your github action: {artifact_url}",
+            detail=f"ChallengePublishHandshake: Failed to fetch the list of artifact files from GitHub: {artifact_url}",
         )
-    artifact_contents = response.data
-    if artifact_contents.find(challenge.public_message) and artifact_contents.find(
-        challenge.public_challenge
-    ):
-        logging.debug(
-            f"Successful ChallengePublishHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward."
-        )
-        return True
-    else:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch.",
-        )
+    artifact_list = response.data
+    for one_artifact in artifact_list["artifacts"]:
+        if one_artifact["id"] == challenge.artifact_id:
+            parts = one_artifact["name"].split(".")
+            if len(parts) == 2 and parts[0] == "ChallengePublishHandshake" and parts[1] == challenge.public_challenge:
+                # FOUND IT!
+                # Note we put the challenge in the artifact name already, no need to get the contents...
+                return True
+
+    raise HTTPException(
+        status_code=401,
+        detail=f"Didn't find the public_challenge {challenge.public_challenge} in any of the artifacts for your workflow run: {artifact_url}",
+    )
