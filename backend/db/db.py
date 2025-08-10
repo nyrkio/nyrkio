@@ -64,7 +64,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         if res:
             return User(**res)
 
-        res = await self.User.find_many(
+        res = await self.User.find(
             {"oauth_accounts.organizations.user.login": github_username}
         ).to_list()
 
