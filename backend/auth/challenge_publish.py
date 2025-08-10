@@ -18,7 +18,6 @@ import os
 import httpx
 from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
-from stream_unzip import stream_unzip
 import zipfile
 import io
 
@@ -254,13 +253,13 @@ def create_challenge(claim: ChallengePublishClaim) -> str:
     return randomstr, line1 + line2
 
 
-def zipped_chunks(url):
-    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
-    HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
-    # Iterable that yields the bytes of a zip file
-    with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
-        print("yielding chunks from the zip now")
-        yield from r.iter_bytes(chunk_size=65536)
+# def zipped_chunks(url):
+#     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+#     HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+#     # Iterable that yields the bytes of a zip file
+#     with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
+#         print("yielding chunks from the zip now")
+#         yield from r.iter_bytes(chunk_size=65536)
 
 
 def check_match(log_chunks, randomstr):
@@ -269,30 +268,30 @@ def check_match(log_chunks, randomstr):
     return False
 
 
-async def validate_public_challenge_STREAM_OFF(
-    challenge: ChallengePublishChallenge,
-) -> bool:
-    i = challenge.claimed_identity
-    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
-
-    found = False
-    previous_chunk = ""
-    try:
-        # Each step is a separate text file inside the zip archive
-        for file_name, file_size, unzipped_chunks in stream_unzip(
-            zipped_chunks(log_url)
-        ):
-            # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
-            # It's ok, what we are looking for is probably toward the end anyway
-            for chunk in unzipped_chunks:
-                if check_match(previous_chunk + chunk, challenge.public_challenge):
-                    found = True
-                previous_chunk = chunk
-    except Exception as any_exception:
-        print(any_exception)
-
-    return found
-
+# async def validate_public_challenge_STREAM_OFF(
+#     challenge: ChallengePublishChallenge,
+# ) -> bool:
+#     i = challenge.claimed_identity
+#     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
+#
+#     found = False
+#     previous_chunk = ""
+#     try:
+#         # Each step is a separate text file inside the zip archive
+#         for file_name, file_size, unzipped_chunks in stream_unzip(
+#             zipped_chunks(log_url)
+#         ):
+#             # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
+#             # It's ok, what we are looking for is probably toward the end anyway
+#             for chunk in unzipped_chunks:
+#                 if check_match(previous_chunk + chunk, challenge.public_challenge):
+#                     found = True
+#                 previous_chunk = chunk
+#     except Exception as any_exception:
+#         print(any_exception)
+#
+#     return found
+#
 
 async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> bool:
     GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
