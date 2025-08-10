@@ -21,9 +21,7 @@ from pydantic import BaseModel
 import zipfile
 import io
 
-from backend.db.db import (
-    UserCreate,
-)
+from backend.db.db import UserCreate, get_user_db
 
 from backend.auth.common import (
     get_user_manager,
