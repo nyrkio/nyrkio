@@ -10,7 +10,6 @@ When the action prints this challenge into its log, this is observed by the nyrk
 the connection was indeed iniitiated by the code running that specific workflow, triggered by the github user
 that is associated with the workflow run in numerous json files returned by github.
 """
-import asyncio
 from typing import Optional, Dict
 import logging
 import uuid
@@ -149,7 +148,6 @@ async def challenge_publish_complete(
     """
     # Note: user is still unauthenticated as handshake isn't co
     session = sessionplus.session
-    challenge.artifact_id = sessionplus.artifact_id
 
     if session.username not in handshake_ongoing_map:
         raise HTTPException(
@@ -159,13 +157,14 @@ async def challenge_publish_complete(
     challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
     if challenge is None:
         # Makes it a bit harder to brute force (but doesn't prevent parallellism)
-        #await asyncio.sleep(25)
+        # await asyncio.sleep(25)
         raise HTTPException(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
         )
     # Make sure to never reuse the secrets (replay attacks and what have you)
     del handshake_ongoing_map[session.username][session.client_secret]
+    challenge.artifact_id = sessionplus.artifact_id
 
     if await validate_public_challenge(challenge):
         github_username = challenge.session.username
@@ -178,7 +177,6 @@ async def challenge_publish_complete(
             # User doesn't exist at all, create now a lightweight CphUser
             # TODO: For the repo owner...
             user = create_cph_user(github_username, is_repo_owner=False)
-
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
         jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
@@ -237,7 +235,6 @@ async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
                 status_code=401,
                 detail=f"ChallengePublishHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
-
 
     # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
     return workflow["run_attempt"]
