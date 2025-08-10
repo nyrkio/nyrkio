@@ -62,14 +62,14 @@ class NyrkioUserDatabase(BeanieUserDatabase):
     async def get_by_github_username(self, github_username: str):
         res = self.User.find_one({github_username: github_username})
         if res:
-            return User(res)
+            return User(**res)
 
         res = self.User.find_many(
             {"oauth_accounts.organizations.user.login": github_username}
         ).to_list()
 
         if len(res) == 1:
-            return User(res)
+            return User(**res)
 
         if len(res) > 1:
             raise DBStoreMultipleResults(
