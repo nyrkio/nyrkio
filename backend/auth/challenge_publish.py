@@ -167,19 +167,19 @@ async def challenge_publish_complete(
 
     if await validate_public_challenge(challenge):
         github_username = challenge.session.username
+        # This user may be a real / full on user that first created a user account on nyrkio.com
+        # Or it may be a CPH user that never visited nyrkio.com in person
+        # We use user.is_cph_user and user.is_repo_owner to restrict some functionality appropriately
+        # TODO: also restrict `user.is_cph_user and user.is_admin`
         user = get_user_by_github_username(github_username)
-        if user:
-            # This user may be a real / full on user that first created a user account on nyrkio.com
-            # Or it may be a CPH user that never visited nyrkio.com in person
-            # We use user.is_cph_user and user.is_repo_owner to restrict some functionality appropriately
-            # TODO: also restrict `user.is_cph_user and user.is_admin`
-
-            # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
-            jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
-        else:
+        if not user:
             # User doesn't exist at all, create now a lightweight CphUser
             # TODO: For the repo owner...
-            create_cph_user(github_username, is_repo_owner=False)
+            user = create_cph_user(github_username, is_repo_owner=False)
+
+
+        # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
+        jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
@@ -188,8 +188,8 @@ async def challenge_publish_complete(
         }
     else:
         raise HTTPException(
-            status_code=500,
-            detail="Shouldn't happen. You should've already received a 401.",
+            status_code=401,
+            detail="Didn't find the challenge in your log output. Challenge Publish Handshake failed!",
         )
 
 
