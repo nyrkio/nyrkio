@@ -169,11 +169,11 @@ async def challenge_publish_complete(
         # Or it may be a CPH user that never visited nyrkio.com in person
         # We use user.is_cph_user and user.is_repo_owner to restrict some functionality appropriately
         # TODO: also restrict `user.is_cph_user and user.is_admin`
-        user = get_user_by_github_username(github_username)
+        user = await get_user_by_github_username(github_username)
         if not user:
             # User doesn't exist at all, create now a lightweight CphUser
             # TODO: For the repo owner...
-            user = create_cph_user(github_username, is_repo_owner=False)
+            user = await create_cph_user(github_username, is_repo_owner=False)
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
         jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
