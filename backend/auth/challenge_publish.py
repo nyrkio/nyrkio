@@ -18,21 +18,17 @@ import os
 
 import httpx
 from fastapi import HTTPException, APIRouter
-from fastapi_users.db import BeanieUserDatabase
 from pydantic import BaseModel
 from stream_unzip import stream_unzip
 import zipfile
 import io
 
 from backend.db.db import (
-    User,
     UserCreate,
-    OAuthAccount,
 )
 
 from backend.auth.common import (
     get_user_manager,
-    UserManager,
     jwt_backend,
     get_jwt_strategy,
 )
@@ -52,6 +48,7 @@ async def get_user_by_github_username(github_username: str):
 async def create_cph_user(github_username: str, is_repo_owner: bool = False):
     manager = get_user_manager()
     user = UserCreate(
+        github_username=github_username,
         email=f"{github_username}@ChallengeResponseHandshake.github.nyrkio.com",
         password=uuid.uuid4(),
         is_active=True,
@@ -181,8 +178,8 @@ async def challenge_publish_complete(
             jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
         else:
             # User doesn't exist at all, create now a lightweight CphUser
-            manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
-            return await manager.create(user)
+            # TODO: For the repo owner...
+            create_cph_user(github_username, is_repo_owner=False)
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
@@ -190,7 +187,10 @@ async def challenge_publish_complete(
             "jwt_token": jwt_token,
         }
     else:
-        return {"message": "Shouldn't happen. You should've already received a 401."}
+        raise HTTPException(
+            status_code=500,
+            detail="Shouldn't happen. You should've already received a 401.",
+        )
 
 
 async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
