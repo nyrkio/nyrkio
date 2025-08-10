@@ -17,16 +17,49 @@ import uuid
 import os
 
 import httpx
-from fastapi import APIRouter, HTTPException
+from fastapi import HTTPException
+from fastapi_users.db import BeanieUserDatabase
 from pydantic import BaseModel
 from stream_unzip import stream_unzip
 import zipfile
 import io
 
-# from backend.auth.auth import auth_router
-auth_router = APIRouter(prefix="/auth")
+from backend.db.db import (
+    User,
+    UserCreate,
+    OAuthAccount,
+)
+
+from backend.auth.common import (
+    auth_router,
+    get_user_manager,
+    UserManager,
+    jwt_backend,
+    get_jwt_strategy,
+)
+
+
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+
+
+async def get_user_by_github_username(github_username: str):
+    manager = get_user_manager()
+    return await manager.get_by_github_username(github_username)
+
+
+async def create_cph_user(github_username: str, is_repo_owner: bool = False):
+    manager = get_user_manager()
+    user = UserCreate(
+        email=f"{github_username}@ChallengeResponseHandshake.github.nyrkio.com",
+        password=uuid.uuid4(),
+        is_active=True,
+        is_verified=True,
+        is_cph_user=True,
+        is_repo_owner=is_repo_owner,
+    )
+
+    return await manager.create(user)
 
 
 class ChallengePublishSession(BaseModel):
@@ -131,11 +164,24 @@ async def challenge_publish_complete(
             status_code=401,
             detail="ChallengePublish handshake failed: wrong client_secret",
         )
+    # Make sure to never reuse the secrets (replay attacks and what have you)
+    del handshake_ongoing_map[session.username][session.client_secret]
 
     if await validate_public_challenge(challenge):
-        # If this user doesn't exist at all, create now
-        # Create a new short lived JWT token for this user to use for the rest of the workflow run.
-        jwt_token = "TODO"
+        github_username = challenge.session.username
+        user = get_user_by_github_username(github_username)
+        if user:
+            # This user may be a real / full on user that first created a user account on nyrkio.com
+            # Or it may be a CPH user that never visited nyrkio.com in person
+            # We use user.is_cph_user and user.is_repo_owner to restrict some functionality appropriately
+            # TODO: also restrict `user.is_cph_user and user.is_admin`
+
+            # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
+            jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
+        else:
+            # User doesn't exist at all, create now a lightweight CphUser
+            manager = UserManager(BeanieUserDatabase(User, OAuthAccount))
+            return await manager.create(user)
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
@@ -263,12 +309,13 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
         )
     log_contents_zipped = response.content
     z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
-    print("have z now no need to write to  disk")
     for filename in z.namelist():
         print(filename)
         log = z.read(filename)
         if check_match(log, challenge_as_bytes):
-            print("FOUND IT FOUND IT")
+            logging.info(
+                f"Challenge Publish Handshake: Found the public_challenge for {i.username} in {filename} of {log_url}(.zip)"
+            )
             found = True
 
     return found

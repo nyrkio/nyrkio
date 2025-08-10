@@ -1,23 +1,20 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
 import os
-from typing import Optional, Tuple
+from typing import Tuple
 import logging
 import uuid
 
 import httpx
-from beanie import PydanticObjectId
 
 # from fastapi import Depends, APIRouter, Request, HTTPException, status
 from fastapi import Depends, Request, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi_users import BaseUserManager, FastAPIUsers, models, exceptions, schemas
-from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
+from fastapi_users.db import BeanieUserDatabase
 from fastapi_users.authentication import (
     AuthenticationBackend,
-    BearerTransport,
     CookieTransport,
-    JWTStrategy,
 )
 from fastapi_users.exceptions import UserAlreadyExists
 from fastapi_users.router.common import ErrorCode
@@ -29,7 +26,6 @@ from httpx_oauth.oauth2 import OAuth2Token
 
 from backend.db.db import (
     User,
-    get_user_db,
     UserRead,
     UserCreate,
     DBStore,
@@ -37,17 +33,18 @@ from backend.db.db import (
     OAuthAccount,
 )
 from backend.auth.github import github_oauth
-from backend.auth.email import send_email, read_template_file
 from backend.auth.superuser import SuperuserStrategy
 
-from backend.auth.challenge_publish import auth_router
+from backend.auth.common import (
+    auth_router,
+    UserManager,
+    get_user_manager,
+    jwt_backend,
+    get_jwt_strategy,
+    bearer_transport,
+)
 
 
-async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
-    yield UserManager(user_db)
-
-
-bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")
 COOKIE_NAME = "auth_cookie"
 cookie_transport = CookieTransport(cookie_name=COOKIE_NAME)
 
@@ -57,16 +54,6 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
-
-def get_jwt_strategy() -> JWTStrategy:
-    return JWTStrategy(secret=SECRET, lifetime_seconds=None)
-
-
-jwt_backend = AuthenticationBackend(
-    name="jwt",
-    transport=bearer_transport,
-    get_strategy=get_jwt_strategy,
-)
 
 cookie_backend = AuthenticationBackend(
     name="cookie",
@@ -165,7 +152,7 @@ async def verify_email(
         )
     except exceptions.UserAlreadyVerified:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_409_CONFLICT,
             detail=ErrorCode.VERIFY_USER_ALREADY_VERIFIED,
         )
 
@@ -280,29 +267,6 @@ async def github_callback(
     response = RedirectResponse("/login?gh_login=success&username=" + user.email)
     response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
     return response
-
-
-class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
-    reset_password_token_secret = SECRET
-    verification_token_secret = SECRET
-
-    async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
-        store = DBStore()
-        await store.add_default_data(user)
-
-    async def on_after_forgot_password(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
-
-    async def on_after_request_verify(
-        self, user: User, token: str, request: Optional[Request] = None
-    ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
-        verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
-        msg = read_template_file("verify-email.html", verify_url=verify_url)
-        await send_email(user.email, token, "Verify your email", msg)
 
 
 class SlackCode(BaseModel):
