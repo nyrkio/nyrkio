@@ -135,7 +135,7 @@ async def challenge_publish_claim(
 
 @cph_router.post("/github/complete")
 async def challenge_publish_complete(
-    session: ChallengePublishSession,
+    sessionplus: ChallengePublishHandshakeComplete,
 ) -> Dict:
     """
     second part
@@ -148,6 +148,8 @@ async def challenge_publish_complete(
 
     """
     # Note: user is still unauthenticated as handshake isn't co
+    session = sessionplus.session
+    challenge.artifact_id = sessionplus.artifact_id
 
     if session.username not in handshake_ongoing_map:
         raise HTTPException(
@@ -164,7 +166,7 @@ async def challenge_publish_complete(
         )
     # Make sure to never reuse the secrets (replay attacks and what have you)
     del handshake_ongoing_map[session.username][session.client_secret]
-    asyncio.sleep(15)
+
     if await validate_public_challenge(challenge):
         github_username = challenge.session.username
         # This user may be a real / full on user that first created a user account on nyrkio.com
