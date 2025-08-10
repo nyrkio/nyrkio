@@ -48,6 +48,9 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         msg = read_template_file("verify-email.html", verify_url=verify_url)
         await send_email(user.email, token, "Verify your email", msg)
 
+    async def get_by_github_username(self, github_username: str):
+        return await self.user_db.get_by_github_username(github_username)
+
 
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=None)

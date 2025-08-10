@@ -11,14 +11,12 @@ the connection was indeed iniitiated by the code running that specific workflow,
 that is associated with the workflow run in numerous json files returned by github.
 """
 from typing import Optional, Dict
-from typing_extensions import Annotated
 import logging
 import uuid
 import os
 
 import httpx
-from fastapi import HTTPException, APIRouter, Depends
-from fastapi_users.db import BeanieUserDatabase
+from fastapi import HTTPException, APIRouter
 from pydantic import BaseModel
 import zipfile
 import io
@@ -36,9 +34,7 @@ from backend.auth.common import (
 cph_router = APIRouter(prefix="/challenge_publish")
 
 
-async def get_user_by_github_username(
-    github_username: str
-):
+async def get_user_by_github_username(github_username: str):
     manager = UserManager(NyrkioUserDatabase())
     return await manager.get_by_github_username(github_username)
 
