@@ -1,0 +1,307 @@
+"""
+Challenge Publish Handshake
+
+We want to allow any logged in Github user use Nyrkiö with zero effort needed to subscribe or register to anything.
+
+At the start of a GitHub action, the action code running at github.com initiates a handshake protocol with
+nyrkio.com. It claims to be a certain github username. The nyrkio.com side verifies that such a workflow is
+currently running and was triggered by the given username. nyrkio.com then returns  a random string to the action.
+When the action prints this challenge into its log, this is observed by the nyrkio.com side. This proves that
+the connection was indeed iniitiated by the code running that specific workflow, triggered by the github user
+that is associated with the workflow run in numerous json files returned by github.
+"""
+import asyncio
+from typing import Optional, Dict
+import logging
+import uuid
+import os
+
+import httpx
+from fastapi import APIRouter, HTTPException
+from pydantic import BaseModel
+from stream_unzip import stream_unzip
+import zipfile
+import io
+
+# from backend.auth.auth import auth_router
+auth_router = APIRouter(prefix="/auth")
+GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+
+
+class ChallengePublishSession(BaseModel):
+    username: str
+    client_secret: str
+    server_secret: str
+
+
+class ChallengePublishClaim(BaseModel):
+    username: str
+    client_secret: str
+
+    repo_owner: str
+    repo_name: str
+    repo_owner_email: Optional[str] = None
+    repo_owner_full_name: Optional[str] = None
+    workflow_name: str
+    event_name: str
+    run_number: int
+    run_id: int
+    run_attempt: Optional[int] = None
+
+
+class ChallengePublishChallenge(BaseModel):
+    session: ChallengePublishSession
+    public_challenge: str
+    artifact_id: Optional[str] = None
+    public_message: str
+    claimed_identity: ChallengePublishClaim
+
+
+class ChallengePublishHandshakeComplete(BaseModel):
+    session: ChallengePublishSession
+    artifact_id: int
+
+
+# TODO: Store in Mongodb some other day ;-)
+handshake_ongoing_map = {}
+
+
+@auth_router.post("/challenge_publish/github/claim")
+async def challenge_publish_claim(
+    claim: ChallengePublishClaim,
+) -> ChallengePublishChallenge:
+    """
+    First part of a "ChallengePublish Github Action Authentication Handshake".
+
+    Note that this is like a login end point, so coming here, user is unknown and unauthenticated
+    """
+    claim.run_attempt = await verify_workflow_run(claim)
+    public_challenge, public_message = create_challenge(claim)
+    server_secret = create_secret()
+    session = ChallengePublishSession(
+        username=claim.username,
+        client_secret=claim.client_secret,
+        server_secret=server_secret,
+    )
+    challenge = ChallengePublishChallenge(
+        session=session,
+        public_challenge=public_challenge,
+        public_message=public_message,
+        claimed_identity=claim,
+    )
+    if session.username not in handshake_ongoing_map:
+        handshake_ongoing_map[session.username] = {}
+    if session.client_secret in handshake_ongoing_map[session.username]:
+        raise HTTPException(
+            status_code=409,
+            detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice.",
+        )
+    handshake_ongoing_map[session.username][session.client_secret] = challenge
+
+    return challenge
+
+
+@auth_router.post("/challenge_publish/github/complete")
+async def challenge_publish_complete(
+    session_and_more: ChallengePublishHandshakeComplete,
+) -> Dict:
+    """
+    second part
+
+    Can't trust the incoming data anymore: Just use the username and client secret
+    to lookup and match corresponding server_secret.
+
+    At this point client should have printed public_message into its main log, aka stdout.
+    Our job is to read the log and find the public_challenge in it.
+
+    """
+    # Note: user is still unauthenticated as handshake isn't co
+
+    session = session_and_more.session
+    artifact_id = session_and_more.artifact_id
+
+    if session.username not in handshake_ongoing_map:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Username {session.username} doesn't have any ChallengePublish handshakes ongoing.",
+        )
+    challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
+    if challenge is None:
+        # Makes it a bit harder to brute force (but doesn't prevent parallellism)
+        await asyncio.sleep(10)
+        raise HTTPException(
+            status_code=401,
+            detail="ChallengePublish handshake failed: wrong client_secret",
+        )
+
+    challenge.artifact_id = artifact_id
+
+    if await validate_public_challenge(challenge):
+        # If this user doesn't exist at all, create now
+        # Create a new short lived JWT token for this user to use for the rest of the workflow run.
+        jwt_token = "TODO"
+
+        return {
+            "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
+            "github_username": challenge.session.username,
+            "jwt_token": jwt_token,
+        }
+    else:
+        return {"message": "Shouldn't happen. You should've already received a 401."}
+
+
+async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
+    """
+    Verify that a workflow run exists where repo_owner and run_id match what we were given.
+
+    Note: repo_owner isn't necessarily the username we are authenticating.
+    Note: This also checks early that we can read the workflow APIs, e.g. this is not a private repo.
+    """
+    client = httpx.AsyncClient()
+    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
+    response = await client.get(uri, headers=HTTP_HEADERS)
+    if response.status_code != 200:
+        logging.error(
+            f"ChallengePublishHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
+        )
+        logging.error(dict(claim))
+        raise HTTPException(
+            status_code=424,
+            detail=f"ChallengePublishHandshake: Could not find the Github workflow you claim to be running: {uri}",
+        )
+    # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
+    workflow = response.json()
+    if workflow["event"] == "pull_request":
+        workflow_username = workflow["actor"]["login"]
+        if workflow_username != claim.username:
+            logging.error(
+                f"ChallengePublishHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+            )
+            raise HTTPException(
+                status_code=401,
+                detail=f"ChallengePublishHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+            )
+
+    if workflow["event"] == "push":
+        workflow_username = workflow["repository"]["owner"]["login"]
+        if workflow_username != claim.username:
+            logging.error(
+                f"ChallengePublishHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
+            )
+            raise HTTPException(
+                status_code=401,
+                detail=f"ChallengePublishHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
+            )
+
+    # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
+    return workflow["run_attempt"]
+
+
+def create_secret() -> str:
+    return str(uuid.uuid4())
+
+
+def create_challenge(claim: ChallengePublishClaim) -> str:
+    randomstr = str(uuid.uuid4())
+    workflowstr = f"/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
+
+    line1 = "ChallengePublishHandshake between github.com and nyrkio.com:\n"
+    line2 = f"I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
+
+    return randomstr, line1 + line2
+
+
+def zipped_chunks(url):
+    # Iterable that yields the bytes of a zip file
+    with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
+        print("yielding chunks from the zip now")
+        yield from r.iter_bytes(chunk_size=65536)
+
+
+def check_match(log_chunks, randomstr):
+    if randomstr in log_chunks:
+        return True
+    return False
+
+
+async def validate_public_challenge_STREAM_OFF(
+    challenge: ChallengePublishChallenge,
+) -> bool:
+    i = challenge.claimed_identity
+    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
+
+    found = False
+    previous_chunk = ""
+    try:
+        # Each step is a separate text file inside the zip archive
+        for file_name, file_size, unzipped_chunks in stream_unzip(
+            zipped_chunks(log_url)
+        ):
+            # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
+            # It's ok, what we are looking for is probably toward the end anyway
+            for chunk in unzipped_chunks:
+                if check_match(previous_chunk + chunk, challenge.public_challenge):
+                    found = True
+                previous_chunk = chunk
+    except Exception as any_exception:
+        print(any_exception)
+
+    return found
+
+
+async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
+    i = challenge.claimed_identity
+    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
+
+    challenge_as_bytes = challenge.public_challenge.encode("utf-8")
+    found = False
+    client = httpx.AsyncClient()
+    response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
+    if response.status_code != 200:
+        logging.error(
+            f"ChallengePublishHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
+        )
+        raise HTTPException(
+            status_code=424,
+            detail=f"ChallengePublishHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
+        )
+    log_contents_zipped = response.content
+    z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
+    print("have z now no need to write to  disk")
+    for filename in z.namelist():
+        print(filename)
+        log = z.read(filename)
+        if check_match(log, challenge_as_bytes):
+            print("FOUND IT FOUND IT")
+            found = True
+
+    return found
+
+
+async def validate_via_artifacts_NOT_USED(challenge: ChallengePublishChallenge) -> bool:
+    artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
+    logging.info(f"GET: {artifact_url}")
+    client = httpx.AsyncClient()
+    response = await client.get(artifact_url, headers=HTTP_HEADERS)
+    if response.status_code != 200:
+        logging.error(
+            f"ChallengePublishHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
+        )
+        raise HTTPException(
+            status_code=424,
+            detail=f"ChallengePublishHandshake: Could not find the artifact fail you should have published in your github action: {artifact_url}",
+        )
+    artifact_contents = response.data
+    if artifact_contents.find(challenge.public_message) and artifact_contents.find(
+        challenge.public_challenge
+    ):
+        logging.debug(
+            f"Successful ChallengePublishHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward."
+        )
+        return True
+    else:
+        raise HTTPException(
+            status_code=401,
+            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch.",
+        )

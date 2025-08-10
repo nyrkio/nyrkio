@@ -1,14 +1,15 @@
 # Copyright (c) 2024, Nyrkiö Oy
 
-import asyncio
 import os
-from typing import Optional, Tuple, Dict
+from typing import Optional, Tuple
 import logging
 import uuid
 
 import httpx
 from beanie import PydanticObjectId
-from fastapi import Depends, APIRouter, Request, HTTPException, status
+
+# from fastapi import Depends, APIRouter, Request, HTTPException, status
+from fastapi import Depends, Request, HTTPException, status
 from fastapi.responses import RedirectResponse
 from fastapi_users import BaseUserManager, FastAPIUsers, models, exceptions, schemas
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
@@ -25,9 +26,6 @@ from pydantic import BaseModel
 
 from httpx_oauth.integrations.fastapi import OAuth2AuthorizeCallback
 from httpx_oauth.oauth2 import OAuth2Token
-from stream_unzip import stream_unzip
-import zipfile
-import io
 
 from backend.db.db import (
     User,
@@ -41,6 +39,8 @@ from backend.db.db import (
 from backend.auth.github import github_oauth
 from backend.auth.email import send_email, read_template_file
 from backend.auth.superuser import SuperuserStrategy
+
+from backend.auth.challenge_publish import auth_router
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
@@ -94,7 +94,9 @@ fastapi_users = FastAPIUsers[User, uuid.UUID](
 # localhost and staging and prod. (Probably need 3 separate app registrations?)
 # REDIRECT_URI = SERVER_NAME + "/api/v0/auth/github/mycallback"
 REDIRECT_URI = "https://nyrkio.com/api/v0/auth/github/mycallback"
-auth_router = APIRouter(prefix="/auth")
+
+
+# auth_router = APIRouter(prefix="/auth")
 auth_router.include_router(
     fastapi_users.get_oauth_router(
         github_oauth,
@@ -382,277 +384,3 @@ async def get_user(id):
 @auth_router.post("/token")
 async def gen_token(user: User = Depends(current_active_user)):
     return await jwt_backend.login(get_jwt_strategy(), user)
-
-
-class TokenlessSession(BaseModel):
-    username: str
-    client_secret: str
-    server_secret: str
-
-
-class TokenlessClaim(BaseModel):
-    username: str
-    client_secret: str
-
-    repo_owner: str
-    repo_name: str
-    repo_owner_email: Optional[str] = None
-    repo_owner_full_name: Optional[str] = None
-    workflow_name: str
-    event_name: str
-    run_number: int
-    run_id: int
-    run_attempt: Optional[int] = None
-
-
-class TokenlessChallenge(BaseModel):
-    session: TokenlessSession
-    public_challenge: str
-    artifact_id: Optional[str] = None
-    public_message: str
-    claimed_identity: TokenlessClaim
-
-
-class TokenlessHandshakeComplete(BaseModel):
-    session: TokenlessSession
-    artifact_id: int
-
-
-# TODO: Store in Mongodb some other day ;-)
-handshake_ongoing_map = {}
-tokenless_users_map = {}
-
-
-@auth_router.post("/github/tokenless/claim")
-async def tokenless_claim(claim: TokenlessClaim) -> TokenlessChallenge:
-    """
-    First part of a "Tokenless Github Action Authentication Handshake".
-
-    Note that this is like a login end point, so coming here, user is unknown and unauthenticated
-    """
-    claim.run_attempt = await verify_workflow_run(claim)
-    public_challenge, public_message = create_challenge(claim)
-    server_secret = create_secret()
-    session = TokenlessSession(
-        username=claim.username,
-        client_secret=claim.client_secret,
-        server_secret=server_secret,
-    )
-    challenge = TokenlessChallenge(
-        session=session,
-        public_challenge=public_challenge,
-        public_message=public_message,
-        claimed_identity=claim,
-    )
-    if session.username not in handshake_ongoing_map:
-        handshake_ongoing_map[session.username] = {}
-    if session.client_secret in handshake_ongoing_map[session.username]:
-        raise HTTPException(
-            status_code=409,
-            detail=f"This username ({session.username}) and client_secret is already in use by another handshake, or alternatively you mistakenly POSTed the same request twice.",
-        )
-    handshake_ongoing_map[session.username][session.client_secret] = challenge
-
-    return challenge
-
-
-@auth_router.post("/github/tokenless/complete")
-async def tokenless_complete(
-    session_and_more: TokenlessHandshakeComplete,
-) -> Dict:
-    """
-    second part
-
-    Can't trust the incoming data anymore: Just use the username and client secret
-    to lookup and match corresponding server_secret.
-
-    At this point client should have printed public_message into its main log, aka stdout.
-    Our job is to read the log and find the public_challenge in it.
-
-    """
-    # Note: user is still unauthenticated as handshake isn't co
-
-    session = session_and_more.session
-    artifact_id = session_and_more.artifact_id
-
-    if session.username not in handshake_ongoing_map:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Username {session.username} doesn't have any Tokenless handshakes ongoing.",
-        )
-    challenge = handshake_ongoing_map[session.username].get(session.client_secret, None)
-    if challenge is None:
-        # Makes it a bit harder to brute force (but doesn't prevent parallellism)
-        await asyncio.sleep(10)
-        raise HTTPException(
-            status_code=401, detail="Tokenless handshake failed: wrong client_secret"
-        )
-
-    challenge.artifact_id = artifact_id
-
-    if await validate_public_challenge(challenge):
-        # If this user doesn't exist at all, create now
-        # Create a new short lived JWT token for this user to use for the rest of the workflow run.
-        jwt_token = "TODO"
-
-        return {
-            "message": "Tokenless Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
-            "github_username": challenge.session.username,
-            "jwt_token": jwt_token,
-        }
-    else:
-        return {"message": "Shouldn't happen. You should've already received a 401."}
-
-
-async def verify_workflow_run(claim: TokenlessClaim) -> int:
-    """
-    Verify that a workflow run exists where repo_owner and run_id match what we were given.
-
-    Note: repo_owner isn't necessarily the username we are authenticating.
-    Note: This also checks early that we can read the workflow APIs, e.g. this is not a private repo.
-    """
-    client = httpx.AsyncClient()
-    uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
-    response = await client.get(uri, headers=HTTP_HEADERS)
-    if response.status_code != 200:
-        logging.error(
-            f"TokenlessHandshake: Failed to fetch the given workflow run from GitHub: {response.status_code}: {response.text}"
-        )
-        logging.error(dict(claim))
-        raise HTTPException(
-            status_code=424,
-            detail=f"TokenlessHandshake: Could not find the Github workflow you claim to be running: {uri}",
-        )
-    # For pull requests, username is not the same as repo owner, so check that (for both, while at it)
-    workflow = response.json()
-    if workflow["event"] == "pull_request":
-        workflow_username = workflow["actor"]["login"]
-        if workflow_username != claim.username:
-            logging.error(
-                f"TokenlessHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
-            )
-            raise HTTPException(
-                status_code=401,
-                detail=f"TokenlessHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
-            )
-
-    if workflow["event"] == "push":
-        workflow_username = workflow["repository"]["owner"]["login"]
-        if workflow_username != claim.username:
-            logging.error(
-                f"TokenlessHandshake failed: claim has username {claim.username} and PR has {workflow_username}"
-            )
-            raise HTTPException(
-                status_code=401,
-                detail=f"TokenlessHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
-            )
-
-    # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
-    return workflow["run_attempt"]
-
-
-def create_secret() -> str:
-    return str(uuid.uuid4())
-
-
-def create_challenge(claim: TokenlessClaim) -> str:
-    randomstr = str(uuid.uuid4())
-    workflowstr = f"/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
-
-    line1 = "TokenlessHandshake between github.com and nyrkio.com:\n"
-    line2 = f"I am {claim.username} and this is proof that I am currently running {workflowstr}: {randomstr}"
-
-    return randomstr, line1 + line2
-
-
-def zipped_chunks(url):
-    # Iterable that yields the bytes of a zip file
-    with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
-        print("yielding chunks from the zip now")
-        yield from r.iter_bytes(chunk_size=65536)
-
-
-def check_match(log_chunks, randomstr):
-    if randomstr in log_chunks:
-        return True
-    return False
-
-
-async def validate_public_challenge_STREAM_OFF(challenge: TokenlessChallenge) -> bool:
-    i = challenge.claimed_identity
-    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
-
-    found = False
-    previous_chunk = ""
-    try:
-        # Each step is a separate text file inside the zip archive
-        for file_name, file_size, unzipped_chunks in stream_unzip(
-            zipped_chunks(log_url)
-        ):
-            # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
-            # It's ok, what we are looking for is probably toward the end anyway
-            for chunk in unzipped_chunks:
-                if check_match(previous_chunk + chunk, challenge.public_challenge):
-                    found = True
-                previous_chunk = chunk
-    except Exception as any_exception:
-        print(any_exception)
-
-    return found
-
-
-async def validate_public_challenge(challenge: TokenlessChallenge) -> bool:
-    i = challenge.claimed_identity
-    log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
-
-    challenge_as_bytes = challenge.public_challenge.encode("utf-8")
-    found = False
-    client = httpx.AsyncClient()
-    response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
-    if response.status_code != 200:
-        logging.error(
-            f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
-        )
-        raise HTTPException(
-            status_code=424,
-            detail=f"TokenlessHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {log_url}",
-        )
-    log_contents_zipped = response.content
-    z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
-    print("have z now no need to write to  disk")
-    for filename in z.namelist():
-        print(filename)
-        log = z.read(filename)
-        if check_match(log, challenge_as_bytes):
-            print("FOUND IT FOUND IT")
-            found = True
-
-    return found
-
-
-async def validate_via_artifacts_NOT_USED(challenge: TokenlessChallenge) -> bool:
-    artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
-    logging.info(f"GET: {artifact_url}")
-    client = httpx.AsyncClient()
-    response = await client.get(artifact_url, headers=HTTP_HEADERS)
-    if response.status_code != 200:
-        logging.error(
-            f"TokenlessHandshake: Failed to fetch the given artifact file from GitHub: {response.status_code}: {response.text}"
-        )
-        raise HTTPException(
-            status_code=424,
-            detail=f"TokenlessHandshake: Could not find the artifact fail you should have published in your github action: {artifact_url}",
-        )
-    artifact_contents = response.data
-    if artifact_contents.find(challenge.public_message) and artifact_contents.find(
-        challenge.public_challenge
-    ):
-        logging.debug(
-            f"Successful TokenlessHandshake for {challenge.session.username}. Now creating a JWT token they can use going forward."
-        )
-        return True
-    else:
-        raise HTTPException(
-            status_code=401,
-            detail=f"Artifact file {artifact_url} did not contain the public challenge: {challenge.public_challenge}. For security, we will delete your initial claim and challenge now. Please start again from scratch.",
-        )
