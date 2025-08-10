@@ -236,6 +236,7 @@ async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
                 detail=f"ChallengePublishHandshake failed. You claimed to be github user {claim.username} but that was not confirmed by {uri}",
             )
 
+
     # We need the exact run_attempt in part 2, might as well get it while we have it in our hands
     return workflow["run_attempt"]
 
@@ -300,6 +301,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
     found = False
     client = httpx.AsyncClient()
     response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
+    print(response)
     if response.status_code != 200:
         logging.error(
             f"ChallengePublishHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
@@ -310,6 +312,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
         )
     log_contents_zipped = response.content
     z = zipfile.ZipFile(io.BytesIO(log_contents_zipped))
+    print(z.namelist())
     for filename in z.namelist():
         print(filename)
         log = z.read(filename)
