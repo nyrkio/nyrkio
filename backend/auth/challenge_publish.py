@@ -53,7 +53,7 @@ class ChallengePublishClaim(BaseModel):
 class ChallengePublishChallenge(BaseModel):
     session: ChallengePublishSession
     public_challenge: str
-    artifact_id: Optional[str] = None
+    # artifact_id: Optional[str] = None
     public_message: str
     claimed_identity: ChallengePublishClaim
 
@@ -104,7 +104,7 @@ async def challenge_publish_claim(
 
 @auth_router.post("/challenge_publish/github/complete")
 async def challenge_publish_complete(
-    session_and_more: ChallengePublishHandshakeComplete,
+    session_and_more: ChallengePublishSession,
 ) -> Dict:
     """
     second part
