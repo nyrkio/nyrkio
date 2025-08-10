@@ -11,6 +11,7 @@ the connection was indeed iniitiated by the code running that specific workflow,
 that is associated with the workflow run in numerous json files returned by github.
 """
 from typing import Optional, Dict
+from typing_extensions import Annotated
 import logging
 import uuid
 import os
@@ -35,11 +36,11 @@ cph_router = APIRouter(prefix="/challenge_publish")
 
 
 async def get_user_by_github_username(
-    github_username: str, user_db: BeanieUserDatabase = Depends(get_user_db)
+    github_username: str, user_db: Annotated[BeanieUserDatabase, Depends(get_user_db)]
 ):
     import pprint
+
     pprint.pprint(user_db)
-    pprint.pprint(list(user_db))
     manager = get_user_manager(user_db)
     return await manager.get_by_github_username(github_username)
 
