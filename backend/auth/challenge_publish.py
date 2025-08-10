@@ -33,8 +33,6 @@ from backend.auth.common import (
 )
 
 
-GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
-HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
 cph_router = APIRouter(prefix="/challenge_publish")
 
@@ -200,6 +198,8 @@ async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
     Note: repo_owner isn't necessarily the username we are authenticating.
     Note: This also checks early that we can read the workflow APIs, e.g. this is not a private repo.
     """
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+    HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     client = httpx.AsyncClient()
     uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
     response = await client.get(uri, headers=HTTP_HEADERS)
@@ -255,6 +255,8 @@ def create_challenge(claim: ChallengePublishClaim) -> str:
 
 
 def zipped_chunks(url):
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+    HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     # Iterable that yields the bytes of a zip file
     with httpx.stream("GET", url, headers=HTTP_HEADERS, follow_redirects=True) as r:
         print("yielding chunks from the zip now")
@@ -293,6 +295,8 @@ async def validate_public_challenge_STREAM_OFF(
 
 
 async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> bool:
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+    HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     i = challenge.claimed_identity
     log_url = f"https://api.github.com/repos/{i.repo_owner}/{i.repo_name}/actions/runs/{i.run_id}/attempts/{i.run_attempt}/logs"
 
@@ -325,6 +329,8 @@ async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> 
 
 
 async def validate_public_challenge(challenge: ChallengePublishChallenge) -> bool:
+    GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
+    HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     artifact_url = f"https://github.com/{challenge.claimed_identity.repo_owner}/{challenge.claimed_identity.repo_name}/actions/runs/{challenge.claimed_identity.run_id}/artifacts/{challenge.artifact_id}"
     logging.info(f"GET: {artifact_url}")
     client = httpx.AsyncClient()
@@ -335,7 +341,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
         )
         raise HTTPException(
             status_code=424,
-            detail=f"ChallengePublishHandshake: Could not find the artifact fail you should have published in your github action: {artifact_url}",
+            detail=f"ChallengePublishHandshake: Could not find the artifact file you should have published in your github action: {artifact_url}",
         )
     artifact_contents = response.data
     if artifact_contents.find(challenge.public_message) and artifact_contents.find(
