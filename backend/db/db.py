@@ -59,7 +59,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         self.store = DBStore()
         self.User = self.store.db.User
 
-    async def get_user_by_github_username(self, github_username: str):
+    async def get_by_github_username(self, github_username: str):
         res = self.User.find_one({github_username: github_username})
         if res:
             return User(res)
