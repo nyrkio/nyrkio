@@ -164,7 +164,7 @@ async def challenge_publish_complete(
         )
     # Make sure to never reuse the secrets (replay attacks and what have you)
     del handshake_ongoing_map[session.username][session.client_secret]
-
+    asyncio.sleep(15)
     if await validate_public_challenge(challenge):
         github_username = challenge.session.username
         # This user may be a real / full on user that first created a user account on nyrkio.com
@@ -280,7 +280,7 @@ async def validate_public_challenge_STREAM_OFF(
         # Each step is a separate text file inside the zip archive
         for file_name, file_size, unzipped_chunks in stream_unzip(
             zipped_chunks(log_url)
-        ):
+        ):challenge_as_bytes
             # unzipped_chunks must be iterated to completion or UnfinishedIterationError will be raised
             # It's ok, what we are looking for is probably toward the end anyway
             for chunk in unzipped_chunks:
