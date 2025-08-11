@@ -26,8 +26,7 @@ from backend.db.db import UserCreate, NyrkioUserDatabase
 from backend.auth.common import (
     UserManager,
     get_user_manager,
-    jwt_backend,
-    get_jwt_strategy,
+    get_short_jwt_strategy,
 )
 
 
@@ -174,17 +173,18 @@ async def challenge_publish_complete(
             user = await create_cph_user(github_username, is_repo_owner=False)
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
-        jwt_token = await jwt_backend.login(get_jwt_strategy(), user)
+        strategy = get_short_jwt_strategy()
+        jwt_token = strategy.write_token(user)
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
             "github_username": challenge.session.username,
-            "jwt_token": dict(jwt_token),
+            "jwt_token": jwt_token,
         }
     else:
         raise HTTPException(
             status_code=401,
-            detail="Didn't find the challenge in your log output. Challenge Publish Handshake failed!",
+            detail="Didn't find the challenge in your artifacts. Challenge Publish Handshake failed!",
         )
 
 
