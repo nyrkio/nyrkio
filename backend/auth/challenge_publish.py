@@ -174,7 +174,7 @@ async def challenge_publish_complete(
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
         strategy = get_short_jwt_strategy()
-        jwt_token = strategy.write_token(user)
+        jwt_token = await strategy.write_token(user)
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
