@@ -69,7 +69,8 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         ).to_list(99)
 
         if len(res) == 1:
-            return User(**res)
+            obj = res[0]
+            return User(**obj)
 
         if len(res) > 1:
             raise DBStoreMultipleResults(
