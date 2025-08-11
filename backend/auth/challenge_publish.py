@@ -10,6 +10,7 @@ When the action prints this challenge into its log, this is observed by the nyrk
 the connection was indeed iniitiated by the code running that specific workflow, triggered by the github user
 that is associated with the workflow run in numerous json files returned by github.
 """
+
 from typing import Optional, Dict
 import logging
 import uuid
