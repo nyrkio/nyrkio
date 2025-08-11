@@ -179,7 +179,7 @@ async def challenge_publish_complete(
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
             "github_username": challenge.session.username,
-            "jwt_token": jwt_token,
+            "jwt_token": dict(jwt_token),
         }
     else:
         raise HTTPException(
