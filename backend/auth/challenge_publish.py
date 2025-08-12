@@ -26,7 +26,6 @@ from backend.db.db import UserCreate, NyrkioUserDatabase
 
 from backend.auth.common import (
     UserManager,
-    get_user_manager,
     get_short_jwt_strategy,
 )
 
