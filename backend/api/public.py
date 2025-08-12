@@ -3,7 +3,7 @@ from fastapi import APIRouter, HTTPException
 
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
-from backend.api.pull_request import _get_pr_results, _get_pr_result, _get_pr_changes
+from backend.api.pull_request import _get_pr_result, _get_pr_changes
 
 
 """
@@ -192,14 +192,16 @@ async def get_pr_commit_result(
 
 @public_router.get("/pulls/{test_name_public_prefix:path}")
 async def get_pr_results(test_name_public_prefix: str):
-    if len(test_name_public_prefix) == 0:
-        raise HTTPException(
-            status_code=404,
-            detail="For /public/pulls/* you must append at least the username or org name component of the path´",
-        )
-
-    user_or_org_id, _, _ = await _get_user_from_prefix(test_name_public_prefix)
-    return await _get_pr_results(user_or_org_id)
+    user_or_org, just_repo, branch, test_name = get_public_namespace_parts(
+        test_name_public_prefix
+    )
+    # user_or_org_id, _, _ = await _get_user_from_prefix(test_name_public_prefix)
+    store = DBStore()
+    return await store.get_pull_requests_from_the_source(
+        repo=f"{user_or_org}/{just_repo}",
+        branch=branch,
+        test_names=[test_name_public_prefix],
+    )
 
 
 # TODO(Henrik): Add a query to `store` where we use test_name in the query, not here

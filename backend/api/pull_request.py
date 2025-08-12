@@ -254,9 +254,12 @@ async def get_pr_results(user: User = Depends(auth.current_active_user)):
 
 
 async def _get_pr_results(
-    user_or_org_id: Any, repo: str = None, branch: str = None, test_names: str = None
+    user_or_org_id: Any = None,
+    repo: str = None,
+    branch: str = None,
+    test_names: str = None,
 ):
     store = DBStore()
-    return await store.get_pull_requests(
-        user_or_org_id, repo=repo, branch=branch, test_names=[test_names]
+    return await store.get_pull_requests_from_the_source(
+        repo=repo, branch=branch, test_names=[test_names]
     )
