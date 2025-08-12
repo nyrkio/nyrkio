@@ -1112,9 +1112,9 @@ class DBStore(object):
             upsert=True,
         )
 
-    async def get_pull_requests(
+    async def get_pull_requests_from_the_source(
         self,
-        user_id,
+        user_id=None,
         repo=None,
         git_commit=None,
         pull_number=None,
@@ -1126,7 +1126,88 @@ class DBStore(object):
 
         If any of repo, git_commit, or pull_number are None, return all pull
         requests for the user. Otherwise, return the pull request that matches
-        the given repo, git_commit, and pull_number.
+        the given repo, git_commit, and pull_number. Note that in the latter
+        case, is user_id is None, return pull requests for all users submitted
+        against the repo. (e.g. random contributors to an open source project
+        will all have different user_id, but all submitted valid PRs against the repo.)
+
+        Each entry in the list is a dict with the following keys:
+          - git_repo - the git repository
+          - git_commit - the git commit
+          - pull_number - the pull request number
+          - test_names - a list of test names
+
+        NOTE: git_repo should not include the protocol or github.com domain.
+
+        Return an empty list if no results are found.
+        """
+        if test_names is None:
+            test_names = []
+        if repo is not None and not repo.startswith("https://github.com/"):
+            repo = f"https://github.com/{repo}"
+
+        coll = self.db.test_results
+
+        query = {"pull_request": {"$exists": 1}}
+        if user_id is not None:
+            query["user_id"] = user_id
+        if repo:
+            query["attributes.git_repo"] = repo
+        if branch:
+            query["attributes.branch"] = branch
+        if test_names:
+            query["test_name"] = {"$in": test_names}
+        if pull_number:
+            query["pull_request"] = pull_number
+
+        pulls = await coll.aggregate(
+            [
+                {"$match": query},
+                {
+                    "$group": {
+                        "_id": {
+                            "git_repo": "$attributes.git_repo",
+                            "branch": "$attributes.branch",
+                            "git_commit": "$attributes.git_commit",
+                            "pull_request": "$pull_request",
+                        },
+                        "test_names": {"$addToSet": "$test_name"},
+                    }
+                },
+                {
+                    "$project": {
+                        "git_repo": "$_id.git_repo",
+                        "branch": "$_id.branch",
+                        "git_commit": "$_id.git_commit",
+                        "pull_number": "$_id.pull_request",
+                        "test_names": "$test_names",
+                    }
+                },
+                {"$sort": {"pull_number": -1}},
+                {"$limit": 50},
+            ]
+        )
+
+        return pulls.to_list(None)
+
+    async def get_pull_requests(
+        self,
+        user_id=None,
+        repo=None,
+        git_commit=None,
+        pull_number=None,
+        branch=None,
+        test_names=None,
+    ) -> List[Dict]:
+        """
+        Get a list of pull requests for a given user.
+
+        If any of repo, git_commit, or pull_number are None, return all pull
+        requests for the user. Otherwise, return the pull request that matches
+        the given repo, git_commit, and pull_number. Note that in the latter
+        case, is user_id is None, return pull requests for all users submitted
+        against the repo. (e.g. random contributors to an open source project
+        will all have different user_id, but all submitted valid PRs against the repo.)
 
         Each entry in the list is a dict with the following keys:
           - git_repo - the git repository
@@ -1142,32 +1223,52 @@ class DBStore(object):
             test_names = []
 
         pr_tests = self.db.pr_tests
-        # Do a lookup on the primary key if we have all the fields
-        if repo and git_commit and pull_number:
-            primary_key = OrderedDict(
-                {
-                    "git_commit": git_commit,
-                    "pull_number": pull_number,
-                    "user_id": user_id,
-                    "git_repo": repo,
-                }
+        if user_id is not None:
+            # Do a lookup on the primary key if we have all the fields
+            if repo and git_commit and pull_number:
+                primary_key = OrderedDict(
+                    {
+                        "git_commit": git_commit,
+                        "pull_number": pull_number,
+                        "user_id": user_id,
+                        "git_repo": repo,
+                    }
+                )
+                test_names = await pr_tests.find_one({"_id": primary_key})
+                return build_pulls([test_names]) if test_names else []
+
+            # Otherwise, do a lookup on the user_id and any other attributes
+            query = {"user_id": user_id}
+            if repo:
+                query["git_repo"] = repo
+            if branch:
+                query["branch"] = branch
+            if test_names:
+                query["test_name"] = {"$in": test_names}
+
+            pulls = (
+                await pr_tests.find(query)
+                .sort({"pull_number": -1})
+                .limit(50)
+                .to_list(None)
             )
-            test_names = await pr_tests.find_one({"_id": primary_key})
-            return build_pulls([test_names]) if test_names else []
+            return build_pulls(pulls)
 
-        # Otherwise, do a lookup on the user_id and any other attributes
-        query = {"user_id": user_id}
-        if repo:
-            query["git_repo"] = repo
-        if branch:
-            query["branch"] = branch
-        if test_names:
-            query["test_name"] = {"$in": test_names}
+        # Then again, is user_id is None, get PRs just based on the repo
+        if repo is not None:
+            query = {"git_repo": repo}
+            if branch:
+                query["branch"] = branch
+            if test_names:
+                query["test_name"] = {"$in": test_names}
 
-        pulls = (
-            await pr_tests.find(query).sort({"pull_number": -1}).limit(50).to_list(None)
-        )
-        return build_pulls(pulls)
+            pulls = (
+                await pr_tests.find(query)
+                .sort({"pull_number": -1})
+                .limit(50)
+                .to_list(None)
+            )
+            return build_pulls(pulls)
 
     async def delete_pull_requests(self, user_id: Any, repo: str, pull_number: int):
         """
