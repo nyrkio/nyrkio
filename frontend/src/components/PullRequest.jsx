@@ -24,7 +24,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
   }
   const fetchPulls = async () => {
 
-    var url = `${baseUrls.apiRoot}pulls${orgEtcPrefix}`;
+    var url = `${baseUrls.apiRoot}pulls/${orgEtcPrefix}`;
     console.log(url);
     const response = await fetch(url, {
       headers: {
