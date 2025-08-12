@@ -1291,6 +1291,31 @@ class DBStore(object):
         coll = self.db.github_installations
         return await coll.find_one({"_id": int(gh_id)})
 
+    async def get_user_by_github_username(self, github_username: str):
+        print("get_user_by_github_username")
+        res = await self.db.User.find_one({github_username: github_username})
+        if res:
+            print("get_user_by_github_username 2")
+            return User(**res)
+
+        print("get_user_by_github_username 3")
+        res = await self.db.User.find(
+            {"oauth_accounts.organizations.user.login": github_username}
+        ).to_list(99)
+
+        if len(res) == 1:
+            print("get_user_by_github_username 4")
+            obj = res[0]
+            return User(**obj)
+
+        print("get_user_by_github_username 5")
+        if len(res) > 1:
+            raise DBStoreMultipleResults(
+                f"Failed to get user by their github_username '{github_username}'. Query returned more than one result."
+            )
+
+        return None
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

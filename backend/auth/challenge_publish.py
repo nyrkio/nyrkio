@@ -22,7 +22,7 @@ from pydantic import BaseModel
 import zipfile
 import io
 
-from backend.db.db import UserCreate, NyrkioUserDatabase
+from backend.db.db import UserCreate, NyrkioUserDatabase, DBStore
 
 from backend.auth.common import (
     UserManager,
@@ -34,8 +34,12 @@ cph_router = APIRouter(prefix="/challenge_publish")
 
 
 async def get_user_by_github_username(github_username: str):
-    manager = UserManager(NyrkioUserDatabase())
-    return await manager.get_by_github_username(github_username)
+    # manager = UserManager(NyrkioUserDatabase())
+    # return await manager.get_by_github_username(github_username)
+    store = DBStore()
+    res = await store.get_user_by_github_username(github_username)
+    print(res)
+    return res
 
 
 async def create_cph_user(github_username: str, is_repo_owner: bool = False):
