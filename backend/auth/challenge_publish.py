@@ -40,7 +40,7 @@ async def get_user_by_github_username(github_username: str):
 
 
 async def create_cph_user(github_username: str, is_repo_owner: bool = False):
-    manager = get_user_manager()
+    manager = UserManager(NyrkioUserDatabase())
     user = UserCreate(
         github_username=github_username,
         email=f"{github_username}@ChallengeResponseHandshake.github.nyrkio.com",
