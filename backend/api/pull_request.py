@@ -40,12 +40,10 @@ from backend.api.changes import calc_changes
 from backend.db.db import DBStoreResultExists, User, DBStore
 from backend.notifiers.github import GitHubCommentNotifier
 
-pr_router = APIRouter()
+pr_router = APIRouter(prefix="/pulls")
 
 
-@pr_router.get(
-    "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
-)
+@pr_router.get("/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}")
 async def get_pr_changes_test_name(
     test_name: str,
     pull_number: int,
@@ -55,10 +53,12 @@ async def get_pr_changes_test_name(
     user: User = Depends(auth.current_active_user),
 ):
     _ = test_name
-    return await _get_pr_changes(pull_number, git_commit, repo, notify, user.id)
+    return await _get_pr_changes(
+        pull_number, git_commit, repo, test_name, notify, user.id
+    )
 
 
-@pr_router.get("/pulls/{repo:path}/{pull_number}/changes/{git_commit}")
+@pr_router.get("/{repo:path}/{pull_number}/changes/{git_commit}")
 async def get_pr_changes(
     pull_number: int,
     git_commit: str,
@@ -73,12 +73,20 @@ async def _get_pr_changes(
     pull_number: int,
     git_commit: str,
     repo: str,
+    test_name: str,
     notify: Union[int, None] = None,
     user_or_org_id: Any = None,
 ):
     store = DBStore()
-    pulls = await store.get_pull_requests(user_or_org_id, repo, git_commit, pull_number)
+    pulls = await store.get_pull_requests(
+        user_id=user_or_org_id,
+        repo=repo,
+        git_commit=git_commit,
+        pull_number=pull_number,
+        test_names=[test_name],
+    )
     if not pulls:
+        print("got nothing...")
         raise HTTPException(status_code=404, detail="No test results found")
 
     if len(pulls) > 1:
@@ -121,7 +129,7 @@ async def _get_pr_changes(
     return changes
 
 
-@pr_router.post("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+@pr_router.post("/{repo:path}/{pull_number}/result/{test_name:path}")
 async def add_pr_result(
     test_name: str,
     test_result: TestResults,
@@ -132,7 +140,7 @@ async def add_pr_result(
     return await _add_pr_result(test_name, test_result, repo, pull_number, user.id)
 
 
-@pr_router.put("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+@pr_router.put("/{repo:path}/{pull_number}/result/{test_name:path}")
 async def put_pr_result(
     test_name: str,
     test_result: TestResults,
@@ -172,7 +180,7 @@ async def _add_pr_result(
         )
 
 
-@pr_router.delete("/pulls/{repo:path}/{pull_number}")
+@pr_router.delete("/{repo:path}/{pull_number}")
 async def delete_pr_result(
     repo: str,
     pull_number: int,
@@ -206,9 +214,7 @@ async def _delete_pr_result(
     return []
 
 
-@pr_router.get(
-    "/pulls/{repo:path}/{pull_number}/result/{git_commit}/test/{test_name:path}"
-)
+@pr_router.get("/{repo:path}/{pull_number}/result/{git_commit}/test/{test_name:path}")
 async def get_pr_commit_result(
     test_name: str,
     repo: str,
@@ -221,7 +227,7 @@ async def get_pr_commit_result(
     )
 
 
-@pr_router.get("/pulls/{repo:path}/{pull_number}/result/{test_name:path}")
+@pr_router.get("/{repo:path}/{pull_number}/result/{test_name:path}")
 async def get_pr_result(
     test_name: str,
     repo: str,
@@ -248,9 +254,10 @@ async def _get_pr_result(
     return results
 
 
-@pr_router.get("/pulls")
+@pr_router.get("")
 async def get_pr_results(user: User = Depends(auth.current_active_user)):
-    return await _get_pr_results(user.id)
+    print('just "" after /pulls')
+    return await _get_pr_results(user_or_org_id=user.id)
 
 
 async def _get_pr_results(
@@ -261,5 +268,5 @@ async def _get_pr_results(
 ):
     store = DBStore()
     return await store.get_pull_requests_from_the_source(
-        repo=repo, branch=branch, test_names=[test_names]
+        user_id=user_or_org_id, repo=repo, branch=branch, test_names=test_names
     )

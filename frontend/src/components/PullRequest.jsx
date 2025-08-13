@@ -29,7 +29,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
       url = `${baseUrls.apiRoot}${orgEtcPrefix}/pulls`;
     }
     if(dashboardType == dashboardTypes.PUBLIC) {
-      var url = `${baseUrls.apiRoot}pulls/${testName}`;
+      url = `${baseUrls.apiRoot}pulls/${testName}`;
     }
       console.log(url);
     const response = await fetch(url, {
@@ -51,7 +51,8 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
     for (var o of res) {
       for (var name of o.test_names){
         if (orgRepoBranch + name === testName){
-          const key = `${o.git_repo}/pull/${o.pull_number}`;
+          var git_repo = o.git_repo.replace("https://github.com/", "");
+          const key = `${git_repo}/pull/${o.pull_number}`;
           if (commits[key] === undefined) {
             commits[key] = [];
             filteredPullRequests.push(key);
@@ -65,7 +66,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
 
   const fetchPullResult = async (pr, c) => {
     const [repo, pull_number] = pr.split("/pull/");
-    const url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/result/${c}/test/${testName}`
+    var url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/result/${c}/test/${testName}`
     const response = await fetch(url, {
       headers: {
         "Content-type": "application/json",
@@ -82,7 +83,15 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
     const res = await response.json();
     console.log(res);
 
-    const response2 = await fetch(`${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${c}`, {
+    url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${c}`;
+    if(dashboardType == dashboardTypes.ORG) {
+      url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${c}`;
+    }
+    if(dashboardType == dashboardTypes.PUBLIC) {
+      // From backend: "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
+      url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${c}/test/${testName}`;
+    }
+    const response2 = await fetch(url, {
       headers: {
         "Content-type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),

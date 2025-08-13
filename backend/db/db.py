@@ -550,11 +550,16 @@ class DBStore(object):
             results = (
                 await test_results.find(
                     {
-                        "user_id": id,
-                        "test_name": test_name,
                         "$or": [
-                            {"pull_request": {"$eq": pull_request}},
-                            {"pull_request": {"$exists": False}},
+                            {
+                                "test_name": test_name,
+                                "pull_request": {"$eq": pull_request},
+                            },
+                            {
+                                "user_id": id,
+                                "test_name": test_name,
+                                "pull_request": {"$exists": False},
+                            },
                         ],
                     },
                     exclude_projection,
@@ -1179,6 +1184,7 @@ class DBStore(object):
             },
             {
                 "$project": {
+                    "_id": False,
                     "git_repo": "$_id.git_repo",
                     "branch": "$_id.branch",
                     "git_commit": "$_id.git_commit",
@@ -1191,7 +1197,7 @@ class DBStore(object):
         ]
         print(pipeline)
         pulls = await coll.aggregate(pipeline).to_list(None)
-
+        print(pulls)
         return pulls
 
     async def get_pull_requests(
