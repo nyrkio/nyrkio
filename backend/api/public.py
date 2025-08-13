@@ -168,9 +168,12 @@ async def get_pr_changes(
     pull_number: int,
     git_commit: str,
 ):
-    user_or_org_id, _ = await _figure_out_user_and_test(test_name)
     return await _get_pr_changes(
-        pull_number, git_commit, repo, notify=None, user_or_org_id=user_or_org_id
+        pull_number=pull_number,
+        git_commit=git_commit,
+        repo=repo,
+        test_name=test_name,
+        notify=None,
     )
 
 

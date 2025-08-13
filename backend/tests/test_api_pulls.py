@@ -38,7 +38,8 @@ def test_pr_add_result(client):
             "pull_number": pull_number,
             "test_names": benchmark_names,
             "git_commit": "12345",
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
+            "branch": "main",
         }
     ]
 
@@ -348,13 +349,15 @@ def test_pr_pulls(client):
     response = client.get("/api/v0/pulls")
     assert response.status_code == 200
     json = response.json()
+    print(json)
     assert len(json) == 1
     assert json == [
         {
             "pull_number": pull_number,
             "test_names": [test_name],
             "git_commit": git_commit,
-            "git_repo": repo,
+            "git_repo": "https://github.com/" + repo,
+            "branch": "main",
         }
     ]
 
@@ -468,7 +471,9 @@ def test_only_last_pr_result_used_in_changes(client):
     )
     assert response.status_code == 200
 
-    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}")
+    response = client.get(
+        f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}/test/{test_name}"
+    )
     assert response.status_code == 200
     json = response.json()
     assert len(json) == 1
