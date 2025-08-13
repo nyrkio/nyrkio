@@ -162,7 +162,7 @@ async def get_result(test_name: str) -> List[Dict]:
 @public_router.get(
     "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
 )
-async def get_pr_changes(
+async def get_pr_changes_for_test_name(
     test_name: str,
     repo: str,
     pull_number: int,
@@ -173,6 +173,22 @@ async def get_pr_changes(
         git_commit=git_commit,
         repo=repo,
         test_name=test_name,
+        notify=None,
+    )
+
+@public_router.get(
+    "/pulls/{repo:path}/{pull_number}/changes/{git_commit}"
+)
+async def get_pr_changes(
+    repo: str,
+    pull_number: int,
+    git_commit: str,
+):
+    return await _get_pr_changes(
+        pull_number=pull_number,
+        git_commit=git_commit,
+        repo=repo,
+        test_name=None,
         notify=None,
     )
 
