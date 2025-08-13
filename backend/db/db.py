@@ -1143,7 +1143,11 @@ class DBStore(object):
         """
         if test_names is None:
             test_names = []
-        if repo is not None and not repo.startswith("https://github.com/") and not repo.startswith("https:/github.com/"):
+        if (
+            repo is not None
+            and not repo.startswith("https://github.com/")
+            and not repo.startswith("https:/github.com/")
+        ):
             repo = f"https://github.com/{repo}"
 
         coll = self.db.test_results
