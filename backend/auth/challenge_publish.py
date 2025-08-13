@@ -38,7 +38,7 @@ async def get_user_by_github_username(github_username: str):
     # return await manager.get_by_github_username(github_username)
     store = DBStore()
     res = await store.get_user_by_github_username(github_username)
-    print(res)
+
     return res
 
 
@@ -306,7 +306,7 @@ async def validate_public_challengeOFF(challenge: ChallengePublishChallenge) -> 
     found = False
     client = httpx.AsyncClient()
     response = await client.get(log_url, headers=HTTP_HEADERS, follow_redirects=True)
-    print(response)
+
     if response.status_code != 200:
         logging.error(
             f"ChallengePublishHandshake: Failed to fetch the log file from run_id {i.run_id}/{i.run_attempt} from GitHub: {response.status_code}: {response.text}"
