@@ -1405,7 +1405,7 @@ class DBStore(object):
 
     async def get_user_by_github_username(self, github_username: str):
         print("get_user_by_github_username")
-        res = await self.db.User.find_one({github_username: github_username})
+        res = await self.db.User.find_one({"github_username": github_username})
         if res:
             print("get_user_by_github_username 2")
             return User(**res)
