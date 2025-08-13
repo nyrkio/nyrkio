@@ -12,7 +12,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
   let orgRepoBranch = "";
   if(dashboardType == dashboardTypes.ORG) {
     if (breadcrumbName) {
-      orgEtcPrefix = "/" + getOrg(breadcrumbName);
+      orgEtcPrefix = getOrg(breadcrumbName);
     }
   }
   if(dashboardType == dashboardTypes.PUBLIC) {
@@ -25,7 +25,13 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
   const fetchPulls = async () => {
 
     var url = `${baseUrls.apiRoot}pulls${orgEtcPrefix}`;
-    console.log(url);
+    if(dashboardType == dashboardTypes.ORG) {
+      url = `${baseUrls.apiRoot}${orgEtcPrefix}/pulls`;
+    }
+    if(dashboardType == dashboardTypes.PUBLIC) {
+      var url = `${baseUrls.apiRoot}pulls/${testName}`;
+    }
+      console.log(url);
     const response = await fetch(url, {
       headers: {
         "Content-type": "application/json",

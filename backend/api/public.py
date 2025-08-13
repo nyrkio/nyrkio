@@ -196,11 +196,12 @@ async def get_pr_results(test_name_public_prefix: str):
         test_name_public_prefix
     )
     # user_or_org_id, _, _ = await _get_user_from_prefix(test_name_public_prefix)
+    print([user_or_org, just_repo, branch, test_name])
     store = DBStore()
     return await store.get_pull_requests_from_the_source(
         repo=f"{user_or_org}/{just_repo}",
         branch=branch,
-        test_names=[test_name_public_prefix],
+        test_names=[test_name],
     )
 
 
