@@ -66,7 +66,7 @@ async def get_pr_changes(
     notify: Union[int, None] = None,
     user: User = Depends(auth.current_active_user),
 ):
-    return await _get_pr_changes(pull_number, git_commit, repo, notify, user.id)
+    return await _get_pr_changes(pull_number, git_commit, repo, None, notify, user.id)
 
 
 async def _get_pr_changes(
@@ -77,37 +77,44 @@ async def _get_pr_changes(
     notify: Union[int, None] = None,
     user_or_org_id: Any = None,
 ):
+    test_names = None if test_name is None else [test_name]
     store = DBStore()
-    pulls = await store.get_pull_requests(
-        user_id=user_or_org_id,
-        repo=repo,
-        git_commit=git_commit,
-        pull_number=pull_number,
-        test_names=[test_name],
-    )
-    if not pulls:
-        print("got nothing...")
-        raise HTTPException(status_code=404, detail="No test results found")
+    if test_names is None:
+        # Find out all my test names
+        pulls = await store.get_pull_requests_from_the_source(
+            user_id=user_or_org_id,
+            repo=repo,
+            git_commit=git_commit,
+            pull_number=pull_number,
+            test_names=test_names,
+        )
+        if not pulls:
+            print("got nothing...")
+            raise HTTPException(status_code=404, detail="No test results found")
 
-    if len(pulls) > 1:
-        # This should be impossible. If it happens, it's a bug.
-        # It's not catastrophic since we just process the first result.
-        logging.error(f"Multiple results for pull request: {pulls}")
+        if len(pulls) > 1:
+            # This should be impossible. If it happens, it's a bug.
+            # It's not catastrophic since we just process the first result.
+            logging.error(f"Multiple results for pull request: {pulls}")
+
+        test_names = [t for t in [pr["test_names"][0] for pr in pulls]]
 
     changes = []
-    user_config, _ = await store.get_user_config(user_or_org_id)
 
-    pr = pulls[0]
     all_results = []
-    for test_name in pr["test_names"]:
+    print("test_names")
+    print(test_names)
+
+    for test_name in test_names:
         results, _ = await store.get_results(
             user_or_org_id, test_name, pull_number, git_commit
         )
+        # print(results)
         if not len(results) >= 1:
             raise HTTPException(
                 status_code=404,
                 detail="Did not find any commits for test_name '{}'. Not even {} which is the commit of this pull request.".format(
-                    test_name, git_commit
+                    test_names, git_commit
                 ),
             )
 
@@ -118,9 +125,10 @@ async def _get_pr_changes(
         if ch:
             changes.append(ch)
 
-    if notify:
+    if notify and user_or_org_id:
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
+        user_config, _ = await store.get_user_config(user_or_org_id)
         notifiers = user_config.get("notifiers", {})
         if notifiers and notifiers.get("github", {}):
             notifier = GitHubCommentNotifier(repo, pull_number)
