@@ -1186,9 +1186,9 @@ class DBStore(object):
                 {"$sort": {"pull_number": -1}},
                 {"$limit": 50},
             ]
-        )
+        ).to_list(None)
 
-        return pulls.to_list(None)
+        return pulls
 
     async def get_pull_requests(
         self,
