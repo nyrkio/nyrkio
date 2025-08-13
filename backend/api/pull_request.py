@@ -101,7 +101,7 @@ async def _get_pr_changes(
 
     changes = []
 
-    # all_results = []
+    all_results = []
     # print("test_names")
     print(test_names)
 
