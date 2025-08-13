@@ -302,6 +302,7 @@ def test_pr_add_results_with_non_pr_results(client):
     response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}")
     assert response.status_code == 200
     json = response.json()
+    print(json)
     assert list(filter(lambda x: "benchmark1" in x.keys(), json))
     assert len(json) == 1
     result = json[0]
@@ -460,7 +461,7 @@ def test_only_last_pr_result_used_in_changes(client):
             {"name": "metric2", "value": 20.0, "unit": "ms"},
         ],
         "attributes": {
-            "git_repo": "https://github.com" + repo,
+            "git_repo": "https://github.com/" + repo,
             "branch": "main",
             "git_commit": git_commit,
         },
@@ -492,7 +493,9 @@ def test_only_last_pr_result_used_in_changes(client):
         )
         assert response.status_code == 200
 
-    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}")
+    response = client.get(
+        f"/api/v0/pulls/{repo}/{pull_number}/changes/{git_commit}/test/{test_name}"
+    )
     assert response.status_code == 200
 
     json = response.json()
@@ -500,7 +503,9 @@ def test_only_last_pr_result_used_in_changes(client):
     assert len(json[0]["benchmark1"]) == 1
     assert json[0]["benchmark1"][0]["time"] == 10
 
-    response = client.get(f"/api/v0/pulls/{repo}/{pull_number}/changes/{last_commit}")
+    response = client.get(
+        f"/api/v0/pulls/{repo}/{pull_number}/changes/{last_commit}/test/{test_name}"
+    )
     assert response.status_code == 200
     json = response.json()
     assert len(json) == 1

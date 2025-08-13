@@ -545,7 +545,10 @@ class DBStore(object):
         # Strip out the internal keys
         exclude_projection = {key: 0 for key in self._internal_keys}
 
-        # TODO(matt) We should read results in batches, not all at once
+        # if test_name is None:
+        #     # Should always be true in our case
+        #     test_name = {"$lt":-999}
+
         if pull_request:
             results = (
                 await test_results.find(
@@ -1146,8 +1149,6 @@ class DBStore(object):
 
         Return an empty list if no results are found.
         """
-        if test_names is None:
-            test_names = []
         if (
             repo is not None
             and not repo.startswith("https://github.com/")
@@ -1164,7 +1165,7 @@ class DBStore(object):
             query["attributes.git_repo"] = repo
         if branch:
             query["attributes.branch"] = branch
-        if test_names:
+        if test_names is not None:
             query["test_name"] = {"$in": test_names}
         if pull_number:
             query["pull_request"] = pull_number
