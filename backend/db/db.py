@@ -1164,33 +1164,32 @@ class DBStore(object):
         if pull_number:
             query["pull_request"] = pull_number
 
-        pulls = await coll.aggregate(
-            [
-                {"$match": query},
-                {
-                    "$group": {
-                        "_id": {
-                            "git_repo": "$attributes.git_repo",
-                            "branch": "$attributes.branch",
-                            "git_commit": "$attributes.git_commit",
-                            "pull_request": "$pull_request",
-                        },
-                        "test_names": {"$addToSet": "$test_name"},
-                    }
-                },
-                {
-                    "$project": {
-                        "git_repo": "$_id.git_repo",
-                        "branch": "$_id.branch",
-                        "git_commit": "$_id.git_commit",
-                        "pull_number": "$_id.pull_request",
-                        "test_names": "$test_names",
-                    }
-                },
-                {"$sort": {"pull_number": -1}},
-                {"$limit": 50},
-            ]
-        ).to_list(None)
+        pipeline = [
+            {"$match": query},
+            {
+                "$group": {
+                    "_id": {
+                        "git_repo": "$attributes.git_repo",
+                        "branch": "$attributes.branch",
+                        "git_commit": "$attributes.git_commit",
+                        "pull_request": "$pull_request",
+                    },
+                    "test_names": {"$addToSet": "$test_name"},
+                }
+            },
+            {
+                "$project": {
+                    "git_repo": "$_id.git_repo",
+                    "branch": "$_id.branch",
+                    "git_commit": "$_id.git_commit",
+                    "pull_number": "$_id.pull_request",
+                    "test_names": "$test_names",
+                }
+            },
+            {"$sort": {"pull_number": -1}},
+            {"$limit": 50},
+        ]
+        pulls = await coll.aggregate(pipeline).to_list(None)
 
         return pulls
 
