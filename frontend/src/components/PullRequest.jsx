@@ -12,7 +12,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
   let orgRepoBranch = "";
   if(dashboardType == dashboardTypes.ORG) {
     if (breadcrumbName) {
-      orgEtcPrefix = getOrg(breadcrumbName);
+      orgEtcPrefix = "/" + getOrg(breadcrumbName);
     }
   }
   if(dashboardType == dashboardTypes.PUBLIC) {
