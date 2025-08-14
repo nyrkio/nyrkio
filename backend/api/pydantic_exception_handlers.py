@@ -24,7 +24,7 @@ async def request_validation_exception_handler(
     This is a wrapper to the default RequestValidationException handler of FastAPI.
     This function will be called when client input is not valid.
     """
-    logger.debug("Our custom request_validation_exception_handler was called")
+    # logger.debug("Our custom request_validation_exception_handler was called")
     body = await request.body()
     query_params = request.query_params._dict  # pylint: disable=protected-access
     detail = {
@@ -43,7 +43,7 @@ async def http_exception_handler(
     This is a wrapper to the default HTTPException handler of FastAPI.
     This function will be called when a HTTPException is explicitly raised.
     """
-    logger.debug("Our custom http_exception_handler was called")
+    # logger.debug("Our custom http_exception_handler was called")
     return await _http_exception_handler(request, exc)
 
 

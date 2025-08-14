@@ -95,14 +95,14 @@ async def _get_pr_changes(
         if len(pulls) > 1:
             # This should be impossible. If it happens, it's a bug.
             # It's not catastrophic since we just process the first result.
-            logging.error(f"Multiple results for pull request: {pulls}")
+            logging.debug(f"Multiple results for pull request: {pulls}")
 
         test_names = [t for t in [pr["test_names"][0] for pr in pulls]]
 
     changes = []
 
     all_results = []
-    print("test_names")
+    # print("test_names")
     print(test_names)
 
     for test_name in test_names:

@@ -199,7 +199,7 @@ class GitHubCommentNotifier:
             },
         )
         if response.status_code != 200:
-            logging.error(
+            logging.info(
                 f"Failed to fetch installation: {response.status_code}: {response.json()}"
             )
             return None

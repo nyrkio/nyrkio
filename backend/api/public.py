@@ -176,9 +176,8 @@ async def get_pr_changes_for_test_name(
         notify=None,
     )
 
-@public_router.get(
-    "/pulls/{repo:path}/{pull_number}/changes/{git_commit}"
-)
+
+@public_router.get("/pulls/{repo:path}/{pull_number}/changes/{git_commit}")
 async def get_pr_changes(
     repo: str,
     pull_number: int,
