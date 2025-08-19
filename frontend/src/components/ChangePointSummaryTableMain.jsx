@@ -297,7 +297,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 //           params.node.rowHeight = 100;
 //         }
   }
-  const gridHeightPx = 135 + Math.min(rowData.length, 50) * 50;
+  const gridHeightPx = 150 + Math.min(Math.max(rowData.length, 2), 20) * 50;
   return (
     <>
       <div className="row text-center">
@@ -305,17 +305,16 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       </div>
       <div
         className="ag-main-cp-table ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
-        style={{ width: "100%", height: gridHeightPx, minHeight: "13em", maxHeight: "90vh" }}
+        style={{ width: "100%", height: gridHeightPx, minHeight: "13em", maxHeight: "95vh" }}
       >
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
-          paginationAutoPageSize={true}
           style={{width: "100%", maxHeight: "75vhi"}}
           className="w-100"
-          paginationPageSize={10}
+          paginationPageSize={20}
           paginationPageSizeSelector={[10, 20, 50, 100]}
           getRowClass={getRowStyle}
           rowClassRules={rowClassRules}                                                                                                                                                                                                                                                    />
