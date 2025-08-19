@@ -211,6 +211,9 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         if (baseUrls.results=="/public"){
           url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name +"#"+ metric_name;
         }
+        if(isLeafDashboard){
+          url = `#${metric_name}`
+        }
         return (
           <>
           <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
