@@ -9,7 +9,9 @@ export const parseTimestamp = (t) => {
 
 export const formatCommit = (commit, commit_msg) => {
   // Limit the git commit sha to 12 characters to improve readability
-  var commitString = commit.substring(0, 12);
+  if(!commit) return "";
+  var l = Math.min(12, commit.length);
+  var commitString = commit.substring(0, l);
   if (commit_msg !== "") {
     commitString += ' ("' + commit_msg + '")';
   }
@@ -149,4 +151,17 @@ export const getOrgRepoBranch = (name) => {
                             + (parts.length > 2 ? "/" + parts[2] : "");
 
       return orgRepoBranch;
+}
+
+// Return the org / namespace /branch / testname of a public project. To be used in links and such.
+export const getOrgRepoBranchTestParts = (name) => {
+  if(name===undefined) return "";
+  name = decodeURIComponent(name).replace("https://github.com/","");
+  const parts = name.split("/");
+  const orgRepoBranchName = [parts.length > 0 ? parts.shift(0) : "",
+  parts.length > 0 ? parts.shift(0) : "",
+  parts.length > 0 ? parts.shift(0) : "",
+  parts.length > 0 ? parts.join("/") : ""];
+
+  return orgRepoBranchName;
 }

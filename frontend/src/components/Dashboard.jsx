@@ -3,7 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 import { PropTypes } from "prop-types";
 import { DrawLineChart } from "./DrawLineChart";
-import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
+import { ChangePointSummaryTableMain } from "./ChangePointSummaryTableMain";
 import { NoMatch } from "./NoMatch";
 import { createShortNames, dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
@@ -739,13 +739,13 @@ export const SingleResultWithTestname = ({
   if(displayData && displayData[displayData.length-1]){
     metricsData = displayData[displayData.length-1].metrics;
   }
-
+  const isPublicDash = isPublicDashboard(dashboardType);
   return (
     <>
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           <div className="container">
             <div className="row justify-content-center">
-              <ChangePointSummaryTable changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData}/>
+              <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} />
             </div>
 
             {hideSettings?"":

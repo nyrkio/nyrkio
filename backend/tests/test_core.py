@@ -19,7 +19,11 @@ def test_add_result():
     """Add a performance test result to a series"""
     series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = {"metric1": 1.0, "metric2": 2.0}
+    # metrics = {"metric1": 1.0, "metric2": 2.0}
+    metrics = [
+        ResultMetric("throughput", "x/s", 345, "higher_is_better"),
+        ResultMetric("delay", "s", 5.0, "lower_is_better"),
+    ]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
@@ -46,7 +50,7 @@ async def test_calculate_changes_in_series():
     series = PerformanceTestResultSeries("benchmark1")
 
     attr = {"attr1": "value1", "attr2": "value2"}
-    metrics = [ResultMetric("metric1", "µs", 1.0)]
+    metrics = [ResultMetric("metric1", "µs", 1.0, "lower_is_better")]
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
@@ -74,7 +78,10 @@ def test_deleting_result_from_series():
     """Delete a result from a series"""
     series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = {"metric1": 1.0, "metric2": 2.0}
+    metrics = [
+        ResultMetric("throughput", "x/s", 345, "higher_is_better"),
+        ResultMetric("delay", "s", 5.0, "lower_is_better"),
+    ]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
@@ -92,7 +99,7 @@ def test_deleting_non_existing_result_from_series():
     """Delete a non-existing result from a series"""
     series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = {"metric1": 1.0, "metric2": 2.0}
+    metrics = [ResultMetric("throughput", "x/s", 345), ResultMetric("delay", "s", 5.0)]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
@@ -113,7 +120,10 @@ async def test_calculate_changes_with_multiple_metrics():
     series = PerformanceTestResultSeries(testname)
 
     attr = {"attr1": "value1", "attr2": "value2"}
-    metrics = [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 1.0)]
+    metrics = [
+        ResultMetric("metric1", "µs", 1.0, "lower_is_better"),
+        ResultMetric("metric2", "µs", 1.0, "higher_is_better"),
+    ]
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
@@ -241,7 +251,10 @@ def test_add_results_in_any_order_returns_sorted():
     """Test that adding results in any order returns sorted results"""
     series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = {"metric1": 1.0, "metric2": 2.0}
+    metrics = [
+        ResultMetric("throughput", "x/s", 345, "higher_is_better"),
+        ResultMetric("delay", "s", 5.0, "lower_is_better"),
+    ]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(3, metrics, attr))
@@ -285,17 +298,23 @@ def test_core_config():
     # don't see any change points when we use a high min_magnitude
     series.add_result(
         PerformanceTestResult(
-            1, [ResultMetric("metric1", "µs", 1.0)], {"attr1": "value1"}
+            1,
+            [ResultMetric("metric1", "µs", 1.0, "higher_is_better")],
+            {"attr1": "value1"},
         )
     )
     series.add_result(
         PerformanceTestResult(
-            2, [ResultMetric("metric1", "µs", 1.0)], {"attr1": "value1"}
+            2,
+            [ResultMetric("metric1", "µs", 1.0, "higher_is_better")],
+            {"attr1": "value1"},
         )
     )
     series.add_result(
         PerformanceTestResult(
-            3, [ResultMetric("metric1", "µs", 2.0)], {"attr1": "value1"}
+            3,
+            [ResultMetric("metric1", "µs", 2.0, "higher_is_better")],
+            {"attr1": "value1"},
         )
     )
 
@@ -308,16 +327,27 @@ def test_notifiers_get_notified():
     """Ensure notifiers get notified"""
     series = PerformanceTestResultSeries("benchmark1")
 
-    metrics = [ResultMetric("metric1", "µs", 1.0)]
-    metrics2 = [ResultMetric("metric1", "µs", 2.0)]
+    metrics = [ResultMetric("metric1", "µs", 1.0, "lower_is_better")]
+    metrics2 = [ResultMetric("metric1", "µs", 2.0, "higher_is_better")]
     attr = {"attr1": "value1", "attr2": "value2"}
 
     series.add_result(PerformanceTestResult(1, metrics, attr))
     series.add_result(PerformanceTestResult(2, metrics, attr))
+
+    change_points = series.calculate_change_points()
+    direction = change_points["metric1"].metric("metric1").direction
+    # direction = series.get_direction_for_change_points("metric1", change_points)
+    assert direction == "lower_is_better"
+
     series.add_result(PerformanceTestResult(3, metrics, attr))
     series.add_result(PerformanceTestResult(4, metrics2, attr))
     series.add_result(PerformanceTestResult(5, metrics2, attr))
     series.add_result(PerformanceTestResult(6, metrics2, attr))
+
+    change_points = series.calculate_change_points()
+    direction = change_points["metric1"].metric("metric1").direction
+    # direction = series.get_direction_for_change_points("metric1", change_points)
+    assert direction == "higher_is_better"
 
     class Notifier:
         notified = False
@@ -331,18 +361,15 @@ def test_notifiers_get_notified():
             self.expected_output = output
 
     notifier = Notifier()
+    reports = asyncio.run(series.produce_reports(change_points, [notifier], None))
 
-    asyncio.run(series.calculate_changes([notifier]))
     assert notifier.notified
     assert "metric1" in notifier.expected_output.keys()
     assert len(notifier.expected_output["metric1"]) == 1
     assert notifier.expected_output["metric1"][0].index == 3
     assert notifier.expected_output["metric1"][0].time == 4
 
-
-def test_changes_for_metrics_with_different_timestamps():
-    """Calculate changes for metrics with different number of timestamps"""
-    config = Config(min_magnitude=0.0, max_pvalue=0.01)
+    config = Config(min_magnitude=1.0)
     series = PerformanceTestResultSeries("benchmark1", config)
 
     # Add a known time series that has change points and ensure that we
@@ -350,7 +377,10 @@ def test_changes_for_metrics_with_different_timestamps():
     series.add_result(
         PerformanceTestResult(
             1,
-            [ResultMetric("metric1", "µs", 1.0), ResultMetric("metric2", "µs", 10.0)],
+            [
+                ResultMetric("metric1", "µs", 1.0, "higher_is_better"),
+                ResultMetric("metric2", "µs", 10.0),
+            ],
             {"attr1": "value1"},
         )
     )
@@ -365,9 +395,9 @@ def test_changes_for_metrics_with_different_timestamps():
         PerformanceTestResult(
             3,
             [
-                ResultMetric("metric1", "µs", 1.0),
-                ResultMetric("metric2", "µs", 10.0),
-                ResultMetric("metric3", "µs", 2.0),
+                ResultMetric("metric1", "µs", 1.0, "higher_is_better"),
+                ResultMetric("metric2", "µs", 10.0, "higher_is_better"),
+                ResultMetric("metric3", "µs", 2.0, "higher_is_better"),
             ],
             {"attr1": "value1"},
         )
@@ -376,9 +406,9 @@ def test_changes_for_metrics_with_different_timestamps():
         PerformanceTestResult(
             4,
             [
-                ResultMetric("metric1", "µs", 20.0),
-                ResultMetric("metric2", "µs", 200.0),
-                ResultMetric("metric3", "µs", 2.0),
+                ResultMetric("metric1", "µs", 20.0, "higher_is_better"),
+                ResultMetric("metric2", "µs", 200.0, "higher_is_better"),
+                ResultMetric("metric3", "µs", 2.0, "higher_is_better"),
             ],
             {"attr1": "value1"},
         )
@@ -387,22 +417,28 @@ def test_changes_for_metrics_with_different_timestamps():
         PerformanceTestResult(
             5,
             [
-                ResultMetric("metric1", "µs", 20.0),
-                ResultMetric("metric2", "µs", 200.0),
-                ResultMetric("metric3", "µs", 20.0),
+                ResultMetric("metric1", "µs", 20.0, "higher_is_better"),
+                ResultMetric("metric2", "µs", 200.0, "higher_is_better"),
+                ResultMetric("metric3", "µs", 20.0, "higher_is_better"),
             ],
             {"attr1": "value1"},
         )
     )
 
-    changes = asyncio.run(series.calculate_changes())
+    # changes = asyncio.run(series.calculate_changes())
+    change_points = series.calculate_change_points()
+    direction = series.get_direction_for_change_points("metric1", change_points)
+    assert direction == "higher_is_better"
+    direction = series.get_direction_for_change_points("metric2", change_points)
+    assert direction == "higher_is_better"
+    reports = asyncio.run(series.produce_reports(change_points, [notifier], None))
 
-    assert "benchmark1" in changes
-    assert len(changes["benchmark1"]) == 2
-    assert len(changes["benchmark1"][0]["changes"]) == 2
-    assert changes["benchmark1"][0]["time"] == 4
-    assert changes["benchmark1"][0]["changes"][0]["metric"] == "metric1"
-    assert changes["benchmark1"][0]["changes"][1]["metric"] == "metric2"
-    assert len(changes["benchmark1"][1]["changes"]) == 1
-    assert changes["benchmark1"][1]["time"] == 5
-    assert changes["benchmark1"][1]["changes"][0]["metric"] == "metric3"
+    assert "benchmark1" in reports
+    assert len(reports["benchmark1"]) == 2
+    assert len(reports["benchmark1"][0]["changes"]) == 2
+    assert reports["benchmark1"][0]["time"] == 4
+    assert reports["benchmark1"][0]["changes"][0]["metric"] == "metric1"
+    assert reports["benchmark1"][0]["changes"][1]["metric"] == "metric2"
+    assert len(reports["benchmark1"][1]["changes"]) == 1
+    assert reports["benchmark1"][1]["time"] == 5
+    assert reports["benchmark1"][1]["changes"][0]["metric"] == "metric3"

@@ -10,7 +10,12 @@ import logging
 from sortedcontainers import SortedList
 
 from hunter.report import Report, ReportType
-from hunter.series import Series, AnalysisOptions, AnalyzedSeries
+from hunter.series import (
+    Series,
+    AnalysisOptions,
+    AnalyzedSeries,
+    Metric as HunterMetric,
+)
 
 from backend.core.sieve import sieve_cache
 from backend.core.config import Config
@@ -54,10 +59,30 @@ Notifications can be sent when a performance change is detected.
 
 
 class ResultMetric:
-    def __init__(self, name, unit, value):
+    def __init__(self, name, unit, value, direction=None):
         self.name = name
         self.unit = unit
         self.value = value
+
+        allowed_values = ["higher_is_better", "lower_is_better"]
+
+        if direction not in allowed_values and direction is not None:
+            raise ValueError(f"direction must be one of {allowed_values}")
+        self.direction = direction
+
+    def get_hunter_direction(self):
+        if self.direction == "higher_is_better":
+            return 1
+        elif self.direction == "lower_is_better":
+            return -1
+        else:
+            return None
+
+    def get_hunter_unit(self):
+        return {self.name: self.unit}
+
+    def to_hunter_instance(self):
+        return HunterMetric(self.direction, 1.0, self.unit)
 
 
 class PerformanceTestResult:
@@ -75,7 +100,11 @@ class PerformanceTestResult:
         self._last_modified = last_modified
 
 
-class PerformanceTestResultSeries:
+class AbstractPerformanceTestResultSeries:
+    pass
+
+
+class PerformanceTestResultSeries(AbstractPerformanceTestResultSeries):
     def __init__(self, name, config=None, change_points_timestamp=None):
         self.results = SortedList(key=lambda r: r.timestamp)
         self.name = name
@@ -145,36 +174,6 @@ class PerformanceTestResultSeries:
         """
         self.results = [r for r in self.results if r.timestamp != timestamp]
 
-    class SingleMetricSeries:
-        def __init__(self):
-            self.timestamps = []
-            self.attributes = defaultdict(list)
-            self.metric_unit = None
-            self.metric_data = []
-
-        def add_result(self, timestamp, result_metric, attributes):
-            self.timestamps.append(timestamp)
-            self.metric_unit = result_metric.unit
-            self.metric_name = result_metric.name
-            self.metric_data.append(result_metric.value)
-            for k, v in attributes.items():
-                self.attributes[k].append(v)
-
-        def __iter__(self):
-            for i in range(len(self.timestamps)):
-                t = self.timestamps[i]
-                d = self.data[i]
-                obj = {
-                    "timestamp": t,
-                    "metric_name": self.metric_name,
-                    "metric_unit": self.metric_unit,
-                    "metric_data": d,
-                    "attributes": {},
-                }
-                for k, v in self.attributes.items():
-                    obj["attributes"][k] = v[i]
-                yield obj
-
     # def per_metric_series(self) -> Dict[str, SingleMetricSeries]:
     #     # TODO(mfleming) Instead of building this dict here we should refactor
     #     # PerformanceTestResultSeries to store the data in this way, i.e. by
@@ -191,7 +190,9 @@ class PerformanceTestResultSeries:
     #
     #     return data
 
-    def per_metric_series(self, split_new=False) -> Dict[str, SingleMetricSeries]:
+    def per_metric_series(
+        self, split_new=False
+    ) -> Dict[str, AbstractPerformanceTestResultSeries]:
         old_data = {}
         new_data = {}
         for r in self.results:
@@ -209,7 +210,7 @@ class PerformanceTestResultSeries:
 
             for rm in r.metrics:
                 if rm.name not in data:
-                    s = data[rm.name] = PerformanceTestResultSeries.SingleMetricSeries()
+                    s = data[rm.name] = _single_metric_series()
                 else:
                     s = data[rm.name]
 
@@ -235,7 +236,7 @@ class PerformanceTestResultSeries:
         # a user only recently started collecting data for a new metric. So we
         # analyze each series separately.
         all_change_points = {}
-        for metric_name, m in data.items():
+        for metric_name, sm in data.items():
             if disabled_metrics is not None:
                 if metric_name in disabled_metrics:
                     continue
@@ -243,15 +244,17 @@ class PerformanceTestResultSeries:
                 if metric_name not in enabled_metrics:
                     continue
 
-            metric_timestamps = m.timestamps
-            metric_units = {metric_name: m.metric_unit}
-            metric_data = {metric_name: m.metric_data}
-            attributes = m.attributes
+            branch = sm.attributes.get("branch")
+            metric_timestamps = sm.timestamps
+            metric_object = {metric_name: sm.metric.to_hunter_instance()}
+            metric_data = sm.get_hunter_data()
+            attributes = sm.attributes
+
             series = Series(
                 self.name,
-                None,
+                branch,
                 metric_timestamps,
-                metric_units,
+                metric_object,
                 metric_data,
                 attributes,
             )
@@ -292,6 +295,15 @@ class PerformanceTestResultSeries:
 
         return all_change_points
 
+    def get_direction_for_change_points(
+        self, metric_name: str, change_points: Dict[str, AnalyzedSeries]
+    ):
+        return (
+            change_points[metric_name]
+            ._AnalyzedSeries__series.metrics[metric_name]
+            .direction
+        )
+
     async def produce_reports(
         self,
         all_change_points: Dict[str, AnalyzedSeries],
@@ -304,9 +316,9 @@ class PerformanceTestResultSeries:
 
         reports = []
         for metric_name, analyzed_series in all_change_points.items():
-            # analyzed_series.change_points_by_time = AnalyzedSeries.__group_change_points_by_time(analyzed_series.__series, analyzed_series.change_points)
+            # direction = self.get_direction_for_change_points(metric_name, change_points)
             change_points = analyzed_series.change_points_by_time
-            report = GitHubReport(analyzed_series.metric(metric_name), change_points)
+            report = GitHubReport(analyzed_series, change_points)
             produced_report = await report.produce_report(self.name, ReportType.JSON)
             reports.append(json.loads(produced_report))
 
@@ -510,3 +522,48 @@ def _validate_cached_series(test_name, data, old_cp):
             )
             return False
     return True
+
+
+class SingleMetricSeries(PerformanceTestResultSeries):
+    def __init__(self):
+        self.timestamps = []
+        self.attributes = defaultdict(list)
+        self.metric = None
+        self.values = []
+
+    def add_result(self, timestamp, result_metric, attributes):
+        self.timestamps.append(timestamp)
+        self.metric = result_metric
+        self.values.append(result_metric.value)
+        for k, v in attributes.items():
+            self.attributes[k].append(v)
+
+    def __iter__(self):
+        for i in range(len(self.timestamps)):
+            obj = {
+                "timestamp": self.timestamps[i],
+                "metric_name": self.metric.name,
+                "metric_unit": self.metric.unit,
+                "metric_data": self.data[i],
+                "attributes": {},  # see below
+            }
+            for k, v in self.attributes.items():
+                obj["attributes"][k] = v[i]
+            yield obj
+
+    def get_hunter_data(self):
+        return {self.metric.name: self.values}
+
+    def to_hunter_instance(self):
+        return Series(
+            self.metric.name,
+            self.attributes.get("branch"),
+            self.timestamps,
+            self.metric.to_hunter_instance(),
+            self.get_hunter_data(),
+            self.attributes,
+        )
+
+
+def _single_metric_series():
+    return SingleMetricSeries()
