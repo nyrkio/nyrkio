@@ -185,15 +185,18 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
       </div>
       <div
         className="ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
-        style={{ height: 500, width: "100%" }}
+        style={{ width: "100%" }}
       >
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
           pagination={true}
+          paginationAutoPageSize={true}
           autoSizeStrategy={autoSizeStrategy}
-          style={{width: "100%"}}
+          style={{width: "100%", maxHeight: "75vhi"}}
           className="w-100"
+          paginationPageSize={10}
+          paginationPageSizeSelector={[10, 20, 50, 100]}
         />
       </div>
     </>

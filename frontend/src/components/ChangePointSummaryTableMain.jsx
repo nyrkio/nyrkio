@@ -12,14 +12,18 @@ const Loading = ({loading}) => {
   return (<><div className="loading_done"></div></>);
 };
 
-export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, queryStringTextTimestamp, loading, metricsData }) => {
+export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, queryStringTextTimestamp, loading, metricsData, isPublicDashboard }) => {
   var rowData = [];
-
   const directionMap = {};
   if(Array.isArray(metricsData)){
     metricsData.forEach((m)=>directionMap[m.name]=m.direction);
   }
-  const direction = (metric)=>{
+  let isLeafDashboard = false;
+
+  const direction = (metric,changePoint)=>{
+      if(changePoint && changePoint.metric && changePoint.metric[metric] && changePoint.metric[metric].direction){
+        return changePoint.metric[metric].direction;
+      }
       if(directionMap[metric]){
         return directionMap[metric];
       }
@@ -77,19 +81,24 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       if (directionMap[metric]=="higher_is_better") return <span title="higher is better">⇧</span>;
       if (directionMap[metric]=="lower_is_better") return <span title="lower is better">⇩</span>;
   }
-
   let previousRow = null;
-  //   console.debug(changeData);
   Object.entries(changeData).forEach(([shortName, obj]) => {
     obj.forEach((changePoint) => {
-        const branchName = changePoint["attributes"]["branch"]
-        const test_name = changePoint["test_name"];
-        const changes = changePoint["cp_values"];
-        // console.debug(changes);
-        changes.map((change) => {
-          const commit = changePoint["_id"]["git_commit"];
+        console.debug(changePoint);
+        if(changePoint["_id"]){
+            changePoint["commit"] = changePoint["_id"]["git_commit"];
+        } else {
+            changePoint["commit"] = changePoint["attributes"]["git_commit"];
+        }
 
+
+        const branchName = changePoint["attributes"]["branch"]
+        let test_name = changePoint["test_name"];
+        const changes = changePoint["cp_values"] || changePoint["changes"];
+        changes.map((change) => {
           let commit_msg = "";
+
+          const commit = changePoint["commit"];
           if (changePoint["attributes"].hasOwnProperty("commit_msg")) {
             commit_msg = changePoint["attributes"]["commit_msg"];
           }
@@ -101,23 +110,35 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
           const isSame = {date:false, commit: false, test: false, index: 0 };
           if (previousRow !== null){
-            isSame.date = (previousRow.time == changePoint.time);
-            isSame.commit = (previousRow["_id"]["git_commit"] == changePoint["_id"]["git_commit"]);
-            isSame.test = (previousRow["test_name"] == changePoint["test_name"]);
+            isSame.date = (previousRow.date == date);
+            isSame.commit = (previousRow["commit"] == changePoint["commit"]);
+            isSame.test = (previousRow["test_name"] == test_name);
           }
           if (isSame.date && isSame.commit){
             changePoint["__isSameIndex"] = 1 + (previousRow["__isSameIndex"] === undefined ? 0 : previousRow["__isSameIndex"]);
             isSame.index += changePoint["__isSameIndex"];
           }
           //console.log(changePoint["__isSameIndex"] + JSON.stringify(changePoint["_id"]));
-          rowData.push({
-            date: { date, isSame },
-            commit: { commit, commit_msg, repo, isSame },
-            test: { test_name, branchName, isSame },
-            metric: { test_name, metric_name, branchName },
-            change: { changeValue, metric_name }
-          });
+          if(test_name){
+            rowData.push({
+              date: { date, isSame },
+              commit: { commit, commit_msg, repo, isSame },
+              test: { test_name, branchName, isSame },
+              metric: { test_name, metric_name, branchName },
+              change: { changeValue, metric_name }
+            });
+          } else {
+            rowData.push({
+              date: { date, isSame },
+              commit: { commit, commit_msg, repo, isSame },
+              test: { branchName, isSame },
+              metric: { metric_name, branchName },
+              change: { changeValue, metric_name }
+            });
+            isLeafDashboard=true;
+          }
           previousRow = changePoint;
+          previousRow.date = date;
       });
     });
   });
@@ -133,7 +154,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     );
   }
 
-  const colDefs = [
+  let colDefs = [
     { field: "date", sort: "desc",
       cellRenderer: (params) => {
         const text = params.value.date;
@@ -240,6 +261,9 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     },
   ];
 
+  if(isLeafDashboard){
+    colDefs = [colDefs[0], colDefs[2], colDefs[3], colDefs[4] ]
+  }
   const autoSizeStrategy = useMemo(() => {
     return {
       type: "fitCellContents",
@@ -253,7 +277,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         return isSame.date && isSame.commit;
       },
       'ag-row-is-new': (params) => {
-        //console.log(params.data.date);
+            console.log(params.data.date);
         const isSame = params.data.date.isSame;
         return ! (isSame.date && isSame.commit);
       }
@@ -263,7 +287,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
          //console.log(params.data.date);
         if ( (isSame.date && isSame.commit) ){
           const oldh = params.node.rowHeight;
-          const h = 25;
+          const h = 42;
           // console.log(isSame);
           const translate = params.node.rowTop -(oldh -h)*(isSame.index+0.5);
           params.node.rowHeight = h;
@@ -286,12 +310,15 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
-          rowClassRules={rowClassRules}
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
-          style={{width: "100%"}}
+          paginationAutoPageSize={true}
+          style={{width: "100%", maxHeight: "75vhi"}}
           className="w-100"
-        />
+          paginationPageSize={10}
+          paginationPageSizeSelector={[10, 20, 50, 100]}
+          getRowClass={getRowStyle}
+          rowClassRules={rowClassRules}                                                                                                                                                                                                                                                    />
       </div>
     </>
   );

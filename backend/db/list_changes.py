@@ -120,6 +120,8 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "metric_name": "$cp2.v.metric",
                 "metric_name_control": "$cp2.k",
+                "direction": "$metrics.direction",
+                "unit": "$metrics.unit",
                 "test_name": "$test_name",
                 "cp_values": "$cp2.v",
             },
@@ -149,6 +151,12 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "metric_name_control": {
                     "$push": "$metric_name_control",
+                },
+                "direction": {
+                    "$last": "$direction",
+                },
+                "unit": {
+                    "$last": "$unit",
                 },
                 "git_repo": {
                     "$last": "$repo",
@@ -186,6 +194,7 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "name": "$metric_name",
                     "unit": "(omitted)",
                     "value": "$data_value",
+                    "direction": "$direction",
                 },
                 "cp_values": "$cp_values",
                 "meta": {

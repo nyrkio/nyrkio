@@ -57,6 +57,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
           <AllChangePoints
             testNamePrefix={prefix}
             baseUrls={baseUrls}
+            dashboardType={dashboardType}
             />
           <OrigTestList
             baseUrls={baseUrls}

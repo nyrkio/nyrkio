@@ -1,7 +1,6 @@
 import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { DrawLineChart } from "./DrawLineChart";
-import { ChangePointSummaryTable } from "./ChangePointSummaryTable";
 import tigerBeetleLogo from "../static/tb-logo-black.png";
 import tursoLogo from "../static/turso-banner.png";
 import kiekerLogo from "../static/kieker-logo.svg";

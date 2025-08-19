@@ -987,7 +987,8 @@ class DBStore(object):
                 "last_modified": series_last_modified,
                 "change_points_timestamp": change_points_timestamp,
                 # 3 = hunter from_json() includes weak_change_points, w
-                "schema_version": 3,
+                # 4 = metrics stores a Metrics object, in particular direction.
+                "schema_version": 4,
             },
             "change_points": change_points_json,
         }
