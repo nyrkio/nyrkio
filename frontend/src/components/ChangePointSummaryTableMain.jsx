@@ -84,7 +84,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   let previousRow = null;
   Object.entries(changeData).forEach(([shortName, obj]) => {
     obj.forEach((changePoint) => {
-        console.debug(changePoint);
+        // console.debug(changePoint);
         if(changePoint["_id"]){
             changePoint["commit"] = changePoint["_id"]["git_commit"];
         } else {
