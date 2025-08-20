@@ -883,7 +883,8 @@ div.card div.card-header {
 
 }
 
-.ag-main-cp-table .ag-row.ag-row-is-new {
+.ag-main-cp-table .ag-row.ag-row-is-new,
+.ag-row-is-new {
   border-top: 1px solid var(--nyrkio-horn-light-brown);
 }
 
