@@ -126,7 +126,12 @@ def _build_result_series(
             if disabled and m["name"] in disabled:
                 continue
 
-            rm = ResultMetric(name=m["name"], unit=m["unit"], value=m["value"])
+            rm = ResultMetric(
+                name=m["name"],
+                unit=m["unit"],
+                value=m["value"],
+                direction=m.get("direction"),
+            )
             metrics.append(rm)
 
         result = PerformanceTestResult(
