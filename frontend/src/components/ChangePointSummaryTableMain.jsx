@@ -131,7 +131,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
             rowData.push({
               date: { date, isSame },
               commit: { commit, commit_msg, repo, isSame },
-              test: { branchName, isSame },
+              test: { date, branchName, isSame },
               metric: { metric_name, branchName },
               change: { changeValue, metric_name }
             });
@@ -154,6 +154,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     );
   }
 
+  let prevDate, prevCommit, prevTest;
   let colDefs = [
     { field: "date", sort: "desc",
       cellRenderer: (params) => {
@@ -165,16 +166,26 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         if (params.column.sort != "desc"){
           isSame.userSort = true;
         }
-        if (isSame.date && params.column.sort == "desc") {
+        if (text == prevDate&& params.column.sort == "desc") {
+          prevDate=text;
+          isSame.newFlag = "yes";
           return "";
         }
         else {
+          prevDate=text;
+          isSame.newFlag = "no";
           return text;
         }
       },
       valueFormatter: (params)=>{
         return params.value.date;
       },
+      cellClass: async params => {
+        const same = (
+          params.value.prevDate == params.value.date
+        );
+        return params.value.isSame.date ? 'xxxxag-row-is-same' : 'xxxxag-row-is-new';
+      }
     },
     { field: "test",
       cellRenderer: (params) => {
@@ -182,15 +193,16 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         const branchName = params.value.branchName;
         const isSame = params.value.isSame;
         let url = baseUrls.resultsWithOrg + "/" + test_name;
-        // console.log(baseUrls);
         if (baseUrls.results=="/public"){
           url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name;
         }
 
-        if (isSame.date && isSame.test && ! isSame.userSort) {
+        if (test_name == prevTest && params.value.isSame.commit && !params.value.isSame.userSort) {
+          prevTest=test_name;
           return "";
         }
         else {
+          prevTest=test_name;
           return (
             <>
             <a href={url}>{test_name}</a>
@@ -247,10 +259,12 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
         const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
-        if (isSame.date && isSame.commit && ! isSame.userSort) {
+        if (text == prevCommit&& !params.value.isSame.userSort) {
+          prevCommit = text;
           return "";
         }
         else {
+          prevCommit = text;
           return (
             <a href={url} target="_blank">
               {text}
@@ -275,21 +289,20 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
   const rowClassRules = {
       'ag-row-is-same': (params) => {
-        // console.log(params);
         const isSame = params.data.date.isSame;
         return isSame.date && isSame.commit;
       },
       'ag-row-is-new': (params) => {
-            console.log(params.data.date);
         const isSame = params.data.date.isSame;
         return ! (isSame.date && isSame.commit);
-      }
+      },
   };
-  const getRowStyle = (params) => {
+  const getRowStyle = async (params) => {
         const isSame = params.data.date.isSame;
-         //console.log(params.data.date);
-        if ( (isSame.date && isSame.commit) ){
+        //console.log(params.data.date.isSame);
+        if ( (isSame.newFlag=="juu") ){
           const oldh = params.node.rowHeight;
+          // console.log(params.data.date.isSame);
           const h = 42;
           // console.log(isSame);
           const translate = params.node.rowTop -(oldh -h)*(isSame.index+0.5);

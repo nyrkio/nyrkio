@@ -963,12 +963,12 @@ const SummarizeChangePoints = ({ longName, summaries,loading }) => {
 */
 // Workaround as this is too comlex for react or something
 const populateSummaryData = (sData, prefix) => {
-  console.debug(sData);
+  //console.debug(sData);
   const summaryElements = document.getElementsByClassName("summarize-change-points");
-  console.debug(summaryElements);
+  //console.debug(summaryElements);
   for(let el of summaryElements){
     let key=el.dataset.longname;
-    console.debug(key);
+    //console.debug(key);
     let a, b, c="";
     var newestDate = new Date();
     if (

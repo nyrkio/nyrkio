@@ -21,10 +21,10 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
   const shortNames = createShortNames(prefix, testNames);
   const displayNames = shortNames.map((name)=>decodeURIComponent(name));
 
-   console.debug(singleTestName);
-   console.debug(prefix);
-   console.debug(data);
-   console.debug(baseUrls);
+//    console.debug(singleTestName);
+//    console.debug(prefix);
+//    console.debug(data);
+//    console.debug(baseUrls);
 
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
