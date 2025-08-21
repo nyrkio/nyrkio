@@ -155,8 +155,14 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "direction": {
                     "$last": "$direction",
                 },
+                "direction_first": {
+                    "$first": "$direction",
+                },
                 "unit": {
                     "$last": "$unit",
+                },
+                "unit_first": {
+                    "$first": "$unit",
                 },
                 "git_repo": {
                     "$last": "$repo",
@@ -195,6 +201,8 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                     "unit": "$unit",
                     "value": "$data_value",
                     "direction": "$direction",
+                    "unit_first": "$unit_first",
+                    "direction_first": "$direction_first",
                 },
                 "cp_values": "$cp_values",
                 "meta": {

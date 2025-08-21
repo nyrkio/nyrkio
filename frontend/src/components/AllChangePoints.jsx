@@ -54,8 +54,8 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
     }
   };
   useEffect(loadData, [location]);
-
-
+  console.log("YYYYYYYYYYYYYYYYYYYY");
+  console.log(changePointData);
 
   return (
       <>
