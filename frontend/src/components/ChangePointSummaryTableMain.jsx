@@ -20,17 +20,20 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   }
   let isLeafDashboard = false;
 
-  const direction = (metric,changePoint)=>{
-      if(changePoint && changePoint.metric && changePoint.metric[metric] && changePoint.metric[metric].direction){
-        return changePoint.metric[metric].direction;
+
+  const getDirection = (metric,changePoint)=>{
+
+      if(changePoint && changePoint.metric && changePoint.metric.direction){
+        return changePoint.metric.direction;
       }
       if(directionMap[metric]){
+
         return directionMap[metric];
       }
       return null;
   };
   const directionFormatter = (value, metric) => {
-    let d = direction(metric);
+    let d = getDirection(metric);
     if ( d == "higher_is_better"){
       if (value>0){
         return (<span className="bg-success nyrkio-change nyrkio-change-improvement">{value}</span>);
@@ -53,8 +56,11 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     }
     return (<span className="nyrkio-change nyrkio-change-unknown">{value}</span>);
   };
-  const directionColor = (value, metric) => {
-    let d = direction(metric);
+  const directionColor = (value, metric, direction) => {
+    let d = direction ? direction : getDirection(metric, direction);
+    if(d=-1) d = "lower_is_better";
+    if( d=1) d = "higher_is_better";
+
     if ( d == "higher_is_better"){
       if (value>0){
         return "#00ff0055";
@@ -77,14 +83,21 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     }
     return "#ffffff00";
   };
-  const directionArrow = (metric) => {
-      if (directionMap[metric]=="higher_is_better") return <span title="higher is better">⇧</span>;
-      if (directionMap[metric]=="lower_is_better") return <span title="lower is better">⇩</span>;
+  const directionArrow = (metric, direction) => {
+    if (direction == 1 || direction == "higher_is_better") return <span title="higher is better">⇧</span>;
+    if (direction == -1 || direction == "lower_is_better") return <span title="lower is better">⇩</span>;
+    if (directionMap[metric] == 1 || directionMap[metric] == "higher_is_better") return <span title="higher is better">⇧</span>;
+    if (directionMap[metric] == -1 || directionMap[metric] == "lower_is_better") return <span title="lower is better">⇩</span>;
+    return "???";
   }
   let previousRow = null;
   Object.entries(changeData).forEach(([shortName, obj]) => {
     obj.forEach((changePoint) => {
-        // console.debug(changePoint);
+        //console.debug(changePoint);
+
+      const direction = changePoint && changePoint.metric ? changePoint.metric.direction : undefined;
+        // console.log(direction);
+
         if(changePoint["_id"]){
             changePoint["commit"] = changePoint["_id"]["git_commit"];
         } else {
@@ -125,19 +138,19 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
               date: { date, isSame },
               commit: { commit, commit_msg, repo, isSame },
               test: { test_name, branchName, isSame },
-              metric: { test_name, metric_name, branchName },
-              change: { changeValue, metric_name }
+              metric: { test_name, metric_name, branchName, direction },
+              change: { changeValue, metric_name, direction }
             });
             previousRow = changePoint;
             previousRow.date = date;
           } else {
+            isLeafDashboard=true;
             rowData.push({
               date: { date, isSame },
               commit: { commit, commit_msg, repo, isSame },
-              metric: { metric_name, branchName },
+              metric: { metric_name, branchName, direction },
               change: { changeValue, metric_name }
             });
-            isLeafDashboard=true;
           }
       });
     });
@@ -219,6 +232,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
         const branchName = params.value.branchName;
+        const direction = params.value.direction;
         let url = baseUrls.resultsWithOrg + "/" + test_name +"#"+ metric_name;
         if (baseUrls.results=="/public"){
           url = baseUrls.resultsWithOrg + "/" + branchName + "/" + test_name +"#"+ metric_name;
@@ -228,7 +242,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         }
         return (
           <>
-          <a href={url}>{metric_name}</a> {directionArrow(metric_name)}
+          <a href={url}>{metric_name}</a> {directionArrow(metric_name, direction)}
           </>
         );
       },
@@ -243,8 +257,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         return (<>{changeValue} %</>);
       },
       cellStyle: (params) => {
-        const { changeValue, metric_name } = params.value;
-        const d = directionColor(changeValue, metric_name);
+        const { changeValue, metric_name, direction } = params.value;
+        const d = directionColor(changeValue, metric_name, direction);
         return {backgroundColor:d};
       },
       valueFormatter: (params)=>{
