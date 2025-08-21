@@ -337,7 +337,8 @@ def test_notifiers_get_notified():
     change_points = series.calculate_change_points()
     direction = change_points["metric1"].metric("metric1").direction
     # direction = series.get_direction_for_change_points("metric1", change_points)
-    assert direction == "lower_is_better"
+    # assert direction == "lower_is_better"
+    assert direction == -1
 
     series.add_result(PerformanceTestResult(3, metrics, attr))
     series.add_result(PerformanceTestResult(4, metrics2, attr))
@@ -347,7 +348,8 @@ def test_notifiers_get_notified():
     change_points = series.calculate_change_points()
     direction = change_points["metric1"].metric("metric1").direction
     # direction = series.get_direction_for_change_points("metric1", change_points)
-    assert direction == "higher_is_better"
+    # assert direction == "higher_is_better"
+    assert direction == 1
 
     class Notifier:
         notified = False
@@ -428,9 +430,9 @@ def test_notifiers_get_notified():
     # changes = asyncio.run(series.calculate_changes())
     change_points = series.calculate_change_points()
     direction = series.get_direction_for_change_points("metric1", change_points)
-    assert direction == "higher_is_better"
+    assert direction == 1
     direction = series.get_direction_for_change_points("metric2", change_points)
-    assert direction == "higher_is_better"
+    assert direction == 1
     reports = asyncio.run(series.produce_reports(change_points, [notifier], None))
 
     assert "benchmark1" in reports

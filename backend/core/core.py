@@ -82,7 +82,13 @@ class ResultMetric:
         return {self.name: self.unit}
 
     def to_hunter_instance(self):
-        return HunterMetric(self.direction, 1.0, self.unit)
+        direction = None
+        if self.direction == "higher_is_better":
+            direction = 1
+        if self.direction == "lower_is_better":
+            direction = -1
+
+        return HunterMetric(direction, 1.0, self.unit)
 
 
 class PerformanceTestResult:
