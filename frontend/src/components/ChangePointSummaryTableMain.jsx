@@ -58,8 +58,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   };
   const directionColor = (value, metric, direction) => {
     let d = direction ? direction : getDirection(metric, direction);
-    if(d=-1) d = "lower_is_better";
-    if( d=1) d = "higher_is_better";
+    if(d==-1) d = "lower_is_better";
+    if( d==1) d = "higher_is_better";
 
     if ( d == "higher_is_better"){
       if (value>0){
