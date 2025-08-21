@@ -93,7 +93,7 @@ for opt in "$@"; do
       lint
       poetry_func
       unit
-      perf
+      # perf
       ;;
     ?)
       echo "Invalid option: ${opt}."

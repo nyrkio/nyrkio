@@ -109,17 +109,18 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           const date = parseTimestamp(changePoint["time"]);
 
           const isSame = {date:false, commit: false, test: false, index: 0 };
-          if (previousRow !== null){
-            isSame.date = (previousRow.date == date);
-            isSame.commit = (previousRow["commit"] == changePoint["commit"]);
-            isSame.test = (previousRow["test_name"] == test_name);
-          }
           if (isSame.date && isSame.commit){
             changePoint["__isSameIndex"] = 1 + (previousRow["__isSameIndex"] === undefined ? 0 : previousRow["__isSameIndex"]);
             isSame.index += changePoint["__isSameIndex"];
           }
           //console.log(changePoint["__isSameIndex"] + JSON.stringify(changePoint["_id"]));
           if(test_name){
+            if (previousRow !== null){
+              isSame.date = (previousRow.date == date);
+              isSame.commit = (previousRow["commit"] == changePoint["commit"]);
+              //console.log(previousRow["commit"] , changePoint["commit"], changePoint);
+              isSame.test = (previousRow["test_name"] == test_name);
+            }
             rowData.push({
               date: { date, isSame },
               commit: { commit, commit_msg, repo, isSame },
@@ -127,18 +128,17 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
               metric: { test_name, metric_name, branchName },
               change: { changeValue, metric_name }
             });
+            previousRow = changePoint;
+            previousRow.date = date;
           } else {
             rowData.push({
               date: { date, isSame },
               commit: { commit, commit_msg, repo, isSame },
-              test: { date, branchName, isSame },
               metric: { metric_name, branchName },
               change: { changeValue, metric_name }
             });
             isLeafDashboard=true;
           }
-          previousRow = changePoint;
-          previousRow.date = date;
       });
     });
   });
@@ -174,7 +174,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         else {
           prevDate=text;
           isSame.newFlag = "no";
-          return text;
+          return ""+text;
         }
       },
       valueFormatter: (params)=>{
@@ -184,7 +184,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         const same = (
           params.value.prevDate == params.value.date
         );
-        return params.value.isSame.date ? 'xxxxag-row-is-same' : 'xxxxag-row-is-new';
+        return params.value.isSame.newFlag=="juu" ? 'ag-row-is-new' : 'ag-row-is-same';
       }
     },
     { field: "test",
@@ -294,7 +294,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       },
       'ag-row-is-new': (params) => {
         const isSame = params.data.date.isSame;
-        return ! (isSame.date && isSame.commit);
+        return !isSame.commit;
       },
   };
   const getRowStyle = async (params) => {
