@@ -66,6 +66,9 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 "data": {
                     "$objectToArray": "$cp.v.data",
                 },
+                "metrics2": {
+                    "$objectToArray": "$cp.v.metrics",
+                },
             },
         },
         {
@@ -83,6 +86,9 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
         },
         {
             "$unwind": "$data",
+        },
+        {
+            "$unwind": "$metrics2",
         },
         {
             "$project": {
@@ -120,8 +126,8 @@ def _set_parameters(user_or_org_id, test_name_prefix, meta, config, commit=None)
                 },
                 "metric_name": "$cp2.v.metric",
                 "metric_name_control": "$cp2.k",
-                "direction": "$metrics.direction",
-                "unit": "$metrics.unit",
+                "direction": "$metrics2.direction",
+                "unit": "$metrics2.unit",
                 "test_name": "$test_name",
                 "cp_values": "$cp2.v",
             },
