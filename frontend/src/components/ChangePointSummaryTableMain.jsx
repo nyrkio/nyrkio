@@ -88,7 +88,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     if (direction == -1 || direction == "lower_is_better") return <span title="lower is better">⇩</span>;
     if (directionMap[metric] == 1 || directionMap[metric] == "higher_is_better") return <span title="higher is better">⇧</span>;
     if (directionMap[metric] == -1 || directionMap[metric] == "lower_is_better") return <span title="lower is better">⇩</span>;
-    return "???";
+    return "";
   }
   let previousRow = null;
   Object.entries(changeData).forEach(([shortName, obj]) => {
