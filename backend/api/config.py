@@ -46,7 +46,6 @@ async def set_config(
     if (
         user.is_cph_user
         and not user.is_owner
-        and not test_name.split("/")[0] == user.github_username
     ):
         raise HTTPException(
             status_code=403,
@@ -88,11 +87,10 @@ async def delete_config(
     if (
         user.is_cph_user
         and not user.is_owner
-        and not test_name.split("/")[0] == user.github_username
     ):
         raise HTTPException(
             status_code=403,
-            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+            detail="You cannot delete configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
         )
     store = DBStore()
     await store.delete_test_config(user.id, test_name)
