@@ -131,11 +131,11 @@ export const HunterSettings = ({callback=noop}) => {
     const configObject = {
       core: { min_magnitude: minMagnitude, max_pvalue: pValue },
     };
-    console.debug("POST /api/v0/user/config ");
+    console.debug("PUT /api/v0/user/config ");
     console.debug(configObject);
 
     const response = await fetch("/api/v0/user/config", {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
@@ -147,7 +147,7 @@ export const HunterSettings = ({callback=noop}) => {
     } else if (response.status == 401){
       console.debug("User has logged out or wrong password or whatever");
     } else {
-      console.error("Failed to POST Nyrkiö core user settings");
+      console.error("Failed to PUT Nyrkiö core user settings");
       console.log(response);
 
     }

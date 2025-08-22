@@ -43,6 +43,16 @@ async def set_config(
     raise a HTTP 409 exception. When an exception is raised, none of the
     configuration changes are made.
     """
+    if (
+        user.is_cph_user
+        and not user.is_owner
+        and not test_name.split("/")[0] == user.github_username
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+        )
+
     store = DBStore()
 
     # TODO(mfleming) This is an attempt to avoid an abstraction leak. The DB
@@ -75,6 +85,15 @@ async def set_config(
 async def delete_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
+    if (
+        user.is_cph_user
+        and not user.is_owner
+        and not test_name.split("/")[0] == user.github_username
+    ):
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+        )
     store = DBStore()
     await store.delete_test_config(user.id, test_name)
     return {}

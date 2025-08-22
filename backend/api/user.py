@@ -76,6 +76,12 @@ async def get_user_config(user: User = Depends(auth.current_active_user)):
 async def set_user_config(
     config: UserConfig, user: User = Depends(auth.current_active_user)
 ):
+    if user.is_cph_user:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+        )
+
     validate_config(config)
     store = DBStore()
     await store.set_user_config(user.id, config.model_dump())
@@ -85,6 +91,12 @@ async def set_user_config(
 async def update_user_config(
     config: UserConfig, user: User = Depends(auth.current_active_user)
 ):
+    if user.is_cph_user:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+        )
+
     validate_config(config)
 
     store = DBStore()
@@ -94,5 +106,10 @@ async def update_user_config(
 
 @user_router.delete("/config")
 async def delete_user_config(user: User = Depends(auth.current_active_user)):
+    if user.is_cph_user:
+        raise HTTPException(
+            status_code=403,
+            detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
+        )
     store = DBStore()
     await store.delete_user_config(user.id)
