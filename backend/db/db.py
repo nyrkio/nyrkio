@@ -1197,9 +1197,9 @@ class DBStore(object):
             {"$sort": {"pull_number": -1}},
             {"$limit": 50},
         ]
-        print(pipeline)
+        # print(pipeline)
         pulls = await coll.aggregate(pipeline).to_list(None)
-        print(pulls)
+        # print(pulls)
         return pulls
 
     async def get_pull_requests(
