@@ -43,7 +43,7 @@ async def set_config(
     raise a HTTP 409 exception. When an exception is raised, none of the
     configuration changes are made.
     """
-    if user.is_cph_user and not user.is_owner:
+    if user.is_cph_user and not user.is_repo_owner:
         raise HTTPException(
             status_code=403,
             detail="You cannot set configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
