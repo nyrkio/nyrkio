@@ -96,6 +96,8 @@ class UserCreate(schemas.BaseUserCreate):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     github_username: Optional[str] = Field(None)
+    is_cph_user: Optional[bool] = None
+    is_repo_owner: Optional[bool] = False
 
 
 class UserUpdate(schemas.BaseUserUpdate):
