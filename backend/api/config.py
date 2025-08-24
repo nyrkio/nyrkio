@@ -81,7 +81,7 @@ async def set_config(
 async def delete_config(
     test_name: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
-    if user.is_cph_user and not user.is_owner:
+    if user.is_cph_user and not user.is_repo_owner:
         raise HTTPException(
             status_code=403,
             detail="You cannot delete configuration options when using the light weight Challenge Response Handshake. Please sign in properly at nyrkio.com and then supply a JWT Token for authentication.",
