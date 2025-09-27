@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Dict, List, Union
 import logging
 import sys
-
+import os
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
 
@@ -51,6 +51,11 @@ logging_out.setLevel(logging.INFO)
 root_logger = logging.getLogger()
 root_logger.setLevel(logging.INFO)
 root_logger.addHandler(logging_out)
+my_git_sha = os.environ.get(
+    "GIT_SHA",
+    "WARNING: GIT_SHA not set. This may not be a proper production deployment.",
+)
+root_logger.info(f"Nyrkio backend starting up. GIT_SHA={my_git_sha}")
 
 api_router = APIRouter()
 
