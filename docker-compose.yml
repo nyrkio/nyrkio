@@ -8,6 +8,7 @@ services:
       - .env.backend
     environment:
       - API_PORT=8000
+      - GIT_TAG=${IMAGE_TAG}
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
