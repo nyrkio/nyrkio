@@ -52,21 +52,32 @@ async def _github_events(gh_event: Dict):
     if gh_event["action"] in ["queued"] and "workflow_job" in gh_event:
         repo_owner = gh_event["repository"]["owner"]["login"]
         repo_name = gh_event["repository"]["name"]
-        logger.info(f"Workflow job for ({repo_owner}/{repo_name})")
+        sender = gh_event["sender"]["login"]
+        org_name = None
+        if "organization" in gh_event and gh_event["organization"]:
+            org_name = gh_event["organization"]["login"]
+        logger.info(f"Workflow job for ({org_name}/{repo_owner}/{repo_name})")
 
-        nyrkio_user = await store.get_user_by_github_username(repo_owner)
+        nyrkio_user_or_org = await store.get_user_by_github_username(repo_owner)
+        if "id" in nyrkio_user_or_org:
+            nyrkio_user_or_org = nyrkio_user_or_org["id"]
+
+        if not nyrkio_user_or_org:
+            nyrkio_user_or_org = await store.get_user_by_github_org(org_name, sender)
         # FIXME: Add a check for quota
-        if not nyrkio_user:
+        if not nyrkio_user_or_org:
+            logger.warning(
+                f"User {repo_owner} not found in Nyrkio. Also {org_name} not found. ({nyrkio_user_or_org})"
+            )
             raise HTTPException(
                 status_code=401,
-                detail="User {repo_owner} not found in Nyrkio. ({nyrkio_user})",
+                detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user_or_org})",
             )
 
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]
         run_attempt = gh_event["workflow_job"]["run_attempt"]
         workflow_name = gh_event["workflow_job"]["workflow_name"]
-        sender = gh_event["sender"]["login"]
         labels = gh_event["workflow_job"]["labels"]
         supported = supported_instance_types()
         runs_on = [lab for lab in labels if lab in supported]
@@ -77,10 +88,10 @@ async def _github_events(gh_event: Dict):
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}",
             )
             runner_registration_token = await get_github_runner_registration_token(
-                org_name=repo_owner
+                org_name=org_name
             )
             # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
-            launcher = RunnerLauncher(nyrkio_user.id, gh_event, runs_on.pop())
+            launcher = RunnerLauncher(nyrkio_user_or_org, gh_event, runs_on.pop())
             await launcher.launch(runner_registration_token)
         elif labels:
             logger.info(
@@ -114,7 +125,7 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
     )
     if response.status_code <= 201:
         runner_configuration_token = response.json()["token"]
-        logging.debug("Got a runner_configuration_token {runner_configuration_token}")
+        logging.info("Got a runner_configuration_token {runner_configuration_token}")
         return runner_configuration_token
     else:
         logging.info(
@@ -161,6 +172,9 @@ async def check_queued_workflow_jobs(repo_full_name):
                     f"Failed to fetch jobs for run {run_id}: {jobs_response.status_code} {jobs_response.text}"
                 )
         return queued_jobs
+    elif response.status_code == 404:
+        # On Github this means private repo and we don't have access
+        return []
     else:
         logging.warning(
             f"Failed to fetch workflow runs: {response.status_code} {response.text}"
@@ -190,9 +204,10 @@ async def handle_pull_requests(gh_event):
             fake_event = {
                 "action": "queued",
                 "workflow_job": job,
-                "repository": gh_event["pull_request"]["base"]["repo"],
-                "organization": gh_event["pull_request"]["base"]["repo"]["owner"],
+                "repository": gh_event["pull_request"]["repository"],
+                "organization": gh_event["pull_request"].get("organization", None),
                 "sender": gh_event["sender"],
+                "installation": gh_event.get("installation", None),
             }
             logger.info(fake_event)
             await _github_events(fake_event)
