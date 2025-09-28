@@ -100,7 +100,7 @@ async def github_events(gh_event: Dict):
         sender = gh_event["sender"]["login"]
         labels = gh_event["workflow_job"]["labels"]
         supported = supported_instance_types()
-        runs_on = [l for l in labels if l in supported]
+        runs_on = [lab for lab in labels if lab in supported]
 
         if runs_on:
             await store.log_json_event(
