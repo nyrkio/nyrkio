@@ -113,6 +113,7 @@ class GitHubIssueNotifier(AbstractNotifier):
         if reported_commits is not None:
             await db.save_reported_commits(reported_commits, user_or_org_id)
 
+
 # TODO: Get rid of the legacy 699959
 async def fetch_access_token(token_url, expiration_seconds=600, installation_id=699959):
     """Grab an access token for the Nyrkio app installation."""
@@ -179,6 +180,17 @@ class GitHubCommentNotifier:
             logging.error(f"Could not find GitHub app pem file: {pem}")
             raise
 
+        payload = {
+            # Issued at time
+            "iat": int(time.time()),
+            # JWT expiration time (10 minutes maximum)
+            "exp": int(time.time()) + 600,
+            # GitHub App's identifier
+            "iss": 699959,
+        }
+
+        encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
+
         logging.debug(f"Fetching installation: {installation_url}")
         response = await self.client.get(
             installation_url,
@@ -192,19 +204,6 @@ class GitHubCommentNotifier:
                 f"Failed to fetch installation: {response.status_code}: {response.json()}"
             )
             return None
-        installation_id = response.json().get("id", 699959) # Backwards compatibility: 699959 used to be hard coded here
-
-        payload = {
-            # Issued at time
-            "iat": int(time.time()),
-            # JWT expiration time (10 minutes maximum)
-            "exp": int(time.time()) + 600,
-            # GitHub App's identifier
-            "iss": installation_id,
-        }
-
-        encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
-
 
         installation_id = response.json()["id"]
         response = await self.client.post(
