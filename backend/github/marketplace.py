@@ -27,34 +27,7 @@ async def github_events(gh_event: Dict):
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub App Webhook")
 
-    if "pull_request" in gh_event and gh_event.get("action") in [
-        "opened",
-        "reopened",
-        "edited",
-        "synchronize",
-    ]:
-        # We don't do anything with pull requests as such, but to minimize the list of permissions to ask for,
-        # Use this to indirectly trigger things that you would normally get from workflow_job events.
-        # Maybe one day I'll ask for those permissions. Just want to see this working first.
-        repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
-        # owner_obj = gh_event["pull_request"]["base"]["repo"]["owner"]
-
-        queued_jobs = await check_queued_workflow_jobs(repo_name)
-        if queued_jobs:
-            logger.info(
-                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
-            )
-            for job in queued_jobs:
-                # Call myself recursively, but with a fake workflow_job event
-                fake_event = {
-                    "action": "queued",
-                    "workflow_job": job,
-                    "repository": gh_event["pull_request"]["base"]["repo"],
-                    "organization": gh_event["pull_request"]["base"]["repo"]["owner"],
-                    "sender": gh_event["sender"],
-                }
-                logger.info(fake_event)
-                await github_events(fake_event)
+    handle_pull_requests(gh_event)
 
     if gh_event["action"] in ["created"]:
         gh_id = gh_event["installation"]["account"]["id"]
@@ -72,18 +45,9 @@ async def github_events(gh_event: Dict):
     # Would need more permissions on github
     # I will rather trigger this from the pull_request events that we already get
     if gh_event["action"] in ["queued"] and "workflow_job" in gh_event:
-        # target_org_or_repo = None
-        # # "repository" > "full_name" is only present for repo scoped runners
-        # if "organization" in gh_event:
-        #     target_org_or_repo = gh_event["organization"]["login"] + "/" + gh_event["repository"]["name"]
-        # elif "repository" in gh_event:
-        #     target_org_or_repo = gh_event["repository"]["full_name"]
-
-        # repo_owner = target_org_or_repo.split("/")[0]
         repo_owner = gh_event["repository"]["owner"]["login"]
         repo_name = gh_event["repository"]["name"]
-        # repo_full_name = f"{repo_owner}/{repo_name}"
-        # logger.info(f"Workflow job for {target_org_or_repo} ({repo_full_name})")
+        logger.info(f"Workflow job for ({repo_name})")
 
         nyrkio_user = store.get_user_by_github_username(repo_owner)
         # FIXME: Add a check for quota
@@ -197,3 +161,37 @@ async def check_queued_workflow_jobs(repo_full_name):
             f"Failed to fetch workflow runs: {response.status_code} {response.text}"
         )
         return []
+
+
+async def handle_pull_requests(gh_event):
+    # We don't do anything with pull requests as such, but to minimize the list of permissions to ask for,
+    # Use this to indirectly trigger things that you would normally get from workflow_job events.
+    # Maybe one day I'll ask for those permissions. Just want to see this working first.
+    if "pull_request" in gh_event and gh_event.get("action") in [
+        "opened",
+        "reopened",
+        "edited",
+        "synchronize",
+    ]:
+        repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
+
+        queued_jobs = await check_queued_workflow_jobs(repo_name)
+        while queued_jobs:
+            logger.info(
+                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
+            )
+            job = queued_jobs.pop()
+            # Call myself recursively, but with a fake workflow_job event
+            fake_event = {
+                "action": "queued",
+                "workflow_job": job,
+                "repository": gh_event["pull_request"]["base"]["repo"],
+                "organization": gh_event["pull_request"]["base"]["repo"]["owner"],
+                "sender": gh_event["sender"],
+            }
+            logger.info(fake_event)
+            await github_events(fake_event)
+            # There can and will be several pull_request events, and handling the fake event could take a few minutes.
+            # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
+            queued_jobs = await check_queued_workflow_jobs(repo_name)
+        return queued_jobs
