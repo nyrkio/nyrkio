@@ -28,7 +28,7 @@ async def github_events(gh_event: Dict):
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub App Webhook")
 
-    handle_pull_requests(gh_event)
+    await handle_pull_requests(gh_event)
 
     if gh_event["action"] in ["created"]:
         gh_id = gh_event["installation"]["account"]["id"]
