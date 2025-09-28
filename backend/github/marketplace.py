@@ -204,8 +204,8 @@ async def handle_pull_requests(gh_event):
             fake_event = {
                 "action": "queued",
                 "workflow_job": job,
-                "repository": gh_event["pull_request"]["repository"],
-                "organization": gh_event["pull_request"].get("organization", None),
+                "repository": gh_event["repository"],
+                "organization": gh_event.get("organization", None),
                 "sender": gh_event["sender"],
                 "installation": gh_event.get("installation", None),
             }
