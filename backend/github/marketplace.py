@@ -27,6 +27,7 @@ async def marketplace_events(gh_event: Dict):
 async def github_events(gh_event: Dict):
     return await _github_events(gh_event)
 
+
 async def _github_events(gh_event: Dict):
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub App Webhook")
