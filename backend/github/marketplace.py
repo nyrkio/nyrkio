@@ -7,6 +7,7 @@ from fastapi import HTTPException
 import logging
 import httpx
 import os
+from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 
 logger = logging.getLogger(__file__)
@@ -98,7 +99,7 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
         raise Exception("Either org_name or repo_full_name must be provided")
 
     client = httpx.AsyncClient()
-    token = os.environ["GITHUB_TOKEN"]
+    token = fetch_access_token(url, 3600)
     response = await client.get(
         url,
         headers={
