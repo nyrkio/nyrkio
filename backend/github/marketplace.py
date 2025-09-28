@@ -51,7 +51,7 @@ async def github_events(gh_event: Dict):
                     "workflow_job": job,
                     "repository": gh_event["pull_request"]["base"]["repo"],
                     "organization": gh_event["pull_request"]["base"]["repo"]["owner"],
-                    "sender": gh_event["actor"],
+                    "sender": gh_event["sender"],
                 }
                 logger.info(fake_event)
                 await github_events(fake_event)
