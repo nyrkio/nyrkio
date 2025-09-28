@@ -48,9 +48,9 @@ async def github_events(gh_event: Dict):
     if gh_event["action"] in ["queued"] and "workflow_job" in gh_event:
         repo_owner = gh_event["repository"]["owner"]["login"]
         repo_name = gh_event["repository"]["name"]
-        logger.info(f"Workflow job for ({repo_name})")
+        logger.info(f"Workflow job for ({repo_owner}/{repo_name})")
 
-        nyrkio_user = store.get_user_by_github_username(repo_owner)
+        nyrkio_user = await store.get_user_by_github_username(repo_owner)
         # FIXME: Add a check for quota
         if not nyrkio_user:
             raise HTTPException(
@@ -99,7 +99,7 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
         raise Exception("Either org_name or repo_full_name must be provided")
 
     client = httpx.AsyncClient()
-    token = fetch_access_token(url, 3600)
+    token = await fetch_access_token(url, 3600)
     response = await client.get(
         url,
         headers={
