@@ -55,7 +55,7 @@ async def github_events(gh_event: Dict):
         if not nyrkio_user:
             raise HTTPException(
                 status_code=401,
-                message="User {repo_owner} not found in Nyrkio. ({nyrkio_user})",
+                detail="User {repo_owner} not found in Nyrkio. ({nyrkio_user})",
             )
 
         run_id = gh_event["workflow_job"]["run_id"]
