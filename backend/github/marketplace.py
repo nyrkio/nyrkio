@@ -59,7 +59,7 @@ async def _github_events(gh_event: Dict):
         logger.info(f"Workflow job for ({org_name}/{repo_owner}/{repo_name})")
 
         nyrkio_user_or_org = await store.get_user_by_github_username(repo_owner)
-        if "id" in nyrkio_user_or_org:
+        if nyrkio_user_or_org is not None and "id" in nyrkio_user_or_org:
             nyrkio_user_or_org = nyrkio_user_or_org["id"]
 
         if not nyrkio_user_or_org:
