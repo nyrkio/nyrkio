@@ -113,8 +113,8 @@ class GitHubIssueNotifier(AbstractNotifier):
         if reported_commits is not None:
             await db.save_reported_commits(reported_commits, user_or_org_id)
 
-
-async def fetch_access_token(token_url, expiration_seconds=600):
+# TODO: Get rid of the legacy 699959
+async def fetch_access_token(token_url, expiration_seconds=600, installation_id=699959):
     """Grab an access token for the Nyrkio app installation."""
     # See https://docs.github.com/
     pem = "/usr/src/backend/keys/nyrkio.pem"
@@ -131,7 +131,7 @@ async def fetch_access_token(token_url, expiration_seconds=600):
         # JWT expiration time (10 minutes maximum)
         "exp": int(time.time()) + expiration_seconds,
         # GitHub App's identifier
-        "iss": 699959,
+        "iss": ,
     }
 
     encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
