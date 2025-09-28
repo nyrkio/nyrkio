@@ -105,7 +105,7 @@ async def github_events(gh_event: Dict):
         if runs_on:
             await store.log_json_event(
                 gh_event,
-                "Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {target_org_or_repo} from {sender} with labels {labels} -> {runs_on}",
+                f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}",
             )
             runner_registration_token = await get_github_runner_registration_token(
                 org_name=repo_owner
@@ -125,10 +125,10 @@ async def github_events(gh_event: Dict):
 async def get_github_runner_registration_token(org_name=None, repo_full_name=None):
     url = None
     if repo_full_name:
-        url = "https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
+        url = f"https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
     elif org_name:
         url = (
-            "https://api.github.com/orgs/{org_name}/actions/runners/registration-token"
+            f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token"
         )
     else:
         raise Exception("Either org_name or repo_full_name must be provided")
@@ -152,7 +152,7 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
             f"Failed to fetch a runner_configuration_token: {response.status_code} {response.text}"
         )
         raise Exception(
-            "Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
         )
 
 
