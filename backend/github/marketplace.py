@@ -25,6 +25,9 @@ async def marketplace_events(gh_event: Dict):
 
 @github_router.post("/webhook")
 async def github_events(gh_event: Dict):
+    return await _github_events(gh_event)
+
+async def _github_events(gh_event: Dict):
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub App Webhook")
 
@@ -191,7 +194,7 @@ async def handle_pull_requests(gh_event):
                 "sender": gh_event["sender"],
             }
             logger.info(fake_event)
-            await github_events(fake_event)
+            await _github_events(fake_event)
             # There can and will be several pull_request events, and handling the fake event could take a few minutes.
             # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
             queued_jobs = await check_queued_workflow_jobs(repo_name)
