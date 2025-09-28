@@ -151,8 +151,9 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
         logging.info(
             f"Failed to fetch a runner_configuration_token: {response.status_code} {response.text}"
         )
-        raise Exception("Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it.")
-
+        raise Exception(
+            "Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+        )
 
 
 async def check_queued_workflow_jobs(repo_full_name):
