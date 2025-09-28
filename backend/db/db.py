@@ -1435,7 +1435,7 @@ class DBStore(object):
         print("get_org_by_github_org")
         query = {"oauth_accounts.organizations.organization.login": "impress"}
         if github_username:
-            query["oauth_accounts.user.login"] = github_username
+            query["oauth_accounts.organizations.user.login"] = github_username
         res = await self.db.User.find(query).to_list(99)
 
         if len(res) == 1:
@@ -1443,7 +1443,7 @@ class DBStore(object):
             obj = res[0]
             return User(**obj)
 
-        print("get_org_by_github_username 5")
+        print("get_org_by_github_org 5")
         if len(res) > 1:
             raise DBStoreMultipleResults(
                 f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
