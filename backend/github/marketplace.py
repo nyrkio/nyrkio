@@ -78,6 +78,7 @@ async def _github_events(gh_event: Dict):
         job_name = gh_event["workflow_job"]["name"]
         run_attempt = gh_event["workflow_job"]["run_attempt"]
         workflow_name = gh_event["workflow_job"]["workflow_name"]
+        installation_id = gh_event["installation"]["id"]
         labels = gh_event["workflow_job"]["labels"]
         supported = supported_instance_types()
         runs_on = [lab for lab in labels if lab in supported]
@@ -88,7 +89,9 @@ async def _github_events(gh_event: Dict):
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}",
             )
             runner_registration_token = await get_github_runner_registration_token(
-                org_name=org_name
+                org_name=org_name,
+                installation_id=installation_id,
+                repo_full_name=f"{repo_owner}/{repo_name}",
             )
             # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
             launcher = RunnerLauncher(nyrkio_user_or_org, gh_event, runs_on.pop())
@@ -102,19 +105,21 @@ async def _github_events(gh_event: Dict):
 
 
 # Get a one time token to register a new runner
-async def get_github_runner_registration_token(org_name=None, repo_full_name=None):
+async def get_github_runner_registration_token(
+    org_name=None, repo_full_name=None, installation_id=None
+):
     url = None
     if repo_full_name:
         url = f"https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
-    elif org_name:
-        url = (
-            f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token"
-        )
+    # elif org_name:
+    #     url = (
+    #         f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token"
+    #     )
     else:
-        raise Exception("Either org_name or repo_full_name must be provided")
+        raise Exception("Both org_name or repo_full_name must be provided")
 
     client = httpx.AsyncClient()
-    token = await fetch_access_token(url, 3600)
+    token = await fetch_access_token(url, 3600, installation_id=installation_id)
     response = await client.get(
         url,
         headers={
