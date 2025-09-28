@@ -123,6 +123,7 @@ async def github_events(gh_event: Dict):
 
 # Get a one time token to register a new runner
 async def get_github_runner_registration_token(org_name=None, repo_full_name=None):
+    url = None
     if repo_full_name:
         url = "https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
     elif org_name:
@@ -145,12 +146,14 @@ async def get_github_runner_registration_token(org_name=None, repo_full_name=Non
     if response.status_code <= 201:
         runner_configuration_token = response.json()["token"]
         logging.debug("Got a runner_configuration_token {runner_configuration_token}")
+        return runner_configuration_token
     else:
         logging.info(
             f"Failed to fetch a runner_configuration_token: {response.status_code} {response.text}"
         )
-
-    return runner_configuration_token
+        raise Exception(
+            "Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+        )
 
 
 async def check_queued_workflow_jobs(repo_full_name):
