@@ -89,7 +89,9 @@ async def _github_events(gh_event: Dict):
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}",
             )
             runner_registration_token = await get_github_runner_registration_token(
-                org_name=org_name, installation_id=installation_id, repo_full_name=f"{repo_owner}/{repo_name}"
+                org_name=org_name,
+                installation_id=installation_id,
+                repo_full_name=f"{repo_owner}/{repo_name}",
             )
             # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
             launcher = RunnerLauncher(nyrkio_user_or_org, gh_event, runs_on.pop())
@@ -103,7 +105,9 @@ async def _github_events(gh_event: Dict):
 
 
 # Get a one time token to register a new runner
-async def get_github_runner_registration_token(org_name=None, repo_full_name=None, installation_id=None):
+async def get_github_runner_registration_token(
+    org_name=None, repo_full_name=None, installation_id=None
+):
     url = None
     if repo_full_name:
         url = f"https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
