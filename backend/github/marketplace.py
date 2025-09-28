@@ -63,7 +63,7 @@ async def _github_events(gh_event: Dict):
             nyrkio_user_or_org = nyrkio_user_or_org["id"]
 
         if not nyrkio_user_or_org:
-            nyrkio_user_or_org = await store.get_user_by_github_org(org_name, sender)
+            nyrkio_user_or_org = await store.get_org_by_github_org(org_name, sender)
         # FIXME: Add a check for quota
         if not nyrkio_user_or_org:
             logger.warning(
