@@ -99,8 +99,8 @@ async def github_events(gh_event: Dict):
         workflow_name = gh_event["workflow_job"]["workflow_name"]
         sender = gh_event["sender"]["login"]
         labels = gh_event["workflow_job"]["labels"]
-
-        runs_on = labels.intersection(set(supported_instance_types()))
+        supported = supported_instance_types()
+        runs_on = [lab for lab in labels if lab in supported]
 
         if runs_on:
             await store.log_json_event(
@@ -110,6 +110,7 @@ async def github_events(gh_event: Dict):
             runner_registration_token = await get_github_runner_registration_token(
                 org_name=repo_owner
             )
+            # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
             launcher = RunnerLauncher(nyrkio_user.id, gh_event, runs_on.pop())
             await launcher.launch(runner_registration_token)
         elif labels:
