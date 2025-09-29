@@ -122,7 +122,7 @@ class RunnerLauncher(object):
             CidrBlock=subnet_cidr,
             AvailabilityZone=az,
         )
-        return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["NetworkAclAssociationId"]
+        # return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["NetworkAclAssociationId"]
 
     def create_route_table(self, ec2, vpc_id, igw_id, subnet_id, owner):
         rt = ec2.create_route_table(
