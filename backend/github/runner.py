@@ -3,6 +3,7 @@ import datetime
 import time
 import logging
 from fabric import Connection
+import httpx
 
 
 from backend.github.runner_configs import gh_runner_config
@@ -106,7 +107,9 @@ class RunnerLauncher(object):
     def get_this_host_public_ip(self):
         response = httpx.get("http://169.254.169.254/latest/meta-data/public-ipv4")
         if response.status_code != 200:
-            logging.warning("Failed to get public IP from instance metadata. I have to leave the github runner inbound fw open for everyone.")
+            logging.warning(
+                "Failed to get public IP from instance metadata. I have to leave the github runner inbound fw open for everyone."
+            )
             return None
         return response.text
 
