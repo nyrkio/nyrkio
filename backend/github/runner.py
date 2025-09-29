@@ -86,7 +86,11 @@ class RunnerLauncher(object):
             {"Key": "owner", "Value": str(self.nyrkio_billing_user)},
             {"Key": "billing_user", "Value": str(self.nyrkio_billing_user)},
         ]
-        tags = [{"Key": str(t["Key"]), "Value": str(t["Value"][0:254])} for t in tags if t["Value"] is not None]
+        tags = [
+            {"Key": str(t["Key"]), "Value": str(t["Value"][0:254])}
+            for t in tags
+            if t["Value"] is not None
+        ]
         return tags
 
     def create_vpc(self, ec2, vpc_cidr, owner):
