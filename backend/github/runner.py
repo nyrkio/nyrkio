@@ -11,10 +11,11 @@ from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
 
 class RunnerLauncher(object):
     def __init__(
-        self, nyrkio_user_id, gh_event, instance_type=None, registration_token=None
+        self, nyrkio_user_id, nyrkio_org_id, gh_event, instance_type=None, registration_token=None
     ):
         self.registration_token = registration_token
         self.nyrkio_user_id = nyrkio_user_id
+        self.nyrkio_org_id = nyrkio_org_id
         self.gh_event = gh_event
         self.instance_type = instance_type
         self.config = gh_runner_config(self.instance_type)
@@ -354,6 +355,14 @@ class RunnerLauncher(object):
         REGION = self.config.get(
             "region", "eu-central-1"
         )  # Set default region if not in config
+
+        aws_access_key_id=self.config.get("aws_access_key_id"),
+        aws_secret_access_key=self.config.get("aws_secret_access_key"),
+        logging.info(f"aws_access_key_id: {aws_access_key_id}")
+        logging.info(f"aws_secret_access_key: {aws_secret_access_key}")
+        logging.info(f"region: {REGION}")
+        logging.info(f"profile: {self.config.get('profile')}")
+        logging.info(f"nyrkio_user and org: {self.nyrkio_user_id}, {self.nyrkio_org_id}")
 
         session = boto3.Session(
             aws_access_key_id=self.config.get("aws_access_key_id"),

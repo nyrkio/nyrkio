@@ -58,20 +58,25 @@ async def _github_events(gh_event: Dict):
             org_name = gh_event["organization"]["login"]
         logger.info(f"Workflow job for ({org_name}/{repo_owner}/{repo_name})")
 
-        nyrkio_user_or_org = await store.get_user_by_github_username(repo_owner)
-        if isinstance(nyrkio_user_or_org, User):
-            nyrkio_user_or_org = nyrkio_user_or_org.id
+        nyrkio_user = await store.get_user_by_github_username(repo_owner)
+        if nyrkio_user is not None:
+            nyrkio_user = nyrkio_user_or_org.id
 
-        if not nyrkio_user_or_org:
-            nyrkio_user_or_org = await store.get_org_by_github_org(org_name, sender)
+        nyrkio_org = None
+        if org_name:
+            nyrkio_org = await store.get_org_by_github_org(org_name, sender)
         # FIXME: Add a check for quota
-        if not nyrkio_user_or_org:
+        if not nyrkio_user:
             logger.warning(
-                f"User {repo_owner} not found in Nyrkio. Also {org_name} not found. ({nyrkio_user_or_org})"
+                f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})"
             )
             raise HTTPException(
                 status_code=401,
-                detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user_or_org})",
+                detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user})",
+            )
+        if not nyrkio_org:
+            logger.warning(
+                f"User {org_name} not found in Nyrkio. ({nyrkio_org})"
             )
 
         run_id = gh_event["workflow_job"]["run_id"]
@@ -95,7 +100,8 @@ async def _github_events(gh_event: Dict):
             )
             # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
             launcher = RunnerLauncher(
-                nyrkio_user_or_org,
+                nyrkio_user,
+                nyrkio_org,
                 gh_event,
                 runs_on.pop(),
                 registration_token=runner_registration_token,
