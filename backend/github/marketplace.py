@@ -56,7 +56,9 @@ async def _github_events(gh_event: Dict):
         org_name = None
         if "organization" in gh_event and gh_event["organization"]:
             org_name = gh_event["organization"]["login"]
-        logger.info(f"Workflow job for ({org_name}/{repo_owner}/{repo_name})")
+        logger.info(
+            f"Workflow job for ({org_name}/{repo_owner}/{repo_name}) triggered by {sender}"
+        )
 
         nyrkio_user = await store.get_user_by_github_username(repo_owner)
         if nyrkio_user is not None:
@@ -73,7 +75,7 @@ async def _github_events(gh_event: Dict):
                 detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user})",
             )
         if not nyrkio_org:
-            logger.warning(f"User {org_name} not found in Nyrkio. ({nyrkio_org})")
+            logger.warning(f"Org {org_name} not found in Nyrkio. ({nyrkio_org})")
 
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]
