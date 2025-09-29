@@ -146,14 +146,14 @@ class RunnerLauncher(object):
             VpcId=vpc_id,
         )
         nyrkio_com_ip = self.get_this_host_public_ip()
-        allow_egress = gh_runner_allowed_ips
+        allow_egress = gh_runner_allowed_ips.splitlines()
 
         nacl_id = nacl["NetworkAcl"]["NetworkAclId"]
         # Egress TCP
         for ip in allow_egress:
             if not ip.strip():
                 continue
-            
+
             ec2.create_network_acl_entry(
                 NetworkAclId=nacl_id,
                 RuleNumber=300,
@@ -161,7 +161,7 @@ class RunnerLauncher(object):
                 RuleAction="allow",
                 Egress=True,
                 CidrBlock=f"{ip}/32",
-                PortRange={"From": 22, "To": 22},
+                PortRange={"From": 22, "To": 8888},
             )
 
         # Ingress
