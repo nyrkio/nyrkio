@@ -113,7 +113,7 @@ class RunnerLauncher(object):
         ec2.attach_internet_gateway(
             VpcId=vpc_id,
             InternetGatewayId=igw_id,
-            TagSpecifications=[{"Tags": self.tags}],
+            TagSpecifications=["InternetGatewayId", "VpcId"],
         )
         return igw_id
 
