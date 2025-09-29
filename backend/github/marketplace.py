@@ -108,36 +108,20 @@ async def _github_events(gh_event: Dict):
 async def get_github_runner_registration_token(
     org_name=None, repo_full_name=None, installation_id=None
 ):
-    url = None
-    if repo_full_name:
-        url = f"https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token"
-    # elif org_name:
-    #     url = (
-    #         f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token"
-    #     )
-    else:
-        raise Exception("Both org_name or repo_full_name must be provided")
-
-    client = httpx.AsyncClient()
-    token = await fetch_access_token(url, 600, installation_id=installation_id)
-    response = await client.get(
-        url,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            # "X-GitHub-Api-Version": "2022-11-28",
-        },
+    token = await fetch_access_token(
+        token_url=None, expiration_seconds=600, installation_id=installation_id
     )
-    if response.status_code <= 201:
-        runner_configuration_token = response.json()["token"]
-        logging.info("Got a runner_configuration_token {runner_configuration_token}")
-        return runner_configuration_token
+    if token:
+        logging.info(
+            f"Successfully fetched access token for installation_id {installation_id} at {repo_full_name}"
+        )
+        return token
     else:
         logging.info(
-            f"Failed to fetch a runner_configuration_token: {response.status_code} {response.text}"
+            f"Failed to fetch a runner_configuration_token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
         )
         raise Exception(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+            f"Failed to fetch a runner_configuration_token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
         )
 
 

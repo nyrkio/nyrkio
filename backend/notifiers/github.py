@@ -114,7 +114,9 @@ class GitHubIssueNotifier(AbstractNotifier):
             await db.save_reported_commits(reported_commits, user_or_org_id)
 
 
-async def fetch_access_token(token_url, expiration_seconds=600, installation_id=None):
+async def fetch_access_token(
+    token_url="TODO: remove", expiration_seconds=600, installation_id=None
+):
     """Grab an access token for the Nyrkio app installation."""
     # See https://docs.github.com/
     pem = "/usr/src/backend/keys/nyrkio.pem"
