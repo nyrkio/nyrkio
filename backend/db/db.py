@@ -1440,8 +1440,10 @@ class DBStore(object):
 
         if len(res) == 1:
             print("get_org_by_github_org 4")
-            obj = res[0]
-            return User(**obj)
+            for oauth in res[0]["oauth_accounts"]:
+                for org in oauth["organizations"]:
+                    if org["organization"]["login"] == github_org:
+                        return org
 
         print("get_org_by_github_org 5")
         if len(res) > 1:

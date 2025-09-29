@@ -72,6 +72,8 @@ async def _github_events(gh_event: Dict):
 
         if org_name:
             nyrkio_org = await store.get_org_by_github_org(org_name, sender)
+            if nyrkio_org is not None:
+                nyrkio_org = nyrkio_org["organization"]["login"]
 
         # FIXME: Add a check for quota
         if (not nyrkio_user) and (not nyrkio_org):
