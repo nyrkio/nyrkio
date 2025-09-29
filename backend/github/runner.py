@@ -150,19 +150,21 @@ class RunnerLauncher(object):
 
         nacl_id = nacl["NetworkAcl"]["NetworkAclId"]
         # Egress TCP
+        rulenr = 300
         for ip in allow_egress:
             if not ip.strip():
                 continue
 
             ec2.create_network_acl_entry(
                 NetworkAclId=nacl_id,
-                RuleNumber=300,
+                RuleNumber=rulenr,
                 Protocol="6",
                 RuleAction="allow",
                 Egress=True,
                 CidrBlock=f"{ip}/32",
                 PortRange={"From": 22, "To": 8888},
             )
+            rulenr += 1
 
         # Ingress
         inbound_cidr = vpc_cidr
