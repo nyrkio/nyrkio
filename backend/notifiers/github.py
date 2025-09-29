@@ -139,7 +139,7 @@ async def fetch_access_token(token_url, expiration_seconds=600, installation_id=
     client = httpx.AsyncClient()
 
     response = await client.post(
-        "https://api.github.com/app/installations/{installation_id}/access_tokens",
+        f"https://api.github.com/app/installations/{installation_id}/access_tokens",
         headers={
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"Bearer {encoded_jwt}",
