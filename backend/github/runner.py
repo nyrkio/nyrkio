@@ -10,7 +10,10 @@ from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
 
 
 class RunnerLauncher(object):
-    def __init__(self, nyrkio_user_id, gh_event, instance_type=None):
+    def __init__(
+        self, nyrkio_user_id, gh_event, instance_type=None, registration_token=None
+    ):
+        self.registration_token = registration_token
         self.nyrkio_user_id = nyrkio_user_id
         self.gh_event = gh_event
         self.instance_type = instance_type
@@ -343,8 +346,10 @@ class RunnerLauncher(object):
         logging.debug(result.stdout)
         return result
 
-    def launch_gh_runner(self, runner_registration_token, repo_owner):
-        self.registration_token = runner_registration_token
+    def launch(self, registration_token=None):
+        if registration_token:
+            self.registration_token = registration_token
+
         REGION = self.config.get(
             "region", "eu-central-1"
         )  # Set default region if not in config
