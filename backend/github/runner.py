@@ -3,6 +3,7 @@ import datetime
 import time
 import logging
 from fabric import Connection
+import httpx
 
 
 from backend.github.runner_configs import gh_runner_config
@@ -104,8 +105,13 @@ class RunnerLauncher(object):
         return vpc_id
 
     def get_this_host_public_ip(self):
-        response = boto3.client("ipify").get_ip_address()
-        return response["ip"]
+        response = httpx.get("http://169.254.169.254/latest/meta-data/public-ipv4")
+        if response.status_code != 200:
+            logging.warning(
+                "Failed to get public IP from instance metadata. I have to leave the github runner inbound fw open for everyone."
+            )
+            return None
+        return response.text
 
     def create_internet_gateway(self, ec2, vpc_id):
         igw = ec2.create_internet_gateway()
@@ -156,13 +162,16 @@ class RunnerLauncher(object):
             )
 
         # Ingress
+        inbound_cidr = vpc_cidr
+        if nyrkio_com_ip is not None:
+            inbound_cidr = "{}/32".format(nyrkio_com_ip)
         ec2.create_network_acl_entry(
             NetworkAclId=nacl_id,
             RuleNumber=100,
             Protocol="6",
             RuleAction="allow",
             Egress=False,
-            CidrBlock="{}/32".format(nyrkio_com_ip),
+            CidrBlock=inbound_cidr,
             PortRange={"From": 22, "To": 22},
         )
         ec2.replace_network_acl_association(
