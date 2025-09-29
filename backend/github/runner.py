@@ -151,6 +151,9 @@ class RunnerLauncher(object):
         nacl_id = nacl["NetworkAcl"]["NetworkAclId"]
         # Egress TCP
         for ip in allow_egress:
+            if not ip.strip():
+                continue
+            
             ec2.create_network_acl_entry(
                 NetworkAclId=nacl_id,
                 RuleNumber=300,
