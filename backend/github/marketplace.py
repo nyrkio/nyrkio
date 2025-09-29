@@ -94,8 +94,13 @@ async def _github_events(gh_event: Dict):
                 repo_full_name=f"{repo_owner}/{repo_name}",
             )
             # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
-            launcher = RunnerLauncher(nyrkio_user_or_org, gh_event, runs_on.pop())
-            await launcher.launch(runner_registration_token)
+            launcher = RunnerLauncher(
+                nyrkio_user_or_org,
+                gh_event,
+                runs_on.pop(),
+                registration_token=runner_registration_token,
+            )
+            await launcher.launch()
         elif labels:
             logger.info(
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels}, but no supported instance types found."
