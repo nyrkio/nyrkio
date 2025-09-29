@@ -14,6 +14,7 @@ class RunnerLauncher(object):
         self,
         nyrkio_user_id,
         nyrkio_org_id,
+        nyrkio_billing_user,
         gh_event,
         instance_type=None,
         registration_token=None,
@@ -21,6 +22,7 @@ class RunnerLauncher(object):
         self.registration_token = registration_token
         self.nyrkio_user_id = nyrkio_user_id
         self.nyrkio_org_id = nyrkio_org_id
+        self.nyrkio_billing_user = nyrkio_billing_user
         self.gh_event = gh_event
         self.instance_type = instance_type
         self.config = gh_runner_config(self.instance_type)
@@ -79,8 +81,10 @@ class RunnerLauncher(object):
             {"Key": "job_created_at", "Value": job.get("created_at", "")},
             {"Key": "launched_at", "Value": str(now)},
             {"Key": "group", "Value": "nyrkio-gh-runner"},
-            {"Key": "owner", "Value": str(self.nyrkio_user_id)},
-            {"Key": "billing_user", "Value": str(self.nyrkio_user_id)},
+            {"Key": "nyrkio_user", "Value": str(self.nyrkio_user_id)},
+            {"Key": "nyrkio_org", "Value": str(self.nyrkio_org_id)},
+            {"Key": "owner", "Value": str(self.nyrkio_billing_user)},
+            {"Key": "billing_user", "Value": str(self.nyrkio_billing_user)},
         ]
         tags = [{"Key": str(t["Key"]), "Value": str(t["Value"])} for t in tags]
         return tags

@@ -60,23 +60,28 @@ async def _github_events(gh_event: Dict):
             f"Workflow job for ({org_name}/{repo_owner}/{repo_name}) triggered by {sender}"
         )
 
+        # repo_owner is either the user or an org
         nyrkio_user = await store.get_user_by_github_username(repo_owner)
+        nyrkio_org = None
         if nyrkio_user is not None:
             nyrkio_user = nyrkio_user.id
+        else:
+            nyrkio_user = await store.get_user_by_github_username(sender)
+            if nyrkio_user is not None:
+                nyrkio_user = nyrkio_user.id
 
-        nyrkio_org = None
         if org_name:
             nyrkio_org = await store.get_org_by_github_org(org_name, sender)
+
         # FIXME: Add a check for quota
-        if not nyrkio_user:
+        if (not nyrkio_user) and (not nyrkio_org):
             logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
             raise HTTPException(
                 status_code=401,
-                detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user})",
+                detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
             )
-        if not nyrkio_org:
-            logger.warning(f"Org {org_name} not found in Nyrkio. ({nyrkio_org})")
 
+        nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]
         run_attempt = gh_event["workflow_job"]["run_attempt"]
@@ -100,6 +105,7 @@ async def _github_events(gh_event: Dict):
             launcher = RunnerLauncher(
                 nyrkio_user,
                 nyrkio_org,
+                nyrkio_billing_user,
                 gh_event,
                 runs_on.pop(),
                 registration_token=runner_registration_token,
