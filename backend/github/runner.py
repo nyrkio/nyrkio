@@ -113,7 +113,6 @@ class RunnerLauncher(object):
         ec2.attach_internet_gateway(
             VpcId=vpc_id,
             InternetGatewayId=igw_id,
-            TagSpecifications=[{"Tags": self.tags}],
         )
         return igw_id
 
@@ -122,14 +121,12 @@ class RunnerLauncher(object):
             VpcId=vpc_id,
             CidrBlock=subnet_cidr,
             AvailabilityZone=az,
-            TagSpecifications=[{"ResourceType": "subnet", "Tags": self.tags}],
         )
         return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["NetworkAclAssociationId"]
 
     def create_route_table(self, ec2, vpc_id, igw_id, subnet_id, owner):
         rt = ec2.create_route_table(
             VpcId=vpc_id,
-            TagSpecifications=[{"ResourceType": "route-table", "Tags": self.tags}],
         )
         rt_id = rt["RouteTable"]["RouteTableId"]
         ec2.create_route(
@@ -141,7 +138,6 @@ class RunnerLauncher(object):
     def create_network_acl(self, ec2, vpc_id, vpc_cidr, nacl_assoc_id):
         nacl = ec2.create_network_acl(
             VpcId=vpc_id,
-            TagSpecifications=[{"ResourceType": "network-acl", "Tags": self.tags}],
         )
         nyrkio_com_ip = self.get_this_host_public_ip()
         allow_egress = gh_runner_allowed_ips
