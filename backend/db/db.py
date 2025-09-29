@@ -1432,8 +1432,8 @@ class DBStore(object):
         return None
 
     async def get_org_by_github_org(self, github_org: str, github_username: str):
-        print("get_org_by_github_org")
-        query = {"oauth_accounts.organizations.organization.login": "impress"}
+        print(f"get_org_by_github_org {github_org} {github_username}")
+        query = {"oauth_accounts.organizations.organization.login": github_org}
         if github_username:
             query["oauth_accounts.organizations.user.login"] = github_username
         res = await self.db.User.find(query).to_list(99)
