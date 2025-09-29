@@ -161,11 +161,11 @@ class RunnerLauncher(object):
                 Protocol="6",
                 RuleAction="allow",
                 Egress=True,
-                CidrBlock=f"{ip}/32",
+                CidrBlock=f"{ip}",
                 PortRange={"From": 22, "To": 8888},
             )
             rulenr += 1
-
+    
         # Ingress
         inbound_cidr = vpc_cidr
         if nyrkio_com_ip is not None:
