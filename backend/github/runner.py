@@ -67,15 +67,16 @@ class RunnerLauncher(object):
             },
             {
                 "Key": "github_event_type",
-                "Value": gh_event.get("workflow_job", {}).get("event", ""),
+                "Value": str(gh_event.get("workflow_job", {}).get("event", "")),
             },
             {"Key": "repo_owner", "Value": repo.get("owner", {}).get("login", "")},
             {"Key": "job_created_at", "Value": job.get("created_at", "")},
-            {"Key": "launched_at", "Value": now},
+            {"Key": "launched_at", "Value": str(now)},
             {"Key": "group", "Value": "nyrkio-gh-runner"},
-            {"Key": "owner", "Value": self.nyrkio_user_id},
-            {"Key": "billing_user", "Value": self.nyrkio_user_id},
+            {"Key": "owner", "Value": str(self.nyrkio_user_id)},
+            {"Key": "billing_user", "Value": str(self.nyrkio_user_id)},
         ]
+        tags = [{"Key": str(t["Key"]), "Value": str(t["Value"])} for t in tags]
         return tags
 
     def create_vpc(self, ec2, vpc_cidr, owner):
