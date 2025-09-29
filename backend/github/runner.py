@@ -87,7 +87,7 @@ class RunnerLauncher(object):
             {"Key": "billing_user", "Value": str(self.nyrkio_billing_user)},
         ]
         tags = [
-            {"Key": str(t["Key"]), "Value": str(t["Value"][0:254])}
+            {"Key": str(t["Key"]), "Value": str(t["Value"])[0:254]}
             for t in tags
             if t["Value"] is not None
         ]
