@@ -1,4 +1,4 @@
-from backend.db.db import DBStore, User
+from backend.db.db import DBStore
 from backend.github.runner import RunnerLauncher
 from fastapi import APIRouter
 from typing import Dict
@@ -60,24 +60,20 @@ async def _github_events(gh_event: Dict):
 
         nyrkio_user = await store.get_user_by_github_username(repo_owner)
         if nyrkio_user is not None:
-            nyrkio_user = nyrkio_user_or_org.id
+            nyrkio_user = nyrkio_user.id
 
         nyrkio_org = None
         if org_name:
             nyrkio_org = await store.get_org_by_github_org(org_name, sender)
         # FIXME: Add a check for quota
         if not nyrkio_user:
-            logger.warning(
-                f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})"
-            )
+            logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
             raise HTTPException(
                 status_code=401,
                 detail="User {org_name}/{repo_owner} not found in Nyrkio. ({nyrkio_user})",
             )
         if not nyrkio_org:
-            logger.warning(
-                f"User {org_name} not found in Nyrkio. ({nyrkio_org})"
-            )
+            logger.warning(f"User {org_name} not found in Nyrkio. ({nyrkio_org})")
 
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]
