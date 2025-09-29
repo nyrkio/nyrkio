@@ -10,7 +10,7 @@ import jwt
 
 from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
 from backend.db.db import DBStore
-
+from backend.auth.github import CLIENT_ID
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 
@@ -114,8 +114,7 @@ class GitHubIssueNotifier(AbstractNotifier):
             await db.save_reported_commits(reported_commits, user_or_org_id)
 
 
-# TODO: Get rid of the legacy 699959
-async def fetch_access_token(token_url, expiration_seconds=600, installation_id=699959):
+async def fetch_access_token(token_url, expiration_seconds=600, installation_id=None):
     """Grab an access token for the Nyrkio app installation."""
     # See https://docs.github.com/
     pem = "/usr/src/backend/keys/nyrkio.pem"
@@ -132,7 +131,7 @@ async def fetch_access_token(token_url, expiration_seconds=600, installation_id=
         # JWT expiration time (10 minutes maximum)
         "exp": int(time.time()) + expiration_seconds,
         # GitHub App's identifier
-        "iss": installation_id,
+        "iss": CLIENT_ID,  # ,
     }
 
     encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
@@ -140,7 +139,7 @@ async def fetch_access_token(token_url, expiration_seconds=600, installation_id=
     client = httpx.AsyncClient()
 
     response = await client.post(
-        token_url,
+        "https://api.github.com/app/installations/{installation_id}/access_tokens",
         headers={
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"Bearer {encoded_jwt}",

@@ -50,6 +50,7 @@ jobs:
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
           echo "$SSL_SECRET_KEY" > nyrkio.com.key
+          echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
           pwd
           ls -a
 
