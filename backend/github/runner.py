@@ -378,7 +378,7 @@ class RunnerLauncher(object):
         session = boto3.Session(
             aws_access_key_id=self.config.get("aws_access_key_id"),
             aws_secret_access_key=self.config.get("aws_secret_access_key"),
-            profile_name=self.config.get("profile"),
+            #            profile_name=self.config.get("profile"),
             region_name=REGION,
         )
         ec2 = session.client("ec2")
