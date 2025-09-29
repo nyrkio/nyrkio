@@ -122,7 +122,7 @@ class RunnerLauncher(object):
             CidrBlock=subnet_cidr,
             AvailabilityZone=az,
         )
-        # return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["NetworkAclAssociationId"]
+        return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["VpcId"]
 
     def create_route_table(self, ec2, vpc_id, igw_id, subnet_id, owner):
         rt = ec2.create_route_table(
@@ -386,7 +386,7 @@ class RunnerLauncher(object):
 
         vpc_id = self.create_vpc(ec2, self.config["vpc_cidr"], self.config["owner"])
         igw_id = self.create_internet_gateway(ec2, vpc_id)
-        subnet_id, nacl_assoc_id = self.create_subnet(
+        subnet_id, subnet_vpc_id = self.create_subnet(
             ec2,
             vpc_id,
             self.config["subnet_cidr"],
@@ -394,7 +394,7 @@ class RunnerLauncher(object):
             self.config["owner"],
         )
         self.create_route_table(ec2, vpc_id, igw_id, subnet_id, self.config["owner"])
-        self.create_network_acl(ec2, vpc_id, self.config["vpc_cidr"], nacl_assoc_id)
+        self.create_network_acl(ec2, vpc_id, self.config["vpc_cidr"], subnet_vpc_id)
 
         sg_id = self.create_security_group(
             ec2, vpc_id, self.config["vpc_cidr"], self.config["owner"]
