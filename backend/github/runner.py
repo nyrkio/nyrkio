@@ -10,54 +10,64 @@ from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
 
 
 class RunnerLauncher(object):
-    def __init__(self, nyrkio_user_id, pr_event, instance_type=None):
+    def __init__(self, nyrkio_user_id, gh_event, instance_type=None):
         self.nyrkio_user_id = nyrkio_user_id
-        self.pr_event = pr_event
+        self.gh_event = gh_event
         self.instance_type = instance_type
         self.config = gh_runner_config(self.instance_type)
-        self.tags = self.pr_event_to_aws_tags(self.pr_event)
+        self.tags = self.gh_event_to_aws_tags(self.gh_event)
         logging.info(
             f"RunnerLauncher initialized for user {self.nyrkio_user_id} with instance_type={self.instance_type}"
         )
 
-    def pr_event_to_aws_tags(
-        self, pr_event, launched_by="nyrkio/nyrkio/backend/github/runner.py"
+    def gh_event_to_aws_tags(
+        self, gh_event, launched_by="nyrkio/nyrkio/backend/github/runner.py"
     ):
         """
-        Converts a GitHub PR event JSON to AWS tag dictionaries.
+        Converts a GitHub workflow_job event JSON to AWS tag dictionaries.
 
         --- Example usage: ---
-        Suppose you get `pr_event` from a webhook:
-        pr_tags = pr_event_to_aws_tags(pr_event, launched_by="henrikingo")
+        Suppose you get `gh_event` from a webhook:
+        tags = gh_event_to_aws_tags(gh_event, launched_by="henrikingo")
         Then, add these to your resource TagSpecifications:
         TagSpecifications=[{
             "ResourceType": "instance",
             "Tags": [
                 {"Key": "Name", "Value": f"nyrkio-gh-runner-{i}"},
                 {"Key": "owner", "Value": OWNER},
-                *pr_tags
+                *tags
             ]
         }]
         """
-        pr = pr_event["pull_request"]
-        repo = pr_event["repository"]
-        user = pr.get("user", {})
+        job = gh_event["workflow_job"]
+        repo = gh_event["repository"]
         now = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
         tags = [
-            {"Key": "pr_author_id", "Value": str(user.get("id", ""))},
-            {"Key": "pr_author_login", "Value": user.get("login", "")},
-            {"Key": "pr_number", "Value": str(pr.get("number", ""))},
-            {"Key": "pr_url", "Value": pr.get("html_url", "")},
             {
-                "Key": "pr_title",
-                "Value": pr.get("title", "")[:100],
-            },  # S3 tag value limit
-            {"Key": "repo_name", "Value": repo.get("name", "")},
+                "Key": "github_sender",
+                "Value": str(job.get("sender", {}).get("login", "")),
+            },
+            {"Key": "github_repo", "Value": str(repo.get("full_name", ""))},
+            {"Key": "github_job_id", "Value": str(job.get("id", ""))},
+            {"Key": "github_job_name", "Value": job.get("name", "")},
+            {"Key": "github_job_run_id", "Value": str(job.get("run_id", ""))},
+            {"Key": "github_job_run_number", "Value": str(job.get("run_number", ""))},
+            {"Key": "github_job_status", "Value": job.get("status", "")},
+            {"Key": "github_job_conclusion", "Value": job.get("conclusion", "")},
+            {"Key": "github_job_html_url", "Value": job.get("html_url", "")},
+            {"Key": "github_job_labels", "Value": ",".join(job.get("labels", []))},
+            {"Key": "github_event_action", "Value": gh_event.get("action", "")},
+            {
+                "Key": "github_event_id",
+                "Value": gh_event.get("workflow_job", {}).get("id", ""),
+            },
+            {
+                "Key": "github_event_type",
+                "Value": gh_event.get("workflow_job", {}).get("event", ""),
+            },
             {"Key": "repo_owner", "Value": repo.get("owner", {}).get("login", "")},
-            {"Key": "pr_created_at", "Value": pr.get("created_at", "")},
-            {"Key": "pr_head_sha", "Value": pr.get("head", {}).get("sha", "")},
-            {"Key": "launched_by", "Value": launched_by},
+            {"Key": "job_created_at", "Value": job.get("created_at", "")},
             {"Key": "launched_at", "Value": now},
             {"Key": "group", "Value": "nyrkio-gh-runner"},
             {"Key": "owner", "Value": self.nyrkio_user_id},
