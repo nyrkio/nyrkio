@@ -1,4 +1,4 @@
-from backend.db.db import DBStore
+from backend.db.db import DBStore, User
 from backend.github.runner import RunnerLauncher
 from fastapi import APIRouter
 from typing import Dict
@@ -59,8 +59,8 @@ async def _github_events(gh_event: Dict):
         logger.info(f"Workflow job for ({org_name}/{repo_owner}/{repo_name})")
 
         nyrkio_user_or_org = await store.get_user_by_github_username(repo_owner)
-        if nyrkio_user_or_org is not None and "id" in nyrkio_user_or_org:
-            nyrkio_user_or_org = nyrkio_user_or_org["id"]
+        if isinstance(nyrkio_user_or_org, User):
+            nyrkio_user_or_org = nyrkio_user_or_org.id
 
         if not nyrkio_user_or_org:
             nyrkio_user_or_org = await store.get_org_by_github_org(org_name, sender)
