@@ -131,7 +131,7 @@ async def fetch_access_token(token_url, expiration_seconds=600, installation_id=
         # JWT expiration time (10 minutes maximum)
         "exp": int(time.time()) + expiration_seconds,
         # GitHub App's identifier
-        "iss": CLIENT_ID,#,
+        "iss": CLIENT_ID,  # ,
     }
 
     encoded_jwt = jwt.encode(payload, signing_key, algorithm="RS256")
