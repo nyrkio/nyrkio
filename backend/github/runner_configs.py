@@ -5,7 +5,8 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 
 # Defaults:
-PROFILE = ("nyrkio-gh-runners",)
+# PROFILE = ("nyrkio-gh-runners",)
+PROFILE = ("",)  # Ended up using env vars and default profile
 REGION = ("eu-central-1",)
 AVAILABILITY_ZONE = ("eu-central-1b",)
 OWNER = ("henrik@nyrkio.com",)
