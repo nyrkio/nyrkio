@@ -365,8 +365,8 @@ class RunnerLauncher(object):
             "region", "eu-central-1"
         )  # Set default region if not in config
 
-        aws_access_key_id = (self.config.get("aws_access_key_id"),)
-        aws_secret_access_key = (self.config.get("aws_secret_access_key"),)
+        aws_access_key_id = self.config.get("aws_access_key_id")
+        aws_secret_access_key = self.config.get("aws_secret_access_key")
         logging.info(f"aws_access_key_id: {aws_access_key_id}")
         logging.info(f"aws_secret_access_key: {aws_secret_access_key}")
         logging.info(f"region: {REGION}")
