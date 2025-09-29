@@ -42,6 +42,7 @@ jobs:
           NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
           SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
+          NYRKIO_GH_RUNNER_SSH: ${{ secrets.NYRKIO_GH_RUNNER_SSH }}
           ENV: prod
         run: |
           mv p/frontend/src/static/* p/
@@ -51,6 +52,7 @@ jobs:
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
           echo "$SSL_SECRET_KEY" > nyrkio.com.key
+          echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
           pwd
           ls -a
 

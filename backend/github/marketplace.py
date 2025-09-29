@@ -119,7 +119,7 @@ async def get_github_runner_registration_token(
         raise Exception("Both org_name or repo_full_name must be provided")
 
     client = httpx.AsyncClient()
-    token = await fetch_access_token(url, 3600, installation_id=installation_id)
+    token = await fetch_access_token(url, 600, installation_id=installation_id)
     response = await client.get(
         url,
         headers={
