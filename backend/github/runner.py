@@ -372,8 +372,7 @@ class RunnerLauncher(object):
         return result
 
     def launch(self, registration_token=None):
-        return
-        # Doesn't work yet. Disable and go to  sleep
+        # return        # Doesn't work yet. Disable and go to  sleep
         if registration_token:
             self.registration_token = registration_token
 
