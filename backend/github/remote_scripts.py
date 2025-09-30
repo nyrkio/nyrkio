@@ -138,8 +138,9 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 
 
 cd /home/runner
+"""
 
-sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/"""  # ... /ORG --token AAS56YWLQMKQKNRVL6J35PDIYKWRU
+configsh = """sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/"""  # ... /ORG --token AAS56YWLQMKQKNRVL6J35PDIYKWRU
 # Append something like this in runner.py before uploading the script
 # Then do: `sudo su runner -c /home/runner/wrapper_wrapper.sh`
 

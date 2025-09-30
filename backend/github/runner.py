@@ -9,7 +9,7 @@ import httpx
 
 from backend.github.runner_configs import gh_runner_config
 from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
-from backend.github.remote_scripts import all_scripts as all_files
+from backend.github.remote_scripts import all_scripts as all_files, configsh
 
 
 class RunnerLauncher(object):
@@ -463,10 +463,11 @@ class RunnerLauncher(object):
                 conn.run(f"echo '{line}' | sudo tee -a {file_name}")
 
             conn.run(f"sudo chmod a+rx {file_name}")
-            if file_name == "provisioning.sh":
-                conn.run(
-                    f"echo '{repo_owner} --token {registration_token}' >> {file_name}"
-                )
+
+        file_name == "/tmp/provisioning.sh"
+        conn.run(
+            f"echo '{configsh}{repo_owner} --token {registration_token}' >> {file_name}"
+        )
 
         # Run provisioning script
         logging.info("Running provisioning.sh ...")
