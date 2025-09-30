@@ -232,6 +232,8 @@ class RunnerLauncher(object):
         ami_id,
         key_name,
         instance_type,
+        vpc_id,
+        nacl_id,
         subnet_id,
         private_ip,
         sg_id,
@@ -247,6 +249,8 @@ class RunnerLauncher(object):
             "KeyName": key_name,
             "InstanceType": instance_type,
             "SubnetId": subnet_id,
+            "VpcId": vpc_id,
+            "NetworkAclId": nacl_id,
             "PrivateIpAddress": private_ip,
             "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
@@ -372,6 +376,71 @@ class RunnerLauncher(object):
         return result
 
     def launch(self, registration_token=None):
+        # return        # Doesn't work yet. Disable and go to  sleep
+        if registration_token:
+            self.registration_token = registration_token
+
+        REGION = self.config.get(
+            "region", "eu-central-1"
+        )  # Set default region if not in config
+        subnet_id = self.config.get("subnet_id","subnet-0a29e3837420ad085")
+        sg_id = self.config.get("sg_id","sg-0d3f3f1e2f4e4c4b5")
+        # nacl_id = self.config.get("nacl_id","acl-0dabab2da09b4ee80")
+        # vpc_id = self.config.get("vpc_id","vpc-04a6f951b50750283")
+
+        aws_access_key_id = self.config.get("aws_access_key_id")
+        aws_secret_access_key = self.config.get("aws_secret_access_key")
+        logging.info(f"aws_access_key_id: {aws_access_key_id}")
+        logging.info(f"aws_secret_access_key: {aws_secret_access_key}")
+        logging.info(f"region: {REGION}")
+        logging.info(f"profile: {self.config.get('profile')}")
+        logging.info(
+            f"nyrkio_user and org: {self.nyrkio_user_id}, {self.nyrkio_org_id}"
+        )
+
+        session = boto3.Session(
+            aws_access_key_id=aws_access_key_id,
+            aws_secret_access_key=aws_secret_access_key,
+            #               profile_name=self.config.get("profile"),
+            region_name=REGION,
+        )
+        ec2 = session.client("ec2")
+        ec2r = session.resource("ec2")
+
+        all_instances = []
+        for i in range(self.config["instance_count"]):
+            instance_id, public_ip = self.request_spot_instance(
+                ec2,
+                ec2r,
+                self.config["ami_id"],
+                self.config["key_name"],
+                self.config["instance_type"],
+                subnet_id,
+                self.config["private_ips"][i],
+                sg_id,
+                self.config["ebs_size"],
+                self.config["ebs_iops"],
+                self.config["user_data"],
+                self.config["owner"],
+                self.config["spot_price"],
+                i,
+            )
+            self.provision_instance_with_fabric(
+                public_ip,
+                self.config["ssh_user"],
+                self.config["ssh_key_file"],
+                self.config["local_files"],
+            )
+            all_instances.append((instance_id, public_ip))
+        self.all_instances = all_instances
+        logging.info(
+            f"RunnerLauncher: Successfully deployed {all_instances} of type {self.instance_type} for user {self.nyrkio_user_id}"
+        )
+        return all_instances
+
+
+    def launch_orig(self, registration_token=None):
+        # Did this once to get the network stuff.
         # return        # Doesn't work yet. Disable and go to  sleep
         if registration_token:
             self.registration_token = registration_token
