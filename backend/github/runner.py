@@ -458,8 +458,10 @@ class RunnerLauncher(object):
         # Upload all files
         for file_name, content in all_files.items():
             logging.info(f"Uploading {file_name} to {ip_address}")
-            # Use repr to preserve newlines and special characters
-            conn.run(f"echo {repr(content)} | sudo tee {file_name}")
+            
+            for line in content.splitlines():
+                conn.run(f"echo '{line}' | sudo tee -a {file_name}")
+            
             conn.run(f"sudo chmod a+rx {file_name}")
             if file_name == "provisioning.sh":
                 conn.run(
