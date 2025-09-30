@@ -131,16 +131,16 @@ then
     echo "* * * * * root sleep 600; if [ wc -l /home/runner/runsh.stdout.log -gt 10 ]; then /bin/true; else shutdown now; fi" | sudo tee /etc/cron.d/nyrkio-github-runner-startup-check
 fi
 
-sudo mv /tmp/runsh_wrapper.sh /home/runner/runsh_wrapper.sh
+#sudo mv /tmp/runsh_wrapper.sh /home/runner/runsh_wrapper.sh
 sudo chmod a+x /home/runner/runsh_wrapper.sh
-sudo mv /tmp/wrapper_wrapper.sh /home/runner/wrapper_wrapper.sh
+#sudo mv /tmp/wrapper_wrapper.sh /home/runner/wrapper_wrapper.sh
 sudo chmod a+x /home/runner/wrapper_wrapper.sh
 
 
 cd /home/runner
 """
 
-configsh = """sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/"""  # ... /ORG --token AAS56YWLQMKQKNRVL6J35PDIYKWRU
+configsh = """cd /home/runner; sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/"""  # ... /ORG --token AAS56YWLQMKQKNRVL6J35PDIYKWRU
 # Append something like this in runner.py before uploading the script
 # Then do: `sudo su runner -c /home/runner/wrapper_wrapper.sh`
 
