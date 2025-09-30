@@ -383,10 +383,10 @@ class RunnerLauncher(object):
         REGION = self.config.get(
             "region", "eu-central-1"
         )  # Set default region if not in config
-        subnet_id = self.config.get("subnet_id","subnet-0a29e3837420ad085")
-        sg_id = self.config.get("sg_id","sg-0d3f3f1e2f4e4c4b5")
-        # nacl_id = self.config.get("nacl_id","acl-0dabab2da09b4ee80")
-        # vpc_id = self.config.get("vpc_id","vpc-04a6f951b50750283")
+        subnet_id = self.config.get("subnet_id", "subnet-0a29e3837420ad085")
+        sg_id = self.config.get("sg_id", "sg-0d3f3f1e2f4e4c4b5")
+        nacl_id = self.config.get("nacl_id", "acl-0dabab2da09b4ee80")
+        vpc_id = self.config.get("vpc_id", "vpc-04a6f951b50750283")
 
         aws_access_key_id = self.config.get("aws_access_key_id")
         aws_secret_access_key = self.config.get("aws_secret_access_key")
@@ -415,6 +415,8 @@ class RunnerLauncher(object):
                 self.config["ami_id"],
                 self.config["key_name"],
                 self.config["instance_type"],
+                vpc_id,
+                nacl_id,
                 subnet_id,
                 self.config["private_ips"][i],
                 sg_id,
@@ -437,7 +439,6 @@ class RunnerLauncher(object):
             f"RunnerLauncher: Successfully deployed {all_instances} of type {self.instance_type} for user {self.nyrkio_user_id}"
         )
         return all_instances
-
 
     def launch_orig(self, registration_token=None):
         # Did this once to get the network stuff.
