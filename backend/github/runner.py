@@ -251,6 +251,8 @@ class RunnerLauncher(object):
             spot_price = [spot_price]
 
         lowest_offer = str(spot_price[0])
+        logging.info(f"Starting with spot price offer: {lowest_offer}")
+        logging.info(user_data)
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
