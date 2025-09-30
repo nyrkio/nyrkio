@@ -389,6 +389,11 @@ class RunnerLauncher(object):
                         },
                     }
                 ],
+                NetworkInterfaces=[
+                    {
+                        "AssociatePublicAddress": True,
+                    }
+                ],
                 UserData=user_data,
                 MaxCount=1,
                 MinCount=1,
@@ -466,7 +471,6 @@ class RunnerLauncher(object):
         return result
 
     async def launch(self, registration_token=None):
-        # return        # Doesn't work yet. Disable and go to  sleep
         if registration_token:
             self.registration_token = registration_token
 
@@ -522,6 +526,8 @@ class RunnerLauncher(object):
                 self.config["ssh_user"],
                 self.config["ssh_key_file"],
                 self.config["local_files"],
+                self.gh_event["repository"]["owner"]["login"],
+                self.registration_token,
             )
             all_instances.append((instance_id, public_ip))
         self.all_instances = all_instances
