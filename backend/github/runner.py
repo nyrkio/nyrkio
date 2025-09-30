@@ -292,10 +292,18 @@ class RunnerLauncher(object):
             logging.info(f"SpotInstanceRequestId: {sir_id}")
             # Wait for fulfillment (very basic)
             sleep_seconds = 5
-            sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
-            res = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
-            req = res["SpotInstanceRequests"][0]
-            if req["State"] == "active" and "InstanceId" in req:
+            res = ec2.describe_spot_instance_requests()
+            spot_request = None
+            for req in res["SpotInstanceRequests"]:
+                if req["SpotInstanceRequestId"] == sir_id:
+                    spot_request = req
+                    break
+
+            if (
+                spot_request
+                and spot_request["State"] == "active"
+                and "InstanceId" in spot_request
+            ):
                 instance_id = req["InstanceId"]
                 logging.info(f"Instance launched: {instance_id}")
             else:
@@ -303,15 +311,17 @@ class RunnerLauncher(object):
                     f"Waiting {sleep_seconds} for spot request {sir_id} to be fulfilled..."
                 )
                 asyncio.sleep(sleep_seconds)
-                if req["State"] == "active" and "InstanceId" in req:
-                    instance_id = req["InstanceId"]
+                if spot_request["State"] == "active" and "InstanceId" in spot_request:
+                    instance_id = spot_request["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
                     break
                 else:
                     logging.info(
-                        f"Spot request {sir_id} not yet fulfilled (state: {req['State']})."
+                        f"Spot request {sir_id} not yet fulfilled (state: {spot_request['State']})."
                     )
-                    logging.info(f"Cancelling spot request {sir_id} and increasing price...")
+                    logging.info(
+                        f"Cancelling spot request {sir_id} and increasing price..."
+                    )
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
         if instance_id is None:
