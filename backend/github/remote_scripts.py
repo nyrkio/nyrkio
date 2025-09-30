@@ -145,7 +145,7 @@ sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/""
 
 
 all_scripts = {
-    "runsh_wrapper.sh": runsh_wrapper,
-    "wrapper_wrapper.sh": wrapper_wrapper,
-    "provisioning.sh": provisioning,
+    "/home/runner/runsh_wrapper.sh": runsh_wrapper,
+    "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
+    "/tmp/provisioning.sh": provisioning,
 }
