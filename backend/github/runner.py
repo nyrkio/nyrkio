@@ -212,7 +212,6 @@ class RunnerLauncher(object):
             ],
         )
         # Egress all
-        # TODO: Monitor what is used (github motership) and then deny everything else
         ec2.authorize_security_group_egress(
             GroupId=sg_id,
             IpPermissions=[
@@ -324,10 +323,10 @@ class RunnerLauncher(object):
                     instance_id = spot_request["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
                     break
-                elif (
-                    spot_request is not None
-                    and spot_request["Status"]["Code"] == "price-too-low"
-                ):
+                elif spot_request is not None and spot_request["Status"]["Code"] in [
+                    "price-too-low",
+                    "canceled-before-fulfillment",
+                ]:
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
                     # verify that we actually canceled in time:
                     res = ec2.describe_spot_instance_requests()
@@ -337,8 +336,13 @@ class RunnerLauncher(object):
                         if req is not None and req["SpotInstanceRequestId"] == sir_id:
                             spot_request2 = req
                             break
-                    if spot_request2 and spot_request2["Status"]["Code"] not in [
+                    if spot_request2 and spot_request2["Status"]["Code"] in [
                         "active",
+                    ]:
+                        logging.info(
+                            f"'active' spot instance achieved for only {offer_price}"
+                        )
+                    elif spot_request2 and spot_request2["Status"]["Code"] in [
                         "price-too-low",
                         "canceled-before-fulfillment",
                     ]:
