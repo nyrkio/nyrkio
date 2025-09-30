@@ -1,5 +1,4 @@
-runsh_wrapper = """
-#!/bin/bash
+runsh_wrapper = """#!/bin/bash
 
 # wrap around run.sh so we can
 # - add logging
@@ -13,8 +12,7 @@ echo "$(date) Done with run.sh. (It returned $?)" >> /home/runner/done
 """
 
 
-wrapper_wrapper = """
-#!/bin/bash
+wrapper_wrapper = """#!/bin/bash
 
 # wrap around run.sh so we can
 # - add logging
@@ -26,8 +24,7 @@ source /home/runner/.bashrc
 screen  -dmS nyrkioGhRunner /home/runner/runsh_wrapper.sh
 """
 
-provisioning = """
-#!/bin/bash
+provisioning = """#!/bin/bash
 
 # MIT licensed
 # (c) Nyrkiö Oy, 2025

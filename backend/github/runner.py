@@ -335,13 +335,13 @@ class RunnerLauncher(object):
                         logging.info(req)
                         if req is not None and req["SpotInstanceRequestId"] == sir_id:
                             spot_request2 = req
-                            break
                     if spot_request2 and spot_request2["Status"]["Code"] in [
                         "active",
                     ]:
                         logging.info(
                             f"'active' spot instance achieved for only {offer_price}"
                         )
+                        break
                     elif spot_request2 and spot_request2["Status"]["Code"] in [
                         "price-too-low",
                         "canceled-before-fulfillment",
@@ -350,8 +350,8 @@ class RunnerLauncher(object):
                         logging.info(
                             f"Spot request {sir_id} not yet fulfilled. Tried to cancel. Status: {status}"
                         )
-                        break
                 else:
+                    logging.info("Catch all. Not quite clear what this is, so dumping all. Break and go for on-demand.")
                     logging.info(spot_request)
                     break
 
@@ -454,18 +454,18 @@ class RunnerLauncher(object):
         )
         # Upload all files
         for file_name, content in all_files.items():
-            logging.debug(f"Uploading {file_name} to {ip_address}")
+            logging.info(f"Uploading {file_name} to {ip_address}")
             # Use repr to preserve newlines and special characters
             conn.run(f"echo {repr(content)} > {file_name}")
             conn.run(f"chmod +x {file_name}")
-            if file_name == "provisioning.sh":
+            if file_name == "/tmp/provisioning.sh":
                 conn.run(
                     f"echo '{repo_owner} --token {registration_token}' >> {file_name}"
                 )
 
         # Run provisioning script
-        logging.debug("Running provisioning.sh ...")
-        result = conn.run("./provisioning.sh", warn=True)
+        logging.info("Running provisioning.sh ...")
+        result = conn.run("/tmp/provisioning.sh", warn=True)
         logging.debug(result.stdout)
         logging.debug("Starting run.sh in a detached screen session ...")
         result = conn.run(
