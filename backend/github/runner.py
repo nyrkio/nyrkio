@@ -371,7 +371,6 @@ class RunnerLauncher(object):
                 ImageId=ami_id,
                 KeyName=key_name,
                 InstanceType=instance_type,
-                SubnetId=subnet_id,
                 PrivateIpAddress=private_ip,
                 SecurityGroupIds=[sg_id],
                 BlockDeviceMappings=[
