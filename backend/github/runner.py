@@ -226,7 +226,7 @@ class RunnerLauncher(object):
         )
         return sg_id
 
-    def request_spot_instance(
+    async def request_spot_instance(
         self,
         ec2,
         ec2r,
@@ -310,8 +310,12 @@ class RunnerLauncher(object):
                 logging.info(
                     f"Waiting {sleep_seconds} for spot request {sir_id} to be fulfilled..."
                 )
-                asyncio.sleep(sleep_seconds)
-                if spot_request["State"] == "active" and "InstanceId" in spot_request:
+                await asyncio.sleep(sleep_seconds)
+                if (
+                    spot_request is not None
+                    and spot_request["State"] == "active"
+                    and "InstanceId" in spot_request
+                ):
                     instance_id = spot_request["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
                     break
@@ -332,7 +336,7 @@ class RunnerLauncher(object):
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
             response = ec2.run_instances(launch_spec)
             if "Instances" not in response or len(response["Instances"]) == 0:
-                asyncio.sleep(5)
+                await asyncio.sleep(5)
                 raise Exception(
                     "Failed to launch on-demand instance {self.instance_type} for user {self.nyrkio_user_id}"
                 )
@@ -345,7 +349,7 @@ class RunnerLauncher(object):
         )
         instance.wait_until_running()
         for sleep_secs in [1, 5, 10, 15, 20]:
-            asyncio.sleep(sleep_seconds)
+            await asyncio.sleep(sleep_seconds)
             instance.load()
             if instance.public_ip_address:
                 break
@@ -397,7 +401,7 @@ class RunnerLauncher(object):
         logging.debug(result.stdout)
         return result
 
-    def launch(self, registration_token=None):
+    async def launch(self, registration_token=None):
         # return        # Doesn't work yet. Disable and go to  sleep
         if registration_token:
             self.registration_token = registration_token
@@ -431,7 +435,7 @@ class RunnerLauncher(object):
 
         all_instances = []
         for i in range(self.config["instance_count"]):
-            instance_id, public_ip = self.request_spot_instance(
+            instance_id, public_ip = await self.request_spot_instance(
                 ec2,
                 ec2r,
                 self.config["ami_id"],
