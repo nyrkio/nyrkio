@@ -1,3 +1,4 @@
+import base64
 import boto3
 import datetime
 import time
@@ -244,6 +245,7 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
+        
         logging.debug(
             f"Requesting spot instance {instance_type} in subnet {subnet_id} with private IP {private_ip} ..."
         )
@@ -253,6 +255,9 @@ class RunnerLauncher(object):
         lowest_offer = str(spot_price[0])
         logging.info(f"Starting with spot price offer: {lowest_offer}")
         logging.info(user_data)
+        user_data = base64.b64encode(user_data.encode("utf-8")).decode("utf-8")
+        logging.info(user_data)
+        
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
