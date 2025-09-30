@@ -3,6 +3,8 @@ import os
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+# Just to cap the damage of infinite loops...
+MAX_RUNNERS = 7
 
 # Defaults:
 # PROFILE = ("nyrkio-gh-runners",)
@@ -34,6 +36,7 @@ INSTANCE_TYPE_NAME = "nyrkio_perf_server_2cpu_ubuntu2404"
 
 
 template = {
+    "max_runners": MAX_RUNNERS,
     "profile": PROFILE,
     "region": REGION,
     "availability_zone": AVAILABILITY_ZONE,
