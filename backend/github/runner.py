@@ -244,6 +244,13 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
+        logging.debug(
+            f"Requesting spot instance {instance_type} in subnet {subnet_id} with private IP {private_ip} ..."
+        )
+        if not isinstance(spot_price, list):
+            spot_price = [spot_price]
+
+        lowest_offer = spot_price[0]
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
@@ -278,13 +285,13 @@ class RunnerLauncher(object):
         }
 
         response = ec2.request_spot_instances(
-            SpotPrice=spot_price,
+            SpotPrice=lowest_offer,
             InstanceCount=1,
             Type="one-time",
             LaunchSpecification=launch_spec,
         )
         sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
-        logging.debug(f"SpotInstanceRequestId: {sir_id}")
+        logging.info(f"SpotInstanceRequestId: {sir_id}")
         # Wait for fulfillment (very basic)
         instance_id = None
         sleep_seconds = 5
@@ -293,15 +300,19 @@ class RunnerLauncher(object):
             req = res["SpotInstanceRequests"][0]
             if req["State"] == "active" and "InstanceId" in req:
                 instance_id = req["InstanceId"]
-                logging.debug(f"Instance launched: {instance_id}")
+                logging.info(f"Instance launched: {instance_id}")
             else:
-                logging.debug(
+                logging.info(
                     f"Waiting {sleep_seconds} for spot request {sir_id} to be fulfilled..."
                 )
                 time.sleep(sleep_seconds)
                 if req["State"] == "active" and "InstanceId" in req:
                     instance_id = req["InstanceId"]
-                    logging.debug(f"Instance launched: {instance_id}")
+                    logging.info(f"Instance launched: {instance_id}")
+            ec2.update_spot_instance_request(
+                SpotInstanceRequestId=sir_id, SpotPrice=offer_price
+            )
+
         if instance_id is None:
             # Cancel the spot request, deploy regular on-demand instance instead
             logging.warning(
