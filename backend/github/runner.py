@@ -461,7 +461,7 @@ class RunnerLauncher(object):
 
             base = base64.b64encode(content.encode("utf-8")).decode("utf-8")
             conn.run(f"echo '{base}' | sudo tee '{file_name}.base'")
-            conn.run(f"sudo base64 {file_name}.base | sudo tee '{file_name}'")
+            conn.run(f"sudo base64 -d {file_name}.base | sudo tee '{file_name}'")
             conn.run(f"sudo chmod a+rx '{file_name}'")
 
         file_name == "/tmp/provisioning.sh"
@@ -471,7 +471,7 @@ class RunnerLauncher(object):
 
         # Run provisioning script
         logging.info("Running provisioning.sh ...")
-        result = conn.run("provisioning.sh", warn=True)
+        result = conn.run("/tmp/provisioning.sh", warn=True)
         logging.info(result.stdout)
         logging.info("Starting run.sh in a detached screen session ...")
         result = conn.run(
