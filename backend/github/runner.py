@@ -364,7 +364,7 @@ class RunnerLauncher(object):
             )
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
-            response = ec2.run_instances(LaunchSpecification=launch_spec)
+            response = ec2.run_instances(LaunchSpecification=launch_spec, MaxCount=1, MinCount=1)
             if "Instances" not in response or len(response["Instances"]) == 0:
                 await asyncio.sleep(5)
                 raise Exception(
