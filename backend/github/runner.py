@@ -351,7 +351,9 @@ class RunnerLauncher(object):
                             f"Spot request {sir_id} not yet fulfilled. Tried to cancel. Status: {status}"
                         )
                 else:
-                    logging.info("Catch all. Not quite clear what this is, so dumping all. Break and go for on-demand.")
+                    logging.info(
+                        "Catch all. Not quite clear what this is, so dumping all. Break and go for on-demand."
+                    )
                     logging.info(spot_request)
                     break
 
