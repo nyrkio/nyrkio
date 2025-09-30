@@ -476,15 +476,18 @@ class RunnerLauncher(object):
             conn.run(f"sudo base64 -d {file_name}.base | sudo tee '{file_name}'")
             conn.run(f"sudo chmod a+rx '{file_name}'")
 
-        file_name == "/tmp/provisioning.sh"
-        conn.run(
-            f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
-        )
-
         # Run provisioning script
         logging.info("Running provisioning.sh ...")
         result = conn.run("/tmp/provisioning.sh", warn=True)
         logging.info(result.stdout)
+
+        file_name == "/tmp/provisioning.sh"
+        cmd = f"{configsh}{repo_owner} --token {registration_token}"
+        # cmd = f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
+        logging.info("About to call home to mother ship...")
+        logging.info(cmd)
+        conn.run(cmd)
+
         logging.info("Starting run.sh in a detached screen session ...")
         result = conn.run(
             "sudo su runner -c /home/runner/wrapper_wrapper.sh", warn=True
