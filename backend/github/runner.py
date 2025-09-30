@@ -331,7 +331,7 @@ class RunnerLauncher(object):
                 f"Spot request {sir_id} not fulfilled, cancelling and launching on-demand instance instead..."
             )
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
-            response = ec2.run_instances(launch_spec)
+            response = ec2.run_instances(LaunchSpecification=launch_spec)
             if "Instances" not in response or len(response["Instances"]) == 0:
                 await asyncio.sleep(5)
                 raise Exception(
