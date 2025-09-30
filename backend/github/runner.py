@@ -340,6 +340,7 @@ class RunnerLauncher(object):
                     if spot_request2 and spot_request2["Status"]["Code"] not in [
                         "active",
                         "price-too-low",
+                        "canceled-before-fulfillment",
                     ]:
                         status = spot_request2["Status"]["Code"]
                         logging.info(
@@ -464,7 +465,7 @@ class RunnerLauncher(object):
             "region", "eu-central-1"
         )  # Set default region if not in config
         subnet_id = self.config.get("subnet_id", "subnet-0a29e3837420ad085")
-        sg_id = self.config.get("sg_id", "sg-0d3f3f1e2f4e4c4b5")
+        sg_id = self.config.get("sg_id", "sg-02a41285041bf2102")
         nacl_id = self.config.get("nacl_id", "acl-0dabab2da09b4ee80")
         vpc_id = self.config.get("vpc_id", "vpc-04a6f951b50750283")
 
