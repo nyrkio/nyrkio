@@ -321,10 +321,7 @@ class RunnerLauncher(object):
                     break
                 else:
                     logging.info(
-                        f"Spot request {sir_id} not yet fulfilled (state: {spot_request['State']})."
-                    )
-                    logging.info(
-                        f"Cancelling spot request {sir_id} and increasing price..."
+                        f"Spot request {sir_id} not yet fulfilled). Cancelling spot request and increasing price..."
                     )
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
