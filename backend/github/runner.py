@@ -374,6 +374,7 @@ class RunnerLauncher(object):
                 InstanceType=instance_type,
                 PrivateIpAddress=private_ip,
                 SecurityGroupIds=[sg_id],
+                SubnetId=subnet_id,
                 BlockDeviceMappings=[
                     {
                         "DeviceName": "/dev/xvda",
