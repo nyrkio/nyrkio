@@ -250,7 +250,7 @@ class RunnerLauncher(object):
         if not isinstance(spot_price, list):
             spot_price = [spot_price]
 
-        lowest_offer = spot_price[0]            
+        lowest_offer = spot_price[0]
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
@@ -312,7 +312,6 @@ class RunnerLauncher(object):
             ec2.update_spot_instance_request(
                 SpotInstanceRequestId=sir_id, SpotPrice=offer_price
             )
-
 
         if instance_id is None:
             # Cancel the spot request, deploy regular on-demand instance instead
