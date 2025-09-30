@@ -337,7 +337,10 @@ class RunnerLauncher(object):
                         if req is not None and req["SpotInstanceRequestId"] == sir_id:
                             spot_request2 = req
                             break
-                    if spot_request2 and spot_request2["Status"]["Code"] != "active":
+                    if spot_request2 and spot_request2["Status"]["Code"] not in [
+                        "active",
+                        "price-too-low",
+                    ]:
                         status = spot_request2["Status"]["Code"]
                         logging.info(
                             f"Spot request {sir_id} not yet fulfilled. Tried to cancel. Status: {status}"
@@ -364,7 +367,9 @@ class RunnerLauncher(object):
             )
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
-            response = ec2.run_instances(LaunchSpecification=launch_spec, MaxCount=1, MinCount=1)
+            response = ec2.run_instances(
+                LaunchSpecification=launch_spec, MaxCount=1, MinCount=1
+            )
             if "Instances" not in response or len(response["Instances"]) == 0:
                 await asyncio.sleep(5)
                 raise Exception(
