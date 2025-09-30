@@ -245,15 +245,13 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
+        all_request_ids = []
         logging.debug(
             f"Requesting spot instance {instance_type} in subnet {subnet_id} with private IP {private_ip} ..."
         )
         if not isinstance(spot_price, list):
             spot_price = [spot_price]
 
-        lowest_offer = str(spot_price[0])
-
-        logging.info(f"Starting with spot price offer: {lowest_offer}")
         logging.info(user_data)
         user_data = base64.b64encode(user_data.encode("utf-8")).decode("utf-8")
         logging.info(user_data)
@@ -282,6 +280,7 @@ class RunnerLauncher(object):
         instance_id = None
 
         for offer_price in spot_price:
+            logging.info(f"Bidding spot price: {offer_price}")
             response = ec2.request_spot_instances(
                 SpotPrice=str(offer_price),
                 InstanceCount=1,
@@ -289,16 +288,19 @@ class RunnerLauncher(object):
                 LaunchSpecification=launch_spec,
             )
             sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
+            all_request_ids.append(sir_id)
             logging.info(f"SpotInstanceRequestId: {sir_id}")
             # Wait for fulfillment (very basic)
             sleep_seconds = 5
             res = ec2.describe_spot_instance_requests()
             spot_request = None
             for req in res["SpotInstanceRequests"]:
+                logging.info(req)
                 if req["SpotInstanceRequestId"] == sir_id:
                     spot_request = req
                     break
 
+            logging.info(f"{sir_id} state: {spot_request['State']}")
             if (
                 spot_request
                 and spot_request["State"] == "active"
