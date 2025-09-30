@@ -321,11 +321,17 @@ class RunnerLauncher(object):
                     instance_id = spot_request["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
                     break
-                else:
+                elif (
+                    spot_request is not None
+                    and spot_request["Status"]["Code"] == "price-too-low"
+                ):
                     logging.info(
                         f"Spot request {sir_id} not yet fulfilled). Cancelling spot request and increasing price..."
                     )
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
+                else:
+                    logging.info(spot_request)
+                    break
 
         if instance_id is None:
             # Cancel the spot request, deploy regular on-demand instance instead
