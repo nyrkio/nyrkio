@@ -391,6 +391,7 @@ class RunnerLauncher(object):
                 ],
                 NetworkInterfaces=[
                     {
+                        "DeviceIndex": 0,
                         "AssociatePublicIpAddress": True,
                         "DeleteOnTermination": True,
                         "SubnetId": subnet_id,
