@@ -250,14 +250,12 @@ class RunnerLauncher(object):
         if not isinstance(spot_price, list):
             spot_price = [spot_price]
 
-        lowest_offer = spot_price[0]
+        lowest_offer = str(spot_price[0])
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
             "InstanceType": instance_type,
             "SubnetId": subnet_id,
-            "VpcId": vpc_id,
-            "NetworkAclId": nacl_id,
             "PrivateIpAddress": private_ip,
             "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
@@ -273,15 +271,6 @@ class RunnerLauncher(object):
                 }
             ],
             "UserData": user_data,
-            "TagSpecifications": [
-                {
-                    "ResourceType": "instance",
-                    "Tags": [
-                        {"Key": "Name", "Value": f"nyrkio-gh-runner-{instance_idx}"},
-                        {"Key": "owner", "Value": owner},
-                    ],
-                }
-            ],
         }
 
         response = ec2.request_spot_instances(
