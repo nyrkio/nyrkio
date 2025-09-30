@@ -459,8 +459,8 @@ class RunnerLauncher(object):
         for file_name, content in all_files.items():
             logging.info(f"Uploading {file_name} to {ip_address}")
             # Use repr to preserve newlines and special characters
-            conn.run(f"echo {repr(content)} > {file_name}")
-            conn.run(f"chmod +x {file_name}")
+            conn.run(f"echo {repr(content)} | sudo tee {file_name}")
+            conn.run(f"sudo chmod a+rx {file_name}")
             if file_name == "provisioning.sh":
                 conn.run(
                     f"echo '{repo_owner} --token {registration_token}' >> {file_name}"
