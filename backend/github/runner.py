@@ -283,7 +283,7 @@ class RunnerLauncher(object):
 
         for offer_price in spot_price:
             response = ec2.request_spot_instances(
-                SpotPrice=offer_price,
+                SpotPrice=str(offer_price),
                 InstanceCount=1,
                 Type="one-time",
                 LaunchSpecification=launch_spec,
@@ -307,8 +307,12 @@ class RunnerLauncher(object):
                     instance_id = req["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
                     break
-
-                ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
+                else:
+                    logging.info(
+                        f"Spot request {sir_id} not yet fulfilled (state: {req['State']})."
+                    )
+                    logging.info(f"Cancelling spot request {sir_id} and increasing price...")
+                    ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
         if instance_id is None:
             # Cancel the spot request, deploy regular on-demand instance instead
