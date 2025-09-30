@@ -245,7 +245,6 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
-        
         logging.debug(
             f"Requesting spot instance {instance_type} in subnet {subnet_id} with private IP {private_ip} ..."
         )
@@ -257,14 +256,14 @@ class RunnerLauncher(object):
         logging.info(user_data)
         user_data = base64.b64encode(user_data.encode("utf-8")).decode("utf-8")
         logging.info(user_data)
-        
+
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
             "InstanceType": instance_type,
             "SubnetId": subnet_id,
             # "PrivateIpAddress": private_ip,
-            "SecurityGroupIds": [sg_id],
+            # "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
                 {
                     "DeviceName": "/dev/xvda",
