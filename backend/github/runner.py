@@ -460,13 +460,13 @@ class RunnerLauncher(object):
             logging.info(f"Uploading {file_name} to {ip_address}")
 
             for line in content.splitlines():
-                conn.run(f"echo '{line}' | sudo tee -a {file_name}")
+                conn.run(f"echo 'repr({line})' | sudo tee -a '{file_name}'")
 
-            conn.run(f"sudo chmod a+rx {file_name}")
+            conn.run(f"sudo chmod a+rx '{file_name}'")
 
         file_name == "/tmp/provisioning.sh"
         conn.run(
-            f"echo '{configsh}{repo_owner} --token {registration_token}' >> {file_name}"
+            f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
         )
 
         # Run provisioning script
