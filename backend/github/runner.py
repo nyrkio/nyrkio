@@ -256,7 +256,7 @@ class RunnerLauncher(object):
             "KeyName": key_name,
             "InstanceType": instance_type,
             "SubnetId": subnet_id,
-            "PrivateIpAddress": private_ip,
+            # "PrivateIpAddress": private_ip,
             "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
                 {
