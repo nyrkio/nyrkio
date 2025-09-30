@@ -12,7 +12,7 @@ AVAILABILITY_ZONE = "eu-central-1b"
 OWNER = "henrik@nyrkio.com"
 VPC_CIDR = "10.2.0.0/16"
 SUBNET_CIDR = "10.2.0.0/24"
-AMI_ID = "ami-0650ffa1687d270fc"
+AMI_ID = "ami-09d286866668d5eb8"
 INSTANCE_TYPE = "c7a.large"
 INSTANCE_COUNT = 1
 PRIVATE_IPS = ["10.2.0.100", "10.2.0.2", "10.2.0.3", "10.2.0.4"]
@@ -22,12 +22,12 @@ SSH_KEY_FILE = "/usr/src/backend/keys/nyrkio-gh-runner-user"
 SSH_USER = "ubuntu"
 EBS_SIZE = 50
 EBS_IOPS = 5000
-LOCAL_FILES = [
-    ("./provisioning.sh", "/tmp/provisioning.sh"),
-    ("github-config-command.sh", "/tmp/github-config-cmd.sh"),
-    ("runsh_wrapper.sh", "/tmp/runsh_wrapper.sh"),
-    ("wrapper_wrapper.sh", "/tmp/wrapper_wrapper.sh"),
-]
+LOCAL_FILES = {
+    "./provisioning.sh": "/tmp/provisioning.sh",
+    "github-config-command.sh": "/tmp/github-config-cmd.sh",
+    "runsh_wrapper.sh": "/tmp/runsh_wrapper.sh",
+    "wrapper_wrapper.sh": "/tmp/wrapper_wrapper.sh",
+}
 USER_DATA = "#!/bin/bash\nsudo systemctl enable ssh\nsudo systemctl start ssh\n"
 
 INSTANCE_TYPE_NAME = "nyrkio_perf_server_2cpu_ubuntu2404"
