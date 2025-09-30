@@ -368,25 +368,27 @@ class RunnerLauncher(object):
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
             response = ec2.run_instances(
-                "ImageId": ami_id,
-                "KeyName": key_name,
-                "InstanceType": instance_type,
-                "SubnetId": subnet_id,
-                "PrivateIpAddress": private_ip,
-                "SecurityGroupIds": [sg_id],
-                "BlockDeviceMappings": [
-                {
-                    "DeviceName": "/dev/xvda",
-                    "Ebs": {
-                        "VolumeSize": ebs_size,
-                        "Iops": ebs_iops,
-                        "DeleteOnTermination": True,
-                        "Encrypted": True,
-                        "VolumeType": "gp3",
-                    },
-                }
+                ImageId=ami_id,
+                KeyName=key_name,
+                InstanceType=instance_type,
+                SubnetId=subnet_id,
+                PrivateIpAddress=private_ip,
+                SecurityGroupIds=[sg_id],
+                BlockDeviceMappings=[
+                    {
+                        "DeviceName": "/dev/xvda",
+                        "Ebs": {
+                            "VolumeSize": ebs_size,
+                            "Iops": ebs_iops,
+                            "DeleteOnTermination": True,
+                            "Encrypted": True,
+                            "VolumeType": "gp3",
+                        },
+                    }
                 ],
-                "UserData": user_data, MaxCount=1, MinCount=1
+                UserData=user_data,
+                MaxCount=1,
+                MinCount=1,
             )
             if "Instances" not in response or len(response["Instances"]) == 0:
                 await asyncio.sleep(5)
