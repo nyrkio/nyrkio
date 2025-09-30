@@ -323,12 +323,15 @@ class RunnerLauncher(object):
                 ):
                     instance_id = spot_request["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
+                    # One is enough. Higher level is responsive to queue length.
                     break
+
                 elif spot_request is not None and spot_request["Status"]["Code"] in [
                     "price-too-low",
                     "canceled-before-fulfillment",
                 ]:
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
+                    await asyncio.sleep(sleep_seconds)
                     # verify that we actually canceled in time:
                     res = ec2.describe_spot_instance_requests()
                     spot_request2 = None
@@ -340,17 +343,24 @@ class RunnerLauncher(object):
                         "active",
                     ]:
                         logging.info(
-                            f"'active' spot instance achieved for only {offer_price}"
+                            f"'active' spot instance achieved, after all, for only {offer_price}"
                         )
                         break
                     elif spot_request2 and spot_request2["Status"]["Code"] in [
-                        "price-too-low",
                         "canceled-before-fulfillment",
                     ]:
                         status = spot_request2["Status"]["Code"]
                         logging.info(
-                            f"Spot request {sir_id} not yet fulfilled. We can retry, bid higher. Status: {status}"
+                            f"Spot request {sir_id} canceled, as it should. We can retry, bid higher. Status: {status}"
                         )
+                    elif spot_request2 and spot_request2["Status"]["Code"] in [
+                        "price-too-low",
+                    ]:
+                        status = spot_request2["Status"]["Code"]
+                        logging.info(
+                            f"Spot request {sir_id} not yet canceled. Let's get out of here and just do the regular instances. Status: {status}"
+                        )
+                        break
                 else:
                     logging.info(
                         "Catch all. Not quite clear what this is, so dumping all. Break and go for on-demand."
@@ -372,7 +382,9 @@ class RunnerLauncher(object):
                         f"Spot request {sir_id} not fulfilled, cancelling and launching on-demand instance instead..."
                     )
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
+            await asyncio.sleep(sleep_seconds)
 
+            logging.info("Now launching regular on-demand instance...")
             response = ec2.run_instances(
                 ImageId=ami_id,
                 KeyName=key_name,
@@ -512,7 +524,7 @@ class RunnerLauncher(object):
         ec2r = session.resource("ec2")
 
         all_instances = []
-        for i in range(self.config["instance_count"]):
+        for i in range(min(self.config["instance_count"], self.config["max_runners"])):
             instance_id, public_ip = await self.request_spot_instance(
                 ec2,
                 ec2r,
