@@ -391,7 +391,7 @@ class RunnerLauncher(object):
                 ],
                 NetworkInterfaces=[
                     {
-                        "AssociatePublicAddress": True,
+                        "AssociatePublicIpAddress": True,
                     }
                 ],
                 UserData=user_data,
