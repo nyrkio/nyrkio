@@ -132,13 +132,33 @@ async def get_github_runner_registration_token(
         logging.info(
             f"Successfully fetched access token for installation_id {installation_id} at {repo_full_name}"
         )
-        return token
     else:
         logging.info(
-            f"Failed to fetch a runner_configuration_token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
+            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
         )
         raise Exception(
-            f"Failed to fetch a runner_configuration_token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
+            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
+        )
+
+    client = httpx.AsyncClient()
+    response = await client.post(
+        f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token",
+        headers={
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
+    if response.status_code in [200, 201]:
+        logging.debug(
+            "Geting a runner registration token from github mothership succeeded. Now onto deploy some VMs."
+        )
+        return response.json()["token"]
+    else:
+        logging.info(
+            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+        )
+        raise Exception(
+            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
         )
 
 
