@@ -375,8 +375,8 @@ class RunnerLauncher(object):
                 KeyName=key_name,
                 InstanceType=instance_type,
                 PrivateIpAddress=private_ip,
-                SecurityGroupIds=[sg_id],
-                SubnetId=subnet_id,
+                # SecurityGroupIds=[sg_id],
+                # SubnetId=subnet_id,
                 BlockDeviceMappings=[
                     {
                         "DeviceName": "/dev/xvda",
@@ -392,6 +392,9 @@ class RunnerLauncher(object):
                 NetworkInterfaces=[
                     {
                         "AssociatePublicIpAddress": True,
+                        "DeleteOnTermination": True,
+                        "SubnetId": subnet_id,
+                        "Groups": [sg_id],
                     }
                 ],
                 UserData=user_data,
