@@ -22,11 +22,11 @@ SSH_KEY_FILE = "/usr/src/backend/keys/nyrkio-gh-runner-user"
 SSH_USER = "ubuntu"
 EBS_SIZE = 50
 EBS_IOPS = 5000
+# Note: The keys are actually keys in remote_scripts.all_files
 LOCAL_FILES = {
-    "./provisioning.sh": "/tmp/provisioning.sh",
-    "github-config-command.sh": "/tmp/github-config-cmd.sh",
-    "runsh_wrapper.sh": "/tmp/runsh_wrapper.sh",
-    "wrapper_wrapper.sh": "/tmp/wrapper_wrapper.sh",
+    "provisioning.sh": "/tmp/provisioning.sh",
+    "runsh_wrapper.sh": "/home/runner/runsh_wrapper.sh",
+    "wrapper_wrapper.sh": "/home/runner/wrapper_wrapper.sh",
 }
 USER_DATA = "#!/bin/bash\nsudo systemctl enable ssh\nsudo systemctl start ssh\n"
 

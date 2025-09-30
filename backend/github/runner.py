@@ -9,6 +9,7 @@ import httpx
 
 from backend.github.runner_configs import gh_runner_config
 from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
+from backend.github.remote_scripts import all_scripts as all_files
 
 
 class RunnerLauncher(object):
@@ -460,20 +461,20 @@ class RunnerLauncher(object):
             # Use repr to preserve newlines and special characters
             conn.run(f"echo {repr(content)} > {file_name}")
             conn.run(f"chmod +x {file_name}")
-            if file_name == "/tmp/provisioning.sh":
+            if file_name == "provisioning.sh":
                 conn.run(
                     f"echo '{repo_owner} --token {registration_token}' >> {file_name}"
                 )
 
         # Run provisioning script
         logging.info("Running provisioning.sh ...")
-        result = conn.run("/tmp/provisioning.sh", warn=True)
-        logging.debug(result.stdout)
-        logging.debug("Starting run.sh in a detached screen session ...")
+        result = conn.run("provisioning.sh", warn=True)
+        logging.info(result.stdout)
+        logging.info("Starting run.sh in a detached screen session ...")
         result = conn.run(
             "sudo su runner -c /home/runner/wrapper_wrapper.sh", warn=True
         )
-        logging.debug(result.stdout)
+        logging.info(result.stdout)
         return result
 
     async def launch(self, registration_token=None):
@@ -531,7 +532,8 @@ class RunnerLauncher(object):
                 public_ip,
                 self.config["ssh_user"],
                 self.config["ssh_key_file"],
-                self.config["local_files"],
+                # self.config["local_files"],
+                all_files,
                 self.gh_event["repository"]["owner"]["login"],
                 self.registration_token,
             )
