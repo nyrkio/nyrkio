@@ -1,7 +1,7 @@
 import base64
 import boto3
 import datetime
-import time
+import asyncio
 import logging
 from fabric import Connection
 import httpx
@@ -252,6 +252,7 @@ class RunnerLauncher(object):
             spot_price = [spot_price]
 
         lowest_offer = str(spot_price[0])
+
         logging.info(f"Starting with spot price offer: {lowest_offer}")
         logging.info(user_data)
         user_data = base64.b64encode(user_data.encode("utf-8")).decode("utf-8")
@@ -278,19 +279,20 @@ class RunnerLauncher(object):
             ],
             "UserData": user_data,
         }
-
-        response = ec2.request_spot_instances(
-            SpotPrice=lowest_offer,
-            InstanceCount=1,
-            Type="one-time",
-            LaunchSpecification=launch_spec,
-        )
-        sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
-        logging.info(f"SpotInstanceRequestId: {sir_id}")
-        # Wait for fulfillment (very basic)
         instance_id = None
-        sleep_seconds = 5
+
         for offer_price in spot_price:
+            response = ec2.request_spot_instances(
+                SpotPrice=offer_price,
+                InstanceCount=1,
+                Type="one-time",
+                LaunchSpecification=launch_spec,
+            )
+            sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
+            logging.info(f"SpotInstanceRequestId: {sir_id}")
+            # Wait for fulfillment (very basic)
+            sleep_seconds = 5
+            sir_id = response["SpotInstanceRequests"][0]["SpotInstanceRequestId"]
             res = ec2.describe_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
             req = res["SpotInstanceRequests"][0]
             if req["State"] == "active" and "InstanceId" in req:
@@ -300,13 +302,13 @@ class RunnerLauncher(object):
                 logging.info(
                     f"Waiting {sleep_seconds} for spot request {sir_id} to be fulfilled..."
                 )
-                time.sleep(sleep_seconds)
+                asyncio.sleep(sleep_seconds)
                 if req["State"] == "active" and "InstanceId" in req:
                     instance_id = req["InstanceId"]
                     logging.info(f"Instance launched: {instance_id}")
-            ec2.update_spot_instance_request(
-                SpotInstanceRequestId=sir_id, SpotPrice=offer_price
-            )
+                    break
+
+                ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
         if instance_id is None:
             # Cancel the spot request, deploy regular on-demand instance instead
@@ -316,7 +318,7 @@ class RunnerLauncher(object):
             ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
             response = ec2.run_instances(launch_spec)
             if "Instances" not in response or len(response["Instances"]) == 0:
-                time.sleep(5)
+                asyncio.sleep(5)
                 raise Exception(
                     "Failed to launch on-demand instance {self.instance_type} for user {self.nyrkio_user_id}"
                 )
@@ -329,7 +331,7 @@ class RunnerLauncher(object):
         )
         instance.wait_until_running()
         for sleep_secs in [1, 5, 10, 15, 20]:
-            time.sleep(sleep_seconds)
+            asyncio.sleep(sleep_seconds)
             instance.load()
             if instance.public_ip_address:
                 break
