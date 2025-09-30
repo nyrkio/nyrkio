@@ -296,7 +296,7 @@ class RunnerLauncher(object):
             spot_request = None
             for req in res["SpotInstanceRequests"]:
                 logging.info(req)
-                if req["SpotInstanceRequestId"] == sir_id:
+                if req["SpotInstanceRequestId"] in all_request_ids:
                     spot_request = req
                     break
 
@@ -349,7 +349,7 @@ class RunnerLauncher(object):
                     ]:
                         status = spot_request2["Status"]["Code"]
                         logging.info(
-                            f"Spot request {sir_id} not yet fulfilled. Tried to cancel. Status: {status}"
+                            f"Spot request {sir_id} not yet fulfilled. We can retry, bid higher. Status: {status}"
                         )
                 else:
                     logging.info(
@@ -459,9 +459,9 @@ class RunnerLauncher(object):
         for file_name, content in all_files.items():
             logging.info(f"Uploading {file_name} to {ip_address}")
 
-            for line in content.splitlines():
-                conn.run(f"echo 'repr({line})' | sudo tee -a '{file_name}'")
-
+            base = base64.b64encode(content.encode("utf-8")).decode("utf-8")
+            conn.run(f"echo '{base}' | sudo tee '{file_name}.base'")
+            conn.run(f"sudo base64 {file_name}.base | sudo tee '{file_name}'")
             conn.run(f"sudo chmod a+rx '{file_name}'")
 
         file_name == "/tmp/provisioning.sh"
