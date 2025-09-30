@@ -361,16 +361,14 @@ class RunnerLauncher(object):
             spot_request = None
             for req in res["SpotInstanceRequests"]:
                 logging.info(req)
-                if req is not None and req["SpotInstanceRequestId"] == sir_id:
-                    spot_request = req
-                    break
-
-            state = spot_request["State"] if spot_request else spot_request
-            logging.info(f"{sir_id} state: {state}")
-            logging.warning(
-                f"Spot request {sir_id} not fulfilled, cancelling and launching on-demand instance instead..."
-            )
-            ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
+                if req is not None and req["SpotInstanceRequestId"] in all_request_ids:
+                    state = req["State"] if req else req
+                    sir_id = req["SpotInstanceRequestId"]
+                    logging.info(f"{sir_id} state: {state}")
+                    logging.warning(
+                        f"Spot request {sir_id} not fulfilled, cancelling and launching on-demand instance instead..."
+                    )
+                    ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
 
             response = ec2.run_instances(
                 ImageId=ami_id,
@@ -396,7 +394,9 @@ class RunnerLauncher(object):
                 MinCount=1,
             )
             if "Instances" not in response or len(response["Instances"]) == 0:
-                await asyncio.sleep(5)
+                logging.warning(
+                    "Failed to launch on-demand instance {self.instance_type} for user {self.nyrkio_user_id}"
+                )
                 raise Exception(
                     "Failed to launch on-demand instance {self.instance_type} for user {self.nyrkio_user_id}"
                 )
@@ -419,6 +419,10 @@ class RunnerLauncher(object):
 
         if not instance.public_ip_address:
             logging.warning(
+                f"Instance {instance_id}, launched for {self.nyrkio_user_id} public IP is {instance.public_ip_address}"
+            )
+        else:
+            logging.info(
                 f"Instance {instance_id}, launched for {self.nyrkio_user_id} public IP is {instance.public_ip_address}"
             )
 
