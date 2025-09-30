@@ -458,10 +458,10 @@ class RunnerLauncher(object):
         # Upload all files
         for file_name, content in all_files.items():
             logging.info(f"Uploading {file_name} to {ip_address}")
-            
+
             for line in content.splitlines():
                 conn.run(f"echo '{line}' | sudo tee -a {file_name}")
-            
+
             conn.run(f"sudo chmod a+rx {file_name}")
             if file_name == "provisioning.sh":
                 conn.run(
