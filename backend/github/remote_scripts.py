@@ -152,7 +152,7 @@ NYRKIO_CONFIG = (
 )
 configsh = (
     f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/"""
-    + "/{} --token {}"
+    + "{} --token {}"
 )
 # Append something like this in runner.py before uploading the script
 # Then do: `sudo su runner -c /home/runner/wrapper_wrapper.sh`
