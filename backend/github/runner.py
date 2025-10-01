@@ -502,7 +502,7 @@ class RunnerLauncher(object):
         REGION = self.config.get(
             "region", "eu-central-1"
         )  # Set default region if not in config
-        subnet_id = self.config.get("subnet_id", "subnet-0d548e054e89de45a")
+        subnet_id = self.config.get("subnet_id", "subnet-0a623bfe81108a1e4")
         sg_id = self.config.get("sg_id", "sg-01dc70c5a8dc24fda")
         nacl_id = self.config.get("nacl_id", "acl-08ec021289cebb343")
         vpc_id = self.config.get("vpc_id", "vpc-0052548c273580de6")
