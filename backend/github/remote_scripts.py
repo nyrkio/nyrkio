@@ -40,8 +40,8 @@ sudo systemctl start ssh
 
 # configuration area:
 FORMAT_EBS=TRUE
-#EPHEMERAL="--ephemeral"
-EPHEMERAL=""
+EPHEMERAL="--ephemeral"
+#EPHEMERAL=""
 
 
 echo "Fixes and patches"
@@ -139,8 +139,17 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 
 cd /home/runner
 """
-
-configsh = """cd /home/runner; sudo -u runner /home/runner/config.sh $NYRKIO_CONFIG --url https://github.com/"""  # ... /ORG --token AAS56YWLQMKQKNRVL6J35PDIYKWRU
+EPHEMERAL = "--ephemeral"
+LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
+NAME = "nyrkio-perf-$\{RANDOM\}e"
+GROUP = "nyrkio"
+NYRKIO_CONFIG = (
+    f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {LABELS}"
+)
+configsh = (
+    f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/"""
+    + "/{ORG} --token {TOKEN}"
+)
 # Append something like this in runner.py before uploading the script
 # Then do: `sudo su runner -c /home/runner/wrapper_wrapper.sh`
 
