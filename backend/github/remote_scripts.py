@@ -149,7 +149,7 @@ def configsh(label, repo_owner, token):
     LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
     NAME = f"nyrkio-perf-{number}"
     GROUP = "nyrkio"
-    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {LABELS}"
+    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {label}"
     return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/{repo_owner} --token {token}"""
 
 
