@@ -410,8 +410,8 @@ class RunnerLauncher(object):
                         "DeviceIndex": 0,
                         "AssociatePublicIpAddress": True,
                         "DeleteOnTermination": True,
-                        "SubnetId": subnet_id,
-                        "Groups": [sg_id],
+                        "SubnetId": "subnet-050d9ede5ba431ff6",
+                        "Groups": ["sg-0cb149603b3fa1309"],
                     }
                 ],
                 UserData=user_data,
