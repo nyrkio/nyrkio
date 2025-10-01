@@ -245,7 +245,7 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
-        all_request_ids = []
+        # all_request_ids = []
         sleep_seconds = 10
         logging.debug(
             f"Requesting spot instance {instance_type} in subnet {subnet_id}  ..."
@@ -405,7 +405,6 @@ class RunnerLauncher(object):
                         },
                     }
                 ],
-                
                 # NetworkInterfaces=[
                 #     {
                 #         "DeviceIndex": 0,
