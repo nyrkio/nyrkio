@@ -1,3 +1,5 @@
+import random
+
 runsh_wrapper = """#!/bin/bash
 
 # wrap around run.sh so we can
@@ -139,9 +141,11 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 
 cd /home/runner
 """
+
+number = random.randint(1, 99999)
 EPHEMERAL = "--ephemeral"
 LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
-NAME = "nyrkio-perf-$\{RANDOM\}e"
+NAME = "nyrkio-perf-{number}"
 GROUP = "nyrkio"
 NYRKIO_CONFIG = (
     f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {LABELS}"
