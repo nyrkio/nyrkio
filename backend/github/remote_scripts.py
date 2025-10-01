@@ -142,18 +142,17 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 cd /home/runner
 """
 
-number = random.randint(1, 99999)
-EPHEMERAL = "--ephemeral"
-LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
-NAME = f"nyrkio-perf-{number}"
-GROUP = "nyrkio"
-NYRKIO_CONFIG = (
-    f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {LABELS}"
-)
-configsh = (
-    f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/"""
-    + "{} --token {}"
-)
+
+def configsh(label, repo_owner, token):
+    number = random.randint(1, 99999)
+    EPHEMERAL = "--ephemeral"
+    LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
+    NAME = f"nyrkio-perf-{number}"
+    GROUP = "nyrkio"
+    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {LABELS}"
+    return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/{repo_owner} --token {token}"""
+
+
 # Append something like this in runner.py before uploading the script
 # Then do: `sudo su runner -c /home/runner/wrapper_wrapper.sh`
 
