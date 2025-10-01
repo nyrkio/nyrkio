@@ -245,7 +245,7 @@ class RunnerLauncher(object):
         spot_price,
         instance_idx,
     ):
-        all_request_ids = []
+        # all_request_ids = []
         sleep_seconds = 10
         logging.debug(
             f"Requesting spot instance {instance_type} in subnet {subnet_id}  ..."
@@ -256,12 +256,12 @@ class RunnerLauncher(object):
         logging.info(user_data)
         user_data = base64.b64encode(user_data.encode("utf-8")).decode("utf-8")
         logging.info(user_data)
-
+        """
         launch_spec = {
             "ImageId": ami_id,
             "KeyName": key_name,
             "InstanceType": instance_type,
-            # "SubnetId": subnet_id,
+            "SubnetId": subnet_id,
             # "PrivateIpAddress": private_ip,
             # "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
@@ -383,7 +383,8 @@ class RunnerLauncher(object):
                     )
                     ec2.cancel_spot_instance_requests(SpotInstanceRequestIds=[sir_id])
             await asyncio.sleep(sleep_seconds)
-
+            """
+        if True:
             logging.info("Now launching regular on-demand instance...")
             response = ec2.run_instances(
                 ImageId=ami_id,
