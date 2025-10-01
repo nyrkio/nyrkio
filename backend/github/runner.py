@@ -246,9 +246,9 @@ class RunnerLauncher(object):
         instance_idx,
     ):
         all_request_ids = []
-        sleep_seconds = 5
+        sleep_seconds = 10
         logging.debug(
-            f"Requesting spot instance {instance_type} in subnet {subnet_id} with private IP {private_ip} ..."
+            f"Requesting spot instance {instance_type} in subnet {subnet_id}  ..."
         )
         if not isinstance(spot_price, list):
             spot_price = [spot_price]
@@ -261,7 +261,7 @@ class RunnerLauncher(object):
             "ImageId": ami_id,
             "KeyName": key_name,
             "InstanceType": instance_type,
-            "SubnetId": subnet_id,
+            # "SubnetId": subnet_id,
             # "PrivateIpAddress": private_ip,
             # "SecurityGroupIds": [sg_id],
             "BlockDeviceMappings": [
@@ -502,10 +502,10 @@ class RunnerLauncher(object):
         REGION = self.config.get(
             "region", "eu-central-1"
         )  # Set default region if not in config
-        subnet_id = self.config.get("subnet_id", "subnet-0a29e3837420ad085")
-        sg_id = self.config.get("sg_id", "sg-02a41285041bf2102")
-        nacl_id = self.config.get("nacl_id", "acl-0dabab2da09b4ee80")
-        vpc_id = self.config.get("vpc_id", "vpc-04a6f951b50750283")
+        subnet_id = self.config.get("subnet_id", "subnet-0d548e054e89de45a")
+        sg_id = self.config.get("sg_id", "sg-01dc70c5a8dc24fda")
+        nacl_id = self.config.get("nacl_id", "acl-08ec021289cebb343")
+        vpc_id = self.config.get("vpc_id", "vpc-0052548c273580de6")
 
         aws_access_key_id = self.config.get("aws_access_key_id")
         aws_secret_access_key = self.config.get("aws_secret_access_key")
