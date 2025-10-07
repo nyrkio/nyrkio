@@ -219,6 +219,19 @@ async def check_queued_workflow_jobs(repo_full_name):
         return []
 
 
+def filter_out_unsupported_jobs(queued_jobs):
+    supported_queue = []
+    while queued_jobs:
+        job = queued_jobs.pop()
+        # Filter out those we're not gonna need anyway
+        labels = job["labels"]
+        supported = supported_instance_types()
+        intersection = [lab for lab in labels if lab in supported]
+        if intersection:
+            supported_queue.append(job)
+    return supported_queue
+
+
 async def handle_pull_requests(gh_event):
     # We don't do anything with pull requests as such, but to minimize the list of permissions to ask for,
     # Use this to indirectly trigger things that you would normally get from workflow_job events.
@@ -233,24 +246,23 @@ async def handle_pull_requests(gh_event):
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
         queued_jobs = await check_queued_workflow_jobs(repo_name)
-        skipped_jobs = 0
+        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
         while queued_jobs:
-            if len(queued_jobs) - skipped_jobs == 1:
+            logger.info(
+                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
+            )
+            if len(queued_jobs) == 1:
                 logger.info(
-                    f"Found {len(queued_jobs)} - {skipped_jobs} queued jobs for {repo_name} on PR event. Will sleep a minute and check again if it's still needed."
+                    "Will sleep a minute and check again if more runners are still needed."
                 )
                 await asyncio.sleep(60)
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
-                skipped_jobs = 0
-                if len(queued_jobs) - skipped_jobs != 1:
-                    continue
-
-            logger.info(
-                f"Found {len(queued_jobs)} - {skipped_jobs} queued jobs for {repo_name} on PR event."
-            )
+                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                if not queued_jobs:
+                    break
 
             job = queued_jobs.pop()
-            skipped_jobs -= 1
+
             # Call myself recursively, but with a fake workflow_job event
             fake_event = {
                 "action": "queued",
@@ -264,12 +276,8 @@ async def handle_pull_requests(gh_event):
             res = await _github_events(fake_event)
             # There can and will be several pull_request events, and handling the fake event could take a few minutes.
             # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
-            # On the other hand, we should not get stuck on jobs that have runs-on values we don't support. (infinite loop)
             if isinstance(res, dict) and res.get("status") == "success":
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
-                skipped_jobs = 0
-            else:
-                # just keep popping more from the queue we already have
-                skipped_jobs += 1
+                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
         return queued_jobs
