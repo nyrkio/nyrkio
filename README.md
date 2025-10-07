@@ -55,7 +55,7 @@ git submodule init
 git submodule update
 
 cat > .env.backend << END
-DB_URL=mongodb://mongodb:27017/mongodb
+DB_URL=mongodb://mongodb.nyrkio.local:27017/mongodb
 DB_NAME=nyrkiodb
 POSTMARK_API_KEY=
 GITHUB_CLIENT_SECRET=
@@ -65,6 +65,8 @@ SECRET_KEY=
 #GRAFANA_USER=
 #GRAFANA_PASSWORD=
 END
+
+export IMAGE_TAG=$(git rev-parse HEAD)
 
 sudo $PACMAN install docker.io docker-compose-v2
 sudo usermod -a -G docker $USER
