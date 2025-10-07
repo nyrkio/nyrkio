@@ -242,9 +242,12 @@ async def handle_pull_requests(gh_event):
         "edited",
         "synchronize",
         "labeled",
+        "unlabeled",
     ]:
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
+        # Give GH some time to queue the jobs. And MySQL to async replicate them...
+        asyncio.sleep(7)
         queued_jobs = await check_queued_workflow_jobs(repo_name)
         queued_jobs = filter_out_unsupported_jobs(queued_jobs)
         while queued_jobs:
