@@ -15,7 +15,7 @@ services:
 
   webhooks:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/webhooks:${IMAGE_TAG}
-    # build: backend
+    build: webhooks
     env_file:
       - .env.backend
     environment:
