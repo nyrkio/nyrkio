@@ -109,4 +109,4 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
-          docker compose -f docker-compose.yml up --no-build -d nginx backend
+          docker compose -f docker-compose.yml up --no-build -d nginx backend webhooks

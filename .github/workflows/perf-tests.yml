@@ -57,6 +57,7 @@ jobs:
           # https://stackoverflow.com/a/62436027
           PULL_NUMBER: ${{ github.event.number }}
           GIT_COMMIT: ${{ github.event.pull_request.head.sha }}
+          IMAGE_TAG: ${{ github.event.pull_request.head.sha }}
         run: |
           mv p/frontend/src/static/* p/
 

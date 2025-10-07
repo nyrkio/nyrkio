@@ -10,6 +10,7 @@ services:
     ports:
       - "27017:27017"
     command: mongod --quiet --logpath /dev/null
+
   backend:
     build: backend
     env_file:
@@ -22,6 +23,20 @@ services:
     hostname: api.nyrkio.local
     depends_on:
       - mongodb
+
+  webhooks:
+    build: backend
+    env_file:
+      - .env.backend
+    environment:
+      - API_PORT=8080
+      - GIT_SHA=${IMAGE_TAG}
+    ports:
+      - "8080:8080"
+    hostname: api.nyrkio.local
+    depends_on:
+      - mongodb
+
   nginx:
     build:
       context: ./
