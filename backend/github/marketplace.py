@@ -1,3 +1,4 @@
+import asyncio
 from backend.db.db import DBStore
 from backend.github.runner import RunnerLauncher
 from fastapi import APIRouter
@@ -220,6 +221,8 @@ async def handle_pull_requests(gh_event):
     ]:
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
+        # Give GH some time to create the queued jobs then
+        await asyncio.sleep(20)
         queued_jobs = await check_queued_workflow_jobs(repo_name)
         while queued_jobs:
             logger.info(
