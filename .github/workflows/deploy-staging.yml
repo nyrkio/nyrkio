@@ -58,7 +58,6 @@ jobs:
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
-          docker push $ECR_REGISTRY/nyrkio/staging/webhooks:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:

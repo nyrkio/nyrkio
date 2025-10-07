@@ -14,8 +14,8 @@ services:
     hostname: api.nyrkio.local
 
   webhooks:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/webhooks:${IMAGE_TAG}
-    build: webhooks
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/backend:${IMAGE_TAG}
+    # build: backend
     env_file:
       - .env.backend
     environment:
