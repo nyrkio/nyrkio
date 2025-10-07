@@ -25,7 +25,7 @@ services:
       - mongodb
 
   webhooks:
-    # build: backend
+    build: backend
     env_file:
       - .env.backend
     environment:
