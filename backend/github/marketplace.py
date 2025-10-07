@@ -241,6 +241,7 @@ async def handle_pull_requests(gh_event):
                 )
                 await asyncio.sleep(60)
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
+                skipped_jobs = 0
                 if len(queued_jobs) - skipped_jobs != 1:
                     continue
 
@@ -249,6 +250,7 @@ async def handle_pull_requests(gh_event):
             )
 
             job = queued_jobs.pop()
+            skipped_jobs -= 1
             # Call myself recursively, but with a fake workflow_job event
             fake_event = {
                 "action": "queued",
