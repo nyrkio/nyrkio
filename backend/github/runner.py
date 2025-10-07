@@ -390,6 +390,7 @@ class RunnerLauncher(object):
                 ImageId=ami_id,
                 KeyName=key_name,
                 InstanceType=instance_type,
+                InstanceInitiatedShutdownBehavior="terminate",
                 # PrivateIpAddress=private_ip,
                 # SecurityGroupIds=[sg_id],
                 # SubnetId=subnet_id,
