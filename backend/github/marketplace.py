@@ -227,6 +227,7 @@ async def handle_pull_requests(gh_event):
         "reopened",
         "edited",
         "synchronize",
+        "labeled",
     ]:
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
@@ -245,7 +246,7 @@ async def handle_pull_requests(gh_event):
                 "sender": gh_event["sender"],
                 "installation": gh_event.get("installation", None),
             }
-            logger.info(fake_event)
+            logger.debug(fake_event)
             res = await _github_events(fake_event)
             # There can and will be several pull_request events, and handling the fake event could take a few minutes.
             # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
