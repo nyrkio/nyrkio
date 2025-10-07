@@ -265,6 +265,7 @@ async def handle_pull_requests(gh_event):
             # On the other hand, we should not get stuck on jobs that have runs-on values we don't support. (infinite loop)
             if isinstance(res, dict) and res.get("status") == "success":
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
+                skipped_jobs = 0
             else:
                 # just keep popping more from the queue we already have
                 skipped_jobs += 1
