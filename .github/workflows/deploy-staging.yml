@@ -58,6 +58,7 @@ jobs:
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nyrkio/staging/webhooks:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:
@@ -109,4 +110,4 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
-          docker compose -f docker-compose.yml up --no-build -d nginx backend
+          docker compose -f docker-compose.yml up --no-build -d nginx backend webhooks
