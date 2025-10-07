@@ -130,7 +130,7 @@ then
     # echo "# This is an --ephemeral instance. Writing to crontab a check to shut down the instance when run.sh marks itself as done." | sudo tee /etc/cron.d/nyrkio-github-runner-done-check
 
     echo "* * * * * root if [ -e /home/runner/done ]; then shutdown now; fi" | sudo tee /etc/cron.d/nyrkio-github-runner-done-check
-    echo "* * * * * root sleep 300; if [[ $(grep "Running job" /home/runner/runsh.stdout.log | wc -l) -gte 1 ]]; then /bin/true; else shutdown now; fi" | sudo tee /etc/cron.d/nyrkio-github-runner-startup-check
+    # echo "* * * * * root sleep 300; if [[ $(grep "Running job" /home/runner/runsh.stdout.log | wc -l) -gte 1 ]]; then /bin/true; else shutdown now; fi" | sudo tee /etc/cron.d/nyrkio-github-runner-startup-check
 fi
 
 #sudo mv /tmp/runsh_wrapper.sh /home/runner/runsh_wrapper.sh
