@@ -1,3 +1,4 @@
+import asyncio
 from backend.db.db import DBStore
 from backend.github.runner import RunnerLauncher
 from fastapi import APIRouter
@@ -232,10 +233,19 @@ async def handle_pull_requests(gh_event):
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
         queued_jobs = await check_queued_workflow_jobs(repo_name)
+        skipped_jobs = 0
         while queued_jobs:
+            if len(queued_jobs) - skipped_jobs == 1:
+                logger.info(
+                    f"Found {len(queued_jobs)} - {skipped_jobs} queued jobs for {repo_name} on PR event. Will sleep a minute and check again if it's still needed."
+                )
+                asyncio.sleep(60)
+                continue
+
             logger.info(
-                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
+                f"Found {len(queued_jobs)} - {skipped_jobs} queued jobs for {repo_name} on PR event."
             )
+
             job = queued_jobs.pop()
             # Call myself recursively, but with a fake workflow_job event
             fake_event = {
@@ -255,6 +265,6 @@ async def handle_pull_requests(gh_event):
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
             else:
                 # just keep popping more from the queue we already have
-                pass
+                skipped_jobs += 1
 
         return queued_jobs
