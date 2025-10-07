@@ -1,4 +1,3 @@
-import asyncio
 from backend.db.db import DBStore
 from backend.github.runner import RunnerLauncher
 from fastapi import APIRouter
@@ -30,6 +29,7 @@ async def github_events(gh_event: Dict):
 
 
 async def _github_events(gh_event: Dict):
+    return_message = None
     store = DBStore()
     await store.log_json_event(gh_event, "GitHub App Webhook")
 
@@ -114,12 +114,21 @@ async def _github_events(gh_event: Dict):
                 registration_token=runner_registration_token,
             )
             await launcher.launch()
+            return_message = f"Launched an instance of type {labels}"
         elif labels:
             logger.info(
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels}, but no supported instance types found."
             )
+            return {
+                "message": f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels}, but no supported instance types found.",
+                "status": "nothing to do",
+            }
 
-    return {"success": "Thank you for using Nyrkiö. For Faster Software!"}
+    default_message = "Thank you for using Nyrkiö. For Faster Software!"
+    return {
+        "status": "success" if return_message else "nothing to do",
+        "message": return_message if return_message else default_message,
+    }
 
 
 # Get a one time token to register a new runner
@@ -221,8 +230,6 @@ async def handle_pull_requests(gh_event):
     ]:
         repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
-        # Give GH some time to create the queued jobs then
-        await asyncio.sleep(20)
         queued_jobs = await check_queued_workflow_jobs(repo_name)
         while queued_jobs:
             logger.info(
@@ -239,8 +246,14 @@ async def handle_pull_requests(gh_event):
                 "installation": gh_event.get("installation", None),
             }
             logger.info(fake_event)
-            await _github_events(fake_event)
+            res = await _github_events(fake_event)
             # There can and will be several pull_request events, and handling the fake event could take a few minutes.
             # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
-            queued_jobs = await check_queued_workflow_jobs(repo_name)
+            # On the other hand, we should not get stuck on jobs that have runs-on values we don't support. (infinite loop)
+            if isinstance(res, dict) and res.get("status") == "success":
+                queued_jobs = await check_queued_workflow_jobs(repo_name)
+            else:
+                # just keep popping more from the queue we already have
+                pass
+
         return queued_jobs
