@@ -241,7 +241,8 @@ async def handle_pull_requests(gh_event):
                 )
                 await asyncio.sleep(60)
                 queued_jobs = await check_queued_workflow_jobs(repo_name)
-                continue
+                if len(queued_jobs) - skipped_jobs != 1:
+                    continue
 
             logger.info(
                 f"Found {len(queued_jobs)} - {skipped_jobs} queued jobs for {repo_name} on PR event."
