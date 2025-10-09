@@ -36,7 +36,7 @@ class RunnerLauncher(object):
         )
 
     async def ensure_runner_group(self):
-        installation_access_token = fetch_access_token(
+        installation_access_token = await fetch_access_token(
             expiration_seconds=600, installation_id=self.gh_event["installation"]["id"]
         )
         client = httpx.AsyncClient()
