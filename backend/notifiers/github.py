@@ -331,7 +331,7 @@ class GitHubCommentNotifier:
             # Find comments from the specific PR
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
-                if if "performed_via_github_app" in c and c["performed_via_github_app"]["client_id"] == CLIENT_ID:
+                if "performed_via_github_app" in c and c["performed_via_github_app"]["client_id"] == CLIENT_ID:
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith("**Nyrkiö Report for Commit"):
                         return c
