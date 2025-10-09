@@ -36,7 +36,9 @@ class RunnerLauncher(object):
         )
 
     async def ensure_runner_group(self):
-        installation_access_token = fetch_access_token(expiration_seconds=600, installation_id=self.gh_event["installation"]["id"])
+        installation_access_token = fetch_access_token(
+            expiration_seconds=600, installation_id=self.gh_event["installation"]["id"]
+        )
         client = httpx.AsyncClient()
         headers = {
             "Accept": "application/vnd.github.v3+json",
