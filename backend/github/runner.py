@@ -35,14 +35,14 @@ class RunnerLauncher(object):
         )
 
     def ensure_runner_group(self):
-        repo_owner = self.config["owner"]
+        gh_org = self.gh_event.get("organization", {}).get("login")
         repo_name = self.gh_event["repository"]["name"]
         response = httpx.get(
-            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups?visible_to_repository={repo_name}"
+            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups?visible_to_repository={repo_name}"
         )
         if response.status_code != 200:
             logging.info(
-                f"Could not fetch runner groups for org {repo_owner} and repo {repo_name}: {response.status_code} {response.text}"
+                f"Could not fetch runner groups for org {gh_org} and repo {repo_name}: {response.status_code} {response.text}"
             )
             return False
 
@@ -52,32 +52,30 @@ class RunnerLauncher(object):
 
         # If the group exists now, it means the specific repo has been disallowed from using nyrkio runners on purpose
         response = httpx.get(
-            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups"
+            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups"
         )
         if response.status_code != 200:
             logging.info(
-                f"Could not fetch runner groups for org {repo_owner}: {response.status_code} {response.text}"
+                f"Could not fetch runner groups for org {gh_org}: {response.status_code} {response.text}"
             )
             return False
 
         for rg in response.json()["runner_groups"]:
             if rg["name"] == "nyrkio":
                 logging.info(
-                    f"Repository {repo_owner}/{repo_name} is not included in nyrkio runner group"
+                    f"Repository {gh_org}/{repo_name} is not included in nyrkio runner group"
                 )
                 return False
 
         # If still here, we need to create it
         response = httpx.post(
-            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups",
+            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
             data={"name": "nyrkio"},
         )
         if response.status_code == 201:
             return True
         else:
-            logging.warning(
-                f"Tried but failed in creating a runner group at {repo_owner}"
-            )
+            logging.warning(f"Tried but failed in creating a runner group at {gh_org}")
             return False
 
     def gh_event_to_aws_tags(
@@ -575,9 +573,9 @@ class RunnerLauncher(object):
         ec2r = session.resource("ec2")
 
         if not self.ensure_runner_group():
-            repo_owner = self.config["owner"]
+            gh_org = self.gh_event.get("organization", {}).get("login")
             logging.warning(
-                f"Couldn't find or create a runner group at http://github.com/{repo_owner}"
+                f"Couldn't find or create a runner group at http://github.com/{gh_org}"
             )
             return
 
