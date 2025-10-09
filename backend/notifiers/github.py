@@ -308,6 +308,7 @@ class GitHubCommentNotifier:
             raise Exception(f"Failed to fetch pull request: {response.status_code}")
 
         issue_url = response.json()["issue_url"]
+        return issue_url
 
     async def list_repo_comments(self, access_token):
         comments_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/comments?sort=updated&per_page=100&direction=desc"
