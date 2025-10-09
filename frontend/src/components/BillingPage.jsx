@@ -123,7 +123,10 @@ const UserBillingPage = () => {
   };
 
   const BillingButton = ({plan}) => {
-    if(plan=="Free") {
+    console.debug(`plan: {plan}`);
+
+
+    if(plan=="Free" || plan === undefined) {
       return (
         <a className="btn btn-success" href="/pricing">
           Upgrade to Nyrkiö Business
