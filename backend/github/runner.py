@@ -10,6 +10,7 @@ import httpx
 from backend.github.runner_configs import gh_runner_config
 from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
 from backend.github.remote_scripts import all_scripts as all_files, configsh
+from backend.notifiers.github import fetch_access_token
 
 
 class RunnerLauncher(object):
@@ -35,10 +36,13 @@ class RunnerLauncher(object):
         )
 
     async def ensure_runner_group(self):
+        installation_access_token = fetch_access_token(
+            expiration_seconds=600, installation_id=self.gh_event["installation"]["id"]
+        )
         client = httpx.AsyncClient()
         headers = {
             "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {self.registration_token}",
+            "Authorization": f"Bearer {installation_access_token}",
         }
 
         gh_org = self.gh_event.get("organization", {}).get("login")
