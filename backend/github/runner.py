@@ -34,6 +34,52 @@ class RunnerLauncher(object):
             f"RunnerLauncher initialized for user {self.nyrkio_user_id} with instance_type={self.instance_type}"
         )
 
+    def ensure_runner_group(self):
+        repo_owner = self.config["owner"]
+        repo_name = self.gh_event["repository"]["name"]
+        response = httpx.get(
+            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups?visible_to_repository={repo_name}"
+        )
+        if response.status_code != 200:
+            logging.info(
+                f"Could not fetch runner groups for org {repo_owner} and repo {repo_name}: {response.status_code} {response.text}"
+            )
+            return False
+
+        for rg in response.json()["runner_groups"]:
+            if rg["name"] == "nyrkio":
+                return True
+
+        # If the group exists now, it means the specific repo has been disallowed from using nyrkio runners on purpose
+        response = httpx.get(
+            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups"
+        )
+        if response.status_code != 200:
+            logging.info(
+                f"Could not fetch runner groups for org {repo_owner}: {response.status_code} {response.text}"
+            )
+            return False
+
+        for rg in response.json()["runner_groups"]:
+            if rg["name"] == "nyrkio":
+                logging.info(
+                    f"Repository {repo_owner}/{repo_name} is not included in nyrkio runner group"
+                )
+                return False
+
+        # If still here, we need to create it
+        response = httpx.post(
+            f"https://api.github.com/orgs/{repo_owner}/actions/runner-groups",
+            data={"name": "nyrkio"},
+        )
+        if response.status_code == 201:
+            return True
+        else:
+            logging.warning(
+                f"Tried but failed in creating a runner group at {repo_owner}"
+            )
+            return False
+
     def gh_event_to_aws_tags(
         self, gh_event, launched_by="nyrkio/nyrkio/backend/github/runner.py"
     ):
@@ -527,6 +573,13 @@ class RunnerLauncher(object):
         )
         ec2 = session.client("ec2")
         ec2r = session.resource("ec2")
+
+        if not self.ensure_runner_group():
+            repo_owner = self.config["owner"]
+            logging.warning(
+                f"Couldn't find or create a runner group at http://github.com/{repo_owner}"
+            )
+            return
 
         all_instances = []
         for i in range(min(self.config["instance_count"], self.config["max_runners"])):
