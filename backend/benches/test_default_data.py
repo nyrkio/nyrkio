@@ -14,7 +14,7 @@ def test_default_data_results(benchmark):
     def fetch():
         response = requests.get(f"{HOST}/api/v0/default/results")
         response.raise_for_status()
-        asyncio.sleep(2)
+        asyncio.sleep(4)
 
     benchmark(fetch)
 
