@@ -34,7 +34,7 @@ class RunnerLauncher(object):
             f"RunnerLauncher initialized for user {self.nyrkio_user_id} with instance_type={self.instance_type}"
         )
 
-    def ensure_runner_group(self):
+    async def ensure_runner_group(self):
         client = httpx.AsyncClient()
         headers = {
             "Accept": "application/vnd.github.v3+json",
@@ -581,7 +581,7 @@ class RunnerLauncher(object):
         ec2 = session.client("ec2")
         ec2r = session.resource("ec2")
 
-        if not self.ensure_runner_group():
+        if not await self.ensure_runner_group():
             gh_org = self.gh_event.get("organization", {}).get("login")
             logging.warning(
                 f"Couldn't find or create a runner group at http://github.com/{gh_org}"
