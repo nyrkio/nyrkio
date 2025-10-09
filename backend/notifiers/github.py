@@ -229,10 +229,11 @@ class GitHubCommentNotifier:
         Create a issue comment body from the test results and changes.
         """
 
-        header = "**Commit**: " + pr_commit + "\n\n"
+        header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/RedWhite/NyrkioLogo_Final_Logomark_RedTan_50x50.png)](https://nyrkio.com)"
+        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GreenGreen3-50x50.png)](https://nyrkio.com)"
+        red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedRed2-50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
         for entry in results:
@@ -246,9 +247,13 @@ class GitHubCommentNotifier:
                         body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
 
         if not anything_to_report:
-            return header + "No performance changes detected. 🚀" + footer
+            return (
+                header
+                + "No performance changes detected, now.\n\nRemember that Nyrkiö results become more precise when more commits are merged. So please check back in a few days."
+                + green_footer
+            )
 
-        return header + body + footer
+        return header + body + red_footer
 
     async def notify(
         self, results, pr_commit, changes, base_url: str = "https://nyrkio.com/result/"
@@ -264,8 +269,37 @@ class GitHubCommentNotifier:
             return
 
         body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
+        old_comment = await self.find_existing_comment(access_token)
+        if old_comment:
+            old_comment_id = old_comment["id"]
+            old_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/comments/{old_comment_id}"
+            logging.debug(f"Updating existing comment at {old_url}")
+            response = await self.client.patch(
+                f"{old_url}",
+                json={"body": body},
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/vnd.github.v3+json",
+                },
+            )
+            if response.status_code != 201:
+                raise Exception(f"Failed to post comment: {response.status_code}")
+        else:
+            # Lookup the issue url from the pull request
+            issue_url = await self.get_issue_url(access_token)
+            logging.debug(f"Posting comment to {issue_url}/comments")
+            response = await self.client.post(
+                f"{issue_url}/comments",
+                json={"body": body},
+                headers={
+                    "Authorization": f"Bearer {access_token}",
+                    "Accept": "application/vnd.github.v3+json",
+                },
+            )
+            if response.status_code != 201:
+                raise Exception(f"Failed to post comment: {response.status_code}")
 
-        # Lookup the issue url from the pull request
+    async def get_issue_url(self, access_token):
         logging.debug(f"Fetching pull request: {self.pull_url}")
         response = await self.client.get(
             self.pull_url, headers={"Authorization": f"Bearer {access_token}"}
@@ -274,17 +308,29 @@ class GitHubCommentNotifier:
             raise Exception(f"Failed to fetch pull request: {response.status_code}")
 
         issue_url = response.json()["issue_url"]
-        logging.debug(f"Posting comment to {issue_url}/comments")
-        response = await self.client.post(
-            f"{issue_url}/comments",
-            json={"body": body},
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "Accept": "application/vnd.github.v3+json",
-            },
+        return issue_url
+
+    async def list_repo_comments(self, access_token):
+        comments_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/comments?sort=updated&per_page=100&direction=desc"
+        logging.debug(f"Fetching 100 newest repo comments: {comments_url}")
+        response = await self.client.get(
+            self.pull_url, headers={"Authorization": f"Bearer {access_token}"}
         )
-        if response.status_code != 201:
-            raise Exception(f"Failed to post comment: {response.status_code}")
+        if response.status_code != 200:
+            raise Exception(f"Failed to fetch pull request: {response.status_code}")
+
+        return response.json()
+
+    async def find_existing_comment(self, access_token):
+        recent_comments = await self.list_repo_comments(access_token)
+        for c in recent_comments:
+            # Find comments from the specific PR
+            if c["issue_url"].endswith(f"issues/{self.pull_number}"):
+                # Find a comment by this app
+                if c["performed_via_github_app"]["client_id"] == CLIENT_ID:
+                    # Find the comment with change detection results
+                    if c["body"].startswith("**Nyrkiö Report for Commit"):
+                        return c
 
 
 def collect_metrics(results):
@@ -298,7 +344,7 @@ def collect_metrics(results):
 def find_changes(pr_commit, test_name, metric, changes):
     for ch in changes:
         for t_name, data in ch.items():
-            if t_name != test_name:
+            if False or t_name != test_name:
                 continue
 
             for d in data:
