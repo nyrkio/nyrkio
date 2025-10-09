@@ -35,10 +35,17 @@ class RunnerLauncher(object):
         )
 
     def ensure_runner_group(self):
+        client = httpx.AsyncClient()
+        headers = {
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"Bearer {self.registration_token}",
+        }
+
         gh_org = self.gh_event.get("organization", {}).get("login")
         repo_name = self.gh_event["repository"]["name"]
-        response = httpx.get(
-            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups?visible_to_repository={repo_name}"
+        response = await client.get(
+            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups?visible_to_repository={repo_name}",
+            headers=headers,
         )
         if response.status_code != 200:
             logging.info(
@@ -51,8 +58,9 @@ class RunnerLauncher(object):
                 return True
 
         # If the group exists now, it means the specific repo has been disallowed from using nyrkio runners on purpose
-        response = httpx.get(
-            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups"
+        response = await client.get(
+            f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
+            headers=headers,
         )
         if response.status_code != 200:
             logging.info(
@@ -68,9 +76,10 @@ class RunnerLauncher(object):
                 return False
 
         # If still here, we need to create it
-        response = httpx.post(
+        response = await client.post(
             f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
             data={"name": "nyrkio"},
+            headers=headers,
         )
         if response.status_code == 201:
             return True
