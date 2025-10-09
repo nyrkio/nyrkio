@@ -319,7 +319,10 @@ class GitHubCommentNotifier:
         if response.status_code != 200:
             raise Exception(f"Failed to fetch pull request: {response.status_code}")
 
-        return response.json()
+        res = response.json()
+        logging.info(res)
+        res = res if isinstance(res, list) else [res]
+        return res
 
     async def find_existing_comment(self, access_token):
         recent_comments = await self.list_repo_comments(access_token)
