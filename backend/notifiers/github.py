@@ -326,7 +326,7 @@ class GitHubCommentNotifier:
 
     async def find_existing_comment(self, access_token):
         recent_comments = await self.list_repo_comments(access_token)
-        # logging.info(recent_comments)
+        logging.info(recent_comments)
         for c in recent_comments:
             # Find comments from the specific PR
             logging.info(
