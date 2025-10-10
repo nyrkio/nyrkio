@@ -326,15 +326,18 @@ class GitHubCommentNotifier:
 
     async def find_existing_comment(self, access_token):
         recent_comments = await self.list_repo_comments(access_token)
-        logging.info(recent_comments)
+        # logging.info(recent_comments)
         for c in recent_comments:
             # Find comments from the specific PR
+            logging.info(f"matching my pull_number = {self.pull_number} and {c['issue_url']}")
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
+                logging.info(c["performed_via_github_app"]["client_id"])
                 if (
                     "performed_via_github_app" in c
                     and c["performed_via_github_app"]["client_id"] == CLIENT_ID
                 ):
+                    c["body"]
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith(
                         "**Nyrkiö Report for Commit"
