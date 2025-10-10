@@ -30,3 +30,4 @@ def test_default_data_changes(benchmark):
         response.raise_for_status()
 
     benchmark(fetch, test_name)
+
