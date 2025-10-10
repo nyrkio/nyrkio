@@ -333,7 +333,7 @@ class GitHubCommentNotifier:
             logging.info(
                 f"matching my pull_number = {self.pull_number} and {c['issue_url']}"
             )
-            if c["issue_url"].endswith(f"pulls/{self.pull_number}"):
+            if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
                 logging.info("client_id")
                 if c["user"]["login"] == "nyrkio[bot]":
