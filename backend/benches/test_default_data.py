@@ -1,6 +1,6 @@
 import requests
 import os
-# import asyncio
+import asyncio
 
 # Must include the protocol prefix and port number if not 80
 HOST = os.environ.get("TEST_HOST", "http://localhost")
@@ -14,7 +14,7 @@ def test_default_data_results(benchmark):
     def fetch():
         response = requests.get(f"{HOST}/api/v0/default/results")
         response.raise_for_status()
-        # asyncio.sleep(1)
+        asyncio.sleep(10)
 
     benchmark(fetch)
 
