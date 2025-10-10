@@ -310,8 +310,8 @@ class GitHubCommentNotifier:
         issue_url = response.json()["issue_url"]
         return issue_url
 
-    async def list_repo_comments(self, access_token):
-        comments_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/comments?sort=updated&per_page=100&direction=desc"
+    async def list_issue_comments(self, access_token):
+        comments_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/{self.pull_number}/comments?sort=updated&per_page=100&direction=desc"
         logging.debug(f"Fetching 100 newest repo comments: {comments_url}")
         response = await self.client.get(
             self.pull_url, headers={"Authorization": f"Bearer {access_token}"}
@@ -325,7 +325,7 @@ class GitHubCommentNotifier:
         return res
 
     async def find_existing_comment(self, access_token):
-        recent_comments = await self.list_repo_comments(access_token)
+        recent_comments = await self.list_issue_comments(access_token)
         logging.info(f"Received {len(recent_comments)} comments from GitHub.")
         logging.info(recent_comments)
         for c in recent_comments:
@@ -336,7 +336,7 @@ class GitHubCommentNotifier:
             if c["issue_url"].endswith(f"pulls/{self.pull_number}"):
                 # Find a comment by this app
                 logging.info("client_id")
-                if c["user"]["html_url"] == "https://github.com/apps/nyrkio":
+                if c["user"]["login"] == "nyrkio[bot]":
                     logging.info(c["body"])
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith(
