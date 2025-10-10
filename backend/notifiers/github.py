@@ -320,7 +320,7 @@ class GitHubCommentNotifier:
             raise Exception(f"Failed to fetch pull request: {response.status_code}")
 
         res = response.json()
-        logging.info(res)
+        # logging.info(res)
         res = res if isinstance(res, list) else [res]
         return res
 
