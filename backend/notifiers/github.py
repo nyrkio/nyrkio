@@ -232,7 +232,7 @@ class GitHubCommentNotifier:
         header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GreenGreen3-50x50.png)](https://nyrkio.com)"
+        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_LightGreen-50x50.png)](https://nyrkio.com)"
         red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedRed2-50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
@@ -326,6 +326,7 @@ class GitHubCommentNotifier:
 
     async def find_existing_comment(self, access_token):
         recent_comments = await self.list_repo_comments(access_token)
+        logging.info(f"Received {len(recent_comments)} comments from GitHub.")
         logging.info(recent_comments)
         for c in recent_comments:
             # Find comments from the specific PR
@@ -335,7 +336,7 @@ class GitHubCommentNotifier:
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
                 logging.info("client_id")
-                if c["user"]["login"] == "nyrkio[bot]":
+                if c["user"]["html_url"] == "https://github.com/apps/nyrkio":
                     logging.info(c["body"])
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith(
