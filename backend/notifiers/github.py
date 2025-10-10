@@ -232,8 +232,8 @@ class GitHubCommentNotifier:
         header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_LightGreen-50x50.png)](https://nyrkio.com)"
-        red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown-50x50.png)](https://nyrkio.com)"
+        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen-50x50.png)](https://nyrkio.com)"
+        red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown2-thick-50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
         for entry in results:
@@ -333,7 +333,7 @@ class GitHubCommentNotifier:
             logging.info(
                 f"matching my pull_number = {self.pull_number} and {c['issue_url']}"
             )
-            if c["issue_url"].endswith(f"pulls/{self.pull_number}"):
+            if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
                 logging.info("client_id")
                 if c["user"]["login"] == "nyrkio[bot]":
