@@ -4,12 +4,13 @@ import requests
 import os
 import sys
 
-GITHUB_TOKEN=os.environ["GITHUB_TOKEN"]
+GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 
-headers={
+headers = {
     "Authorization": f"Bearer {GITHUB_TOKEN}",
     "Accept": "application/vnd.github.v3+json",
 }
+
 
 def calculate_unit(value):
     """
@@ -41,8 +42,7 @@ def create_nyrkio_payload(benchmark, extra_info):
     # git show -s --format=%ct HEAD. Instead we have to use the
     # REST API.
     response = requests.get(
-        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{commit}",
-        headers=headers
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{commit}", headers=headers
     )
     response.raise_for_status()
     timestamp = int(
