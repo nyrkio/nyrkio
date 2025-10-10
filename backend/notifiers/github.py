@@ -334,9 +334,9 @@ class GitHubCommentNotifier:
             )
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
-                # logging.info(c["performed_via_github_app"]["client_id"])
+                logging.info("client_id")
                 if c["user"]["login"] == "nyrkio[bot]":
-                    c["body"]
+                    logging.info(c["body"])
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith(
                         "**Nyrkiö Report for Commit"
