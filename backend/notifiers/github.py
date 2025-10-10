@@ -233,7 +233,7 @@ class GitHubCommentNotifier:
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
         green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_LightGreen-50x50.png)](https://nyrkio.com)"
-        red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedRed2-50x50.png)](https://nyrkio.com)"
+        red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown-50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
         for entry in results:
