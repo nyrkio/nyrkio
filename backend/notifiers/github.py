@@ -249,7 +249,7 @@ class GitHubCommentNotifier:
         if not anything_to_report:
             return (
                 header
-                + "No performance changes detected, now.\n\nRemember that Nyrkiö results become more precise when more commits are merged. So please check back in a few days."
+                + "No performance changes detected.\n\nRemember that Nyrkiö results become more precise when more commits are merged. So please check back in a few days."
                 + green_footer
             )
 
@@ -329,7 +329,9 @@ class GitHubCommentNotifier:
         # logging.info(recent_comments)
         for c in recent_comments:
             # Find comments from the specific PR
-            logging.info(f"matching my pull_number = {self.pull_number} and {c['issue_url']}")
+            logging.info(
+                f"matching my pull_number = {self.pull_number} and {c['issue_url']}"
+            )
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
                 logging.info(c["performed_via_github_app"]["client_id"])
