@@ -12,7 +12,6 @@ def test_default_data_results(benchmark):
 
     def fetch():
         response = requests.get(f"{HOST}/api/v0/default/results")
-        response = requests.get(f"{HOST}/api/v0/default/results")
         response.raise_for_status()
 
     benchmark(fetch)
