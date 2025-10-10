@@ -314,7 +314,7 @@ class GitHubCommentNotifier:
         comments_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/issues/{self.pull_number}/comments?sort=updated&per_page=100&direction=desc"
         logging.debug(f"Fetching 100 newest repo comments: {comments_url}")
         response = await self.client.get(
-            self.pull_url, headers={"Authorization": f"Bearer {access_token}"}
+            comments_url, headers={"Authorization": f"Bearer {access_token}"}
         )
         if response.status_code != 200:
             raise Exception(f"Failed to fetch pull request: {response.status_code}")
