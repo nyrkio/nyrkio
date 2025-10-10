@@ -282,7 +282,7 @@ class GitHubCommentNotifier:
                     "Accept": "application/vnd.github.v3+json",
                 },
             )
-            if response.status_code != 201:
+            if response.status_code > 201:
                 raise Exception(f"Failed to post comment: {response.status_code}")
         else:
             # Lookup the issue url from the pull request
