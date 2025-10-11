@@ -4,11 +4,11 @@ import datetime
 import asyncio
 import logging
 from fabric import Connection
+from paramiko.ssh_exception import NoValidConnectionsError
 import httpx
 
 
 from backend.github.runner_configs import gh_runner_config
-from backend.github.gh_runner_ip_list import gh_runner_allowed_ips
 from backend.github.remote_scripts import all_scripts as all_files, configsh
 from backend.notifiers.github import fetch_access_token
 
@@ -166,136 +166,6 @@ class RunnerLauncher(object):
             if t["Value"] is not None
         ]
         return tags
-
-    def create_vpc(self, ec2, vpc_cidr, owner):
-        vpc = ec2.create_vpc(
-            CidrBlock=vpc_cidr,
-            TagSpecifications=[{"ResourceType": "vpc", "Tags": self.tags}],
-        )
-        vpc_id = vpc["Vpc"]["VpcId"]
-        ec2.modify_vpc_attribute(VpcId=vpc_id, EnableDnsSupport={"Value": True})
-        ec2.modify_vpc_attribute(VpcId=vpc_id, EnableDnsHostnames={"Value": True})
-        return vpc_id
-
-    def get_this_host_public_ip(self):
-        response = httpx.get("http://169.254.169.254/latest/meta-data/public-ipv4")
-        if response.status_code != 200:
-            logging.warning(
-                "Failed to get public IP from instance metadata. I have to leave the github runner inbound fw open for everyone."
-            )
-            return None
-        return response.text
-
-    def create_internet_gateway(self, ec2, vpc_id):
-        igw = ec2.create_internet_gateway()
-        igw_id = igw["InternetGateway"]["InternetGatewayId"]
-        ec2.attach_internet_gateway(
-            VpcId=vpc_id,
-            InternetGatewayId=igw_id,
-        )
-        return igw_id
-
-    def create_subnet(self, ec2, vpc_id, subnet_cidr, az, owner):
-        subnet = ec2.create_subnet(
-            VpcId=vpc_id,
-            CidrBlock=subnet_cidr,
-            AvailabilityZone=az,
-        )
-        return subnet["Subnet"]["SubnetId"], subnet["Subnet"]["VpcId"]
-
-    def create_route_table(self, ec2, vpc_id, igw_id, subnet_id, owner):
-        rt = ec2.create_route_table(
-            VpcId=vpc_id,
-        )
-        rt_id = rt["RouteTable"]["RouteTableId"]
-        ec2.create_route(
-            RouteTableId=rt_id, DestinationCidrBlock="0.0.0.0/0", GatewayId=igw_id
-        )
-        ec2.associate_route_table(RouteTableId=rt_id, SubnetId=subnet_id)
-        return rt_id
-
-    def create_network_acl(self, ec2, vpc_id, vpc_cidr, nacl_assoc_id):
-        nacl = ec2.create_network_acl(
-            VpcId=vpc_id,
-        )
-        nyrkio_com_ip = self.get_this_host_public_ip()
-        allow_egress = gh_runner_allowed_ips.splitlines()
-
-        nacl_id = nacl["NetworkAcl"]["NetworkAclId"]
-        # Egress TCP
-        rulenr = 300
-        for ip in allow_egress:
-            if not ip.strip():
-                continue
-
-            ec2.create_network_acl_entry(
-                NetworkAclId=nacl_id,
-                RuleNumber=rulenr,
-                Protocol="6",
-                RuleAction="allow",
-                Egress=True,
-                CidrBlock=f"{ip}",
-                PortRange={"From": 22, "To": 8888},
-            )
-            rulenr += 1
-
-        # Ingress
-        inbound_cidr = vpc_cidr
-        if nyrkio_com_ip is not None:
-            inbound_cidr = "{}/32".format(nyrkio_com_ip)
-        ec2.create_network_acl_entry(
-            NetworkAclId=nacl_id,
-            RuleNumber=100,
-            Protocol="6",
-            RuleAction="allow",
-            Egress=False,
-            CidrBlock=inbound_cidr,
-            PortRange={"From": 22, "To": 22},
-        )
-        ec2.replace_network_acl_association(
-            AssociationId=nacl_assoc_id, NetworkAclId=nacl_id
-        )
-        return nacl_id
-
-    def create_security_group(self, ec2, vpc_id, vpc_cidr, owner):
-        sg = ec2.create_security_group(
-            GroupName="nyrkio-gh-runner",
-            Description="Nyrkio GitHub runner(s)",
-            VpcId=vpc_id,
-        )
-        sg_id = sg["GroupId"]
-        ec2.create_tags(Resources=[sg_id], Tags=self.tags)
-        # Ingress SSH and 8080 from anywhere
-        ec2.authorize_security_group_ingress(
-            GroupId=sg_id,
-            IpPermissions=[
-                {
-                    "IpProtocol": "tcp",
-                    "FromPort": 22,
-                    "ToPort": 8080,
-                    "IpRanges": [{"CidrIp": "0.0.0.0/0"}],
-                },
-                {
-                    "IpProtocol": "-1",
-                    "FromPort": 0,
-                    "ToPort": 0,
-                    "IpRanges": [{"CidrIp": vpc_cidr}],
-                },
-            ],
-        )
-        # Egress all
-        ec2.authorize_security_group_egress(
-            GroupId=sg_id,
-            IpPermissions=[
-                {
-                    "IpProtocol": "-1",
-                    "FromPort": 0,
-                    "ToPort": 0,
-                    "IpRanges": [{"CidrIp": "0.0.0.0/0"}],
-                }
-            ],
-        )
-        return sg_id
 
     async def request_spot_instance(
         self,
@@ -525,7 +395,7 @@ class RunnerLauncher(object):
 
         return instance_id, instance.public_ip_address
 
-    def provision_instance_with_fabric(
+    async def provision_instance_with_fabric(
         self,
         ip_address,
         ssh_user,
@@ -540,6 +410,16 @@ class RunnerLauncher(object):
             user=ssh_user,
             connect_kwargs={"key_filename": ssh_key_file},
         )
+
+        retries = [1, 5, 10, 15]
+        for sleep_seconds in retries:
+            try:
+                conn.run("echo verify ssh connection works and is ready to use")
+                break
+            except NoValidConnectionsError as err:
+                logging.info(err)
+                await asyncio.sleep(sleep_seconds)
+
         # Upload all files
         for file_name, content in all_files.items():
             logging.info(f"Uploading {file_name} to {ip_address}")
@@ -626,7 +506,7 @@ class RunnerLauncher(object):
                 self.config["spot_price"],
                 i,
             )
-            self.provision_instance_with_fabric(
+            await self.provision_instance_with_fabric(
                 public_ip,
                 self.config["ssh_user"],
                 self.config["ssh_key_file"],
@@ -641,138 +521,3 @@ class RunnerLauncher(object):
             f"RunnerLauncher: Successfully deployed {all_instances} of type {self.instance_type} for user {self.nyrkio_user_id}"
         )
         return all_instances
-
-    def launch_orig(self, registration_token=None):
-        # Did this once to get the network stuff.
-        # return        # Doesn't work yet. Disable and go to  sleep
-        if registration_token:
-            self.registration_token = registration_token
-
-        REGION = self.config.get(
-            "region", "eu-central-1"
-        )  # Set default region if not in config
-
-        aws_access_key_id = self.config.get("aws_access_key_id")
-        aws_secret_access_key = self.config.get("aws_secret_access_key")
-        logging.info(f"aws_access_key_id: {aws_access_key_id}")
-        logging.info(f"aws_secret_access_key: {aws_secret_access_key}")
-        logging.info(f"region: {REGION}")
-        logging.info(f"profile: {self.config.get('profile')}")
-        logging.info(
-            f"nyrkio_user and org: {self.nyrkio_user_id}, {self.nyrkio_org_id}"
-        )
-
-        session = boto3.Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            #               profile_name=self.config.get("profile"),
-            region_name=REGION,
-        )
-        ec2 = session.client("ec2")
-        ec2r = session.resource("ec2")
-
-        vpc_id = self.create_vpc(ec2, self.config["vpc_cidr"], self.config["owner"])
-        igw_id = self.create_internet_gateway(ec2, vpc_id)
-        subnet_id, subnet_vpc_id = self.create_subnet(
-            ec2,
-            vpc_id,
-            self.config["subnet_cidr"],
-            self.config["availability_zone"],
-            self.config["owner"],
-        )
-        self.create_route_table(ec2, vpc_id, igw_id, subnet_id, self.config["owner"])
-        self.create_network_acl(ec2, vpc_id, self.config["vpc_cidr"], subnet_vpc_id)
-
-        sg_id = self.create_security_group(
-            ec2, vpc_id, self.config["vpc_cidr"], self.config["owner"]
-        )
-
-        all_instances = []
-        for i in range(self.config["instance_count"]):
-            instance_id, public_ip = self.request_spot_instance(
-                ec2,
-                ec2r,
-                self.config["ami_id"],
-                self.config["key_name"],
-                self.config["instance_type"],
-                subnet_id,
-                self.config["private_ips"][i],
-                sg_id,
-                self.config["ebs_size"],
-                self.config["ebs_iops"],
-                self.config["user_data"],
-                self.config["owner"],
-                self.config["spot_price"],
-                i,
-            )
-            self.provision_instance_with_fabric(
-                public_ip,
-                self.config["ssh_user"],
-                self.config["ssh_key_file"],
-                self.config["local_files"],
-            )
-            all_instances.append((instance_id, public_ip))
-        self.all_instances = all_instances
-        logging.info(
-            f"RunnerLauncher: Successfully deployed {all_instances} of type {self.instance_type} for user {self.nyrkio_user_id}"
-        )
-        return all_instances
-
-
-# Note: EC2 instances are provisioned to terminate on shutdown, and they will shutdwown immediately after finishing the workflow.
-# Unfortunately, the VPC and related resources are not automatically deleted, so you have to periodically run a cleanup script to remove old resources.
-# Example bash that uses AWS CLI:
-"""
-#!/bin/bash
-set -e
-# Cleanup old Nyrkio GH Runner VPCs and related network resources that are empty and older than 15 minutes
-THRESHOLD_MINUTES=15
-NOW=$(date -u +%s)
-VPCS=$(aws ec2 describe-vpcs --filters "Name=tag:group,Values=nyrkio-gh-runner" --query "Vpcs[?Tags[?Key=='group' && Value=='nyrkio-gh-runner']].VpcId" --output text)
-for VPC in $VPCS; do
-    # Check if there are any instances in the VPC
-    INSTANCE_COUNT=$(aws ec2 describe-instances --filters "Name=vpc-id,Values=$VPC" --query "Reservations[*].Instances[*].[InstanceId]" --output text | wc -l)
-    if [ "$INSTANCE_COUNT" -eq 0 ]; then
-        # Get the creation time of the VPC
-        CREATION_TIME=$(aws ec2 describe-vpcs --vpc-ids $VPC --query "Vpcs[0].Tags[?Key=='launched_at'].Value" --output text)
-        CREATION_TIMESTAMP=$(date -d "$CREATION_TIME" +%s)
-        AGE_MINUTES=$(( (NOW - CREATION_TIMESTAMP) / 60 ))
-        if [ "$AGE_MINUTES" -ge "$THRESHOLD_MINUTES" ]; then
-            echo "Deleting VPC $VPC (age: $AGE_MINUTES minutes)"
-            # Detach and delete Internet Gateway
-            IGW_ID=$(aws ec2 describe-internet-gateways --filters "Name=attachment.vpc-id,Values=$VPC" --query "InternetGateways[0].InternetGatewayId" --output text)
-            if [ "$IGW_ID" != "None" ]; then
-                aws ec2 detach-internet-gateway --internet-gateway-id $IGW_ID --vpc-id $VPC
-                aws ec2 delete-internet-gateway --internet-gateway-id $IGW_ID
-            fi
-            # Delete subnets
-            SUBNETS=$(aws ec2 describe-subnets --filters "Name=vpc-id,Values=$VPC" --query "Subnets[].SubnetId" --output text)
-            for SUBNET in $SUBNETS; do
-                aws ec2 delete-subnet --subnet-id $SUBNET
-            done
-            # Delete route tables
-            RTBS=$(aws ec2 describe-route-tables --filters "Name=vpc-id           ,Values=$VPC" --query "RouteTables[].RouteTableId" --output text)
-            for RTB in $RTBS; do
-                aws ec2 delete-route-table --route-table-id $RTB
-            done
-            # Delete network ACLs
-            NACLS=$(aws ec2 describe-network-acls --filters "Name=vpc-id,Values=$VPC" --query "NetworkAcls[].NetworkAclId" --output text)
-            for NACL in $NACLS; do
-                aws ec2 delete-network-acl --network-acl-id $NACL
-            done
-            # Delete security groups
-            SGS=$(aws ec2 describe-security-groups --filters "Name=vpc-id,Values=$VPC" --query "SecurityGroups[?GroupName!='default'].GroupId" --output text)
-            for SG in $SGS; do 
-               aws ec2 delete-security-group --group-id $SG; 
-             done          
-             # Finally, delete the VPC 
-             aws ec2 delete-vpc --vpc-id $VPC
-        else
-            echo "VPC $VPC is only $AGE_MINUTES minutes old, skipping"
-        fi
-    else
-        echo "VPC $VPC has $INSTANCE_COUNT instance(s), skipping"
-    fi
-done
-"""
-# Save this as cleanup_old_vpcs.sh and run it periodically, e.g. via cron
