@@ -41,6 +41,7 @@ class RunnerLauncher(object):
         )
         client = httpx.AsyncClient()
         headers = {
+            "Content-type": "application/json",
             "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {installation_access_token}",
         }
@@ -99,6 +100,9 @@ class RunnerLauncher(object):
             logging.info(response.reason_phrase)
             logging.info(response.headers)
             logging.info(response.text)
+            logging.ingo(response.request)
+            logging.ingo(response.request.headers)
+            logging.ingo(response.request.text)
             return False
 
     def gh_event_to_aws_tags(
