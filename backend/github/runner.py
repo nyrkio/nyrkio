@@ -88,7 +88,10 @@ class RunnerLauncher(object):
         if response.status_code == 201:
             return True
         else:
-            logging.warning(f"Tried but failed in creating a runner group at {gh_org}")
+            logging.warning(
+                f"Tried but failed in creating a runner group at {gh_org} ({response.status_code} {response.text})"
+            )
+            logging.info(response)
             return False
 
     def gh_event_to_aws_tags(
