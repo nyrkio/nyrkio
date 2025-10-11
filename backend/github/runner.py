@@ -88,7 +88,7 @@ class RunnerLauncher(object):
         }
         response = await client.post(
             f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
-            data=data_payload,
+            json=data_payload,
             headers=headers,
         )
         if response.status_code == 201:
@@ -100,9 +100,9 @@ class RunnerLauncher(object):
             logging.info(response.reason_phrase)
             logging.info(response.headers)
             logging.info(response.text)
-            logging.ingo(response.request)
-            logging.ingo(response.request.headers)
-            logging.ingo(response.request.text)
+            logging.info(response.request)
+            logging.info(response.request.headers)
+            logging.info(response.request.text)
             return False
 
     def gh_event_to_aws_tags(
