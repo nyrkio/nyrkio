@@ -41,7 +41,7 @@ class RunnerLauncher(object):
         )
         client = httpx.AsyncClient()
         headers = {
-            "Accept": "application/vnd.github.v3+json",
+            "Accept": "application/vnd.github+json",
             "Authorization": f"Bearer {installation_access_token}",
         }
 
