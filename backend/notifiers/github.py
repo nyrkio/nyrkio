@@ -144,9 +144,7 @@ async def fetch_access_token(
         if installation_id is None:
             raise ValueError("either a token_url or an installation_id is required.")
         else:
-            token_url = (
-                "https://api.github.com/app/installations/{installation_id}/access_tokens",
-            )
+            token_url = f"https://api.github.com/app/installations/{installation_id}/access_tokens"
 
     response = await client.post(
         token_url,
