@@ -96,9 +96,9 @@ class RunnerLauncher(object):
             logging.warning(
                 f"Tried but failed in creating a runner group at {gh_org} ({response.status_code} {response.text})"
             )
-            logging.info(response.error())
-            logging.info(response.headers.to_s())
-            logging.info(response.body.to_s())
+            logging.info(response.reason_phrase)
+            logging.info(response.headers)
+            logging.info(response.read)
             return False
 
     def gh_event_to_aws_tags(
