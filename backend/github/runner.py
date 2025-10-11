@@ -80,7 +80,7 @@ class RunnerLauncher(object):
                 return False
 
         # If still here, we need to create it
-        data_payload = {"name": "nyrkio", "allows_public_repositories": True}
+        data_payload = {"name": "nyrkio", "allows_public_repositories": True, "visibility": "all"}
         response = await client.post(
             f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
             data=data_payload,
