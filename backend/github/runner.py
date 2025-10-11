@@ -80,15 +80,19 @@ class RunnerLauncher(object):
                 return False
 
         # If still here, we need to create it
+        data_payload = {"name": "nyrkio", "allows_public_repositories": True}
         response = await client.post(
             f"https://api.github.com/orgs/{gh_org}/actions/runner-groups",
-            data={"name": "nyrkio"},
+            data=data_payload,
             headers=headers,
         )
         if response.status_code == 201:
             return True
         else:
-            logging.warning(f"Tried but failed in creating a runner group at {gh_org}")
+            logging.warning(
+                f"Tried but failed in creating a runner group at {gh_org} ({response.status_code} {response.text})"
+            )
+            logging.info(response)
             return False
 
     def gh_event_to_aws_tags(

@@ -250,7 +250,11 @@ async def handle_pull_requests(gh_event):
         await asyncio.sleep(7)
         queued_jobs = await check_queued_workflow_jobs(repo_name)
         queued_jobs = filter_out_unsupported_jobs(queued_jobs)
-        while queued_jobs:
+        # Needed to prevent infinite loops in valid cases. If this is reached,
+        # github will 403 because you reached the maximum requests allowed per hour.
+        max_loops = 7
+        while queued_jobs and max_loops > 0:
+            max_loops -= 1
             logger.info(
                 f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
             )
