@@ -98,7 +98,7 @@ class RunnerLauncher(object):
             )
             logging.info(response.reason_phrase)
             logging.info(response.headers)
-            logging.info(response.read)
+            logging.info(response.text)
             return False
 
     def gh_event_to_aws_tags(
