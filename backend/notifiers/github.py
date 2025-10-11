@@ -115,7 +115,7 @@ class GitHubIssueNotifier(AbstractNotifier):
 
 
 async def fetch_access_token(
-    token_url="TODO: remove", expiration_seconds=600, installation_id=None
+    token_url=None, expiration_seconds=600, installation_id=None
 ):
     """Grab an access token for the Nyrkio app installation."""
     # See https://docs.github.com/
@@ -140,8 +140,16 @@ async def fetch_access_token(
 
     client = httpx.AsyncClient()
 
+    if token_url is None:
+        if installation_id is None:
+            raise ValueError("either a token_url or an installation_id is required.")
+        else:
+            token_url = (
+                "https://api.github.com/app/installations/{installation_id}/access_tokens",
+            )
+
     response = await client.post(
-        f"https://api.github.com/app/installations/{installation_id}/access_tokens",
+        token_url,
         headers={
             "Accept": "application/vnd.github.v3+json",
             "Authorization": f"Bearer {encoded_jwt}",
