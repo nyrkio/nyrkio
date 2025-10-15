@@ -335,18 +335,18 @@ class RunnerLauncher(object):
                 # PrivateIpAddress=private_ip,
                 # SecurityGroupIds=[sg_id],
                 # SubnetId=subnet_id,
-                BlockDeviceMappings=[
-                    {
-                        "DeviceName": "/dev/xvda",
-                        "Ebs": {
-                            "VolumeSize": ebs_size,
-                            "Iops": ebs_iops,
-                            "DeleteOnTermination": True,
-                            "Encrypted": True,
-                            "VolumeType": "gp3",
-                        },
-                    }
-                ],
+                # BlockDeviceMappings=[
+                #     {
+                #         "DeviceName": "/dev/xvda",
+                #         "Ebs": {
+                #             "VolumeSize": ebs_size,
+                #             "Iops": ebs_iops,
+                #             "DeleteOnTermination": True,
+                #             "Encrypted": True,
+                #             "VolumeType": "gp3",
+                #         },
+                #     }
+                # ],
                 NetworkInterfaces=[
                     {
                         "DeviceIndex": 0,
