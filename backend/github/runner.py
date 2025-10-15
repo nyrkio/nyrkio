@@ -335,18 +335,18 @@ class RunnerLauncher(object):
                 # PrivateIpAddress=private_ip,
                 # SecurityGroupIds=[sg_id],
                 # SubnetId=subnet_id,
-                BlockDeviceMappings=[
-                    {
-                        "DeviceName": "/dev/xvda",
-                        "Ebs": {
-                            "VolumeSize": ebs_size,
-                            "Iops": ebs_iops,
-                            "DeleteOnTermination": True,
-                            "Encrypted": True,
-                            "VolumeType": "gp3",
-                        },
-                    }
-                ],
+                # BlockDeviceMappings=[
+                #     {
+                #         "DeviceName": "/dev/xvda",
+                #         "Ebs": {
+                #             "VolumeSize": ebs_size,
+                #             "Iops": ebs_iops,
+                #             "DeleteOnTermination": True,
+                #             "Encrypted": True,
+                #             "VolumeType": "gp3",
+                #         },
+                #     }
+                # ],
                 NetworkInterfaces=[
                     {
                         "DeviceIndex": 0,
@@ -375,6 +375,12 @@ class RunnerLauncher(object):
             "Waiting for instance to be in 'running' state and have a public IP address..."
         )
         instance.wait_until_running()
+
+        ec2.create_tags(
+            Resources=[instance_id],
+            Tags=self.tags,
+        )
+
         for sleep_secs in [1, 5, 10, 15, 20]:
             await asyncio.sleep(sleep_seconds)
             instance.load()

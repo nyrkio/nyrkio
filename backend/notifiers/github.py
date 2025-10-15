@@ -238,7 +238,7 @@ class GitHubCommentNotifier:
         header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen-50x50.png)](https://nyrkio.com)"
+        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen3-50x50.png)](https://nyrkio.com)"
         red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown2-thick-50x50.png)](https://nyrkio.com)"
 
         anything_to_report = False
