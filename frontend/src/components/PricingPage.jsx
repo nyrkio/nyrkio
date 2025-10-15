@@ -379,7 +379,7 @@ export const PricingPage = ({ loggedIn }) => {
           </div>
         </div>
       </div>
-      <div style={{opacity: 0.2}} >
+      <div style={{opacity: 0.01, width: "100px", position: "absolute", right: "0px"}} >
       {loggedIn ? (
         <form
         action="/api/v0/billing/create-checkout-session?mode=subscription"
