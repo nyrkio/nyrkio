@@ -131,7 +131,7 @@ class RunnerLauncher(object):
         tags = [
             {
                 "Key": "github_sender",
-                "Value": str(job.get("sender", {}).get("login", "")),
+                "Value": str(gh_event.get("sender", {}).get("login", "")),
             },
             {"Key": "github_repo", "Value": str(repo.get("full_name", ""))},
             {"Key": "github_job_id", "Value": str(job.get("id", ""))},
@@ -149,7 +149,7 @@ class RunnerLauncher(object):
             },
             {
                 "Key": "github_event_type",
-                "Value": str(gh_event.get("workflow_job", {}).get("event", "")),
+                "Value": "workflow_job",  # Previous row already assumes this so why not
             },
             {"Key": "repo_owner", "Value": repo.get("owner", {}).get("login", "")},
             {"Key": "job_created_at", "Value": job.get("created_at", "")},
