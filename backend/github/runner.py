@@ -375,6 +375,12 @@ class RunnerLauncher(object):
             "Waiting for instance to be in 'running' state and have a public IP address..."
         )
         instance.wait_until_running()
+
+        ec2.create_tags(
+            Resources=[instance_id],
+            Tags=self.tags,
+        )
+
         for sleep_secs in [1, 5, 10, 15, 20]:
             await asyncio.sleep(sleep_seconds)
             instance.load()
