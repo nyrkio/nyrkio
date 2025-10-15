@@ -14,7 +14,7 @@ AVAILABILITY_ZONE = "eu-central-1b"
 OWNER = "henrik@nyrkio.com"
 VPC_CIDR = "10.88.0.0/16"
 SUBNET_CIDR = "subnet-0a623bfe81108a1e4"
-AMI_ID = "ami-0f7a75cb49405fe04" # Copied from runson owner id = 135269210855
+AMI_ID = "ami-0f7a75cb49405fe04"  # Copied from runson owner id = 135269210855
 INSTANCE_TYPE = "c7a.large"
 INSTANCE_COUNT = 1
 PRIVATE_IPS = ["10.88.0.100", "10.88.0.2", "10.88.0.3", "10.8.0.4"]
