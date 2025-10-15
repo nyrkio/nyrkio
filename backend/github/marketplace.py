@@ -96,9 +96,12 @@ async def _github_events(gh_event: Dict):
         runs_on = [lab for lab in labels if lab in supported]
 
         if runs_on:
+            await store.log_json_event(gh_event, event_type="workflow_job")
             await store.log_json_event(
-                gh_event,
-                f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}",
+                {
+                    "message": f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels} -> {runs_on}"
+                },
+                event_type="internal message",
             )
             runner_registration_token = await get_github_runner_registration_token(
                 org_name=org_name,
