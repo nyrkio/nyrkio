@@ -137,7 +137,7 @@ class RunnerLauncher(object):
             {"Key": "github_job_id", "Value": str(job.get("id", ""))},
             {"Key": "github_job_name", "Value": job.get("name", "")},
             {"Key": "github_job_run_id", "Value": str(job.get("run_id", ""))},
-            {"Key": "github_job_run_number", "Value": str(job.get("run_number", ""))},
+            {"Key": "github_job_run_attempt", "Value": str(job.get("run_attempt", ""))},
             {"Key": "github_job_status", "Value": job.get("status", "")},
             {"Key": "github_job_conclusion", "Value": job.get("conclusion", "")},
             {"Key": "github_job_html_url", "Value": job.get("html_url", "")},
