@@ -49,7 +49,7 @@ fix=false
 deploy=false
 
 for opt in "$@"; do
-  print "$opt"
+  echo "$opt"
 
   case ${opt} in
     --fix)
