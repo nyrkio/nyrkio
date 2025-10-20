@@ -168,11 +168,15 @@ async def get_pr_changes_for_test_name(
     pull_number: int,
     git_commit: str,
 ):
+    user_or_org_id, int_test_name = await _figure_out_user_and_test(test_name)
+    _, just_repo, branch, _ = get_public_namespace_parts(test_name)
+
     return await _get_pr_changes(
+        user_or_org_id=user_or_org_id,
         pull_number=pull_number,
         git_commit=git_commit,
         repo=repo,
-        test_name=test_name,
+        test_name=int_test_name,
         notify=None,
     )
 
