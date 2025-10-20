@@ -669,7 +669,17 @@ export const SingleResultWithTestname = ({
     // TODO: Make this configurable
     // Note that change points in the summary table are over the entire history, you just can't see
     // them on the graphs now. Perhaps a slider to select a time range is needed after all.
-    setDisplayData(resultData.slice(-300));
+    // Fix: preserve pull requests no matter what
+    let keep = [];
+    for (let i=0; i < resultData.length && i<300; i++) {
+      if (resultData[i].pull_request > 0)
+        keep.push(resultData[-i]);
+    }
+    let cutResultData = resultData.slice(-300);
+    for (let o of keep){
+      cutResultData.push(o);
+    }
+    setDisplayData(cutResultData);
 
     const changes = await fetch(url2, {
       headers: {
