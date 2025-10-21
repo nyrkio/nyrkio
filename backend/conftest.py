@@ -2,6 +2,7 @@ import os
 import pytest
 
 from starlette.testclient import TestClient
+from httpx import Response
 from backend.api.api import app
 
 os.environ["NYRKIO_TESTING"] = "True"
@@ -26,8 +27,7 @@ class AuthenticatedTestClient(TestClient):
 
     def login(self):
         response = self.post(
-            "/api/v0/auth/jwt/login",
-            data={"username": self.email, "password": "foo"},
+            "/api/v0/auth/jwt/login", data={"username": self.email, "password": "foo"}
         )
         assert response.status_code == 200
         token = response.json()["access_token"]
@@ -94,6 +94,64 @@ class GitHubClient(AuthenticatedTestClient):
         return response
 
 
+class MockHttpClient(TestClient):
+    """
+    Capture and mock all http requests anywhere in the world.
+    """
+
+    def __init__(self, app):
+        super().__init__(app)
+        self.mock_response_dict = {
+            "status_code": 200,
+            "text": '{"payload": "mock payload"}',
+            "content": b'{"payload": "mock payload"}',
+        }
+
+    def mock_response(self, **kwargs):
+        self.mock_response_dict = kwargs
+
+    def method(self, method, url, **kwargs):
+        valid_args = [
+            "content",
+            "data",
+            "files",
+            "json",
+            "headers",
+            "cookies",
+            "auth",
+            "proxy",
+            "timeout",
+            "follow_redirects",
+            "verify",
+            "trust_env",
+        ]
+
+        for k, v in kwargs.items():
+            print(k, v)
+            assert k in valid_args
+
+        print("Create Response object")
+        print(self.mock_response_dict)
+        print(kwargs)
+        resp = Response(**self.mock_response_dict)  # , **kwargs)
+        return resp
+
+    def get(self, url, **kwargs):
+        return self.method("GET", url, **kwargs)
+
+    def post(self, url, **kwargs):
+        print(kwargs)
+        print(*kwargs)
+        # print(**kwargs)
+        return self.method("POST", url, **kwargs)
+
+    def put(self, url, **kwargs):
+        return self.method("PUT", url, **kwargs)
+
+    def delete(self, url, **kwargs):
+        return self.method("DELETE", url, **kwargs)
+
+
 @pytest.fixture
 def client():
     with AuthenticatedTestClient(app) as client:
@@ -119,4 +177,10 @@ def unauthenticated_client():
 @pytest.fixture
 def gh_client():
     with GitHubClient(app) as client:
+        yield client
+
+
+@pytest.fixture
+def mock_http_client():
+    with MockHttpClient(app) as client:
         yield client

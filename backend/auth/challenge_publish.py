@@ -26,7 +26,7 @@ from backend.db.db import UserCreate, NyrkioUserDatabase, DBStore
 
 from backend.auth.common import (
     UserManager,
-    get_short_jwt_strategy,
+    get_cph_jwt_strategy,
 )
 
 
@@ -60,6 +60,7 @@ async def create_cph_user(github_username: str, is_repo_owner: bool = False):
 class ChallengePublishSession(BaseModel):
     username: str
     client_secret: str
+    repo_owner: str
     server_secret: str
 
 
@@ -110,6 +111,7 @@ async def challenge_publish_claim(
     session = ChallengePublishSession(
         username=claim.username,
         client_secret=claim.client_secret,
+        repo_owner=claim.repo_owner,
         server_secret=server_secret,
     )
     challenge = ChallengePublishChallenge(
@@ -177,8 +179,10 @@ async def challenge_publish_complete(
             user = await create_cph_user(github_username, is_repo_owner=False)
 
         # Give the user a short lived JWT token. After this, it will look like a regular user logging in and using JWT tokens.
-        strategy = get_short_jwt_strategy()
-        jwt_token = await strategy.write_token(user)
+        strategy = get_cph_jwt_strategy()
+        jwt_token = await strategy.write_token(
+            user, is_cph_user=True, repo_owner=challenge.session.repo_owner
+        )
 
         return {
             "message": "ChallengePublish Handshake completed. Please keep the supplied JWT token secret and use it to authenticate going forward.",
@@ -203,6 +207,7 @@ async def verify_workflow_run(claim: ChallengePublishClaim) -> int:
     HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
     client = httpx.AsyncClient()
     uri = f"https://api.github.com/repos/{claim.repo_owner}/{claim.repo_name}/actions/runs/{claim.run_id}"
+    # print(client)
     response = await client.get(uri, headers=HTTP_HEADERS)
     if response.status_code != 200:
         logging.error(
@@ -349,6 +354,7 @@ async def validate_public_challenge(challenge: ChallengePublishChallenge) -> boo
             detail=f"ChallengePublishHandshake: Failed to fetch the list of artifact files from GitHub: {artifact_url}",
         )
     artifact_list = response.json()
+    # logging.warn(artifact_list)
     for one_artifact in artifact_list["artifacts"]:
         if one_artifact["id"] == challenge.artifact_id:
             parts = one_artifact["name"].split(".")

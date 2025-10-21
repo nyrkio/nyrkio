@@ -30,12 +30,14 @@ This is true for all the API endpoints in this file.
 """
 
 import logging
-from typing import Union, Any
+from typing import Union, Any, Tuple, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_users import models, BaseUserManager
 
 from backend.api.model import TestResults
 from backend.auth import auth
+from backend.auth.common import get_user_manager
 from backend.api.changes import calc_changes
 from backend.db.db import DBStoreResultExists, User, DBStore
 from backend.notifiers.github import GitHubCommentNotifier
@@ -102,14 +104,11 @@ async def _get_pr_changes(
     changes = []
 
     all_results = []
-    # print("test_names")
-    print(test_names)
 
     for test_name in test_names:
         results, _ = await store.get_results(
             user_or_org_id, test_name, pull_number, git_commit
         )
-        # print(results)
         if not len(results) >= 1:
             raise HTTPException(
                 status_code=404,
@@ -143,8 +142,18 @@ async def add_pr_result(
     test_result: TestResults,
     repo: str,
     pull_number: int,
-    user: User = Depends(auth.current_active_user),
+    token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
+        auth.current_user_token
+    ),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+    # user: User = Depends(auth.current_active_user),
 ):
+    from backend.api.public import _validate_cph_user, _validate_normal_user
+
+    user = await _validate_normal_user(token_tup, user_manager)
+    if user.is_cph_user:
+        _validate_cph_user(token_tup, repo)
+
     return await _add_pr_result(test_name, test_result, repo, pull_number, user.id)
 
 
