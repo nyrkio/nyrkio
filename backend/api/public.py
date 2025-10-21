@@ -1,9 +1,12 @@
-from typing import Dict, List
-from fastapi import APIRouter, HTTPException
+from typing import Dict, List, Union, Tuple, Optional
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi_users import models
 
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
 from backend.api.pull_request import _get_pr_result, _get_pr_changes
+from backend.auth.common import get_cph_jwt_strategy, get_jwt_strategy
+from backend.auth import auth
 
 
 """
@@ -159,6 +162,55 @@ async def get_result(test_name: str) -> List[Dict]:
     return data
 
 
+def _validate_cph_user(cph_token_tup, repo):
+    cph_jwt = get_cph_jwt_strategy()
+    token_data = cph_jwt.read_token_and_i_mean_token(cph_token_tup[1])
+    repo_owner, repo_name = repo.split("/")
+    # print(token_data, repo)
+    if token_data.get("is_cph_user", False):
+        token_repo_owner = token_data.get("repo_owner")
+        if repo_owner != token_data.get("repo_owner"):
+            github_username = token_data.get(
+                "github_username",
+                "ERROR: github_username missing from CPH generated token!",
+            )
+            raise HTTPException(
+                status_code=403,
+                detail=f"This session is only authorized to operate on the org https://github.com/{token_repo_owner} (You previously identified as {github_username}) using Challenge Publish lightweight authentication.",
+            )
+        return True
+    return False
+
+
+async def _validate_normal_user(cph_token_tup, user_manager):
+    cph_jwt = get_jwt_strategy()
+    return await cph_jwt.read_token(cph_token_tup[1], user_manager)
+
+
+async def _get_cph_org(repo):
+    """
+    We will change the use of orgs so that there's a hard 2-way coupling to the github org.
+    If the repo is gtihub.com/acme/tools then it will automatically be owned and shared by the acme org.
+    Conversely you can only keep private results that are posted as github.com/henrikingo/*
+    Other results will automatically be shared with everyone in the same gh org. (But not public, unless you make it.)
+
+    The relevance here is that now we know that for a public test result, the nyrkio owner is whoever is the first
+    part of  the path.
+    """
+    store = DBStore()
+    repo_owner, repo_name = repo.split("/")
+    org = await store.get_org_by_github_org(repo_owner, None)
+    if not org:
+        # Every user is their own org == has their own github namespace
+        org = await store.get_user_by_github_username(repo_owner)
+
+    # print(org)
+    # Backward compatibility: tursodatabase org goes into pekka's user id...
+    if repo_owner == "tursodatabase":
+        org = {"id": "65d5fd1c69f0a9fb177e31f5"}
+    return org
+
+
 @public_router.get(
     "/pulls/{repo:path}/{pull_number}/changes/{git_commit}/test/{test_name:path}"
 )
@@ -167,17 +219,31 @@ async def get_pr_changes_for_test_name(
     repo: str,
     pull_number: int,
     git_commit: str,
+    notify: Union[int, None] = None,
+    cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
+        auth.current_user_token
+    ),
 ):
-    user_or_org_id, int_test_name = await _figure_out_user_and_test(test_name)
-    _, just_repo, branch, _ = get_public_namespace_parts(test_name)
+    if _validate_cph_user(cph_token_tup, repo):
+        org = await _get_cph_org(repo)
+        if org and "id" in org:
+            return await _get_pr_changes(
+                pull_number=pull_number,
+                git_commit=git_commit,
+                repo=repo,
+                test_name=test_name,
+                notify=notify,
+                user_or_org_id=org["id"],
+            )
 
+    user_id, test_name = await _figure_out_user_and_test(test_name)
     return await _get_pr_changes(
-        user_or_org_id=user_or_org_id,
         pull_number=pull_number,
         git_commit=git_commit,
         repo=repo,
         test_name=int_test_name,
         notify=None,
+        user_or_org_id=user_id,
     )
 
 
@@ -186,7 +252,22 @@ async def get_pr_changes(
     repo: str,
     pull_number: int,
     git_commit: str,
+    notify: Union[int, None] = None,
 ):
+    cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
+        auth.current_user_token
+    )
+    if _validate_cph_user(cph_token_tup, repo):
+        org = await _get_cph_org(repo)
+        if org and "id" in org:
+            return await _get_pr_changes(
+                pull_number=pull_number,
+                git_commit=git_commit,
+                repo=repo,
+                test_name=None,
+                notify=notify,
+                user_or_org_id=org["id"],
+            )
     return await _get_pr_changes(
         pull_number=pull_number,
         git_commit=git_commit,

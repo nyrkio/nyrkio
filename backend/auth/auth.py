@@ -117,6 +117,7 @@ auth_router.include_router(
 
 current_active_user = fastapi_users.current_user(active=True)
 current_active_superuser = fastapi_users.current_user(active=True, superuser=True)
+current_user_token = fastapi_users.authenticator.current_user_token(active=True)
 
 
 @auth_router.get("/authenticated-route")
