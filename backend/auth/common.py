@@ -1,9 +1,12 @@
 from fastapi import APIRouter, Depends, Request
-from fastapi_users import BaseUserManager
+
+# from fastapi_users import BaseUserManager, BaseUserDatabase
+from fastapi_users.manager import BaseUserManager, BaseUserDatabase
 from fastapi_users.authentication import (
     AuthenticationBackend,
     BearerTransport,
 )
+from fastapi_users.jwt import generate_jwt, decode_jwt
 
 from typing import Optional
 from beanie import PydanticObjectId
@@ -52,12 +55,46 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         return await self.user_db.get_by_github_username(github_username)
 
 
+class CphJWTStrategy(JWTStrategy):
+    """
+    If github user Alice submitted a Pull Request against github.com/acme/tools
+    """
+
+    async def write_token(
+        self,
+        user: BaseUserDatabase,
+        is_cph_user: bool = False,
+        repo_owner: Optional[str] = None,
+        github_username: Optional[str] = None,
+    ) -> str:
+        data = {
+            "sub": str(user.id),
+            "aud": self.token_audience,
+            "is_cph_user": is_cph_user,
+            "repo_owner": repo_owner,
+            "github_username": user.github_username if user.github_username else None,
+        }
+        return generate_jwt(
+            data, self.encode_key, self.lifetime_seconds, algorithm=self.algorithm
+        )
+
+    def read_token_and_i_mean_token(self, token):
+        data = decode_jwt(
+            token, self.decode_key, self.token_audience, algorithms=[self.algorithm]
+        )
+        return data
+
+
 def get_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=None)
 
 
 def get_short_jwt_strategy() -> JWTStrategy:
     return JWTStrategy(secret=SECRET, lifetime_seconds=300)
+
+
+def get_cph_jwt_strategy() -> JWTStrategy:
+    return CphJWTStrategy(secret=SECRET, lifetime_seconds=300)
 
 
 bearer_transport = BearerTransport(tokenUrl="auth/jwt/login")

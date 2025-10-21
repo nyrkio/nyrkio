@@ -234,6 +234,7 @@ class MockDBStrategy(ConnectionStrategy):
             password="gh",
             is_active=True,
             is_verified=True,
+            github_username="ghuser",
             oauth_accounts=[
                 OAuthAccount(
                     account_id="123",
@@ -249,7 +250,7 @@ class MockDBStrategy(ConnectionStrategy):
                             "id": 123,
                             "url": "https://api.github.com/orgs/nyrkio/memberships/foo",
                             "organization_url": "https://api.github.com/orgs/bar",
-                            "user": {"login": "foo", "id": 3},
+                            "user": {"login": "ghuser", "id": 3},
                             "organization": {
                                 "login": "nyrkio",
                                 "id": 123,
@@ -261,7 +262,7 @@ class MockDBStrategy(ConnectionStrategy):
                             "id": 456,
                             "url": "https://api.github.com/orgs/nyrkio2/memberships/foo",
                             "organization_url": "https://api.github.com/orgs/bar",
-                            "user": {"login": "foo", "id": 3},
+                            "user": {"login": "ghuser", "id": 3},
                             "organization": {
                                 "login": "nyrkio2",
                                 "id": 456,
@@ -280,6 +281,7 @@ class MockDBStrategy(ConnectionStrategy):
             password="gh",
             is_active=True,
             is_verified=True,
+            github_username="ghuser2",
             oauth_accounts=[
                 OAuthAccount(
                     account_id="456",
@@ -551,21 +553,26 @@ class DBStore(object):
         #     # Should always be true in our case
         #     test_name = {"$lt":-999}
 
+        query = {
+            "user_id": id,
+            "test_name": test_name,
+            "pull_request": {"$exists": False},
+        }
+
+        pull_query = {
+            "test_name": test_name,
+            "pull_request": pull_request,
+        }
+        # print(pr_commit, type(pr_commit))
+        if pr_commit:
+            pull_query["attributes.git_commit"] = pr_commit
+        # print(pull_query)
+        # print(query)
         if pull_request:
             results = (
                 await test_results.find(
                     {
-                        "$or": [
-                            {
-                                "test_name": test_name,
-                                "pull_request": {"$eq": pull_request},
-                            },
-                            {
-                                "user_id": id,
-                                "test_name": test_name,
-                                "pull_request": {"$exists": False},
-                            },
-                        ],
+                        "$or": [pull_query, query],
                     },
                     exclude_projection,
                 )
@@ -595,7 +602,7 @@ class DBStore(object):
                 .sort("timestamp")
                 .to_list(None)
             )
-
+            # print(results)
         return separate_meta(results)
 
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
@@ -1522,6 +1529,8 @@ def filter_out_pr_results(results, pr_commit):
     Filter out results that are not for the given PR commit.
     """
     # TODO: I don't think this is needed anymore?
+    # Was needed. Now fixed the query but keep this for  a while
+    # print(results)
     initial = len(results)
     filtered = list(
         filter(
