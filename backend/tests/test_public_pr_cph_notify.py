@@ -277,6 +277,7 @@ def test_public_user_pr_cph_notify(
     # assert len(json) == 1
     # FIXME
 
+
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.get", new_callable=AsyncMock)
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.post", new_callable=AsyncMock)
 @patch("backend.core.core.cached_get")
