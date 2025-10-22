@@ -192,8 +192,8 @@ async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=No
         pull_request=pull_request,
     )
     logging.info("DUMP series AND changes JUST TO REVIEW ITS ALL THERE")
-    logging.info(series)
-    logging.info(changes)
+    logging.info(series.results)
+    logging.info({k: a.to_json() for k, a in changes.items()})
     logging.info(is_cached)
     return series, changes, is_cached
 
