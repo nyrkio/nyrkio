@@ -133,6 +133,14 @@ def test_public_org_pr_cph_notify(
     json = response.json()
     assert len(json) == 1
 
+    # response = unauthenticated_client.get(
+    #     f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
+    #     headers=headers,
+    # )
+    # assert response.status_code == 200
+    # json = response.json()
+    # assert len(json) == 1
+
 
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.get", new_callable=AsyncMock)
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.post", new_callable=AsyncMock)
@@ -260,6 +268,15 @@ def test_public_user_pr_cph_notify(
     # print(json)
     assert len(json) == 1
 
+    response = unauthenticated_client.get(
+        f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    json = response.json()
+    # assert len(json) == 1
+    # FIXME
+
 
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.get", new_callable=AsyncMock)
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.post", new_callable=AsyncMock)
@@ -274,6 +291,8 @@ def test_public_user_fail_pr_cph_notify(
     mock_sieve.side_effect = lambda repo, commit: commit
     pull_number = 123
     repo = "ghuser/tools"
+    last_commit = "12349999"
+
     add_public_results("benchmark1", gh_client, unauthenticated_client, repo)
 
     repo = "nyrkio2/tools"
@@ -340,6 +359,18 @@ def test_public_user_fail_pr_cph_notify(
     )
 
     # Trying to post against a repo that isn't in the org that we first authenticated against with CPH, is not permitted
+    assert response.status_code == 403
+
+    response = unauthenticated_client.get(
+        f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}/test/ghuser/tools/main/benchmark1?notify=1",
+        headers=headers,
+    )
+    assert response.status_code == 403
+
+    response = unauthenticated_client.get(
+        f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
+        headers=headers,
+    )
     assert response.status_code == 403
 
 

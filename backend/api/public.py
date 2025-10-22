@@ -204,7 +204,7 @@ async def _get_cph_org(repo):
         # Every user is their own org == has their own github namespace
         org = await store.get_user_by_github_username(repo_owner)
 
-    # print(org)
+    print(org)
     # Backward compatibility: tursodatabase org goes into pekka's user id...
     if repo_owner == "tursodatabase":
         org = {"id": "65d5fd1c69f0a9fb177e31f5"}
@@ -253,12 +253,16 @@ async def get_pr_changes(
     pull_number: int,
     git_commit: str,
     notify: Union[int, None] = None,
-):
     cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
         auth.current_user_token
-    )
+    ),
+):
+    # cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
+    #     auth.current_user_token
+    # )
     if _validate_cph_user(cph_token_tup, repo):
         org = await _get_cph_org(repo)
+        print(org)
         if org and "id" in org:
             return await _get_pr_changes(
                 pull_number=pull_number,
@@ -268,12 +272,14 @@ async def get_pr_changes(
                 notify=notify,
                 user_or_org_id=org["id"],
             )
+
     return await _get_pr_changes(
         pull_number=pull_number,
         git_commit=git_commit,
         repo=repo,
         test_name=None,
         notify=None,
+        user_or_org_id=None,
     )
 
 
