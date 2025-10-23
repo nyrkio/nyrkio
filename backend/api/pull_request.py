@@ -144,6 +144,9 @@ async def _get_pr_changes(
         )
         if ch:
             changes.append(ch)
+
+    public_test_objects, _ = await store.get_public_results(varying_user_id)
+
     if notify and user_or_org_id:
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
