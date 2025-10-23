@@ -91,7 +91,7 @@ async def _get_pr_changes(
             pull_number=pull_number,
             test_names=test_names,
         )
-        print(pulls)
+        # print(pulls)
         if not pulls:
             print("got nothing...")
             raise HTTPException(status_code=404, detail="No test results found")
