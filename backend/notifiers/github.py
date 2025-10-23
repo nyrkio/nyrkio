@@ -164,8 +164,10 @@ async def fetch_access_token(
 
 
 class GitHubCommentNotifier:
-    def __init__(self, repo, pull_number):
+    def __init__(self, repo, pull_number, public_base_url=None, public_tests=[]):
         self.pull_number = pull_number
+        self.public_base_url = public_base_url
+        self.public_tests = public_tests
 
         self.owner, self.repo = repo.split("/")
         self.pull_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{self.pull_number}"
@@ -230,7 +232,9 @@ class GitHubCommentNotifier:
         return access_token
 
     @staticmethod
-    def create_body(results, pr_commit, changes, base_url) -> str:
+    def create_body(
+        results, pr_commit, changes, base_url, public_base_url, public_tests
+    ) -> str:
         """
         Create a issue comment body from the test results and changes.
         """
@@ -240,26 +244,43 @@ class GitHubCommentNotifier:
         body += "--- | --- | ---\n"
         green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen3-50x50.png)](https://nyrkio.com)"
         red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown2-thick-50x50.png)](https://nyrkio.com)"
+        total_tests = len(results)
+        total_metrics = 0
+        total_changes = 0
 
         anything_to_report = False
         for entry in results:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
+                total_metrics += len(test_metrics)
                 for m in test_metrics:
                     ch, mb, ma = find_changes(pr_commit, test_name, m, changes)
                     if ch is not None:
                         anything_to_report = True
+                        total_changes += 1
 
-                        body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
+                        burl = base_url
+                        if test_name in public_tests:
+                            burl = public_base_url
+
+                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
 
         if not anything_to_report:
             return (
                 header
-                + "No performance changes detected.\n\nRemember that Nyrkiö results become more precise when more commits are merged. So please check back in a few days."
+                + "No performance changes detected.\n\n"
+                + "Remember that Nyrkiö results become more precise when more commits are merged.\n\n"
+                + f"So [please check again]({base_url}) in a few days."
                 + green_footer
+                + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
             )
 
-        return header + body + red_footer
+        return (
+            header
+            + body
+            + red_footer
+            + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
+        )
 
     async def notify(
         self, results, pr_commit, changes, base_url: str = "https://nyrkio.com/result/"
@@ -274,7 +295,14 @@ class GitHubCommentNotifier:
         if not access_token:
             return
 
-        body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
+        body = GitHubCommentNotifier.create_body(
+            results,
+            pr_commit,
+            changes,
+            base_url,
+            self.public_base_url,
+            self.public_tests,
+        )
         old_comment = await self.find_existing_comment(access_token)
         if old_comment:
             old_comment_id = old_comment["id"]
