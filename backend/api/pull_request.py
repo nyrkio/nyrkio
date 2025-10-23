@@ -117,7 +117,7 @@ async def _get_pr_changes(
         #     pull_number=pull_number,
         #     git_commit=git_commit,
         # )
-        pull = await store.get_results(
+        pull, _ = await store.get_results(
             varying_user_id, test_name, pull_number, git_commit
         )
         results, _ = await store.get_results(varying_user_id, test_name)
