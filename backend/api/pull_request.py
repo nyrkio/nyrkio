@@ -29,7 +29,6 @@ results where it is the full git repository URL.
 This is true for all the API endpoints in this file.
 """
 
-import logging
 from typing import Union, Any, Tuple, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -92,19 +91,15 @@ async def _get_pr_changes(
             pull_number=pull_number,
             test_names=test_names,
         )
+        print(pulls)
         if not pulls:
             print("got nothing...")
             raise HTTPException(status_code=404, detail="No test results found")
-
-        if len(pulls) > 1:
-            # This should be impossible. If it happens, it's a bug.
-            # It's not catastrophic since we just process the first result.
-            logging.debug(f"Multiple results for pull request: {pulls}")
-
-        test_names = [t for t in [pr["test_names"][0] for pr in pulls]]
+        test_names = []
+        for p in pulls:
+            test_names.extend(p["test_names"])
 
     changes = []
-
     all_results = []
     varying_user_id = repo_owner_id if repo_owner_id else user_or_org_id
     for test_name in test_names:
@@ -122,7 +117,8 @@ async def _get_pr_changes(
         )
         # results, _ = await store.get_results(varying_user_id, test_name)
         # print()
-        print(pull)
+        # import pprint
+        # pprint.pprint(pull)
         # print()
         # if pull:
         #     results.extend(pull)
