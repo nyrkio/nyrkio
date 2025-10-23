@@ -268,9 +268,9 @@ class GitHubCommentNotifier:
         if not anything_to_report:
             return (
                 header
-                + "No performance changes detected.\n\n"
-                + "Remember that Nyrkiö results become more precise when more commits are merged.\n\n"
-                + f"So [please check again]({base_url}) in a few days."
+                + "No performance changes detected.\n"
+                + "Remember that Nyrkiö results become more precise when more commits are merged.\n"
+                + f"So [please check again]({base_url}) in a few days.\n\n"
                 + green_footer
                 + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
             )
