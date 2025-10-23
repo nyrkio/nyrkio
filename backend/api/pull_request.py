@@ -78,7 +78,9 @@ async def _get_pr_changes(
     test_name: str,
     notify: Union[int, None] = None,
     user_or_org_id: Any = None,
+    repo_owner_id: Any = None,
 ):
+    print(repo_owner_id, user_or_org_id, test_name)
     test_names = None if test_name is None else [test_name]
     store = DBStore()
     if test_names is None:
@@ -104,11 +106,30 @@ async def _get_pr_changes(
     changes = []
 
     all_results = []
-
+    varying_user_id = repo_owner_id if repo_owner_id else user_or_org_id
     for test_name in test_names:
-        results, _ = await store.get_results(
-            user_or_org_id, test_name, pull_number, git_commit
+        # results, _ = await store.get_results(
+        #     user_or_org_id, test_name, pull_number, git_commit
+        # )
+        # pull = await store.get_pull_requests_from_the_source(
+        #     user_id=user_or_org_id,
+        #     test_names=[test_name],
+        #     pull_number=pull_number,
+        #     git_commit=git_commit,
+        # )
+        pull = await store.get_results(
+            varying_user_id, test_name, pull_number, git_commit
         )
+        results, _ = await store.get_results(varying_user_id, test_name)
+        print()
+        print(pull)
+        print()
+        # if pull:
+        #     results.extend(pull)
+        # print(results)
+        print()
+        results = pull
+        # assert False
         if not len(results) >= 1:
             raise HTTPException(
                 status_code=404,
@@ -119,11 +140,10 @@ async def _get_pr_changes(
 
         all_results.append({test_name: results})
         ch = await calc_changes(
-            test_name, user_or_org_id, pull_request=pull_number, pr_commit=git_commit
+            test_name, varying_user_id, pull_request=pull_number, pr_commit=git_commit
         )
         if ch:
             changes.append(ch)
-
     if notify and user_or_org_id:
         # TODO(mfleming) in the future we should also support slack
         # slack = config.get("slack", {})
