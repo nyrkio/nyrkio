@@ -1,7 +1,9 @@
 from typing import Dict, List, Union, Tuple, Optional
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi_users import models
+from fastapi_users import models, BaseUserManager
+from pydantic import BaseModel
 
+from backend.auth.common import get_user_manager
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
 from backend.api.pull_request import _get_pr_result, _get_pr_changes
@@ -203,8 +205,9 @@ async def _get_cph_org(repo):
     if not org:
         # Every user is their own org == has their own github namespace
         org = await store.get_user_by_github_username(repo_owner)
+    if isinstance(org, BaseModel):
+        org = org.model_dump()
 
-    print(org)
     # Backward compatibility: tursodatabase org goes into pekka's user id...
     if repo_owner == "tursodatabase":
         org = {"id": "65d5fd1c69f0a9fb177e31f5"}
@@ -223,27 +226,32 @@ async def get_pr_changes_for_test_name(
     cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
         auth.current_user_token
     ),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+    # user: User = Depends(auth.current_active_user),
 ):
-    if _validate_cph_user(cph_token_tup, repo):
+    user = await _validate_normal_user(cph_token_tup, user_manager)
+    repo_owner_id, int_test_name = await _figure_out_user_and_test(test_name)
+    if user.is_cph_user and _validate_cph_user(cph_token_tup, repo):
         org = await _get_cph_org(repo)
         if org and "id" in org:
             return await _get_pr_changes(
                 pull_number=pull_number,
                 git_commit=git_commit,
                 repo=repo,
-                test_name=test_name,
+                test_name=int_test_name,
                 notify=notify,
-                user_or_org_id=org["id"],
+                repo_owner_id=org["id"],
+                # user_or_org_id=org["id"],
+                user_or_org_id=user.id,
             )
 
-    user_or_org_id, int_test_name = await _figure_out_user_and_test(test_name)
     return await _get_pr_changes(
         pull_number=pull_number,
         git_commit=git_commit,
         repo=repo,
         test_name=int_test_name,
         notify=None,
-        user_or_org_id=user_or_org_id,
+        user_or_org_id=user.id,
     )
 
 
@@ -256,13 +264,12 @@ async def get_pr_changes(
     cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
         auth.current_user_token
     ),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+    # user: User = Depends(auth.current_active_user),
 ):
-    # cph_token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
-    #     auth.current_user_token
-    # )
-    if _validate_cph_user(cph_token_tup, repo):
+    user = await _validate_normal_user(cph_token_tup, user_manager)
+    if user.is_cph_user and _validate_cph_user(cph_token_tup, repo):
         org = await _get_cph_org(repo)
-        print(org)
         if org and "id" in org:
             return await _get_pr_changes(
                 pull_number=pull_number,
@@ -270,16 +277,18 @@ async def get_pr_changes(
                 repo=repo,
                 test_name=None,
                 notify=notify,
-                user_or_org_id=org["id"],
+                repo_owner_id=org["id"],
+                user_or_org_id=user.id,
             )
-
+    repo_owner_id, _, _ = await _get_user_from_prefix(repo)
     return await _get_pr_changes(
         pull_number=pull_number,
         git_commit=git_commit,
         repo=repo,
         test_name=None,
         notify=None,
-        user_or_org_id=None,
+        user_or_org_id=user.id,
+        repo_owner_id=repo_owner_id,
     )
 
 
