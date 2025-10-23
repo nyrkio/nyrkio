@@ -133,13 +133,13 @@ def test_public_org_pr_cph_notify(
     json = response.json()
     assert len(json) == 1
 
-    # response = unauthenticated_client.get(
-    #     f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
-    #     headers=headers,
-    # )
-    # assert response.status_code == 200
-    # json = response.json()
-    # assert len(json) == 1
+    response = unauthenticated_client.get(
+        f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
+        headers=headers,
+    )
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
 
 
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.get", new_callable=AsyncMock)
@@ -220,7 +220,6 @@ def test_public_user_pr_cph_notify(
     assert response.status_code == 200
 
     last_commit = "12349999"
-
     response = unauthenticated_client.get(
         f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}/test/ghuser/tools/main/benchmark1",
         headers=headers,
@@ -274,8 +273,7 @@ def test_public_user_pr_cph_notify(
     )
     assert response.status_code == 200
     json = response.json()
-    # assert len(json) == 1
-    # FIXME
+    assert len(json) == 1
 
 
 @patch("backend.auth.challenge_publish.httpx.AsyncClient.get", new_callable=AsyncMock)
@@ -290,12 +288,11 @@ def test_public_user_fail_pr_cph_notify(
 ):
     mock_sieve.side_effect = lambda repo, commit: commit
     pull_number = 123
-    repo = "ghuser/tools"
     last_commit = "12349999"
 
+    repo = "nyrkio2/tools"
     add_public_results("benchmark1", gh_client, unauthenticated_client, repo)
 
-    repo = "nyrkio2/tools"
     cph_creds, sessionplus = do_cph_auth(
         mock_httpx_client_get, mock_httpx_client_post, unauthenticated_client, repo
     )
@@ -365,7 +362,7 @@ def test_public_user_fail_pr_cph_notify(
         f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}/test/ghuser/tools/main/benchmark1?notify=1",
         headers=headers,
     )
-    assert response.status_code == 403
+    assert response.status_code == 404
 
     response = unauthenticated_client.get(
         f"/api/v0/public/pulls/{repo}/{pull_number}/changes/{last_commit}?notify=1",
