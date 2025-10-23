@@ -120,14 +120,14 @@ async def _get_pr_changes(
         pull, _ = await store.get_results(
             varying_user_id, test_name, pull_number, git_commit
         )
-        results, _ = await store.get_results(varying_user_id, test_name)
-        print()
-        print(pull)
-        print()
+        # results, _ = await store.get_results(varying_user_id, test_name)
+        # print()
+        # print(pull)
+        # print()
         # if pull:
         #     results.extend(pull)
         # print(results)
-        print()
+        # print()
         results = pull
         # assert False
         if not len(results) >= 1:
