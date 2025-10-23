@@ -1189,6 +1189,7 @@ class DBStore(object):
         if git_commit:
             query["attributes.git_commit"] = git_commit
 
+        print(query)
         pipeline = [
             {"$match": query},
             {
@@ -1217,7 +1218,7 @@ class DBStore(object):
         # {"$limit": 50},
         # print(pipeline)
         pulls = await coll.aggregate(pipeline).to_list(None)
-        # print(pulls)
+        print(pulls)
         return pulls
 
     async def get_pull_requests(
