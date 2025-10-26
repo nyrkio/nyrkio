@@ -4,6 +4,9 @@ import { Routes, Route, Link } from "react-router-dom";
 export const SidePanel = ({ loggedIn }) => {
   const [orgs, setOrgs] = useState([]);
   const getOrganizations = async () => {
+    if (!loggedIn){
+      return;
+    }
     const url = "/api/v0/orgs/";
     console.debug("GET " + url);
     const response = await fetch(url, {
