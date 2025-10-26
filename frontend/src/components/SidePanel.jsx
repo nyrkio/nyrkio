@@ -4,6 +4,9 @@ import { Routes, Route, Link } from "react-router-dom";
 export const SidePanel = ({ loggedIn }) => {
   const [orgs, setOrgs] = useState([]);
   const getOrganizations = async () => {
+    if (!loggedIn){
+      return;
+    }
     const url = "/api/v0/orgs/";
     console.debug("GET " + url);
     const response = await fetch(url, {
@@ -196,10 +199,10 @@ const DocsSidePanel = ({ loggedIn }) => {
       <Link to="/docs/getting-started" className="nav-link">
         Getting started
       </Link>
-      <Link to="/docs/getting-started#getting-started-github-action" className="nav-link nav-level2">
+      <Link to="/docs/getting-started" className="nav-link nav-level2">
         GitHub action
       </Link>
-      <Link to="/docs/getting-started#getting-started-curl" className="nav-link nav-level2">
+      <Link to="/docs/getting-started-http" className="nav-link nav-level2">
         Generic HTTP / curl
       </Link>
 
