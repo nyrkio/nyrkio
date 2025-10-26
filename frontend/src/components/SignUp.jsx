@@ -83,7 +83,7 @@ export const SignUpPage = () => {
       <div id="signup" className="container">
         <div className="row">
           <div className="col">
-            <h3 className="text-center mt-5">Create new account</h3>
+            <h2 className="text-center mt-5">Create new account</h2>
           </div>
         </div>
         <div className="row ">

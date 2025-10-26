@@ -132,11 +132,11 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h3 className="text-center mt-5">Log In</h3>
+          <h2 className="text-center mt-5">Log In</h2>
         </div>
       </div>
-      <div className="row">
-        <div className="col"></div>
+      <div className="row ">
+      <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
         <div className="text-center mt-5 mb-5">
           <button className="btn btn-success" onClick={githubSubmit}>
             <svg
@@ -153,14 +153,16 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
       </div>
-      <hr className="col-md-5 mx-auto" />
-      <div className="row mt-5 justify-content-center">
+      <div className="text-center mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
         <div className="text-center mt-3 mb-5">
         Or login with your email and password if you created a password account:
         </div>
-        <div className="col-md-4">
+        <div className="row">
+        <div className="col-xs-1 col-md-2">
+        </div>
+        <div className="text-center col-xs-10 col-md-8">
           <form onSubmit={authSubmit}>
-            <div className="mb-3">
+            <div className="mb-3 text-center">
               <label htmlFor="exampleInputEmail1" className="form-label">
                 Email address
               </label>
@@ -189,8 +191,13 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </div>
           </form>
         </div>
+        </div>
         <ErrorMessage className="mb-5"/>
-        <hr className="mt-3 mb-3" />
+        </div>
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
+        <div>&nbsp;</div>
         <SignUpPage />
       </div>
     </div>
