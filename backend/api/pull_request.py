@@ -142,8 +142,8 @@ async def _get_pr_changes(
             changes.append(ch)
 
     public_test_objects, _ = await store.get_public_results(varying_user_id)
-    public_test_names = [t["test_name"] for t in public_test_objects]
-    print(public_test_names)
+    # public_test_names = [t["test_name"] for t in public_test_objects]
+    # print(public_test_names)
 
     if notify and user_or_org_id:
         # TODO(mfleming) in the future we should also support slack
