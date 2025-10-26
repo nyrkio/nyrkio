@@ -196,10 +196,10 @@ const DocsSidePanel = ({ loggedIn }) => {
       <Link to="/docs/getting-started" className="nav-link">
         Getting started
       </Link>
-      <Link to="/docs/getting-started#getting-started-github-action" className="nav-link nav-level2">
+      <Link to="/docs/getting-started" className="nav-link nav-level2">
         GitHub action
       </Link>
-      <Link to="/docs/getting-started#getting-started-curl" className="nav-link nav-level2">
+      <Link to="/docs/getting-started-http" className="nav-link nav-level2">
         Generic HTTP / curl
       </Link>
 
