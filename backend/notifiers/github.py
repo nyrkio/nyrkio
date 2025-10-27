@@ -7,6 +7,7 @@ import os
 
 import httpx
 import jwt
+import urllib.parse
 
 from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
 from backend.db.db import DBStore
@@ -248,6 +249,7 @@ class GitHubCommentNotifier:
         for entry in results:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
+                public_prefix = get_public_prefix(results)
                 for m, direction in test_metrics.items():
                     c = FeedbackTextDecoration(direction)
                     ch_num, mb, ma, ch_str = find_changes(
@@ -261,7 +263,7 @@ class GitHubCommentNotifier:
                         burl = base_url
                         print(test_name)
                         if test_name in self.public_tests:
-                            burl = self.public_base_url
+                            burl = self.public_base_url + public_prefix
 
                         change = c.render(ch_num, f"{ch_str} % ({mb} → {ma})")
                         body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) {c.arrow} |{change}\n"
@@ -379,6 +381,12 @@ def collect_metrics(results):
         for m in r["metrics"]:
             metrics[m["name"]] = m.get("direction")
     return metrics
+
+
+def get_public_prefix(results):
+    git_repo = results[-1]["attributes"]["git_repo"]
+    branch = results[-1]["attributes"]["branch"]
+    return urllib.parse.quote(git_repo + "/" + branch)
 
 
 def _custom_round(x):
