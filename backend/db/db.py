@@ -1464,9 +1464,20 @@ class DBStore(object):
 
         print("get_org_by_github_org 5")
         if len(res) > 1:
-            raise DBStoreMultipleResults(
-                f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
-            )
+            # This is not good but actually they can all be the same github_org
+            orgs = {}
+            for one_org in res:
+                for oauth in res["oauth_accounts"]:
+                    for org in oauth["organizations"]:
+                        if org["organization"]["login"] == github_org:
+                            orgs[org["organization"]["id"]] = org
+
+            if len(list(orgs.keys())) == 1:
+                return orgs.values()[0]
+            else:
+                raise DBStoreMultipleResults(
+                    f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
+                )
 
         return None
 
