@@ -142,7 +142,7 @@ async def _get_pr_changes(
             changes.append(ch)
 
     public_test_objects, _ = await store.get_public_results(varying_user_id)
-    # public_test_names = [t["test_name"] for t in public_test_objects]
+    public_test_names = [t["test_name"] for t in public_test_objects]
     # print(public_test_names)
 
     if notify and user_or_org_id:
@@ -152,7 +152,7 @@ async def _get_pr_changes(
         notifiers = user_config.get("notifiers", {})
         if notifiers and notifiers.get("github", {}):
             notifier = GitHubCommentNotifier(
-                repo, pull_number, "https://nyrkio.com/public/", []
+                repo, pull_number, "https://nyrkio.com/public/", public_test_names
             )
             await notifier.notify(all_results, git_commit, changes)
 
