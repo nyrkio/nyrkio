@@ -296,7 +296,7 @@ class GitHubCommentNotifier:
         if not access_token:
             return
 
-        body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
+        body = self.create_body(results, pr_commit, changes, base_url)
         old_comment = await self.find_existing_comment(access_token)
         if old_comment:
             old_comment_id = old_comment["id"]
