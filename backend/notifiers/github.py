@@ -406,7 +406,7 @@ def find_changes(pr_commit, test_name, metric, changes):
 
                 for c in d["changes"]:
                     return (
-                        c["forward_change_percent"],
+                        float(c["forward_change_percent"]),
                         _custom_round(c["mean_before"]),
                         _custom_round(c["mean_after"]),
                         _custom_round(c["forward_change_percent"]),
@@ -431,7 +431,7 @@ class MarkdownColors:
             self.neg = ""
 
     def color(self, value: Union[float, int]):
-        if value < 0:
+        if float(value) < 0.0:
             return f"{self.neg} "
         else:
             return f"{self.pos} "
