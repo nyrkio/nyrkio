@@ -382,8 +382,9 @@ def collect_metrics(results):
 
 
 def _custom_round(x):
-    if not isinstance(x, float):
+    if str(x) != str(float(x)) or isinstance(x, int):
         return x
+    x = float(x)
 
     if abs(x) < 1000:
         if abs(x) < 1:
