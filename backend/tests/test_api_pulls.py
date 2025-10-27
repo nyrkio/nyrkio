@@ -236,7 +236,7 @@ def test_pr_add_results_with_non_pr_results(client):
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
-                "git_commit": "12345",
+                "git_commit": "12345a",
             },
             "extra_info": {},
         },
@@ -250,7 +250,7 @@ def test_pr_add_results_with_non_pr_results(client):
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
-                "git_commit": "12345",
+                "git_commit": "12345b",
             },
             "extra_info": {},
         },
@@ -260,7 +260,7 @@ def test_pr_add_results_with_non_pr_results(client):
     assert response.status_code == 200
 
     pull_number = 123
-    git_commit = "12345"
+    git_commit = "12345c"
     repo = "nyrkio/nyrkio"
     pr_data = [
         {
