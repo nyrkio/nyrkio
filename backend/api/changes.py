@@ -204,6 +204,30 @@ async def calc_changes(
     series, changes, is_cached = await _calc_changes(
         test_name, user_id, pull_request, pr_commit
     )
+    pr_changes = {}
+    if pr_commit is not None:
+        # Need this later but better do it only once here:
+        per_metric_series = series.per_metric_series()
+        for k, a in changes.items():
+            commit_list = a.to_json()["attributes"]["git_commit"]
+            commit_index = commit_list.index(pr_commit)
+            if commit_index >= 0:
+                for cp in a.change_points[k]:
+                    if cp.index == commit_index:
+                        # create a new AnalyzedSeries that only has the cp where cp.index==pr_commit
+                        hunter_series = per_metric_series[k].to_hunter_instance()
+
+                        pr_change_points = {k: [cp]}
+                        pr_changes[k] = AnalyzedSeries(
+                            hunter_series, a.options, pr_change_points
+                        )
+                        # There can be only one
+                        break
+
+        # For a PR we want to return/report only the change points at the PR
+        changes = pr_changes
+        print(f"pr_changes found: {len(list(changes.keys()))}")
+
     reports = await series.produce_reports(changes, notifiers, user_id)
     return reports
 
