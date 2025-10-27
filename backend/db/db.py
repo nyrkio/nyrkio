@@ -1467,7 +1467,7 @@ class DBStore(object):
             # This is not good but actually they can all be the same github_org
             orgs = {}
             for one_org in res:
-                for oauth in res["oauth_accounts"]:
+                for oauth in one_org["oauth_accounts"]:
                     for org in oauth["organizations"]:
                         if org["organization"]["login"] == github_org:
                             orgs[org["organization"]["id"]] = org
