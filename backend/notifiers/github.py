@@ -249,7 +249,7 @@ class GitHubCommentNotifier:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
                 for m, direction in test_metrics.items():
-                    c = MarkdownColors(direction)
+                    c = FeedbackTextDecoration(direction)
                     ch_num, mb, ma, ch_str = find_changes(
                         pr_commit, test_name, m, changes
                     )
@@ -263,8 +263,8 @@ class GitHubCommentNotifier:
                         if test_name in self.public_tests:
                             burl = self.public_base_url
 
-                        change = c.render(ch_num, "{ch_str} % ({mb} → {ma})")
-                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) |{change}\n"
+                        change = c.render(ch_num, f"{ch_str} % ({mb} → {ma})")
+                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) {c.arrow} |{change}\n"
 
         if not anything_to_report:
             return (
@@ -415,7 +415,7 @@ def find_changes(pr_commit, test_name, metric, changes):
     return None, None, None, None
 
 
-class MarkdownColors:
+class FeedbackTextDecoration:
     def __init__(self, direction: str = None):
         self.set_map(direction)
 
@@ -423,12 +423,18 @@ class MarkdownColors:
         if direction == "lower_is_better":
             self.pos = "-"
             self.neg = "+"
+            self.arrow = "⇓"
+            self.emoji = lambda x: "🚀" if x < 0.0 else "🙀"
         elif direction == "higher_is_better":
             self.pos = "+"
             self.neg = "-"
+            self.arrow = "⇑"
+            self.emoji = lambda x: "🚀" if x > 0.0 else "🙀"
         else:  # None / default
             self.pos = ""
             self.neg = ""
+            self.arrow = ""
+            self.emoji = lambda x: ""
 
     def color(self, value: Union[float, int]):
         if float(value) < 0.0:
@@ -437,5 +443,4 @@ class MarkdownColors:
             return f"{self.pos} "
 
     def render(self, value: Union[float, int], txt: str):
-        c = self.color(value)
-        return f"```diff\n{c} {txt}\n```"
+        return txt + self.emoji(value)
