@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from backend.hunter.hunter.series import AnalyzedSeries
 import logging
 import time
@@ -231,14 +231,10 @@ class GitHubCommentNotifier:
         access_token = response.json()["token"]
         return access_token
 
-    @staticmethod
-    def create_body(
-        results, pr_commit, changes, base_url, public_base_url, public_tests
-    ) -> str:
+    def create_body(self, results, pr_commit, changes, base_url) -> str:
         """
         Create a issue comment body from the test results and changes.
         """
-
         header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
@@ -252,18 +248,23 @@ class GitHubCommentNotifier:
         for entry in results:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
-                total_metrics += len(test_metrics)
-                for m in test_metrics:
-                    ch, mb, ma = find_changes(pr_commit, test_name, m, changes)
-                    if ch is not None:
+                for m, direction in test_metrics.items():
+                    c = MarkdownColors(direction)
+                    ch_num, mb, ma, ch_str = find_changes(
+                        pr_commit, test_name, m, changes
+                    )
+                    total_metrics += 1
+                    if ch_num is not None:
                         anything_to_report = True
                         total_changes += 1
 
                         burl = base_url
-                        if test_name in public_tests:
-                            burl = public_base_url
+                        print(test_name)
+                        if test_name in self.public_tests:
+                            burl = self.public_base_url
 
-                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
+                        change = c.render(ch_num, "{ch_str} % ({mb} → {ma})")
+                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) |{change}\n"
 
         if not anything_to_report:
             return (
@@ -295,14 +296,7 @@ class GitHubCommentNotifier:
         if not access_token:
             return
 
-        body = GitHubCommentNotifier.create_body(
-            results,
-            pr_commit,
-            changes,
-            base_url,
-            self.public_base_url,
-            self.public_tests,
-        )
+        body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
         old_comment = await self.find_existing_comment(access_token)
         if old_comment:
             old_comment_id = old_comment["id"]
@@ -380,11 +374,24 @@ class GitHubCommentNotifier:
 
 
 def collect_metrics(results):
-    metrics = set()
+    metrics = {}
     for r in results:
         for m in r["metrics"]:
-            metrics.add(m["name"])
+            metrics[m["name"]] = m.get("direction")
     return metrics
+
+
+def _custom_round(x):
+    if not isinstance(x, float):
+        return x
+
+    if abs(x) < 1000:
+        if abs(x) < 1:
+            return f"{x:.1f}" if x % 1 == 0.0 else f"{x:.3g}"
+
+        return f"{x:.1f}" if x % 1 == 0.0 else f"{x:.4g}"
+    else:
+        return f"{x:.0f}"
 
 
 def find_changes(pr_commit, test_name, metric, changes):
@@ -398,11 +405,37 @@ def find_changes(pr_commit, test_name, metric, changes):
                     continue
 
                 for c in d["changes"]:
-                    if c["metric"] == metric:
-                        return (
-                            c["forward_change_percent"],
-                            c["mean_before"],
-                            c["mean_after"],
-                        )
+                    return (
+                        c["forward_change_percent"],
+                        _custom_round(c["mean_before"]),
+                        _custom_round(c["mean_after"]),
+                        _custom_round(c["forward_change_percent"]),
+                    )
 
-    return None, None, None
+    return None, None, None, None
+
+
+class MarkdownColors:
+    def __init__(self, direction: str = None):
+        self.set_map(direction)
+
+    def set_map(self, direction):
+        if direction == "lower_is_better":
+            self.pos = "-"
+            self.neg = "+"
+        elif direction == "higher_is_better":
+            self.pos = "+"
+            self.neg = "-"
+        else:  # None / default
+            self.pos = ""
+            self.neg = ""
+
+    def color(self, value: Union[float, int]):
+        if value < 0:
+            return f"{self.neg} "
+        else:
+            return f"{self.pos} "
+
+    def render(self, value: Union[float, int], txt: str):
+        c = self.color(value)
+        return f"```diff\n{c} {txt}\n```"
