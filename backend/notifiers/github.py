@@ -390,6 +390,11 @@ def get_public_prefix(results):
 
 
 def _custom_round(x):
+    if isinstance(x, str):
+        if "." in x:
+            while x[-1] == '0':
+                x = x[:-1]
+
     if str(x) != str(float(x)) or isinstance(x, int):
         return x
     x = float(x)
