@@ -236,7 +236,7 @@ def test_pr_add_results_with_non_pr_results(client):
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
-                "git_commit": "12345",
+                "git_commit": "12345a",
             },
             "extra_info": {},
         },
@@ -250,7 +250,7 @@ def test_pr_add_results_with_non_pr_results(client):
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
                 "branch": "main",
-                "git_commit": "12345",
+                "git_commit": "12345b",
             },
             "extra_info": {},
         },
@@ -260,7 +260,7 @@ def test_pr_add_results_with_non_pr_results(client):
     assert response.status_code == 200
 
     pull_number = 123
-    git_commit = "12345"
+    git_commit = "12345c"
     repo = "nyrkio/nyrkio"
     pr_data = [
         {
@@ -511,3 +511,118 @@ def test_only_last_pr_result_used_in_changes(client):
     assert len(json) == 1
     assert len(json[0]["benchmark1"]) == 1
     assert json[0]["benchmark1"][0]["time"] == 10 + num_results - 1
+
+
+def test_pr_many_tests(client):
+    """Ensure that we can add a PR result"""
+    client.login()
+
+    data = [
+        {
+            "timestamp": 1,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123",
+            },
+            "extra_info": {},
+        },
+        {
+            "timestamp": 2,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "1234",
+            },
+            "extra_info": {},
+        },
+        {
+            "timestamp": 3,
+            "metrics": [
+                {"name": "metric1", "value": 2.0, "unit": "ms"},
+                {"name": "metric2", "value": 30.0, "unit": "ms"},
+                {"name": "metric3", "value": 30.0, "unit": "ms"},
+            ],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "12345",
+            },
+            "extra_info": {},
+        },
+    ]
+
+    benchmark_names = [
+        "benchmark1",
+        "benchmark2",
+        "benchmark3",
+        "benchmark4",
+        "benchmark5",
+    ]
+    for benchmark_name in benchmark_names:
+        response = client.post("/api/v0/result/" + benchmark_name, json=data)
+
+    pull_number = 66666
+    repo = "nyrkio/nyrkio"
+
+    prdata = {
+        "timestamp": 10,
+        "metrics": [
+            {"name": "metric1", "value": 22.0, "unit": "ms"},
+            {"name": "metric2", "value": 30.0, "unit": "ms"},
+            {"name": "metric3", "value": 300.0, "unit": "ms"},
+        ],
+        "attributes": {
+            "git_repo": "https://github.com/nyrkio/nyrkio",
+            "branch": "main",
+            "git_commit": "123456",
+        },
+        "extra_info": {},
+    }
+    benchmark_names = [
+        "benchmark1",
+        "benchmark2",
+        "benchmark3",
+        "benchmark4",
+        "benchmark5",
+    ]
+    for benchmark_name in benchmark_names:
+        response = client.post(
+            f"/api/v0/pulls/{repo}/{pull_number}/result/{benchmark_name}", json=[prdata]
+        )
+        assert response.status_code == 200
+
+    response = client.get("/api/v0/pulls")
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 1
+
+    assert json == [
+        {
+            "pull_number": pull_number,
+            "test_names": benchmark_names,
+            "git_commit": "123456",
+            "git_repo": "https://github.com/" + repo,
+            "branch": "main",
+        }
+    ]
+
+    response = client.get(
+        f"/api/v0/pulls/{repo}/{pull_number}/changes/123456?notify=1",
+    )
+    assert response.status_code == 200
+    json = response.json()
+    assert len(json) == 5
+    for obj in json:
+        for k, v in obj.items():
+            assert len(v) == 1

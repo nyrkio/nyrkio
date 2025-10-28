@@ -131,13 +131,13 @@ class RunnerLauncher(object):
         tags = [
             {
                 "Key": "github_sender",
-                "Value": str(job.get("sender", {}).get("login", "")),
+                "Value": str(gh_event.get("sender", {}).get("login", "")),
             },
             {"Key": "github_repo", "Value": str(repo.get("full_name", ""))},
             {"Key": "github_job_id", "Value": str(job.get("id", ""))},
             {"Key": "github_job_name", "Value": job.get("name", "")},
             {"Key": "github_job_run_id", "Value": str(job.get("run_id", ""))},
-            {"Key": "github_job_run_number", "Value": str(job.get("run_number", ""))},
+            {"Key": "github_job_run_attempt", "Value": str(job.get("run_attempt", ""))},
             {"Key": "github_job_status", "Value": job.get("status", "")},
             {"Key": "github_job_conclusion", "Value": job.get("conclusion", "")},
             {"Key": "github_job_html_url", "Value": job.get("html_url", "")},
@@ -149,7 +149,7 @@ class RunnerLauncher(object):
             },
             {
                 "Key": "github_event_type",
-                "Value": str(gh_event.get("workflow_job", {}).get("event", "")),
+                "Value": "workflow_job",  # Previous row already assumes this so why not
             },
             {"Key": "repo_owner", "Value": repo.get("owner", {}).get("login", "")},
             {"Key": "job_created_at", "Value": job.get("created_at", "")},
@@ -335,18 +335,18 @@ class RunnerLauncher(object):
                 # PrivateIpAddress=private_ip,
                 # SecurityGroupIds=[sg_id],
                 # SubnetId=subnet_id,
-                BlockDeviceMappings=[
-                    {
-                        "DeviceName": "/dev/xvda",
-                        "Ebs": {
-                            "VolumeSize": ebs_size,
-                            "Iops": ebs_iops,
-                            "DeleteOnTermination": True,
-                            "Encrypted": True,
-                            "VolumeType": "gp3",
-                        },
-                    }
-                ],
+                # BlockDeviceMappings=[
+                #     {
+                #         "DeviceName": "/dev/xvda",
+                #         "Ebs": {
+                #             "VolumeSize": ebs_size,
+                #             "Iops": ebs_iops,
+                #             "DeleteOnTermination": True,
+                #             "Encrypted": True,
+                #             "VolumeType": "gp3",
+                #         },
+                #     }
+                # ],
                 NetworkInterfaces=[
                     {
                         "DeviceIndex": 0,
@@ -375,6 +375,12 @@ class RunnerLauncher(object):
             "Waiting for instance to be in 'running' state and have a public IP address..."
         )
         instance.wait_until_running()
+
+        ec2.create_tags(
+            Resources=[instance_id],
+            Tags=self.tags,
+        )
+
         for sleep_secs in [1, 5, 10, 15, 20]:
             await asyncio.sleep(sleep_seconds)
             instance.load()

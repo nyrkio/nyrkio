@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Union
 from backend.hunter.hunter.series import AnalyzedSeries
 import logging
 import time
@@ -7,6 +7,7 @@ import os
 
 import httpx
 import jwt
+import urllib.parse
 
 from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
 from backend.db.db import DBStore
@@ -164,8 +165,10 @@ async def fetch_access_token(
 
 
 class GitHubCommentNotifier:
-    def __init__(self, repo, pull_number):
+    def __init__(self, repo, pull_number, public_base_url=None, public_tests=[]):
         self.pull_number = pull_number
+        self.public_base_url = public_base_url
+        self.public_tests = public_tests
 
         self.owner, self.repo = repo.split("/")
         self.pull_url = f"https://api.github.com/repos/{self.owner}/{self.repo}/pulls/{self.pull_number}"
@@ -229,37 +232,58 @@ class GitHubCommentNotifier:
         access_token = response.json()["token"]
         return access_token
 
-    @staticmethod
-    def create_body(results, pr_commit, changes, base_url) -> str:
+    def create_body(self, results, pr_commit, changes, base_url) -> str:
         """
         Create a issue comment body from the test results and changes.
         """
-
         header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
-        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen-50x50.png)](https://nyrkio.com)"
+        green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen3-50x50.png)](https://nyrkio.com)"
         red_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_RedBrown2-thick-50x50.png)](https://nyrkio.com)"
+        total_tests = len(results)
+        total_metrics = 0
+        total_changes = 0
 
         anything_to_report = False
         for entry in results:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
-                for m in test_metrics:
-                    ch, mb, ma = find_changes(pr_commit, test_name, m, changes)
-                    if ch is not None:
+                public_prefix = get_public_prefix(results)
+                for m, direction in test_metrics.items():
+                    c = FeedbackTextDecoration(direction)
+                    ch_num, mb, ma, ch_str = find_changes(
+                        pr_commit, test_name, m, changes
+                    )
+                    total_metrics += 1
+                    if ch_num is not None:
                         anything_to_report = True
+                        total_changes += 1
 
-                        body += f"[{test_name}]({base_url}{test_name}) | [{m}]({base_url}{test_name}#{m}) | {ch} % ({mb} → {ma})\n"
+                        burl = base_url
+                        print(test_name)
+                        if test_name in self.public_tests:
+                            burl = self.public_base_url + public_prefix
+
+                        change = c.render(ch_num, f"{ch_str} % ({mb} → {ma})")
+                        body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) {c.arrow} |{change}\n"
 
         if not anything_to_report:
             return (
                 header
-                + "No performance changes detected.\n\nRemember that Nyrkiö results become more precise when more commits are merged. So please check back in a few days."
+                + "No performance changes detected.\n"
+                + "Remember that Nyrkiö results become more precise when more commits are merged.\n"
+                + f"So [please check again]({base_url}) in a few days.\n\n"
                 + green_footer
+                + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
             )
 
-        return header + body + red_footer
+        return (
+            header
+            + body
+            + red_footer
+            + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
+        )
 
     async def notify(
         self, results, pr_commit, changes, base_url: str = "https://nyrkio.com/result/"
@@ -274,7 +298,7 @@ class GitHubCommentNotifier:
         if not access_token:
             return
 
-        body = GitHubCommentNotifier.create_body(results, pr_commit, changes, base_url)
+        body = self.create_body(results, pr_commit, changes, base_url)
         old_comment = await self.find_existing_comment(access_token)
         if old_comment:
             old_comment_id = old_comment["id"]
@@ -352,11 +376,31 @@ class GitHubCommentNotifier:
 
 
 def collect_metrics(results):
-    metrics = set()
+    metrics = {}
     for r in results:
         for m in r["metrics"]:
-            metrics.add(m["name"])
+            metrics[m["name"]] = m.get("direction")
     return metrics
+
+
+def get_public_prefix(results):
+    git_repo = results[-1]["attributes"]["git_repo"]
+    branch = results[-1]["attributes"]["branch"]
+    return urllib.parse.quote(git_repo + "/" + branch)
+
+
+def _custom_round(x):
+    if str(x) != str(float(x)) or isinstance(x, int):
+        return x
+    x = float(x)
+
+    if abs(x) < 1000:
+        if abs(x) < 1:
+            return f"{x:.1f}" if x % 1 == 0.0 else f"{x:.3g}"
+
+        return f"{x:.1f}" if x % 1 == 0.0 else f"{x:.4g}"
+    else:
+        return f"{x:.0f}"
 
 
 def find_changes(pr_commit, test_name, metric, changes):
@@ -370,11 +414,42 @@ def find_changes(pr_commit, test_name, metric, changes):
                     continue
 
                 for c in d["changes"]:
-                    if c["metric"] == metric:
-                        return (
-                            c["forward_change_percent"],
-                            c["mean_before"],
-                            c["mean_after"],
-                        )
+                    return (
+                        float(c["forward_change_percent"]),
+                        _custom_round(c["mean_before"]),
+                        _custom_round(c["mean_after"]),
+                        _custom_round(c["forward_change_percent"]),
+                    )
 
-    return None, None, None
+    return None, None, None, None
+
+
+class FeedbackTextDecoration:
+    def __init__(self, direction: str = None):
+        self.set_map(direction)
+
+    def set_map(self, direction):
+        if direction == "lower_is_better":
+            self.pos = "-"
+            self.neg = "+"
+            self.arrow = "⇓"
+            self.emoji = lambda x: "🚀" if x < 0.0 else "🙀"
+        elif direction == "higher_is_better":
+            self.pos = "+"
+            self.neg = "-"
+            self.arrow = "⇑"
+            self.emoji = lambda x: "🚀" if x > 0.0 else "🙀"
+        else:  # None / default
+            self.pos = ""
+            self.neg = ""
+            self.arrow = ""
+            self.emoji = lambda x: ""
+
+    def color(self, value: Union[float, int]):
+        if float(value) < 0.0:
+            return f"{self.neg} "
+        else:
+            return f"{self.pos} "
+
+    def render(self, value: Union[float, int], txt: str):
+        return txt + self.emoji(value)

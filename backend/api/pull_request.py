@@ -29,13 +29,14 @@ results where it is the full git repository URL.
 This is true for all the API endpoints in this file.
 """
 
-import logging
-from typing import Union, Any
+from typing import Union, Any, Tuple, Optional
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_users import models, BaseUserManager
 
 from backend.api.model import TestResults
 from backend.auth import auth
+from backend.auth.common import get_user_manager
 from backend.api.changes import calc_changes
 from backend.db.db import DBStoreResultExists, User, DBStore
 from backend.notifiers.github import GitHubCommentNotifier
@@ -76,7 +77,9 @@ async def _get_pr_changes(
     test_name: str,
     notify: Union[int, None] = None,
     user_or_org_id: Any = None,
+    repo_owner_id: Any = None,
 ):
+    print(repo_owner_id, user_or_org_id, test_name)
     test_names = None if test_name is None else [test_name]
     store = DBStore()
     if test_names is None:
@@ -88,28 +91,41 @@ async def _get_pr_changes(
             pull_number=pull_number,
             test_names=test_names,
         )
+        # print(pulls)
         if not pulls:
             print("got nothing...")
             raise HTTPException(status_code=404, detail="No test results found")
-
-        if len(pulls) > 1:
-            # This should be impossible. If it happens, it's a bug.
-            # It's not catastrophic since we just process the first result.
-            logging.debug(f"Multiple results for pull request: {pulls}")
-
-        test_names = [t for t in [pr["test_names"][0] for pr in pulls]]
+        test_names = []
+        for p in pulls:
+            test_names.extend(p["test_names"])
 
     changes = []
-
     all_results = []
-    # print("test_names")
-    print(test_names)
-
+    varying_user_id = repo_owner_id if repo_owner_id else user_or_org_id
     for test_name in test_names:
-        results, _ = await store.get_results(
-            user_or_org_id, test_name, pull_number, git_commit
+        # results, _ = await store.get_results(
+        #     user_or_org_id, test_name, pull_number, git_commit
+        # )
+        # pull = await store.get_pull_requests_from_the_source(
+        #     user_id=user_or_org_id,
+        #     test_names=[test_name],
+        #     pull_number=pull_number,
+        #     git_commit=git_commit,
+        # )
+        pull, _ = await store.get_results(
+            varying_user_id, test_name, pull_number, git_commit
         )
+        # results, _ = await store.get_results(varying_user_id, test_name)
+        # print()
+        # import pprint
+        # pprint.pprint(pull)
+        # print()
+        # if pull:
+        #     results.extend(pull)
         # print(results)
+        # print()
+        results = pull
+        # assert False
         if not len(results) >= 1:
             raise HTTPException(
                 status_code=404,
@@ -120,10 +136,14 @@ async def _get_pr_changes(
 
         all_results.append({test_name: results})
         ch = await calc_changes(
-            test_name, user_or_org_id, pull_request=pull_number, pr_commit=git_commit
+            test_name, varying_user_id, pull_request=pull_number, pr_commit=git_commit
         )
         if ch:
             changes.append(ch)
+
+    public_test_objects, _ = await store.get_public_results(varying_user_id)
+    public_test_names = [t["test_name"] for t in public_test_objects]
+    print(public_test_names)
 
     if notify and user_or_org_id:
         # TODO(mfleming) in the future we should also support slack
@@ -131,7 +151,9 @@ async def _get_pr_changes(
         user_config, _ = await store.get_user_config(user_or_org_id)
         notifiers = user_config.get("notifiers", {})
         if notifiers and notifiers.get("github", {}):
-            notifier = GitHubCommentNotifier(repo, pull_number)
+            notifier = GitHubCommentNotifier(
+                repo, pull_number, "https://nyrkio.com/public/", public_test_names
+            )
             await notifier.notify(all_results, git_commit, changes)
 
     return changes
@@ -143,8 +165,18 @@ async def add_pr_result(
     test_result: TestResults,
     repo: str,
     pull_number: int,
-    user: User = Depends(auth.current_active_user),
+    token_tup: Tuple[Optional[models.UP], Optional[str]] = Depends(
+        auth.current_user_token
+    ),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+    # user: User = Depends(auth.current_active_user),
 ):
+    from backend.api.public import _validate_cph_user, _validate_normal_user
+
+    user = await _validate_normal_user(token_tup, user_manager)
+    if user.is_cph_user:
+        _validate_cph_user(token_tup, repo)
+
     return await _add_pr_result(test_name, test_result, repo, pull_number, user.id)
 
 

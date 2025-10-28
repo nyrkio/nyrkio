@@ -234,6 +234,7 @@ class MockDBStrategy(ConnectionStrategy):
             password="gh",
             is_active=True,
             is_verified=True,
+            github_username="ghuser",
             oauth_accounts=[
                 OAuthAccount(
                     account_id="123",
@@ -249,7 +250,7 @@ class MockDBStrategy(ConnectionStrategy):
                             "id": 123,
                             "url": "https://api.github.com/orgs/nyrkio/memberships/foo",
                             "organization_url": "https://api.github.com/orgs/bar",
-                            "user": {"login": "foo", "id": 3},
+                            "user": {"login": "ghuser", "id": 3},
                             "organization": {
                                 "login": "nyrkio",
                                 "id": 123,
@@ -261,7 +262,7 @@ class MockDBStrategy(ConnectionStrategy):
                             "id": 456,
                             "url": "https://api.github.com/orgs/nyrkio2/memberships/foo",
                             "organization_url": "https://api.github.com/orgs/bar",
-                            "user": {"login": "foo", "id": 3},
+                            "user": {"login": "ghuser", "id": 3},
                             "organization": {
                                 "login": "nyrkio2",
                                 "id": 456,
@@ -280,6 +281,7 @@ class MockDBStrategy(ConnectionStrategy):
             password="gh",
             is_active=True,
             is_verified=True,
+            github_username="ghuser2",
             oauth_accounts=[
                 OAuthAccount(
                     account_id="456",
@@ -503,6 +505,9 @@ class DBStore(object):
         False), raise a DBStoreResultExists exception. Otherwise, update the
         existing result.
         """
+        if isinstance(id, str):
+            id = ObjectId(id)
+
         new_list = [
             DBStore.create_doc_with_metadata(r, id, test_name, pull_number)
             for r in results
@@ -550,22 +555,28 @@ class DBStore(object):
         # if test_name is None:
         #     # Should always be true in our case
         #     test_name = {"$lt":-999}
+        if isinstance(id, str):
+            id = ObjectId(id)
+        query = {
+            "user_id": id,
+            "test_name": test_name,
+            "pull_request": {"$exists": False},
+        }
 
+        pull_query = {
+            "test_name": test_name,
+            "pull_request": pull_request,
+        }
+        # print(pr_commit, type(pr_commit))
+        if pr_commit:
+            pull_query["attributes.git_commit"] = pr_commit
+        # print(pull_query)
+        # print(query)
         if pull_request:
             results = (
                 await test_results.find(
                     {
-                        "$or": [
-                            {
-                                "test_name": test_name,
-                                "pull_request": {"$eq": pull_request},
-                            },
-                            {
-                                "user_id": id,
-                                "test_name": test_name,
-                                "pull_request": {"$exists": False},
-                            },
-                        ],
+                        "$or": [pull_query, query],
                     },
                     exclude_projection,
                 )
@@ -595,7 +606,7 @@ class DBStore(object):
                 .sort("timestamp")
                 .to_list(None)
             )
-
+        # print(results)
         return separate_meta(results)
 
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
@@ -1163,7 +1174,10 @@ class DBStore(object):
 
         query = {"pull_request": {"$exists": 1}}
         if user_id is not None:
-            query["user_id"] = user_id
+            if not isinstance(user_id, int):
+                query["user_id"] = ObjectId(user_id)
+            else:
+                query["user_id"] = user_id
         if repo:
             query["attributes.git_repo"] = repo
         if branch:
@@ -1172,7 +1186,10 @@ class DBStore(object):
             query["test_name"] = {"$in": test_names}
         if pull_number:
             query["pull_request"] = pull_number
+        if git_commit:
+            query["attributes.git_commit"] = git_commit
 
+        print(query)
         pipeline = [
             {"$match": query},
             {
@@ -1197,11 +1214,11 @@ class DBStore(object):
                 }
             },
             {"$sort": {"pull_number": -1}},
-            {"$limit": 50},
         ]
+        # {"$limit": 50},
         # print(pipeline)
         pulls = await coll.aggregate(pipeline).to_list(None)
-        # print(pulls)
+        print(pulls)
         return pulls
 
     async def get_pull_requests(
@@ -1447,9 +1464,20 @@ class DBStore(object):
 
         print("get_org_by_github_org 5")
         if len(res) > 1:
-            raise DBStoreMultipleResults(
-                f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
-            )
+            # This is not good but actually they can all be the same github_org
+            orgs = {}
+            for one_org in res:
+                for oauth in one_org["oauth_accounts"]:
+                    for org in oauth["organizations"]:
+                        if org["organization"]["login"] == github_org:
+                            orgs[org["organization"]["id"]] = org
+
+            if len(list(orgs.keys())) == 1:
+                return orgs.values()[0]
+            else:
+                raise DBStoreMultipleResults(
+                    f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
+                )
 
         return None
 
@@ -1522,6 +1550,8 @@ def filter_out_pr_results(results, pr_commit):
     Filter out results that are not for the given PR commit.
     """
     # TODO: I don't think this is needed anymore?
+    # Was needed. Now fixed the query but keep this for  a while
+    # print(results)
     initial = len(results)
     filtered = list(
         filter(
