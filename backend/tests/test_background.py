@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import Mock, patch, AsyncMock, MagicMock
+from unittest.mock import Mock, patch, AsyncMock
 from backend.api.background import (
     precompute_cached_change_points,
     precompute_summaries_non_leaf,
@@ -195,7 +195,7 @@ class TestPrecomputeSummariesNonLeaf:
                 "largest_change": 50.0,
                 "largest_test_name": "a/b/c",
                 "largest_change_point": {"change": 50.0},
-            }
+            },
         }
 
         mock_store.get_summaries_cache = AsyncMock(return_value=mock_cache)

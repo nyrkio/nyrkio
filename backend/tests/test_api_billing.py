@@ -77,9 +77,7 @@ def test_subscribe_success(mock_stripe, client):
     mock_subscription = Mock()
     mock_subscription.__getitem__ = Mock(
         side_effect=lambda x: {
-            "items": {
-                "data": [{"price": {"lookup_key": "business_monthly"}}]
-            }
+            "items": {"data": [{"price": {"lookup_key": "business_monthly"}}]}
         }[x]
     )
 
@@ -150,9 +148,7 @@ def test_create_portal_session_with_billing_info(mock_stripe, client):
     mock_subscription = Mock()
     mock_subscription.__getitem__ = Mock(
         side_effect=lambda x: {
-            "items": {
-                "data": [{"price": {"lookup_key": "business_monthly"}}]
-            }
+            "items": {"data": [{"price": {"lookup_key": "business_monthly"}}]}
         }[x]
     )
 
@@ -196,9 +192,7 @@ def test_create_portal_session_stripe_error(mock_stripe, client):
     mock_subscription = Mock()
     mock_subscription.__getitem__ = Mock(
         side_effect=lambda x: {
-            "items": {
-                "data": [{"price": {"lookup_key": "business_monthly"}}]
-            }
+            "items": {"data": [{"price": {"lookup_key": "business_monthly"}}]}
         }[x]
     )
 
