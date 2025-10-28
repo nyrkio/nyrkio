@@ -28,3 +28,4 @@ def test_custom_round():
     assert _custom_round(1234567890.0) == str("1234567890")
     assert _custom_round(123456.789) == str("123457")
     assert _custom_round("123456.789") == str("123457")
+    assert _custom_round("123456.78000") == str("123457")
