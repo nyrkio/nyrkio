@@ -108,9 +108,9 @@ class TestSetParameters:
         query = _set_parameters(user_id, test_name_prefix, meta, config)
 
         match_stage = query[0]
-        assert match_stage["$match"]["meta.change_points_timestamp"]["$gte"] == datetime(
-            1970, 1, 1
-        )
+        assert match_stage["$match"]["meta.change_points_timestamp"][
+            "$gte"
+        ] == datetime(1970, 1, 1)
 
     def test_set_parameters_custom_timestamp(self):
         """Test with custom timestamp in meta"""
@@ -123,7 +123,9 @@ class TestSetParameters:
         query = _set_parameters(user_id, test_name_prefix, meta, config)
 
         match_stage = query[0]
-        assert match_stage["$match"]["meta.change_points_timestamp"]["$gte"] == custom_time
+        assert (
+            match_stage["$match"]["meta.change_points_timestamp"]["$gte"] == custom_time
+        )
 
 
 class TestChangePointsPerCommit:
