@@ -107,7 +107,6 @@ def start_backend():
         print("Please install dependencies using one of:")
         print("  1. poetry install (in backend directory)")
         print("  2. pip install uvicorn fastapi")
-        print("  3. python3 install_backend.py --local-only")
         sys.exit(1)
 
     # Load environment variables
@@ -149,7 +148,7 @@ def start_backend():
         f.write(str(process.pid))
 
     print(f"Backend started with PID: {process.pid}")
-    print(f"To stop: python3 backend_init.py stop")
+    print(f"To stop: python3 etc/nyrkio_backend.py stop")
     print(f"To view logs: tail -f backend/uvicorn.log (if configured)")
 
 
