@@ -13,3 +13,4 @@
 .vscode
 
 .env.backend
+.backend.pid
