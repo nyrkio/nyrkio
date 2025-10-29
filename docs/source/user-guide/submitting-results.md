@@ -29,6 +29,7 @@ curl -X POST "https://api.nyrkio.com/api/v0/result/test-name" \
 
 ```python
 import requests
+import time
 
 results = {
     "timestamp": int(time.time()),

@@ -63,14 +63,14 @@ class MyRequest(BaseModel):
 
 ```python
 from fastapi import APIRouter, Depends
-from backend.auth.jwt import get_current_user
+from backend.auth import auth
 
 router = APIRouter()
 
 @router.post("/my-endpoint")
 async def my_endpoint(
     request: MyRequest,
-    user = Depends(get_current_user)
+    user = Depends(auth.current_active_user)
 ):
     # Your logic here
     return {"status": "success"}

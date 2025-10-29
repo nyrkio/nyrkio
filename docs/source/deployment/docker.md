@@ -34,7 +34,7 @@ version: '3.8'
 
 services:
   mongodb:
-    image: mongo:latest
+    image: mongodb/mongodb-community-server:latest
     ports:
       - "27017:27017"
     volumes:
@@ -45,11 +45,11 @@ services:
       context: ./backend
       dockerfile: Dockerfile
     ports:
-      - "8001:8001"
+      - "8000:8000"
     environment:
       - DB_URL=mongodb://mongodb:27017/nyrkiodb
       - DB_NAME=nyrkiodb
-      - API_PORT=8001
+      - API_PORT=8000
     depends_on:
       - mongodb
 
@@ -85,27 +85,38 @@ volumes:
 ### Backend Dockerfile
 
 ```dockerfile
-FROM python:3.11-slim
+# Multi-stage build for production (from backend/Dockerfile)
+FROM python:3.8-slim AS base
 
-WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+ENV PIP_DEFAULT_TIMEOUT=100 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    POETRY_VERSION=1.7.1
 
-# Install Poetry
-RUN pip install poetry
+WORKDIR /usr/src/backend
 
-# Copy dependency files
-COPY pyproject.toml poetry.lock ./
+FROM base as builder
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev libc-dev
+RUN pip install --upgrade pip
+RUN pip install "poetry==$POETRY_VERSION"
+RUN python -m venv /venv
 
-# Install dependencies
-RUN poetry config virtualenvs.create false     && poetry install --no-interaction --no-ansi
-
-# Copy application
 COPY . .
+RUN poetry export --no-hashes -f requirements.txt | /venv/bin/pip install -r /dev/stdin
+RUN poetry build
+RUN /venv/bin/pip install dist/*.whl
 
-# Expose port
-EXPOSE 8001
-
-# Run application
-CMD ["uvicorn", "backend.api.api:app", "--host", "0.0.0.0", "--port", "8001"]
+FROM base as final
+RUN addgroup --system app && adduser --system --group app
+COPY --from=builder /venv /venv
+COPY ./entrypoint.sh ./
+COPY ./keys/ /usr/src/backend/keys/
+COPY --chown=app:app . ./
+USER app
+CMD ["/usr/src/backend/entrypoint.sh"]
 ```
 
 ### Build and Push
