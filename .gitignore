@@ -8,9 +8,13 @@
 /backend/.benchmarks
 /backend/keys/nyrkio.pem
 
+/docs/build
+
 **/__pycache__
+**/.DS_Store
 
 .vscode
+.idea
 
 .env.backend
 .backend.pid
