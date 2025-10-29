@@ -1473,7 +1473,7 @@ class DBStore(object):
                             orgs[org["organization"]["id"]] = org
 
             if len(list(orgs.keys())) == 1:
-                return orgs.values()[0]
+                return list(orgs.values())[0]
             else:
                 raise DBStoreMultipleResults(
                     f"Failed to get a nyrkio org from github_org '{github_org}' (user={github_username}). Query returned more than one result."
