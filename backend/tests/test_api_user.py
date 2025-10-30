@@ -17,7 +17,19 @@ def test_add_and_get_user_config(client):
     json = response.json()
     assert json == {
         **config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
+        "billing": None,
+    }
+
+    config = {"core": {"max_pvalue": 0.00001, "min_magnitude": 0.5}}
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    json = response.json()
+    assert json == {
+        **config,
+        "notifiers": {"github": False, "since_days": 14, "slack": True},
         "billing": None,
     }
 
@@ -34,7 +46,6 @@ def test_update_existing_user_config(client):
     json = response.json()
     assert json == {
         **config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
         "billing": None,
     }
 
@@ -47,7 +58,6 @@ def test_update_existing_user_config(client):
     json = response.json()
     assert json == {
         **new_config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
         "billing": None,
     }
 

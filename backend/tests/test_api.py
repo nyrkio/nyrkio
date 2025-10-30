@@ -993,7 +993,6 @@ def test_add_and_get_user_config(client):
     client.login()
     config = {
         "notifiers": {"slack": True, "github": False, "since_days": 14},
-        "core": {"min_magnitude": 0.01, "max_pvalue": 0.01},
     }
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
@@ -1014,7 +1013,6 @@ def test_add_and_get_partial_user_config(client):
     assert response.status_code == 200
     assert response.json() == {
         **config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
         "billing": None,
     }
 
@@ -1030,7 +1028,6 @@ def test_update_existing_user_config(client):
     assert response.status_code == 200
     assert response.json() == {
         **config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
         "billing": None,
     }
 
@@ -1042,7 +1039,6 @@ def test_update_existing_user_config(client):
     assert response.status_code == 200
     assert response.json() == {
         **new_config,
-        "core": {"min_magnitude": 0.05, "max_pvalue": 0.001},
         "billing": None,
     }
 
