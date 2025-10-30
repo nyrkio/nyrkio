@@ -210,8 +210,8 @@ async def calc_changes(
         per_metric_series = series.per_metric_series()
         for k, a in changes.items():
             commit_list = a.to_json()["attributes"]["git_commit"]
-            commit_index = commit_list.index(pr_commit)
-            if commit_index >= 0:
+            if pr_commit in commit_list:
+                commit_index = commit_list.index(pr_commit)
                 for cp in a.change_points[k]:
                     if cp.index == commit_index:
                         # create a new AnalyzedSeries that only has the cp where cp.index==pr_commit
