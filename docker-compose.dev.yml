@@ -38,8 +38,7 @@ services:
       - mongodb
 
   worker01:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/backend:${IMAGE_TAG}
-    # build: backend
+    build: backend
     env_file:
       - .env.backend
     environment:
@@ -48,6 +47,8 @@ services:
     ports:
       - "8081:8081"
     hostname: api.nyrkio.local
+    depends_on:
+     - mongodb
 
   nginx:
     build:
