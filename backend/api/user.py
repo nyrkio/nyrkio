@@ -76,6 +76,9 @@ async def get_user_config(user: User = Depends(auth.current_active_user)):
 async def set_user_config(
     config: UserConfig, user: User = Depends(auth.current_active_user)
 ):
+    print("Incoming UserConfig parsed as:")
+    print(config.model_dump())
+    print(user.model_dump())
     if user.is_cph_user:
         raise HTTPException(
             status_code=403,
