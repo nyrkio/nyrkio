@@ -37,6 +37,19 @@ services:
     depends_on:
       - mongodb
 
+  worker01:
+    build: backend
+    env_file:
+      - .env.backend
+    environment:
+      - API_PORT=8081
+      - GIT_SHA=${IMAGE_TAG}
+    ports:
+      - "8081:8081"
+    hostname: api.nyrkio.local
+    depends_on:
+     - mongodb
+
   nginx:
     build:
       context: ./

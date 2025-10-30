@@ -4,7 +4,6 @@ from pydantic import BaseModel
 
 from backend.auth import auth
 from backend.db.db import User, DBStore
-from backend.core.config import Config
 
 user_router = APIRouter(prefix="/user")
 
@@ -42,7 +41,7 @@ class GitHubConfig(BaseModel):
 
 class UserConfig(BaseModel):
     notifiers: Optional[Notifiers] = None
-    core: Optional[Core] = Config()
+    core: Optional[Core] = None
     billing: Optional[Billing] = None
     github: Optional[GitHubConfig] = None
 

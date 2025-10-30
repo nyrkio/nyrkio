@@ -25,6 +25,18 @@ services:
       - "8080:8080"
     hostname: api.nyrkio.local
 
+  worker01:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/backend:${IMAGE_TAG}
+    # build: backend
+    env_file:
+      - .env.backend
+    environment:
+      - API_PORT=8081
+      - GIT_SHA=${IMAGE_TAG}
+    ports:
+      - "8081:8081"
+    hostname: api.nyrkio.local
+
   nginx:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/nginx:${IMAGE_TAG}
     build:
