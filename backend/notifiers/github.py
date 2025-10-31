@@ -421,12 +421,15 @@ def find_changes(pr_commit, test_name, metric, changes):
                     continue
 
                 for c in d["changes"]:
-                    return (
-                        float(c["forward_change_percent"]),
-                        _custom_round(c["mean_before"]),
-                        _custom_round(c["mean_after"]),
-                        _custom_round(c["forward_change_percent"]),
-                    )
+                    if c["metric"] == metric:
+                        return (
+                            float(c["forward_change_percent"]),
+                            _custom_round(c["mean_before"]),
+                            _custom_round(c["mean_after"]),
+                            _custom_round(c["forward_change_percent"]),
+                        )
+                    else:
+                        print(str(c))
 
     return None, None, None, None
 
