@@ -673,7 +673,7 @@ export const SingleResultWithTestname = ({
     let keep = [];
     for (let i=0; i < resultData.length && i<300; i++) {
       if (resultData[i].pull_request > 0)
-        keep.push(resultData[-i]);
+        keep.push(resultData[i]);
     }
     let cutResultData = resultData.slice(-300);
     for (let o of keep){
