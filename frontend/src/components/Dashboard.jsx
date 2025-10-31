@@ -692,8 +692,9 @@ export const SingleResultWithTestname = ({
       console.error("Failed to fetch change point data: " + changes.status);
       return;
     }
+    console.log(changeData);
     // Fix: needs unwrapping. TODO: fix backend.
-    if(selectedPr && changeData){
+    if(selectedPr && changeData && changeData.length > 0){
       const keylist = Object.keys(changeData[0]);
       changeData = changeData[0]; //[keylist[0]];
     }
