@@ -386,7 +386,7 @@ def collect_metrics(results):
 def get_public_prefix(results):
     git_repo = results[-1]["attributes"]["git_repo"]
     branch = results[-1]["attributes"]["branch"]
-    return urllib.parse.quote(git_repo + "/" + branch)
+    return urllib.parse.quote_plus(git_repo + "/" + branch)
 
 
 def _custom_round(x):
