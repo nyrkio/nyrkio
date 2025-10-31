@@ -263,7 +263,7 @@ class GitHubCommentNotifier:
                         total_changes += 1
 
                         burl = base_url
-                        print(test_name)
+                        # print(test_name)
                         if test_name in self.public_tests:
                             burl = self.public_base_url + public_prefix
 
