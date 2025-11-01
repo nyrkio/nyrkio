@@ -443,12 +443,12 @@ class FeedbackTextDecoration:
             self.pos = "-"
             self.neg = "+"
             self.arrow = "⇓"
-            self.emoji = lambda x: "🚀" if x < 0.0 else "🙀"
+            self.emoji = lambda x: "😻" if x < 0.0 else "🙀"
         elif direction == "higher_is_better":
             self.pos = "+"
             self.neg = "-"
             self.arrow = "⇑"
-            self.emoji = lambda x: "🚀" if x > 0.0 else "🙀"
+            self.emoji = lambda x: "😻" if x > 0.0 else "🙀"
         else:  # None / default
             self.pos = ""
             self.neg = ""
