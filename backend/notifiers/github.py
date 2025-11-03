@@ -166,8 +166,8 @@ async def fetch_access_token(
 
 class GitHubCommentNotifier:
     def __init__(self, repo, pull_number, public_base_url=None, public_tests=[]):
-        if public_base_url is not None and public_base_url[-1] != "/":
-            public_base_url = public_base_url + "/"
+        if public_base_url is not None and public_base_url[-1] == "/":
+            public_base_url = public_base_url[:-1]
         self.pull_number = pull_number
         self.public_base_url = public_base_url
         self.public_tests = public_tests
@@ -265,7 +265,7 @@ class GitHubCommentNotifier:
                         burl = base_url
                         # print(test_name)
                         if test_name in self.public_tests:
-                            burl = self.public_base_url + public_prefix
+                            burl = self.public_base_url + "/" + public_prefix + "/"
 
                         change = c.render(ch_num, f"{ch_str} % ({mb} → {ma})")
                         body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) {c.arrow} |{change}\n"
@@ -388,7 +388,9 @@ def collect_metrics(results):
 def get_public_prefix(results):
     git_repo = results[-1]["attributes"]["git_repo"]
     branch = results[-1]["attributes"]["branch"]
-    return urllib.parse.quote_plus(git_repo + "/" + branch + "/")
+    return (
+        urllib.parse.quote_plus(git_repo) + "/" + urllib.parse.quote_plus(branch) + "/"
+    )
 
 
 def _custom_round(x):
