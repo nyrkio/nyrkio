@@ -7,27 +7,27 @@ function poetry_func () {
 
 function lint() {
   echo "Lint backend code..."
-  ruff check --exclude hunter $lintargs .
+  ruff --exclude hunter $lintargs
 }
 
 function format() {
   echo "Format python code..."
-  ruff format --exclude hunter $ruffargs .
+  ruff format --exclude hunter $ruffargs
 }
 
 function unit() {
   echo "Run unit tests..."
-  poetry run pytest tests
+  pytest tests
 }
 
 function integration() {
   echo "Run integration tests..."
-  poetry run pytest integration_tests
+  pytest integration_tests
 }
 
 function perf() {
   echo "Run performance tests..."
-  if [ "$deploy" = "true" ]
+  if $deploy -eq "true"
   then
     cd ..
     docker compose -f docker-compose.dev.yml up -d
@@ -36,7 +36,7 @@ function perf() {
 
   pytest --benchmark-disable-gc --benchmark-warmup=on --benchmark-max-time=10 --benchmark-save=results benches/
 
-  if [ "$deploy" = "true" ]
+  if $deploy -eq "true"
   then
     # Dump the logs in case of failure
     docker compose -f docker-compose.dev.yml logs
@@ -59,7 +59,7 @@ for opt in "$@"; do
       deploy=true
       ;;
     format)
-      if [ "$fix" = "true" ]
+      if $fix -eq "true"
       then
         ruffargs=""
       else
@@ -68,7 +68,7 @@ for opt in "$@"; do
       format
       ;;
     lint)
-      if [ "$fix" = "true" ]
+      if $fix -eq "true"
       then
         lintargs="--fix"
       else

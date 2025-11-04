@@ -32,138 +32,47 @@ Also the web service itself is open source.
 
 The frontend is implemented using React and the backend is built on top of FastAPI and Pydantic.
 
-## Quick Start for Developers
-
-### Installation
-
-Clone the repository and install dependencies:
-
-```bash
-git clone git@github.com:nyrkio/nyrkio.git
-cd nyrkio
-
-# Initialize submodules
-git submodule init
-git submodule update
-
-# Install backend dependencies
-cd backend
-poetry install
-cd ..
-
-# Create environment file
-cat > .env.backend << 'EOF'
-DB_URL=mongodb://localhost:27017/nyrkiodb
-DB_NAME=nyrkiodb
-POSTMARK_API_KEY=
-GITHUB_CLIENT_SECRET=
-SECRET_KEY=
-API_PORT=8001
-EOF
-```
-
-**Prerequisites:**
-- Python 3.8+
-- Poetry (`curl -sSL https://install.python-poetry.org | python3 -`)
-- MongoDB (locally or via Docker)
-- Node.js & npm (for frontend)
-
-### Running the Backend
-
-After installation, you can start the backend using:
-
-```bash
-# Start backend server (runs on port 8001 by default)
-python3 etc/nyrkio_backend.py start
-
-# Check backend status
-python3 etc/nyrkio_backend.py status
-
-# Stop backend server
-python3 etc/nyrkio_backend.py stop
-
-# Restart backend server
-python3 etc/nyrkio_backend.py restart
-```
-
-The backend API will be available at:
-- API: http://localhost:8001
-- OpenAPI docs: http://localhost:8001/docs
-
-To customize the port, edit the `.env.backend` file and set `API_PORT` to your desired port.
-
-### Running the Full Stack with Docker
-
-To run the complete stack (backend, webhooks, MongoDB, nginx):
-
-```bash
-# Start Docker stack
-python3 etc/nyrkio_docker.py start
-
-# Check Docker stack status
-python3 etc/nyrkio_docker.py status
-
-# Stop Docker stack
-python3 etc/nyrkio_docker.py stop
-
-# Restart Docker stack
-python3 etc/nyrkio_docker.py restart
-```
-
-Services will be available at:
-- Backend API: http://localhost:8000
-- Webhooks: http://localhost:8080
-- Nginx proxy: http://localhost:80
-- MongoDB: localhost:27017
-
-### Frontend Development
-
 If you want to hack on the frontend you can run `npm` directly from inside of the `frontend` directory.
 The configuration file `vite.config.js` can be pointing to the real nyrkio.com backend API.
 
-```bash
-cd frontend
+```console
 npm install
 npm run dev
 ```
 
-### Manual Installation
+To run the full stack on your own, use the `docker-compose.dev.yml` file which will start services
+for the proxy (`nginx`), the frontend (`React`Single-page app) and the backend (`FastAPI` app).
 
-If you prefer to install manually:
 
-```bash
+```console
+PACMAN=apt
+#PACMAN=yum
+#PACMAN=brew
+
 git clone git@github.com:nyrkio/nyrkio.git
 cd nyrkio
 git submodule init
 git submodule update
 
-# Create environment file
 cat > .env.backend << END
 DB_URL=mongodb://mongodb.nyrkio.local:27017/mongodb
 DB_NAME=nyrkiodb
 POSTMARK_API_KEY=
 GITHUB_CLIENT_SECRET=
 SECRET_KEY=
-API_PORT=8001
 
 #HUNTER_CONFIG=
 #GRAFANA_USER=
 #GRAFANA_PASSWORD=
 END
 
-# Install dependencies
-cd backend
-poetry install
-
-# Start backend
-cd ..
-python3 etc/nyrkio_backend.py start
-```
-
-For Docker-based deployment:
-
-```bash
 export IMAGE_TAG=$(git rev-parse HEAD)
+
+sudo $PACMAN install docker.io docker-compose-v2
+sudo usermod -a -G docker $USER
+newgrp docker
+
+
 docker compose -f docker-compose.dev.yml up --build
 ```
 
