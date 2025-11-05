@@ -277,7 +277,7 @@ class GitHubCommentNotifier:
                         burl = base_url
                         # print(test_name)
                         if test_name in self.public_tests:
-                            burl = self.public_base_url + "/" + public_prefix + "/"
+                            burl = self.public_base_url + "/" + public_prefix
 
                         change = c.render(ch_num, f"{ch_str} % ({mb} → {ma})")
                         body += f"[{test_name}]({burl}{test_name}) | [{m}]({burl}{test_name}#{m}) {c.arrow} |{change}\n"
