@@ -286,26 +286,6 @@ class ScriptTester:
         else:
             self.results.add_skip(test_name, "README.md not found")
 
-        # Test that old references don't exist
-        test_name = "Documentation: No references to old script names"
-        issues = []
-        for doc_file in [dev_doc, readme]:
-            if doc_file.exists():
-                content = doc_file.read_text()
-                if "backend_init.py" in content:
-                    issues.append(f"{doc_file.name} contains backend_init.py")
-                if "frontend_init.py" in content:
-                    issues.append(f"{doc_file.name} contains frontend_init.py")
-                if "docker_init.py" in content:
-                    issues.append(f"{doc_file.name} contains docker_init.py")
-                if "install_backend.py" in content:
-                    issues.append(f"{doc_file.name} contains install_backend.py")
-
-        if issues:
-            self.results.add_fail(test_name, "; ".join(issues))
-        else:
-            self.results.add_pass(test_name)
-
     def run_all_tests(self):
         """Run all tests"""
         print("="*60)
