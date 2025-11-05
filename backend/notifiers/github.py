@@ -256,12 +256,14 @@ class GitHubCommentNotifier:
                 base_commit_info = ""
                 if base_commit is not None:
                     base_sha = base_commit["id"]
-                    base_commit_info = f", base commit {base_sha}"
+                    base_commit_info = f" Base commit {base_sha}"
                     if base_commit.get("timestamp", False) and isinstance(
                         base_commit["timestamp"], int
                     ):
-                        base_date = datetime.fromtimestamp(base_commit["timestamp"])
-                        base_commit_info += f" on {base_date}"
+                        base_date = datetime.fromtimestamp(
+                            base_commit["timestamp"]
+                        ).strftime("%a %-d %b, %Y")
+                        base_commit_info += f" from {base_date}"
                 for m, direction in test_metrics.items():
                     c = FeedbackTextDecoration(direction)
                     ch_num, mb, ma, ch_str = find_changes(
@@ -283,13 +285,13 @@ class GitHubCommentNotifier:
         if not anything_to_report:
             return (
                 header
-                + base_commit_info
                 + "\n\n"
                 + "No performance changes detected.\n"
                 + "Remember that Nyrkiö results become more precise when more commits are merged.\n"
                 + f"So [please check again]({base_url}) in a few days.\n\n"
                 + green_footer
                 + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
+                + base_commit_info
             )
 
         return (
@@ -299,6 +301,7 @@ class GitHubCommentNotifier:
             + body
             + red_footer
             + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
+            + base_commit_info
         )
 
     async def notify(
