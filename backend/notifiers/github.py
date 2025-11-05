@@ -379,14 +379,13 @@ class GitHubCommentNotifier:
         logging.debug(recent_comments)
         for c in recent_comments:
             # Find comments from the specific PR
-            logging.info(
+            logging.debug(
                 f"matching my pull_number = {self.pull_number} and {c['issue_url']}"
             )
             if c["issue_url"].endswith(f"issues/{self.pull_number}"):
                 # Find a comment by this app
-                logging.info("client_id")
                 if c["user"]["login"] == "nyrkio[bot]":
-                    logging.info(c["body"])
+                    logging.debug(c["body"])
                     # Find the comment with change detection results
                     if "body" in c and c["body"].startswith(
                         "**Nyrkiö Report for Commit"
