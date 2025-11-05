@@ -238,7 +238,7 @@ class GitHubCommentNotifier:
         """
         Create a issue comment body from the test results and changes.
         """
-        header = "**Nyrkiö Report for Commit**: " + pr_commit + "\n\n"
+        header = "**Nyrkiö Report for Commit**: " + pr_commit
         body = "Test name | Metric | Change" + "\n"
         body += "--- | --- | ---\n"
         green_footer = "\n\n[![Nyrkiö](https://nyrkio.com/p/logo/round/Logomark_GithubGreen3-50x50.png)](https://nyrkio.com)"
@@ -252,6 +252,16 @@ class GitHubCommentNotifier:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
                 public_prefix = get_public_prefix(results)
+                base_commit = get_base_commit(results)
+                base_commit_info = ""
+                if base_commit is not None:
+                    base_sha = base_commit["id"]
+                    base_commit_info = f", base commit {base_sha}"
+                    if base_commit.get("timestamp", False) and isinstance(
+                        base_commit["timestamp"], int
+                    ):
+                        base_date = datetime.fromtimestamp(base_commit)
+                        base_commit_info += f" on {base_date}"
                 for m, direction in test_metrics.items():
                     c = FeedbackTextDecoration(direction)
                     ch_num, mb, ma, ch_str = find_changes(
@@ -273,6 +283,8 @@ class GitHubCommentNotifier:
         if not anything_to_report:
             return (
                 header
+                + base_commit_info
+                + "\n\n"
                 + "No performance changes detected.\n"
                 + "Remember that Nyrkiö results become more precise when more commits are merged.\n"
                 + f"So [please check again]({base_url}) in a few days.\n\n"
@@ -282,6 +294,8 @@ class GitHubCommentNotifier:
 
         return (
             header
+            + base_commit_info
+            + "\n\n"
             + body
             + red_footer
             + f"    {total_changes} changes / {total_tests} tests & {total_metrics} metrics."
@@ -465,3 +479,30 @@ class FeedbackTextDecoration:
 
     def render(self, value: Union[float, int], txt: str):
         return txt + self.emoji(value)
+
+
+def get_base_commit(results):
+    """
+    Sample
+
+    "base_commit": {
+        "author": {
+            "name": "Henrik Ingo",
+            "username": "henrikingo",
+            "email": "henrik@nyrk.io"
+        },
+        "committer": {
+            "name": "Henrik Ingo",
+            "username": "henrikingo",
+            "email": "henrik@nyrk.io"
+        },
+        "id": "e8f32fe51999005f5a958136b86d80c0a445ad14",
+        "message": "debug env",
+        "timestamp": "2025-11-04T21:48:41Z",
+        "url": "https://api.github.com/repos/nyrkio/change-detection/git/commits/e8f32fe51999005f5a958136b86d80c0a445ad14",
+        "repo": "change-detection",
+        "repoUrl": "https://github.com/nyrkio/change-detection/commit/e8f32fe51999005f5a958136b86d80c0a445ad14",
+        "branch": "master"
+    }
+    """
+    return results.get("extra_info", {}).get("base_commit", None)
