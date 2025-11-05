@@ -15,7 +15,7 @@ import time
 from pathlib import Path
 
 
-class TestResult:
+class TestScripts:
     """Store and display test results"""
     def __init__(self):
         self.passed = []
@@ -57,7 +57,7 @@ class ScriptTester:
     def __init__(self, root_dir: Path):
         self.root_dir = root_dir
         self.etc_dir = root_dir / "etc"
-        self.results = TestResult()
+        self.results = TestScripts()
 
     def run_command(self, cmd, timeout=10, check=True):
         """Run a command and return the result"""
