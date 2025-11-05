@@ -252,7 +252,7 @@ class GitHubCommentNotifier:
             for test_name, results in entry.items():
                 test_metrics = collect_metrics(results)
                 public_prefix = get_public_prefix(results)
-                base_commit = get_base_commit(results)
+                base_commit = get_base_commit(pr_commit)
                 base_commit_info = ""
                 if base_commit is not None:
                     base_sha = base_commit["id"]
@@ -481,7 +481,7 @@ class FeedbackTextDecoration:
         return txt + self.emoji(value)
 
 
-def get_base_commit(results):
+def get_base_commit(pr):
     """
     Sample
 
@@ -505,8 +505,4 @@ def get_base_commit(results):
         "branch": "master"
     }
     """
-    if len(results) == 0:
-        return None
-    # They all have the same base_commit
-    r = results[0]
-    return r.get("extra_info", {}).get("base_commit", None)
+    return pr.get("extra_info", {}).get("base_commit", None)
