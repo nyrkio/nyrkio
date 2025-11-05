@@ -260,7 +260,7 @@ class GitHubCommentNotifier:
                     if base_commit.get("timestamp", False) and isinstance(
                         base_commit["timestamp"], int
                     ):
-                        base_date = datetime.fromtimestamp(base_commit)
+                        base_date = datetime.fromtimestamp(base_commit["timestamp"])
                         base_commit_info += f" on {base_date}"
                 for m, direction in test_metrics.items():
                     c = FeedbackTextDecoration(direction)
