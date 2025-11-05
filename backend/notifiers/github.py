@@ -505,4 +505,8 @@ def get_base_commit(results):
         "branch": "master"
     }
     """
-    return results.get("extra_info", {}).get("base_commit", None)
+    if len(results) == 0:
+        return None
+    # They all have the same base_commit
+    r = results[0]
+    return r.get("extra_info", {}).get("base_commit", None)
