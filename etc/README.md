@@ -92,9 +92,9 @@ python3 etc/nyrkio_frontend.py [--mode {local|production}] [--port PORT] {start|
 
 ### Options
 
-- **`--mode {local|production}`** - Deployment mode (default: `local`)
-  - `local` - Uses `vite.config.test.js`, proxies API to `http://localhost:8001`
+- **`--mode {local|production}`** - Deployment mode (default: `production`)
   - `production` - Uses `vite.config.js`, proxies API to `https://nyrk.io`
+  - `local` - Uses `vite.config.test.js`, proxies API to `http://localhost:8001`
 - **`--port PORT`** - Port to run frontend on (default: 5173)
 
 ### Features
@@ -107,13 +107,13 @@ python3 etc/nyrkio_frontend.py [--mode {local|production}] [--port PORT] {start|
 ### Examples
 
 ```bash
-# Start with local backend (default)
+# Start with production backend (default)
 python3 etc/nyrkio_frontend.py start
-# Frontend running at http://localhost:5173 (proxying to http://localhost:8001)
-
-# Start with production backend
-python3 etc/nyrkio_frontend.py start --mode production
 # Frontend running at http://localhost:5173 (proxying to https://nyrk.io)
+
+# Start with local backend
+python3 etc/nyrkio_frontend.py start --mode local
+# Frontend running at http://localhost:5173 (proxying to http://localhost:8001)
 
 # Start on custom port
 python3 etc/nyrkio_frontend.py start --port 3000
@@ -131,17 +131,17 @@ python3 etc/nyrkio_frontend.py stop
 
 ### Deployment Modes Explained
 
-**Local Mode** (default):
-- Best for full-stack local development
-- Requires backend running on `localhost:8001`
-- Fast iteration, hot reload enabled
-- Uses `frontend/vite.config.test.js`
-
-**Production Mode**:
+**Production Mode** (default):
 - For frontend-only development against production API
 - Connects to live `https://nyrk.io` backend
 - Useful for testing frontend changes without running backend locally
 - Uses `frontend/vite.config.js`
+
+**Local Mode**:
+- Best for full-stack local development
+- Requires backend running on `localhost:8001`
+- Fast iteration, hot reload enabled
+- Uses `frontend/vite.config.test.js`
 
 ### Process Management
 
@@ -255,7 +255,7 @@ All tests passed!
 python3 etc/nyrkio_backend.py start
 
 # Terminal 2: Start frontend in local mode
-python3 etc/nyrkio_frontend.py start
+python3 etc/nyrkio_frontend.py start --mode local
 
 # Check everything is running
 python3 etc/nyrkio_backend.py status
@@ -270,8 +270,8 @@ Then access:
 ### Frontend Development Only
 
 ```bash
-# Use production backend, develop frontend only
-python3 etc/nyrkio_frontend.py start --mode production
+# Use production backend, develop frontend only (default)
+python3 etc/nyrkio_frontend.py start
 ```
 
 ### Full Docker Stack

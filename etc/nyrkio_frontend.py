@@ -69,12 +69,12 @@ def install_dependencies():
         return False
 
 
-def start_frontend(mode="local", port=5173):
+def start_frontend(mode="production", port=5173):
     """Start the frontend server
 
     Args:
-        mode: 'local' for local backend (uses vite.config.test.js) or
-              'production' for production backend (uses vite.config.js)
+        mode: 'production' for production backend (uses vite.config.js) or
+              'local' for local backend (uses vite.config.test.js)
         port: Port to run the frontend server on (default: 5173)
     """
     running, pid = is_frontend_running()
@@ -210,17 +210,17 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Deployment Modes:
-  local       - Use local backend at http://localhost:8001 (default)
-                Uses vite.config.test.js
-  production  - Use production backend at https://nyrk.io
+  production  - Use production backend at https://nyrk.io (default)
                 Uses vite.config.js
+  local       - Use local backend at http://localhost:8001
+                Uses vite.config.test.js
 
 Examples:
-  # Start with local backend (default)
+  # Start with production backend (default)
   python3 frontend_init.py start
 
-  # Start with production backend
-  python3 frontend_init.py start --mode production
+  # Start with local backend
+  python3 frontend_init.py start --mode local
 
   # Start on custom port
   python3 frontend_init.py start --port 3000
@@ -242,8 +242,8 @@ Examples:
     parser.add_argument(
         '--mode',
         choices=['local', 'production'],
-        default='local',
-        help='Deployment mode (default: local)'
+        default='production',
+        help='Deployment mode (default: production)'
     )
 
     parser.add_argument(
