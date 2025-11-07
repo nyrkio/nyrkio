@@ -11,5 +11,12 @@
 **/__pycache__
 
 .vscode
+.idea
 
 .env.backend
+
+# macOS
+.DS_Store
+
+# Process tracking
+.backend.pid
