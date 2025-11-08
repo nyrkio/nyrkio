@@ -764,7 +764,7 @@ def test_pull_number():
     pull_number = 123
     results = [
         {
-            "timestamp": 1,
+            "timestamp": 2,
             "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
             "attributes": {
                 "git_repo": "https://github.com/nyrkio/nyrkio",
@@ -773,24 +773,35 @@ def test_pull_number():
             },
         }
     ]
+    results2 = [
+        {
+            "timestamp": 1,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "654321",
+            },
+        }
+    ]
 
     # Add pr result
     asyncio.run(store.add_results(user.id, test_name, results, pull_number=pull_number))
 
     # Add regular main branch result
-    results[0]["timestamp"] = 2
-    asyncio.run(store.add_results(user.id, test_name, results))
+    asyncio.run(store.add_results(user.id, test_name, results2))
 
     # Ensure we don't see the pull request result
     response, _ = asyncio.run(store.get_results(user.id, test_name))
     assert len(response) == 1
-    assert response[0]["timestamp"] == 2
+    assert response[0]["timestamp"] == 1
 
     # Ensure we can see the pull request result and the regular result
     response, _ = asyncio.run(store.get_results(user.id, test_name, pull_number))
     assert len(response) == 2
     assert response[0]["timestamp"] == 1
     assert response[1]["timestamp"] == 2
+    assert response[1]["pull_request"] == pull_number
 
     results[0]["timestamp"] = 3
     asyncio.run(store.add_results(user.id, test_name, results, pull_number=456))
@@ -804,8 +815,168 @@ def test_pull_number():
     # Should we both the pull request (456) result and the regular main branch result
     response, _ = asyncio.run(store.get_results(user.id, test_name, 456))
     assert len(response) == 2
-    assert response[0]["timestamp"] == 2
+    assert response[0]["timestamp"] == 1
     assert response[1]["timestamp"] == 3
+
+    # New rules: If commits newer than the pull request commit timestamp were merged,
+    # they are not returned with a pull_request result
+    # in other words, pull_request is compared to its history, not its future
+    results3 = [
+        {
+            "timestamp": 9,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "9999",
+            },
+        }
+    ]
+    asyncio.run(store.add_results(user.id, test_name, results3))
+    response, _ = asyncio.run(store.get_results(user.id, test_name, pull_number))
+    assert len(response) == 2
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+
+
+def test_pull_with_base_commit():
+    """We really want to know the base commit and compare against its history (inclusive). For now you may toss base_commit onto extra_info."""
+    store = DBStore()
+    strategy = MockDBStrategy()
+    store.setup(strategy)
+    asyncio.run(store.startup())
+
+    user = strategy.get_test_user()
+    test_name = "benchmark1"
+    pull_number = 123
+    results = [
+        {
+            "timestamp": 5,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "123456",
+            },
+            "extra_info": {
+                "base_commit": {
+                    "timestamp": 2,
+                    "id": 654321,  # As of this writing
+                    "git_commit": 654321,  # Future, for consistency
+                },
+            },
+        }
+    ]
+    results2 = [
+        {
+            "timestamp": 1,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "54321",
+            },
+        },
+        # This is the base commit
+        {
+            "timestamp": 2,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "654321",
+            },
+        },
+        {
+            "timestamp": 3,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "7654321",
+            },
+        },
+    ]
+
+    # Add pr result
+    asyncio.run(store.add_results(user.id, test_name, results, pull_number=pull_number))
+
+    # Add regular main branch result
+    asyncio.run(store.add_results(user.id, test_name, results2))
+
+    # Ensure we don't see the pull request result
+    response, _ = asyncio.run(store.get_results(user.id, test_name))
+    assert len(response) == 3
+    assert response[0]["timestamp"] == 1
+    assert response[2]["timestamp"] == 3
+
+    # Ensure we can see the pull request result and regular commits only up to the base commit
+    response, _ = asyncio.run(store.get_results(user.id, test_name, pull_number))
+    assert len(response) == 3
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+    assert response[2]["timestamp"] == 5
+    assert response[2]["pull_request"] == pull_number
+
+    results = [
+        {
+            "timestamp": 9,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "999999",
+            },
+            "extra_info": {
+                "base_commit": {
+                    "timestamp": 3,
+                    "id": 7654321,  # As of this writing
+                    "git_commit": 7654321,  # Future, for consistency
+                },
+            },
+        }
+    ]
+    asyncio.run(store.add_results(user.id, test_name, results, pull_number=456))
+
+    # Ensure pr 456 isn't visible
+    response, _ = asyncio.run(store.get_results(user.id, test_name, pull_number))
+    assert len(response) == 3
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+    assert response[2]["timestamp"] == 5
+    assert response[2]["pull_request"] == pull_number
+
+    # Should we both the pull request (456) result and the regular main branch result
+    response, _ = asyncio.run(store.get_results(user.id, test_name, 456))
+    assert len(response) == 4
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+    assert response[2]["timestamp"] == 3
+    assert response[3]["timestamp"] == 9
+    assert response[3]["pull_request"] == 456
+
+    # If commits newer than the base request commit timestamp were merged,
+    # they are not returned with a pull_request result
+    # in other words, pull_request is compared to its history, not its future
+    results3 = [
+        {
+            "timestamp": 99,
+            "metrics": [{"name": "metric1", "value": 5, "unit": "ms"}],
+            "attributes": {
+                "git_repo": "https://github.com/nyrkio/nyrkio",
+                "branch": "main",
+                "git_commit": "9999",
+            },
+        }
+    ]
+    asyncio.run(store.add_results(user.id, test_name, results3))
+    response, _ = asyncio.run(store.get_results(user.id, test_name, 456))
+    assert len(response) == 4
+    assert response[0]["timestamp"] == 1
+    assert response[1]["timestamp"] == 2
+    assert response[2]["timestamp"] == 3
+    assert response[3]["timestamp"] == 9
+    assert response[3]["pull_request"] == 456
 
 
 def test_pr_add_tests():
