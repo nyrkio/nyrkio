@@ -563,36 +563,70 @@ class DBStore(object):
             "pull_request": {"$exists": False},
         }
 
-        pull_query = {
-            "test_name": test_name,
-            "pull_request": pull_request,
-        }
-        # print(pr_commit, type(pr_commit))
-        if pr_commit:
-            pull_query["attributes.git_commit"] = pr_commit
-        # print(pull_query)
         # print(query)
         if pull_request:
+            pull_query = {
+                "test_name": test_name,
+                "pull_request": pull_request,
+            }
+            # print(pr_commit, type(pr_commit))
+            # We foolishly have allowed API endpoint where you don't provide pr_commit
+            # Returning lots of commits pushed to the same PR doesn't make sense. We'll
+            # sort by timestamp and return the latest one.
+            # To avoid ambiguity, always provide the commit sha
+            if pr_commit:
+                pull_query["attributes.git_commit"] = pr_commit
+
+            print(pull_query)
+            # New strategy: Just get the pr first. This could be a graphLookup query but this is easy to follow.
+            pr_result = (
+                await test_results.find(pull_query, exclude_projection)
+                .sort("timestamp", -1)
+                .to_list(None)
+            )
+            print(pr_result)
+            if len(pr_result) == 0:
+                return [], []
+            pr_result = pr_result[0]
+
+            # we want to compare the pr result to its history.
+            # if there are results that are newer than the PR base commit, ignore those
+            base_timestamp = None
+            if (
+                "extra_info" in pr_result
+                and pr_result["extra_info"] is not None
+                and "base_commit" in pr_result["extra_info"]
+            ):
+                base_timestamp = pr_result["extra_info"]["base_commit"].get("timestamp")
+            pr_timestamp = pr_result.get("timestamp")
+            if base_timestamp is not None:
+                query["timestamp"] = {"$lte": base_timestamp}
+            elif pr_timestamp is not None:
+                # Don't have info about base commit, but just take the commits that are older than the pr commit.
+                query["timestamp"] = {"$lte": pr_timestamp}
+            else:
+                # Just fetch all results for this test_name
+                pass
+
             results = (
-                await test_results.find(
-                    {
-                        "$or": [pull_query, query],
-                    },
-                    exclude_projection,
-                )
+                await test_results.find(query, exclude_projection)
                 .sort("timestamp")
                 .to_list(None)
             )
+            # It's valid to rerun the test multiple times and report against the same commit
+            results.append(pr_result)
 
-            if not pr_commit:
-                logging.error(f"pr_commit is None for pull request {pull_request}.")
-                if len(results) > 0:
-                    logging.info("Defaulting to last result.")
-                    pr_commit = list(filter(lambda x: "pull_request" in x, results))[
-                        -1
-                    ]["attributes"]["git_commit"]
+            # if not pr_commit:
+            # logging.error(f"pr_commit is None for pull request {pull_request}.")
+            # if len(results) > 0:
+            #     logging.info("Defaulting to last result.")
+            #     pr_commit = list(filter(lambda x: "pull_request" in x, results))[
+            #         -1
+            #     ]["attributes"]["git_commit"]
 
-            results = filter_out_pr_results(results, pr_commit)
+            if pr_commit is not None:
+                results = filter_out_pr_results(results, pr_commit)
+                print(results)
         else:
             results = (
                 await test_results.find(
