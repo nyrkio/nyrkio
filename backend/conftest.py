@@ -1,6 +1,5 @@
 import os
 import pytest
-
 from starlette.testclient import TestClient
 from httpx import Response
 from backend.api.api import app

@@ -1515,6 +1515,75 @@ class DBStore(object):
 
         return None
 
+    async def queue_work_task(self, event, task_type="default"):
+        coll = self.db.work_queue
+        wrapper = {
+            "task_type": task_type,
+            "nyrkio_datetime": datetime.now(tz=timezone.utc).timestamp(),
+            "task": event,
+            "status": "queued",
+        }
+        await coll.insert_one(wrapper)
+        if task_type in ["workflow_job"]:
+            runid = event[task_type]["run_id"]
+            logging.info(f"Work task {runid} added to queue")
+        else:
+            d = wrapper["nyrkio_datetime"]
+            logging.info(f"Work tast {task_type}/{d} added to queue")
+
+    async def check_work_queue(self, task_type="default"):
+        await self.timeout_tasks(task_type)
+        coll = self.db.work_queue
+        q = {
+            "task_type": task_type,
+            "status": "queued",
+        }
+        task = await coll.find_one_and_update(
+            q, {"$set": {"status": "working"}}, sort=[("nyrkio_datetime", 1)]
+        )
+        logging.info(f"Found task {task} in the queue")
+        if task:
+            # Note: Unusually return the document with the _id field.
+            # This is so that we can mark it done or delete later.
+            return task
+
+        return None
+
+    async def timeout_tasks(self, task_type="default", hours_ago=2):
+        time_ago = ((datetime.now(tz=timezone.utc).timestamp() - hours_ago * 60 * 60),)
+        coll = self.db.work_queue
+        q = {
+            "task_type": task_type,
+            "status": "working",
+            "nyrkio_datetime": {"$lt": time_ago},
+            "reset_counter": {"$lt": 5},
+        }
+        not_completed_tasks = (
+            await coll.find(q, {"$set": "working"})
+            .sort("nyrkio_datetime", 1)
+            .limit(100)
+            .to_list(None)
+        )
+        if not_completed_tasks:
+            logging.warning(
+                "The following tasks in the work queue are {hours_ago} old. Resetting."
+            )
+            logging.warning(not_completed_tasks)
+            for t in not_completed_tasks:
+                await coll.find_one_and_update(
+                    {"_id": t["_id"]},
+                    {"$set": {"status": "queued"}, "$inc": {"reset_counter"}},
+                )
+
+    async def work_task_done(self, task):
+        coll = self.db.work_queue
+        q = {"_id": task["_id"]}
+        now = datetime.now(tz=timezone.utc).timestamp()
+        result = await coll.update_one(
+            q, {"$set": {"status": "done", "nyrkio_done": now}}
+        )
+        print("done", result)
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

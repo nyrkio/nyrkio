@@ -1,5 +1,15 @@
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
+from backend.github.runner import check_work_queue
+
+
+async def background_worker():
+    done_work = await check_work_queue()
+    if done_work is not None:
+        done_work["_id"] = str(done_work["_id"])
+        return done_work
+
+    return await precompute_cached_change_points()
 
 
 async def precompute_cached_change_points():
@@ -17,6 +27,7 @@ async def precompute_cached_change_points():
     and OOM. A goal of this background task is to compute the change points in smaller chunks so that
     won't happen.
     """
+    print("precompute_cached_change_points")
     do_n_in_one_task = 150
     db = DBStore()
     all_users = await db.list_users()
