@@ -11,7 +11,7 @@ services:
       - GIT_SHA=${IMAGE_TAG}
     networks:
       vpcbr:
-        ipv4_address: 172.18.0.2
+        ipv4_address: 10.18.0.2
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
@@ -26,7 +26,7 @@ services:
       - GIT_SHA=${IMAGE_TAG}
     networks:
       vpcbr:
-        ipv4_address: 172.18.0.4
+        ipv4_address: 10.18.0.4
     ports:
       - "8080:8080"
     hostname: api.nyrkio.local
@@ -41,7 +41,7 @@ services:
       - GIT_SHA=${IMAGE_TAG}
     networks:
       vpcbr:
-        ipv4_address: 172.18.0.3
+        ipv4_address: 10.18.0.3
     ports:
       - "8081:8081"
     hostname: api.nyrkio.local
@@ -55,7 +55,7 @@ services:
         - DOMAIN
     networks:
       vpcbr:
-        ipv4_address: 172.18.0.5
+        ipv4_address: 10.18.0.5
     ports:
       - "80:80"
       - "443:443"
@@ -71,5 +71,5 @@ networks:
     driver: bridge
     ipam:
      config:
-       - subnet: 172.18.0.0/16
-         gateway: 172.18.0.1
+       - subnet: 10.18.0.0/16
+         gateway: 10.18.0.1
