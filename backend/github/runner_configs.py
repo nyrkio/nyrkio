@@ -65,7 +65,10 @@ template = {
 
 instance_types = OrderedDict(
     {
-        INSTANCE_TYPE_NAME: {},  # Default
+        INSTANCE_TYPE_NAME: {
+            "instance_type": "c7a.large",
+            "spot_price": "0.053",
+        },  # Default
         "nyrkio_perf_server_4cpu_ubuntu2404": {
             "instance_type": "c7a.xlarge",
             "spot_price": "0.083",
