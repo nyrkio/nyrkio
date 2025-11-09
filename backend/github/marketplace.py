@@ -1,15 +1,13 @@
 import asyncio
 from backend.db.db import DBStore
-from backend.github.runner import RunnerLauncher
+from backend.github.runner_configs import supported_instance_types
 from fastapi import APIRouter
 from typing import Dict
 from datetime import datetime, timezone
 from fastapi import HTTPException
-import logging
 import httpx
 import os
-from backend.notifiers.github import fetch_access_token
-from backend.github.runner_configs import supported_instance_types
+import logging
 
 logger = logging.getLogger(__file__)
 
@@ -85,16 +83,16 @@ async def _github_events(gh_event: Dict):
                 detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
             )
 
-        nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]
         run_attempt = gh_event["workflow_job"]["run_attempt"]
         workflow_name = gh_event["workflow_job"]["workflow_name"]
-        installation_id = gh_event["installation"]["id"]
         labels = gh_event["workflow_job"]["labels"]
         supported = supported_instance_types()
         runs_on = [lab for lab in labels if lab in supported]
 
+        print(labels)
+        print(runs_on)
         if runs_on:
             await store.log_json_event(gh_event, event_type="workflow_job")
             await store.log_json_event(
@@ -103,22 +101,9 @@ async def _github_events(gh_event: Dict):
                 },
                 event_type="internal message",
             )
-            runner_registration_token = await get_github_runner_registration_token(
-                org_name=org_name,
-                installation_id=installation_id,
-                repo_full_name=f"{repo_owner}/{repo_name}",
-            )
-            # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
-            launcher = RunnerLauncher(
-                nyrkio_user,
-                nyrkio_org,
-                nyrkio_billing_user,
-                gh_event,
-                runs_on.pop(),
-                registration_token=runner_registration_token,
-            )
-            await launcher.launch()
-            return_message = f"Launched an instance of type {labels}"
+            await store.queue_work_task(gh_event, task_type="workflow_job")
+            return_message = f"Queued a job to launch an instance of type {labels}"
+
         elif labels:
             logger.info(
                 f"Got new workflow_job {workflow_name}/{job_name}/{run_id} (attempt {run_attempt}) for {repo_owner}/{repo_name} from {sender} with labels {labels}, but no supported instance types found."
@@ -135,45 +120,62 @@ async def _github_events(gh_event: Dict):
     }
 
 
-# Get a one time token to register a new runner
-async def get_github_runner_registration_token(
-    org_name=None, repo_full_name=None, installation_id=None
-):
-    token = await fetch_access_token(
-        token_url=None, expiration_seconds=600, installation_id=installation_id
-    )
-    if token:
-        logging.info(
-            f"Successfully fetched access token for installation_id {installation_id} at {repo_full_name}"
-        )
-    else:
-        logging.info(
-            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
-        )
-        raise Exception(
-            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
-        )
+async def handle_pull_requests(gh_event):
+    # We don't do anything with pull requests as such, but to minimize the list of permissions to ask for,
+    # Use this to indirectly trigger things that you would normally get from workflow_job events.
+    # Maybe one day I'll ask for those permissions. Just want to see this working first.
+    if "pull_request" in gh_event and gh_event.get("action") in [
+        "opened",
+        "reopened",
+        "edited",
+        "synchronize",
+        "labeled",
+        "unlabeled",
+    ]:
+        repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
 
-    client = httpx.AsyncClient()
-    response = await client.post(
-        f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token",
-        headers={
-            "Accept": "application/vnd.github.v3+json",
-            "Authorization": f"Bearer {token}",
-        },
-    )
-    if response.status_code in [200, 201]:
-        logging.debug(
-            "Geting a runner registration token from github mothership succeeded. Now onto deploy some VMs."
-        )
-        return response.json()["token"]
-    else:
-        logging.info(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-        )
-        raise Exception(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-        )
+        # Give GH some time to queue the jobs. And MySQL to async replicate them...
+        await asyncio.sleep(7)
+        queued_jobs = await check_queued_workflow_jobs(repo_name)
+        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+        # Needed to prevent infinite loops in valid cases. If this is reached,
+        # github will 403 because you reached the maximum requests allowed per hour.
+        max_loops = 7
+        while queued_jobs and max_loops > 0:
+            max_loops -= 1
+            logger.info(
+                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
+            )
+            if len(queued_jobs) == 1:
+                logger.info(
+                    "Will sleep a minute and check again if more runners are still needed."
+                )
+                await asyncio.sleep(60)
+                queued_jobs = await check_queued_workflow_jobs(repo_name)
+                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                if not queued_jobs:
+                    break
+
+            job = queued_jobs.pop()
+
+            # Call myself recursively, but with a fake workflow_job event
+            fake_event = {
+                "action": "queued",
+                "workflow_job": job,
+                "repository": gh_event["repository"],
+                "organization": gh_event.get("organization", None),
+                "sender": gh_event["sender"],
+                "installation": gh_event.get("installation", None),
+            }
+            logger.debug(fake_event)
+            res = await _github_events(fake_event)
+            # There can and will be several pull_request events, and handling the fake event could take a few minutes.
+            # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
+            if isinstance(res, dict) and res.get("status") == "success":
+                queued_jobs = await check_queued_workflow_jobs(repo_name)
+                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+
+        return queued_jobs
 
 
 async def check_queued_workflow_jobs(repo_full_name):
@@ -233,61 +235,3 @@ def filter_out_unsupported_jobs(queued_jobs):
         if intersection:
             supported_queue.append(job)
     return supported_queue
-
-
-async def handle_pull_requests(gh_event):
-    # We don't do anything with pull requests as such, but to minimize the list of permissions to ask for,
-    # Use this to indirectly trigger things that you would normally get from workflow_job events.
-    # Maybe one day I'll ask for those permissions. Just want to see this working first.
-    if "pull_request" in gh_event and gh_event.get("action") in [
-        "opened",
-        "reopened",
-        "edited",
-        "synchronize",
-        "labeled",
-        "unlabeled",
-    ]:
-        repo_name = gh_event["pull_request"]["base"]["repo"]["full_name"]
-
-        # Give GH some time to queue the jobs. And MySQL to async replicate them...
-        await asyncio.sleep(7)
-        queued_jobs = await check_queued_workflow_jobs(repo_name)
-        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
-        # Needed to prevent infinite loops in valid cases. If this is reached,
-        # github will 403 because you reached the maximum requests allowed per hour.
-        max_loops = 7
-        while queued_jobs and max_loops > 0:
-            max_loops -= 1
-            logger.info(
-                f"Found {len(queued_jobs)} queued jobs for {repo_name} on PR event."
-            )
-            if len(queued_jobs) == 1:
-                logger.info(
-                    "Will sleep a minute and check again if more runners are still needed."
-                )
-                await asyncio.sleep(60)
-                queued_jobs = await check_queued_workflow_jobs(repo_name)
-                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
-                if not queued_jobs:
-                    break
-
-            job = queued_jobs.pop()
-
-            # Call myself recursively, but with a fake workflow_job event
-            fake_event = {
-                "action": "queued",
-                "workflow_job": job,
-                "repository": gh_event["repository"],
-                "organization": gh_event.get("organization", None),
-                "sender": gh_event["sender"],
-                "installation": gh_event.get("installation", None),
-            }
-            logger.debug(fake_event)
-            res = await _github_events(fake_event)
-            # There can and will be several pull_request events, and handling the fake event could take a few minutes.
-            # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
-            if isinstance(res, dict) and res.get("status") == "success":
-                queued_jobs = await check_queued_workflow_jobs(repo_name)
-                queued_jobs = filter_out_unsupported_jobs(queued_jobs)
-
-        return queued_jobs
