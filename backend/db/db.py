@@ -1559,7 +1559,7 @@ class DBStore(object):
             "reset_counter": {"$lt": 5},
         }
         not_completed_tasks = (
-            await coll.find(q, {"$set": {"status": "queued"}})
+            await coll.find(q)
             .sort("nyrkio_datetime", 1)
             .limit(100)
             .to_list(None)
