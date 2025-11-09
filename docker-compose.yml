@@ -9,6 +9,9 @@ services:
     environment:
       - API_PORT=8000
       - GIT_SHA=${IMAGE_TAG}
+    networks:
+      vpcbr:
+        ipv4_address: 10.18.0.2
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
@@ -21,6 +24,9 @@ services:
     environment:
       - API_PORT=8080
       - GIT_SHA=${IMAGE_TAG}
+    networks:
+      vpcbr:
+        ipv4_address: 10.18.0.4
     ports:
       - "8080:8080"
     hostname: api.nyrkio.local
@@ -33,6 +39,9 @@ services:
     environment:
       - API_PORT=8081
       - GIT_SHA=${IMAGE_TAG}
+    networks:
+      vpcbr:
+        ipv4_address: 10.18.0.3
     ports:
       - "8081:8081"
     hostname: api.nyrkio.local
@@ -44,6 +53,9 @@ services:
       dockerfile: ./nginx/Dockerfile
       args:
         - DOMAIN
+    networks:
+      vpcbr:
+        ipv4_address: 10.18.0.5
     ports:
       - "80:80"
       - "443:443"
@@ -52,3 +64,12 @@ services:
       - webhooks
       - worker01
     restart: always
+
+
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.18.0.0/16
+         gateway: 10.18.0.1
