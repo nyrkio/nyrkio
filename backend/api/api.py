@@ -27,7 +27,7 @@ from backend.db.db import (
 )
 from backend.notifiers.slack import SlackNotifier
 from backend.notifiers.github import GitHubIssueNotifier
-from backend.api.background import precompute_cached_change_points
+from backend.api.background import background_worker
 from backend.db.list_changes import change_points_per_commit
 
 from fastapi.exceptions import RequestValidationError
@@ -199,9 +199,8 @@ async def get_subtree_summary_siblings(
 
 @api_router.get("/results/precompute")
 async def precompute(user: User = Depends(auth.current_active_superuser)):
-    print("Background task: precompute change points")
-    await precompute_cached_change_points()
-    return []
+    print("Background task entry point")
+    return await background_worker()
 
 
 @api_router.get("/results")

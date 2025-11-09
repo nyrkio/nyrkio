@@ -6,11 +6,86 @@ import logging
 from fabric import Connection
 from paramiko.ssh_exception import NoValidConnectionsError
 import httpx
-
+from fastapi import HTTPException
 
 from backend.github.runner_configs import gh_runner_config
 from backend.github.remote_scripts import all_scripts as all_files, configsh
 from backend.notifiers.github import fetch_access_token
+from backend.github.runner_configs import supported_instance_types
+from backend.db.db import DBStore
+
+logger = logging.getLogger(__file__)
+
+
+async def check_work_queue():
+    store = DBStore()
+    task = await store.check_work_queue("workflow_job")
+    if task:
+        await workflow_job_event(task["task"])
+        await store.work_task_done(task)
+        return task
+    return None
+
+
+async def workflow_job_event(queued_gh_event):
+    store = DBStore()
+
+    repo_owner = queued_gh_event["repository"]["owner"]["login"]
+    repo_name = queued_gh_event["repository"]["name"]
+    sender = queued_gh_event["sender"]["login"]
+    org_name = None
+    if "organization" in queued_gh_event and queued_gh_event["organization"]:
+        org_name = queued_gh_event["organization"]["login"]
+    installation_id = queued_gh_event["installation"]["id"]
+    labels = queued_gh_event["workflow_job"]["labels"]
+    supported = supported_instance_types()
+    runs_on = [lab for lab in labels if lab in supported]
+
+    runner_registration_token = await get_github_runner_registration_token(
+        org_name=org_name,
+        installation_id=installation_id,
+        repo_full_name=f"{repo_owner}/{repo_name}",
+    )
+    # repo_owner is either the user or an org
+    nyrkio_user = await store.get_user_by_github_username(repo_owner)
+    nyrkio_org = None
+    if nyrkio_user is not None:
+        nyrkio_user = nyrkio_user.id
+    else:
+        nyrkio_user = await store.get_user_by_github_username(sender)
+        if nyrkio_user is not None:
+            nyrkio_user = nyrkio_user.id
+
+    if org_name:
+        nyrkio_org = await store.get_org_by_github_org(org_name, sender)
+        if nyrkio_org is not None:
+            nyrkio_org = nyrkio_org["organization"]["id"]
+    nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
+
+    # FIXME: Add a check for quota
+    if (not nyrkio_user) and (not nyrkio_org):
+        logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
+        raise HTTPException(
+            status_code=401,
+            detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
+        )
+    # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
+    launcher = RunnerLauncher(
+        nyrkio_user,
+        nyrkio_org,
+        nyrkio_billing_user,
+        queued_gh_event,
+        runs_on.pop(),
+        registration_token=runner_registration_token,
+    )
+    await launcher.launch()
+    return_message = f"Launched an instance of type {labels}"
+
+    default_message = "Thank you for using Nyrkiö. For Faster Software!"
+    return {
+        "status": "success" if return_message else "nothing to do",
+        "message": return_message if return_message else default_message,
+    }
 
 
 class RunnerLauncher(object):
@@ -527,3 +602,44 @@ class RunnerLauncher(object):
             f"RunnerLauncher: Successfully deployed {all_instances} of type {self.instance_type} for user {self.nyrkio_user_id}"
         )
         return all_instances
+
+
+# Get a one time token to register a new runner
+async def get_github_runner_registration_token(
+    org_name=None, repo_full_name=None, installation_id=None
+):
+    token = await fetch_access_token(
+        token_url=None, expiration_seconds=600, installation_id=installation_id
+    )
+    if token:
+        logging.info(
+            f"Successfully fetched access token for installation_id {installation_id} at {repo_full_name}"
+        )
+    else:
+        logging.info(
+            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
+        )
+        raise Exception(
+            f"Failed to fetch a app installation access token from GitHub for {repo_full_name}/{installation_id}. I can't deploy a runner without it."
+        )
+
+    client = httpx.AsyncClient()
+    response = await client.post(
+        f"https://api.github.com/orgs/{org_name}/actions/runners/registration-token",
+        headers={
+            "Accept": "application/vnd.github.v3+json",
+            "Authorization": f"Bearer {token}",
+        },
+    )
+    if response.status_code in [200, 201]:
+        logging.debug(
+            "Geting a runner registration token from github mothership succeeded. Now onto deploy some VMs."
+        )
+        return response.json()["token"]
+    else:
+        logging.info(
+            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+        )
+        raise Exception(
+            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+        )
