@@ -49,4 +49,6 @@ services:
       - "443:443"
     depends_on:
       - backend
+      - webhooks
+      - worker01
     restart: always
