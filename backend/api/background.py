@@ -1,15 +1,146 @@
+import logging
+import httpx
+import asyncio
+import os
+
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
-from backend.github.runner import check_work_queue
+from backend.github.runner import workflow_job_event
+from backend.github.runner_configs import supported_instance_types
 
+logger = logging.getLogger(__file__)
 
 async def background_worker():
-    done_work = await check_work_queue()
-    if done_work is not None:
-        done_work["_id"] = str(done_work["_id"])
-        return done_work
+    # old_done_work = await check_work_queue()
+
+    done_work = await loop_installations()
+    if len(done_work) > 0:
+        logger.info(f"Background worker launched {len(done_work)} github runners.")
+        for runner in done_work:
+            logger.debug(runner)
+
+        return len(done_work)
 
     return await precompute_cached_change_points()
+
+async def loop_installations():
+    store = DBStore()
+    installations = await store.list_github_installations()
+    statuses = [] # To return
+    for inst_wrapper in installations:
+        inst = inst_wrapper["installation"]
+        # installation_id = inst["installation"]["id"]
+        # client_id = inst["installation"]["client_id"]
+        # app_access_token = await fetch_access_token(installation_id=installation_id)
+        for repo in inst["repositories"]:
+            full_name = repo["full_name"]
+            repo_name = repo["name"]
+            repo_owner = full_name.split("/")[0]
+            queued_jobs = await check_queued_workflow_jobs(full_name)
+            queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+
+            # Needed to prevent infinite loops in valid cases. If this is reached,
+            # github will 403 because you reached the maximum requests allowed per hour.
+            max_loops = 7
+            while queued_jobs and max_loops > 0:
+                max_loops -= 1
+                logger.info(
+                    f"Found {len(queued_jobs)} queued jobs for {repo_name}. (poll from background worker)"
+                )
+                if len(queued_jobs) == 1:
+                    logger.info(
+                        "Will sleep a minute and check again if more runners are still needed."
+                    )
+                    await asyncio.sleep(60)
+                    queued_jobs = await check_queued_workflow_jobs(repo_name)
+                    queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                    if not queued_jobs:
+                        break
+
+                    job = queued_jobs.pop()
+
+                    # Call myself recursively, but with a fake workflow_job event
+                    fake_event = {
+                        "action": "queued",
+                        "workflow_job": job,
+                        "repository": repo,
+                        "sender": inst["sender"],
+                        "installation": inst,
+                    }
+                    if repo_owner != inst["sender"]["login"]:
+                        fake_event["organization"] = inst["account"]
+                    logger.debug(fake_event)
+                    return_status = await workflow_job_event(fake_event)
+
+                    statuses.append(return_status)
+
+                    # Handling each job could take a few minutes.
+                    # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
+                    if isinstance(return_status, dict) and return_status.get("status") == "success":
+                        queued_jobs = await check_queued_workflow_jobs(repo_name)
+                        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+
+    return statuses
+
+
+
+async def check_queued_workflow_jobs(repo_full_name):
+    url = f"https://api.github.com/repos/{repo_full_name}/actions/runs?status=queued"
+    client = httpx.AsyncClient()
+    token = os.environ["GITHUB_TOKEN"]
+    response = await client.get(
+        url,
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            # "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    if response.status_code <= 201:
+        runs = response.json().get("workflow_runs", [])
+        queued_jobs = []
+        for run in runs:
+            run_id = run["id"]
+            jobs_url = f"https://api.github.com/repos/{repo_full_name}/actions/runs/{run_id}/jobs"
+            jobs_response = await client.get(
+                jobs_url,
+                headers={
+                    "Authorization": f"Bearer {token}",
+                    "Accept": "application/vnd.github+json",
+                    # "X-GitHub-Api-Version": "2022-11-28",
+                },
+            )
+            if jobs_response.status_code <= 201:
+                jobs = jobs_response.json().get("jobs", [])
+                for job in jobs:
+                    if job["status"] == "queued":
+                        queued_jobs.append(job)
+            else:
+                logging.warning(
+                    f"Failed to fetch jobs for run {run_id}: {jobs_response.status_code} {jobs_response.text}"
+                )
+        return queued_jobs
+    elif response.status_code == 404:
+        # On Github this means private repo and we don't have access
+        return []
+    else:
+        logging.warning(
+            f"Failed to fetch workflow runs: {response.status_code} {response.text}"
+        )
+        return []
+
+
+def filter_out_unsupported_jobs(queued_jobs):
+    supported_queue = []
+    while queued_jobs:
+        job = queued_jobs.pop()
+        # Filter out those we're not gonna need anyway
+        labels = job["labels"]
+        supported = supported_instance_types()
+        intersection = [lab for lab in labels if lab in supported]
+        if intersection:
+            supported_queue.append(job)
+    return supported_queue
 
 
 async def precompute_cached_change_points():
