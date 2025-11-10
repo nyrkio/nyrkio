@@ -110,7 +110,9 @@ async def check_queued_workflow_jobs(repo_full_name):
 
     pprint.pprint(response)
     if response.status_code <= 201:
-        runs = response.json().get("workflow_runs", [])
+        data = response.json()
+        pprint.pprint(data)
+        runs = data.get("workflow_runs", [])
         queued_jobs = []
         for run in runs:
             run_id = run["id"]
@@ -126,6 +128,7 @@ async def check_queued_workflow_jobs(repo_full_name):
             pprint.pprint(jobs_response)
             if jobs_response.status_code <= 201:
                 jobs = jobs_response.json().get("jobs", [])
+                pprint.pprint(jobs)
                 for job in jobs:
                     if job["status"] == "queued":
                         queued_jobs.append(job)
