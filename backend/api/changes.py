@@ -184,6 +184,13 @@ async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=No
             core_config,
             change_points_timestamp=cp_timestamp,
         )
+    if len(series.results) == 0:
+        # is_cached is not well defined when the input series is zero. We return True
+        # because is_cached is mostly or only used by callers to determine whether we
+        # had to do the heavy computation work to get these results, or whether the
+        # result might contain new information. And the answer to both of those is no.
+        return series, [], True
+
     changes, is_cached = await get_cached_or_calc_changes(
         user_id,
         series,
