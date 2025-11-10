@@ -106,6 +106,8 @@ async def check_queued_workflow_jobs(repo_full_name):
             # "X-GitHub-Api-Version": "2022-11-28",
         },
     )
+    import pprint
+    pprint.pprint(response)
     if response.status_code <= 201:
         runs = response.json().get("workflow_runs", [])
         queued_jobs = []
@@ -120,6 +122,7 @@ async def check_queued_workflow_jobs(repo_full_name):
                     # "X-GitHub-Api-Version": "2022-11-28",
                 },
             )
+            pprint.pprint(jobs_response)
             if jobs_response.status_code <= 201:
                 jobs = jobs_response.json().get("jobs", [])
                 for job in jobs:
