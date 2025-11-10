@@ -53,8 +53,8 @@ async def precompute_cached_change_points():
                     f"Computed new change points for user={user_id} ({user.email}), test_name={test_name}."
                 )
                 # We found a result series that didn't have cached change points and have now computed
-                # the chánge points and cached them. Time to exit this task and let the next invocation
-                # compute the next set of change points.
+                # the chánge points and cached them. We decrement the counter and once it reaches zero
+                # it's time to exit and say goodbye.
                 # We do this to split up the background computation into smaller chunks, to avoid hogging
                 # the cpu for minutes at a time and to consume infinite amounts of memory when python
                 # and numpy don't release the memory quickly enough.
