@@ -87,6 +87,7 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
   };
 
   const saveHunterSettingsOrg = throttle(saveHunterSettingsOrgReal, 1000);
+  const slidersCurrentValue = { min_magnitude_raw: 0, max_pvalue_raw: 0, min_magnitude: 0.05, max_pvalue: 0.001 };
 
   const getHunterSettingsOrg = async () => {
     console.debug("GET /api/v0/orgs/org/"+orgName);
@@ -119,7 +120,7 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
 
     return defaultConfig;
   };
-
+/*
   // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
   const minMagnitudeUpdate = (rawValue) => {
     document.getElementById("nyrkio-min-magnitude-value").innerHTML =
@@ -174,8 +175,234 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
     if (slider) slider.value = rawValue;
     return rawValue;
   };
+*/
+
+  function saveHunterSettings(){
+    saveHunterSettingsOrg();
+  }
+  function getHunterSettings(){
+    getHunterSettingsOrg();
+  }
+  // These are percentages as used in the UI
+  // Note that the API uses decimals. So 5 (%) -> 0.05 in API call.
+  const quantizedMagnitudeValues = [0.0, 0.0001, 0.001, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.25, 0.3, 0.333, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.5, 2.0, 2.5, 3.0, 3.333, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0, 16.0, 17.0, 18.0, 19.0, 20.0, 21.0, 22.0, 23.0, 24.0, 25.0, 26.0, 27.0, 28.0, 29.0, 30.0, 31.0, 32.0, 33.0, 33.333, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 99, 100, 150, 200, 250, 300, 333, 400, 500, 600, 700, 800, 900, 1000, 5000, 10000, 50000, 100000];
+  const minMagnitudeSliderMax = quantizedMagnitudeValues.length-1;
+  const quantizedPValues = [0.000001, 0.00001, 0.0001, 0.001, 0.01, 0.02, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.15, 0.2, 0.25, 0.3, 0.333, 0.4, 0.5, 1.0];
+  const pValueSliderMax = quantizedPValues.length-1;
+
+  // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
+  const minMagnitudeUpdate = (rawValue) => {
+    document.getElementById("nyrkio-min-magnitude-value").innerHTML = quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.min_magnitude = quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.min_magnitude_raw = rawValue;
+    saveHunterSettings();
+  };
+  // Use logarithmic mode to allow for more granularity around 0.5 - 5 %.
+  // Disabled for now
+  const minMagnitudeUpdateLog = (rawValue) => {
+    if(rawValue>2250 && rawValue < 2950)
+      document.getElementById("nyrkio-min-magnitude-value").innerHTML = 0.5;
+    else
+      document.getElementById("nyrkio-min-magnitude-value").innerHTML = Math.round(getRealMinMagnitude(rawValue) );
+
+    saveHunterSettings();
+  };
+  const getRealMinMagnitude = (rawValue, stoprecursion) => {
+    return quantizedMagnitudeValues[rawValue];
+  };
+  const getRealMinMagnitude_Log = (rawValue, stoprecursion) => {
+    const scaledDown = rawValue / 1000.0;
+    const logScale = Math.pow(scaledDown, 4) / 100;
+    const quantized = parseFloat(
+      (Math.round(logScale * 2) / 2.0).toPrecision(2),
+    );
+    // if(!stoprecursion)
+    // console.debug("mrawreal " + rawValue + " " + quantized + " " + getRawMinMagnitude(logScale) + " " + getRawMinMagnitude(quantized) + " " + getRealMinMagnitude(getRawMinMagnitude(quantized),true));
+    return quantized;
+  };
+  const getRawMinMagnitude = (realValue) => {
+    realValue = Math.max(quantizedMagnitudeValues[0], realValue);
+    let i = 0;
+    while (realValue > quantizedMagnitudeValues[i]) {
+      i++;
+    }
+    return i;
+  };
+  const getRawMinMagnitude_Log = (realValue) => {
+    const scaledDown = Math.pow(realValue * 100, 1.0 / 4.0);
+    const rawValue = scaledDown * 1000.0;
+    return rawValue;
+  };
+
+  const minMagnitudeSet = (realValue) => {
+    let rawValue = getRawMinMagnitude(realValue);
+    document.getElementById("nyrkio-min-magnitude-value").innerHTML = quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.min_magnitude = quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.min_magnitude_raw = rawValue;
+    document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
+    return rawValue;
+  };
+  const minMagnitudeSet_Log = (realValue) => {
+    let rawValue = getRawMinMagnitude(realValue);
+    if (getRealMinMagnitude(slidersCurrentValue.min_magnitude_raw) == realValue){
+      rawValue = slidersCurrentValue.min_magnitude_raw;
+    }
+    if (document.getElementById("nyrkio-min-magnitude-value")){
+      if(rawValue>2250 && rawValue < 2950)
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = 0.5;
+      else
+        document.getElementById("nyrkio-min-magnitude-value").innerHTML = Math.round(realValue );
+      document.getElementById("nyrkio-min-magnitude-slider").value = rawValue;
+    }
+    return rawValue;
+  };
+
+  const pvalueUpdate = (rawValue) => {
+    const realPValue = getRealPValue(rawValue);
+    slidersCurrentValue.max_pvalue = realPValue;
+    slidersCurrentValue.max_pvalue_raw = rawValue;
+    document.getElementById("nyrkio-p-value-value").innerHTML = realPValue;
+    saveHunterSettings();
+  };
+  const pvalueUpdate_Log = (rawValue) => {
+    document.getElementById("nyrkio-p-value-value").innerHTML =
+    getRealPValue(rawValue);
+    saveHunterSettings();
+  };
+  const getRealPValue = (rawValue) => {
+    return quantizedPValues[rawValue];
+  };
+  const getRealPValue_Log = (rawValue) => {
+    const scaledDown = rawValue / 100.0;
+    const logScale = Math.pow(scaledDown, 3) / 1000;
+    const quantized = Math.max(parseFloat(Math.round(logScale).toPrecision(1)) / 1000.0,0.0001);
+    //console.debug("prawreal " + rawValue + " " + quantized + " " + getRawPValue(logScale) + " " + getRawPValue(quantized));
+    return quantized;
+  };
+  const getRawPValue = (realValue) => {
+    realValue = Math.max(quantizedPValues[0], realValue);
+    //     alert(realValue);
+    let i = 0;
+    while (realValue > quantizedPValues[i]) {
+      i++;
+    }
+    return i;
+  };
+  const getRawPValue_Log = (realValue) => {
+    const scaledDown = Math.pow(realValue * 1000, 1.0 / 3.0);
+    const rawValue = scaledDown * 100.0 * 10;
+    return rawValue;
+  };
+  const pvalueSet = (realValue) => {
+    let rawValue = getRawPValue(realValue);
+    document.getElementById("nyrkio-p-value-value").innerHTML = realValue; //quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.max_pvalue = realValue; // quantizedMagnitudeValues[rawValue];
+    slidersCurrentValue.max_pvalue_raw = rawValue;
+    document.getElementById("nyrkio-p-value-slider").value = rawValue;
+    //     alert(JSON.stringify(slidersCurrentValue));
+    return rawValue;
+  };
+  const pvalueSet_Log = (realValue) => {
+    let rawValue = getRawPValue(realValue);
+    slidersCurrentValue.max_pvalue_raw = rawValue;
+    if (document.getElementById("nyrkio-p-value-value")){
+      document.getElementById("nyrkio-p-value-value").innerHTML = realValue;
+      document.getElementById("nyrkio-p-value-slider").value = rawValue;
+    }
+    return rawValue;
+  };
 
   const NyrkioCpSliders = () => {
+    return (
+      <>
+      <div id="nyrkio-cp-sliders">
+      <div className="row mt-5 ">
+      <div className="col-xs-12 col-md-6 col-lg-6">
+      <em>Lower P-values (ex: 0.001) will find the most significant regressions, while minimizing false positives.</em>
+      </div>
+      <div className="col-xs-0 col-md-1 col-lg-1"></div>
+      <div className="col-xs-12 col-md-5 col-lg-5">
+      <em>Higher P-values (ex: 0.05) will find more change points.</em>
+      </div>
+      </div>
+      <div className="row mt-4 ">
+      <div className="col col-md-12">
+      <label htmlFor="nyrkio-p-value-slider" className="form-label">
+      P-value:{" "}
+      </label>
+      </div>
+      <div className="col col-md-10">
+      <input
+      type="range"
+      id="nyrkio-p-value-slider"
+      name="nyrkio-p-value-slider"
+      className="nyrkio-p-value-slider nyrkio-slider"
+      style={{ width: "100%" }}
+      defaultValue={slidersCurrentValue.max_pvalue_raw}
+      min={0}
+      max={pValueSliderMax}
+      step={1}
+      precision={1}
+      tooltip="off"
+      onChange={(ev) => pvalueUpdate(ev.target.value)}
+      />
+      </div>
+      <div className="col col-md-2">
+      <span id="nyrkio-p-value-value" className="form-label">
+      {slidersCurrentValue.max_pvalue}
+      </span>
+      </div>
+      </div>
+      <div className="row mt-5">
+      <div className="col-xs-12 col-md-6 col-lg-6">
+      <em>You can filter out regressions that are so small that it's not worth fixing them even if they are "real"/statistically significant.</em>
+      </div>
+      <div className="col-xs-0 col-md-0 col-lg-1"></div>
+      <div className="col-xs-12 col-md-6 col-lg-5">
+      <em>For example, you might only care about regressions that are 5% or larger.</em>
+      </div>
+      </div>
+
+      <div className="row mt-5">
+      <div className="col col-md-12">
+      <label
+      htmlFor="nyrkio-min-magnitude-slider"
+      className="form-label"
+      >
+      Change magnitude:{" "}
+      </label>
+      </div>
+      <div className="col col-md-10">
+      <input
+      type="range"
+      id="nyrkio-min-magnitude-slider"
+      name="nyrkio-min-magnitude-slider"
+      className="nyrkio-min-magnitude-slider nyrkio-slider"
+      style={{ width: "100%" }}
+      defaultValue={slidersCurrentValue.min_magnitude_raw}
+      min={0}
+      max={minMagnitudeSliderMax}
+      step={1}
+      precision={1}
+      tooltip="off"
+      onChange={(ev) => minMagnitudeUpdate(ev.target.value)}
+      />
+      </div>
+      <div className="col col-md-2">
+      <span id="nyrkio-min-magnitude-value" className="form-label">
+      {slidersCurrentValue.min_magnitude}
+      </span>
+      <span className="form-label">%</span>
+      </div>
+      </div>
+      </div>
+      </>
+    );
+  };
+
+
+
+  const NyrkioCpSlidersOff = () => {
     return (
       <>
         <div id="nyrkio-cp-sliders">
