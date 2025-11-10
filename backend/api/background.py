@@ -5,10 +5,17 @@ import os
 
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
-from backend.github.runner import workflow_job_event
+from backend.github.runner import workflow_job_event, check_work_queue
 from backend.github.runner_configs import supported_instance_types
 
 logger = logging.getLogger(__file__)
+
+
+async def old_background_worker():
+    done_work = await check_work_queue()
+    if done_work is not None:
+        done_work["_id"] = str(done_work["_id"])
+        return done_work
 
 
 async def background_worker():
