@@ -10,6 +10,7 @@ from backend.github.runner_configs import supported_instance_types
 
 logger = logging.getLogger(__file__)
 
+
 async def background_worker():
     # old_done_work = await check_work_queue()
 
@@ -23,10 +24,11 @@ async def background_worker():
 
     return await precompute_cached_change_points()
 
+
 async def loop_installations():
     store = DBStore()
     installations = await store.list_github_installations()
-    statuses = [] # To return
+    statuses = []  # To return
     for inst_wrapper in installations:
         inst = inst_wrapper["installation"]
         # installation_id = inst["installation"]["id"]
@@ -76,12 +78,14 @@ async def loop_installations():
 
                     # Handling each job could take a few minutes.
                     # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
-                    if isinstance(return_status, dict) and return_status.get("status") == "success":
+                    if (
+                        isinstance(return_status, dict)
+                        and return_status.get("status") == "success"
+                    ):
                         queued_jobs = await check_queued_workflow_jobs(repo_name)
                         queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
     return statuses
-
 
 
 async def check_queued_workflow_jobs(repo_full_name):
