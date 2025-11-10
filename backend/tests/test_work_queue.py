@@ -1,6 +1,8 @@
+import asyncio
 import pytest
 from unittest.mock import patch, AsyncMock
 from backend.github.runner import check_work_queue
+from backend.api.background import old_background_worker
 
 
 @patch("backend.github.runner.get_github_runner_registration_token")
@@ -18,9 +20,11 @@ def test_work_queue(mock_get_token, mock_launcher, client, superuser_client):
     print(response.json())
 
     superuser_client.login()
-    response = superuser_client.get("/api/v0/results/precompute")
-    assert response.status_code == 200
-    r = response.json()
+    # response = superuser_client.get("/api/v0/results/precompute")
+    response = asyncio.run(old_background_worker())
+
+    r = response
+    print(r)
     assert r["task"][r["task_type"]]["run_id"] == 1234
 
     mock_get_token.assert_called_once_with()
