@@ -36,14 +36,13 @@ async def loop_installations():
     store = DBStore()
     installations = await store.list_github_installations()
     statuses = []  # To return
-    for inst_wrapper in installations:
-        inst = inst_wrapper["installation"]
+    for inst in installations:
         # installation_id = inst["installation"]["id"]
         # client_id = inst["installation"]["client_id"]
         # app_access_token = await fetch_access_token(installation_id=installation_id)
         for repo in inst["repositories"]:
             full_name = repo["full_name"]
-            repo_name = repo["name"]
+            # repo_name = repo["name"]
             repo_owner = full_name.split("/")[0]
             queued_jobs = await check_queued_workflow_jobs(full_name)
             queued_jobs = filter_out_unsupported_jobs(queued_jobs)
@@ -54,14 +53,14 @@ async def loop_installations():
             while queued_jobs and max_loops > 0:
                 max_loops -= 1
                 logger.info(
-                    f"Found {len(queued_jobs)} queued jobs for {repo_name}. (poll from background worker)"
+                    f"Found {len(queued_jobs)} queued jobs for {full_name}. (poll from background worker)"
                 )
                 if len(queued_jobs) == 1:
                     logger.info(
                         "Will sleep a minute and check again if more runners are still needed."
                     )
                     await asyncio.sleep(60)
-                    queued_jobs = await check_queued_workflow_jobs(repo_name)
+                    queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
                     if not queued_jobs:
                         break
@@ -74,7 +73,7 @@ async def loop_installations():
                         "workflow_job": job,
                         "repository": repo,
                         "sender": inst["sender"],
-                        "installation": inst,
+                        "installation": inst["installation"],
                     }
                     if repo_owner != inst["sender"]["login"]:
                         fake_event["organization"] = inst["account"]
@@ -89,7 +88,7 @@ async def loop_installations():
                         isinstance(return_status, dict)
                         and return_status.get("status") == "success"
                     ):
-                        queued_jobs = await check_queued_workflow_jobs(repo_name)
+                        queued_jobs = await check_queued_workflow_jobs(full_name)
                         queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
     return statuses
