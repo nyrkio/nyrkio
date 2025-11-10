@@ -1,12 +1,14 @@
 import asyncio
 from backend.db.db import DBStore
 from backend.github.runner_configs import supported_instance_types
+from backend.api.background import (
+    check_queued_workflow_jobs,
+    filter_out_unsupported_jobs,
+)
 from fastapi import APIRouter
 from typing import Dict
 from datetime import datetime, timezone
 from fastapi import HTTPException
-import httpx
-import os
 import logging
 
 logger = logging.getLogger(__file__)
@@ -176,62 +178,3 @@ async def handle_pull_requests(gh_event):
                 queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
         return queued_jobs
-
-
-async def check_queued_workflow_jobs(repo_full_name):
-    url = f"https://api.github.com/repos/{repo_full_name}/actions/runs?status=queued"
-    client = httpx.AsyncClient()
-    token = os.environ["GITHUB_TOKEN"]
-    response = await client.get(
-        url,
-        headers={
-            "Authorization": f"Bearer {token}",
-            "Accept": "application/vnd.github+json",
-            # "X-GitHub-Api-Version": "2022-11-28",
-        },
-    )
-    if response.status_code <= 201:
-        runs = response.json().get("workflow_runs", [])
-        queued_jobs = []
-        for run in runs:
-            run_id = run["id"]
-            jobs_url = f"https://api.github.com/repos/{repo_full_name}/actions/runs/{run_id}/jobs"
-            jobs_response = await client.get(
-                jobs_url,
-                headers={
-                    "Authorization": f"Bearer {token}",
-                    "Accept": "application/vnd.github+json",
-                    # "X-GitHub-Api-Version": "2022-11-28",
-                },
-            )
-            if jobs_response.status_code <= 201:
-                jobs = jobs_response.json().get("jobs", [])
-                for job in jobs:
-                    if job["status"] == "queued":
-                        queued_jobs.append(job)
-            else:
-                logging.warning(
-                    f"Failed to fetch jobs for run {run_id}: {jobs_response.status_code} {jobs_response.text}"
-                )
-        return queued_jobs
-    elif response.status_code == 404:
-        # On Github this means private repo and we don't have access
-        return []
-    else:
-        logging.warning(
-            f"Failed to fetch workflow runs: {response.status_code} {response.text}"
-        )
-        return []
-
-
-def filter_out_unsupported_jobs(queued_jobs):
-    supported_queue = []
-    while queued_jobs:
-        job = queued_jobs.pop()
-        # Filter out those we're not gonna need anyway
-        labels = job["labels"]
-        supported = supported_instance_types()
-        intersection = [lab for lab in labels if lab in supported]
-        if intersection:
-            supported_queue.append(job)
-    return supported_queue
