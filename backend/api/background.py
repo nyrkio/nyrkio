@@ -5,7 +5,11 @@ import os
 
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
-from backend.github.runner import workflow_job_event, check_work_queue
+from backend.github.runner import (
+    workflow_job_event,
+    check_work_queue,
+    fetch_access_token,
+)
 from backend.github.runner_configs import supported_instance_types
 
 logger = logging.getLogger(__file__)
@@ -37,14 +41,18 @@ async def loop_installations():
     installations = await store.list_github_installations()
     statuses = []  # To return
     for inst in installations:
-        # installation_id = inst["installation"]["id"]
+        installation_id = inst["installation"]["id"]
         # client_id = inst["installation"]["client_id"]
-        # app_access_token = await fetch_access_token(installation_id=installation_id)
-        for repo in inst["repositories"]:
+        app_access_token = await fetch_access_token(installation_id=installation_id)
+        repo_list = refresh_repo_list(app_access_token)
+        # for repo in inst["repositories"]:
+        for repo in repo_list["repositories"]:
             full_name = repo["full_name"]
             # repo_name = repo["name"]
             repo_owner = full_name.split("/")[0]
-            queued_jobs = await check_queued_workflow_jobs(full_name)
+            queued_jobs = await check_queued_workflow_jobs(
+                full_name, app_access_token=app_access_token
+            )
             queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
             # Needed to prevent infinite loops in valid cases. If this is reached,
@@ -94,10 +102,35 @@ async def loop_installations():
     return statuses
 
 
-async def check_queued_workflow_jobs(repo_full_name):
+async def refresh_repo_list(app_access_token):
+    url = "https://api.github.com/installation/repositories"
+    client = httpx.AsyncClient()
+    response = await client.get(
+        url,
+        headers={
+            "Authorization": f"Bearer {app_access_token}",
+            "Accept": "application/vnd.github+json",
+            # "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    import pprint
+
+    pprint.pprint(response)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        logger.error(
+            f"Couldn't get repo list for app_access_token {app_access_token[:11]}"
+        )
+        logger.error(response.json())
+
+
+async def check_queued_workflow_jobs(repo_full_name, app_access_token=None):
     url = f"https://api.github.com/repos/{repo_full_name}/actions/runs?status=queued"
     client = httpx.AsyncClient()
-    token = os.environ["GITHUB_TOKEN"]
+    token = (
+        app_access_token if app_access_token is not None else os.environ["GITHUB_TOKEN"]
+    )
     response = await client.get(
         url,
         headers={
