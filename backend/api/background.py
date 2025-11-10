@@ -44,7 +44,7 @@ async def loop_installations():
         installation_id = inst["installation"]["id"]
         # client_id = inst["installation"]["client_id"]
         app_access_token = await fetch_access_token(installation_id=installation_id)
-        repo_list = refresh_repo_list(app_access_token)
+        repo_list = await refresh_repo_list(app_access_token)
         # for repo in inst["repositories"]:
         for repo in repo_list["repositories"]:
             full_name = repo["full_name"]
