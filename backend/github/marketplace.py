@@ -36,7 +36,7 @@ async def _github_events(gh_event: Dict):
 
     await handle_pull_requests(gh_event)
 
-    if gh_event["action"] in ["created","added","removed"]:
+    if gh_event["action"] in ["created", "added", "removed"]:
         gh_id = gh_event["installation"]["account"]["id"]
         await store.set_github_installation(gh_id, gh_event)
     if gh_event["action"] in ["deleted"]:
