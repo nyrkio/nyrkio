@@ -16,9 +16,13 @@
     "prettier": "prettier . --write",
     "preview": "vite preview",
     "playwright": "./node_modules/playwright/cli.js",
-    "test": "./node_modules/playwright/cli.js test",
-    "test-ui": "./node_modules/playwright/cli.js test --ui",
-    "test-report": "./node_modules/playwright/cli.js show-report"
+    "test": "npx playwright test",
+    "test:unit": "npx playwright test tests/*.spec.ts",
+    "test:integration": "npx playwright test --config=playwright.config.integration.ts",
+    "test-ui": "npx playwright test --ui",
+    "test-ui:integration": "npx playwright test --config=playwright.config.integration.ts --ui",
+    "test-report": "npx playwright show-report",
+    "test-report:integration": "npx playwright show-report test-results/integration-report"
   },
   "dependencies": {
     "ag-grid-react": "^31.0.1",

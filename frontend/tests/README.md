@@ -8,6 +8,21 @@ This directory contains end-to-end (E2E) UI tests for the Nyrkiö frontend using
 **Test Runner:** `@playwright/test`
 **Browser:** Chromium (default)
 
+## Test Types
+
+### Unit Tests (Default)
+- Mock API responses
+- Fast execution (~1-2s per test)
+- Run during development
+- Located in: `tests/*.spec.ts`
+
+### Integration Tests
+- Use real backend API
+- Slower execution (~5-15s per test)
+- Run before commits/in CI
+- Located in: `tests/integration/*.integration.ts`
+- **See:** [Integration Tests README](./integration/README.md)
+
 ## Test Files
 
 ### `auth.spec.ts` - Authentication Flow Tests
@@ -49,11 +64,35 @@ npm install
 npx playwright install chromium
 ```
 
-### Run All Tests
+### Run Unit Tests (Mocked API)
 
 ```bash
+# Run all unit tests
 npm run test
+
+# Run specific unit test file
+npm run test:unit
+
+# Run with UI mode
+npm run test-ui
 ```
+
+### Run Integration Tests (Real API)
+
+**Prerequisites:** MongoDB running, backend configured
+
+```bash
+# Run all integration tests
+npm run test:integration
+
+# Run with UI mode
+npm run test-ui:integration
+
+# View integration test report
+npm run test-report:integration
+```
+
+**See [Integration Tests README](./integration/README.md) for detailed setup.**
 
 ### Run Specific Test File
 
