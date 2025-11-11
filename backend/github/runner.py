@@ -43,11 +43,20 @@ async def workflow_job_event(queued_gh_event):
     supported = supported_instance_types()
     runs_on = [lab for lab in labels if lab in supported]
 
-    runner_registration_token = await get_github_runner_registration_token(
-        org_name=org_name,
-        installation_id=installation_id,
-        repo_full_name=f"{repo_owner}/{repo_name}",
-    )
+    try:
+        runner_registration_token = await get_github_runner_registration_token(
+            org_name=org_name,
+            installation_id=installation_id,
+            repo_full_name=f"{repo_owner}/{repo_name}",
+        )
+    except Exception as e:
+        # Error was already logged
+        logger.debug(e)
+        return {
+            "status": "error",
+            "message": str(e),
+        }
+
     # repo_owner is either the user or an org
     nyrkio_user = await store.get_user_by_github_username(repo_owner)
     nyrkio_org = None
