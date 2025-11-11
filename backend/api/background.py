@@ -84,7 +84,7 @@ async def loop_installations():
                     "installation": inst["installation"],
                 }
                 if repo_owner != inst["sender"]["login"]:
-                    fake_event["organization"] = inst["account"]
+                    fake_event["organization"] = inst["installation"]["account"]
                 logger.debug(fake_event)
                 return_status = await workflow_job_event(fake_event)
 
