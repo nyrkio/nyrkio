@@ -124,22 +124,56 @@ Integration tests use `playwright.config.integration.ts` which:
 
 ## Test Structure
 
-### `auth.integration.ts`
+### `auth.integration.ts` - Authentication
 
 Complete authentication flow tests:
 
 - **Login Page**: Loads correctly with real backend
-- **Password Authentication**:
-  - Successful login with valid credentials
-  - Error messages with invalid credentials
-  - Form validation
-- **Session Persistence**:
-  - Across page navigation
-  - Across page reload
+- **Password Authentication**: Success/failure cases with real API
+- **Session Persistence**: Across navigation and reload
 - **Logout**: Complete logout flow
 - **Protected Routes**: Access control verification
 - **API Token Usage**: JWT token in requests
 - **GitHub OAuth**: OAuth flow initiation
+
+### `dashboard.integration.ts` - Dashboard & Test Results
+
+Dashboard and test results viewing tests:
+
+- **Dashboard Loading**: After login
+- **Test Results List**: Display and navigation
+- **Test Submission**: Via API with verification
+- **Test Details**: Individual test page rendering
+- **Charts**: Visualization of multiple results
+- **Public Tests**: Viewing without authentication
+- **Change Point Detection**: With sufficient data
+
+### `settings.integration.ts` - Settings & Configuration
+
+User settings, test configuration, and organization management:
+
+- **User Settings**: Page loading and user info display
+- **API Tokens**: Token management section
+- **Test Configuration**: Via API (create/retrieve/update)
+- **Public Tests**: Making tests public
+- **Notifications**: Configuration via API
+- **Organization Management**: Viewing and creating orgs
+- **Billing**: Page loading and subscription status
+- **Admin Dashboard**: Access control for non-admin users
+
+### `navigation.integration.ts` - Navigation & UI
+
+General navigation and UI functionality:
+
+- **Public Navigation**: Front page, docs, about, pricing
+- **Authenticated Navigation**: Dashboard, settings, billing
+- **Auth State Persistence**: Across navigation
+- **Side Panel**: Display and route-based updates
+- **Navigation Bar**: Login/logout button visibility
+- **Footer**: Display
+- **Responsive Design**: Mobile, tablet, desktop viewports
+- **Error Handling**: Network and API errors
+- **404 Handling**: Invalid routes
 
 ## Writing Integration Tests
 
