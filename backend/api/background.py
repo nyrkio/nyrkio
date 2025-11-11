@@ -73,31 +73,34 @@ async def loop_installations():
                     if not queued_jobs:
                         break
 
-                    job = queued_jobs.pop()
+                job = queued_jobs.pop()
 
-                    # Call myself recursively, but with a fake workflow_job event
-                    fake_event = {
-                        "action": "queued",
-                        "workflow_job": job,
-                        "repository": repo,
-                        "sender": inst["sender"],
-                        "installation": inst["installation"],
-                    }
-                    if repo_owner != inst["sender"]["login"]:
-                        fake_event["organization"] = inst["account"]
-                    logger.debug(fake_event)
-                    return_status = await workflow_job_event(fake_event)
+                # Create a fakr workflow_job event, just like the ones github sends to the webhook
+                fake_event = {
+                    "action": "queued",
+                    "workflow_job": job,
+                    "repository": repo,
+                    "sender": inst["sender"],
+                    "installation": inst["installation"],
+                }
+                if repo_owner != inst["sender"]["login"]:
+                    fake_event["organization"] = inst["account"]
+                logger.debug(fake_event)
+                return_status = await workflow_job_event(fake_event)
 
-                    statuses.append(return_status)
+                statuses.append(return_status)
 
-                    # Handling each job could take a few minutes.
-                    # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
-                    if (
-                        isinstance(return_status, dict)
-                        and return_status.get("status") == "success"
-                    ):
-                        queued_jobs = await check_queued_workflow_jobs(full_name)
-                        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                # Handling each job could take a few minutes.
+                # So we need to refresh the queue to ensure we don't start too many runners in multile parallel threads/coroutines.
+                if (
+                    isinstance(return_status, dict)
+                    and return_status.get("status") == "success"
+                ):
+                    queued_jobs = await check_queued_workflow_jobs(full_name)
+                    queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                else:
+                    logger.error(return_status)
+                    break
 
     return statuses
 
@@ -113,9 +116,7 @@ async def refresh_repo_list(app_access_token):
             # "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    import pprint
 
-    pprint.pprint(response)
     if response.status_code == 200:
         return response.json()
     else:
@@ -139,12 +140,8 @@ async def check_queued_workflow_jobs(repo_full_name, app_access_token=None):
             # "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    import pprint
-
-    pprint.pprint(response)
     if response.status_code <= 201:
         data = response.json()
-        pprint.pprint(data)
         runs = data.get("workflow_runs", [])
         queued_jobs = []
         for run in runs:
@@ -158,10 +155,8 @@ async def check_queued_workflow_jobs(repo_full_name, app_access_token=None):
                     # "X-GitHub-Api-Version": "2022-11-28",
                 },
             )
-            pprint.pprint(jobs_response)
             if jobs_response.status_code <= 201:
                 jobs = jobs_response.json().get("jobs", [])
-                pprint.pprint(jobs)
                 for job in jobs:
                     if job["status"] == "queued":
                         queued_jobs.append(job)
