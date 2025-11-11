@@ -83,17 +83,21 @@ test.describe("Test Configuration", () => {
     const testName = "integration-config-test-" + Date.now();
 
     // Submit a test result first
-    await request.post("http://localhost:8001/api/v0/result", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        test_name: testName,
-        value: 123.45,
-        unit: "ms",
-        timestamp: Math.floor(Date.now() / 1000),
-      },
-    });
+    const submitResponse = await request.post(
+      "http://localhost:8001/api/v0/result",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: {
+          test_name: testName,
+          value: 123.45,
+          unit: "ms",
+          timestamp: Math.floor(Date.now() / 1000),
+        },
+      }
+    );
+    expect(submitResponse.status()).toBe(200);
 
     // Configure the test
     const configResponse = await request.post(
@@ -114,8 +118,25 @@ test.describe("Test Configuration", () => {
         ],
       }
     );
-
     expect(configResponse.status()).toBe(200);
+
+    // Verify configuration was saved correctly
+    const getConfigResponse = await request.get(
+      `http://localhost:8001/api/v0/config/${testName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    expect(getConfigResponse.status()).toBe(200);
+    const config = await getConfigResponse.json();
+    expect(Array.isArray(config)).toBe(true);
+    expect(config[0].public).toBe(false);
+    expect(config[0].attributes.git_repo).toBe(
+      "https://github.com/nyrkio/nyrkio"
+    );
+    expect(config[0].attributes.branch).toBe("main");
   });
 
   test("should retrieve test configuration", async ({ page, request }) => {
@@ -123,32 +144,40 @@ test.describe("Test Configuration", () => {
     const testName = "integration-get-config-test-" + Date.now();
 
     // Submit and configure a test
-    await request.post("http://localhost:8001/api/v0/result", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: {
-        test_name: testName,
-        value: 100,
-        unit: "ms",
-        timestamp: Math.floor(Date.now() / 1000),
-      },
-    });
-
-    await request.post(`http://localhost:8001/api/v0/config/${testName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      data: [
-        {
-          public: true,
-          attributes: {
-            git_repo: "https://github.com/test/repo",
-            branch: "test-branch",
-          },
+    const submitResponse = await request.post(
+      "http://localhost:8001/api/v0/result",
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
         },
-      ],
-    });
+        data: {
+          test_name: testName,
+          value: 100,
+          unit: "ms",
+          timestamp: Math.floor(Date.now() / 1000),
+        },
+      }
+    );
+    expect(submitResponse.status()).toBe(200);
+
+    const configSetResponse = await request.post(
+      `http://localhost:8001/api/v0/config/${testName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        data: [
+          {
+            public: true,
+            attributes: {
+              git_repo: "https://github.com/test/repo",
+              branch: "test-branch",
+            },
+          },
+        ],
+      }
+    );
+    expect(configSetResponse.status()).toBe(200);
 
     // Retrieve configuration
     const response = await request.get(
@@ -163,6 +192,10 @@ test.describe("Test Configuration", () => {
     expect(response.status()).toBe(200);
     const config = await response.json();
     expect(Array.isArray(config)).toBe(true);
+    expect(config.length).toBeGreaterThan(0);
+    expect(config[0].public).toBe(true);
+    expect(config[0].attributes.git_repo).toBe("https://github.com/test/repo");
+    expect(config[0].attributes.branch).toBe("test-branch");
   });
 
   test("should update test to public", async ({ page, request }) => {
@@ -211,6 +244,28 @@ test.describe("Test Configuration", () => {
     expect(publicResponse.status()).toBe(200);
     const publicData = await publicResponse.json();
     expect(Array.isArray(publicData)).toBe(true);
+
+    // Verify our test actually appears in the public list
+    const ourTest = publicData.find((item: any) => item.test_name === testName);
+    expect(ourTest).toBeDefined();
+    expect(ourTest.test_name).toBe(testName);
+
+    // Verify configuration was actually saved
+    const configResponse = await request.get(
+      `http://localhost:8001/api/v0/config/${testName}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    expect(configResponse.status()).toBe(200);
+    const config = await configResponse.json();
+    expect(Array.isArray(config)).toBe(true);
+    expect(config[0].public).toBe(true);
+    expect(config[0].attributes.git_repo).toBe(
+      "https://github.com/nyrkio/nyrkio"
+    );
   });
 });
 

@@ -143,7 +143,10 @@ test.describe("Authentication Integration Tests", () => {
   });
 
   test.describe("Session Persistence", () => {
-    test("should maintain session across page navigation", async ({ page }) => {
+    test("should maintain session across page navigation", async ({
+      page,
+      request,
+    }) => {
       await page.goto("/login");
 
       // Login
@@ -164,6 +167,21 @@ test.describe("Authentication Integration Tests", () => {
       const initialToken = await page.evaluate(() =>
         localStorage.getItem("token")
       );
+      expect(initialToken).toBeTruthy();
+
+      // Verify token works with API
+      const authResponse = await request.get(
+        "http://localhost:8001/api/v0/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${initialToken}`,
+          },
+        }
+      );
+      expect(authResponse.status()).toBe(200);
+      const userData = await authResponse.json();
+      expect(userData).toHaveProperty("email");
+      expect(userData.email).toBe(TEST_USER.email);
 
       // Navigate to another page (e.g., docs)
       await page.goto("/docs");
@@ -174,13 +192,27 @@ test.describe("Authentication Integration Tests", () => {
       );
       expect(tokenAfterNav).toBe(initialToken);
 
+      // Verify token still works with API after navigation
+      const authResponse2 = await request.get(
+        "http://localhost:8001/api/v0/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenAfterNav}`,
+          },
+        }
+      );
+      expect(authResponse2.status()).toBe(200);
+
       const loggedIn = await page.evaluate(() =>
         localStorage.getItem("loggedIn")
       );
       expect(loggedIn).toBe("true");
     });
 
-    test("should maintain session across page reload", async ({ page }) => {
+    test("should maintain session across page reload", async ({
+      page,
+      request,
+    }) => {
       await page.goto("/login");
 
       // Login
@@ -204,6 +236,20 @@ test.describe("Authentication Integration Tests", () => {
       const initialUsername = await page.evaluate(() =>
         localStorage.getItem("username")
       );
+      expect(initialToken).toBeTruthy();
+
+      // Verify token works with API before reload
+      const authResponse1 = await request.get(
+        "http://localhost:8001/api/v0/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${initialToken}`,
+          },
+        }
+      );
+      expect(authResponse1.status()).toBe(200);
+      const userData1 = await authResponse1.json();
+      expect(userData1.email).toBe(TEST_USER.email);
 
       // Reload page
       await page.reload();
@@ -218,6 +264,19 @@ test.describe("Authentication Integration Tests", () => {
         localStorage.getItem("username")
       );
       expect(usernameAfterReload).toBe(initialUsername);
+
+      // Verify token still works with API after reload
+      const authResponse2 = await request.get(
+        "http://localhost:8001/api/v0/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${tokenAfterReload}`,
+          },
+        }
+      );
+      expect(authResponse2.status()).toBe(200);
+      const userData2 = await authResponse2.json();
+      expect(userData2.email).toBe(TEST_USER.email);
 
       const loggedIn = await page.evaluate(() =>
         localStorage.getItem("loggedIn")
@@ -275,6 +334,7 @@ test.describe("Authentication Integration Tests", () => {
   test.describe("Protected Routes", () => {
     test("should allow access to protected routes when logged in", async ({
       page,
+      request,
     }) => {
       await page.goto("/login");
 
@@ -292,12 +352,30 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Try to access dashboard (assuming it's a protected route)
-      await page.goto("/dashboard");
+      const token = await page.evaluate(() => localStorage.getItem("token"));
+      expect(token).toBeTruthy();
+
+      // Verify we can access protected API endpoints
+      const userResponse = await request.get(
+        "http://localhost:8001/api/v0/users/me",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      expect(userResponse.status()).toBe(200);
+
+      // Try to access user settings (protected route)
+      await page.goto("/user/settings");
+      await page.waitForTimeout(1000);
 
       // Should be able to access (not redirected to login)
-      // Adjust based on your actual protected routes
-      expect(page.url()).toContain("/dashboard");
+      expect(page.url()).toContain("/user/settings");
+
+      // Verify the page actually loaded content
+      const main = page.locator("#main-content");
+      await expect(main).toBeVisible();
     });
 
     test("should redirect to login for protected routes when not logged in", async ({
