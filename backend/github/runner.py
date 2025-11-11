@@ -36,6 +36,8 @@ async def workflow_job_event(queued_gh_event):
     org_name = None
     if "organization" in queued_gh_event and queued_gh_event["organization"]:
         org_name = queued_gh_event["organization"]["login"]
+    else:
+        org_name = repo_owner
     installation_id = queued_gh_event["installation"]["id"]
     labels = queued_gh_event["workflow_job"]["labels"]
     supported = supported_instance_types()
