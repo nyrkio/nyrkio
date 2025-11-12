@@ -10,9 +10,9 @@ export default defineConfig({
     proxy: {
       // "/p/": {target: "http://51.20.96.129/"},
       "/api": {
-        target: "https://nyrk.io",
+        // target: "https://nyrk.io",
         //target: "https://staging.nyrkio.com",
-        // target: "http://localhost",
+        target: "http://localhost:8001",
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ""),
       },

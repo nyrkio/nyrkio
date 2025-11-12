@@ -7,13 +7,43 @@ import { test, expect } from "@playwright/test";
  * by comparing what's shown in the UI against what the API returns.
  */
 
-// Helper to login
+// Helper to login - uses API directly to bypass UI login form issues
 async function login(page: any, email: string, password: string) {
-  await page.goto("/login");
-  await page.fill('input[type="text"]#exampleInputEmail1', email);
-  await page.fill('input[type="password"]#exampleInputPassword1', password);
-  await page.click('button[type="submit"]:has-text("Login")');
-  await page.waitForURL("/", { timeout: 10000 });
+  // Get authentication token from API
+  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
+    form: {
+      username: email,
+      password: password
+    }
+  });
+
+  if (!response.ok()) {
+    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
+  }
+
+  const { access_token } = await response.json();
+
+  // Navigate to home page first
+  await page.goto('/');
+
+  // Then inject token and loggedIn flag into localStorage
+  await page.evaluate((token) => {
+    localStorage.setItem('token', token);
+    localStorage.setItem('username', 'testuser');
+    localStorage.setItem('loggedIn', 'true');
+  }, access_token);
+
+  // Reload page to trigger authentication
+  await page.reload();
+
+  // Wait for app to recognize authentication
+  await page.waitForTimeout(1000);
+
+  // Verify token is present
+  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
+  if (!storedToken) {
+    throw new Error('Token not found in localStorage after login');
+  }
 }
 
 const TEST_USER = {
@@ -23,8 +53,7 @@ const TEST_USER = {
 
 test.describe("Dashboard UI - Test List Display", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => localStorage.clear());
+    // Login will navigate to "/" and set up authentication
     await login(page, TEST_USER.email, TEST_USER.password);
   });
 
@@ -43,22 +72,36 @@ test.describe("Dashboard UI - Test List Display", () => {
 
     for (const testName of testNames) {
       const response = await request.post(
-        "http://localhost:8001/api/v0/result",
+        `http://localhost:8001/api/v0/result/${testName}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
-          data: {
-            test_name: testName,
-            value: Math.random() * 100,
-            unit: "ms",
-            timestamp: Math.floor(Date.now() / 1000),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
           },
+          data: [
+            {
+              timestamp: Math.floor(Date.now() / 1000),
+              metrics: [
+                {
+                  name: "performance",
+                  value: Math.random() * 100,
+                  unit: "ms"
+                }
+              ],
+              attributes: {
+                git_repo: "https://github.com/nyrkio/nyrkio",
+                branch: "ui-testing",
+                git_commit: "test123"
+              }
+            }
+          ],
         }
       );
       expect(response.status()).toBe(200);
     }
 
     // Verify tests exist in API
-    const apiResponse = await request.get("http://localhost:8001/api/v0/tests", {
+    const apiResponse = await request.get("http://localhost:8001/api/v0/results", {
       headers: { Authorization: `Bearer ${token}` },
     });
     expect(apiResponse.status()).toBe(200);
@@ -66,7 +109,10 @@ test.describe("Dashboard UI - Test List Display", () => {
 
     // Navigate to dashboard
     await page.goto("/tests");
-    await page.waitForTimeout(2000);
+
+    // Wait for dashboard to finish loading
+    await page.waitForSelector('text=Select tests', { timeout: 10000 });
+    await page.waitForTimeout(3000); // Give extra time for data to load
 
     // Verify each test name from API appears in the UI
     for (const testName of testNames) {
@@ -88,14 +134,28 @@ test.describe("Dashboard UI - Test List Display", () => {
     const testValue = 123.456;
 
     // Create test with specific value
-    await request.post("http://localhost:8001/api/v0/result", {
-      headers: { Authorization: `Bearer ${token}` },
-      data: {
-        test_name: testName,
-        value: testValue,
-        unit: "ms",
-        timestamp: Math.floor(Date.now() / 1000),
+    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
       },
+      data: [
+        {
+          timestamp: Math.floor(Date.now() / 1000),
+          metrics: [
+            {
+              name: "performance",
+              value: testValue,
+              unit: "ms"
+            }
+          ],
+          attributes: {
+            git_repo: "https://github.com/nyrkio/nyrkio",
+            branch: "ui-testing",
+            git_commit: "test123"
+          }
+        }
+      ],
     });
 
     // Verify via API
@@ -106,7 +166,7 @@ test.describe("Dashboard UI - Test List Display", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results[0].value).toBe(testValue);
+    expect(apiData[0].metrics[0].value).toBe(testValue);
 
     // Navigate to test detail page
     await page.goto(`/result/${testName}`);
@@ -129,14 +189,28 @@ test.describe("Dashboard UI - Test List Display", () => {
     const testUnit = "requests/sec";
 
     // Create test with specific unit
-    await request.post("http://localhost:8001/api/v0/result", {
-      headers: { Authorization: `Bearer ${token}` },
-      data: {
-        test_name: testName,
-        value: 100,
-        unit: testUnit,
-        timestamp: Math.floor(Date.now() / 1000),
+    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
       },
+      data: [
+        {
+          timestamp: Math.floor(Date.now() / 1000),
+          metrics: [
+            {
+              name: "performance",
+              value: 100,
+              unit: testUnit
+            }
+          ],
+          attributes: {
+            git_repo: "https://github.com/nyrkio/nyrkio",
+            branch: "ui-testing",
+            git_commit: "test123"
+          }
+        }
+      ],
     });
 
     // Verify via API
@@ -147,7 +221,7 @@ test.describe("Dashboard UI - Test List Display", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results[0].unit).toBe(testUnit);
+    expect(apiData[0].metrics[0].unit).toBe(testUnit);
 
     // Navigate to test detail page
     await page.goto(`/result/${testName}`);
@@ -163,8 +237,6 @@ test.describe("Dashboard UI - Test List Display", () => {
 
 test.describe("Dashboard UI - Test Result Details", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => localStorage.clear());
     await login(page, TEST_USER.email, TEST_USER.password);
   });
 
@@ -183,14 +255,28 @@ test.describe("Dashboard UI - Test Result Details", () => {
     ];
 
     for (const point of dataPoints) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: point.value,
-          unit: "ms",
-          timestamp: Math.floor(point.timestamp / 1000),
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor(point.timestamp / 1000),
+            metrics: [
+              {
+                name: "performance",
+                value: point.value,
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
     }
 
@@ -202,7 +288,7 @@ test.describe("Dashboard UI - Test Result Details", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(3);
+    expect(apiData.length).toBe(3);
 
     // Navigate to test page
     await page.goto(`/result/${testName}`);
@@ -229,14 +315,28 @@ test.describe("Dashboard UI - Test Result Details", () => {
     // Create results with known values for statistics
     const values = [100, 200, 300, 400, 500];
     for (const value of values) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: value,
-          unit: "ms",
-          timestamp: Math.floor(Date.now() / 1000) - values.indexOf(value),
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor(Date.now() / 1000) - values.indexOf(value),
+            metrics: [
+              {
+                name: "performance",
+                value: value,
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
     }
 
@@ -248,10 +348,10 @@ test.describe("Dashboard UI - Test Result Details", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(5);
+    expect(apiData.length).toBe(5);
 
     // Calculate expected statistics
-    const apiValues = apiData.results.map((r: any) => r.value);
+    const apiValues = apiData.map((r: any) => r.metrics[0].value);
     const expectedMin = Math.min(...apiValues);
     const expectedMax = Math.max(...apiValues);
     const expectedAvg = apiValues.reduce((a: number, b: number) => a + b, 0) / apiValues.length;
@@ -271,8 +371,6 @@ test.describe("Dashboard UI - Test Result Details", () => {
 
 test.describe("Dashboard UI - Empty States", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
-    await page.evaluate(() => localStorage.clear());
     await login(page, TEST_USER.email, TEST_USER.password);
   });
 

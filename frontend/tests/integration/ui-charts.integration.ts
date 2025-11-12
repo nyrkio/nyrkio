@@ -46,15 +46,29 @@ test.describe("Chart UI - Data Visualization", () => {
 
     for (const point of dataPoints) {
       const response = await request.post(
-        "http://localhost:8001/api/v0/result",
+        `http://localhost:8001/api/v0/result/${testName}`,
         {
-          headers: { Authorization: `Bearer ${token}` },
-          data: {
-            test_name: testName,
-            value: point.value,
-            unit: "ms",
-            timestamp: Math.floor(point.timestamp / 1000),
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
           },
+          data: [
+            {
+              timestamp: Math.floor(point.timestamp / 1000),
+              metrics: [
+                {
+                  name: "performance",
+                  value: point.value,
+                  unit: "ms"
+                }
+              ],
+              attributes: {
+                git_repo: "https://github.com/nyrkio/nyrkio",
+                branch: "ui-testing",
+                git_commit: "test123"
+              }
+            }
+          ],
         }
       );
       expect(response.status()).toBe(200);
@@ -69,7 +83,7 @@ test.describe("Chart UI - Data Visualization", () => {
     );
     expect(apiResponse.status()).toBe(200);
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(5);
+    expect(apiData.length).toBe(5);
 
     // Navigate to test result page
     await page.goto(`/result/${testName}`);
@@ -95,14 +109,28 @@ test.describe("Chart UI - Data Visualization", () => {
     // Create exactly 10 data points
     const pointCount = 10;
     for (let i = 0; i < pointCount; i++) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: 100 + i * 5,
-          unit: "ms",
-          timestamp: Math.floor(Date.now() / 1000) - (pointCount - i),
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor(Date.now() / 1000) - (pointCount - i),
+            metrics: [
+              {
+                name: "performance",
+                value: 100 + i * 5,
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
     }
 
@@ -114,7 +142,7 @@ test.describe("Chart UI - Data Visualization", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(pointCount);
+    expect(apiData.length).toBe(pointCount);
 
     // Navigate to test page
     await page.goto(`/result/${testName}`);
@@ -138,14 +166,28 @@ test.describe("Chart UI - Data Visualization", () => {
 
     // Create data with clear upward trend
     for (let i = 0; i < 10; i++) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: 100 + i * 10, // Clear linear trend
-          unit: "ms",
-          timestamp: Math.floor(Date.now() / 1000) - (10 - i) * 60,
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor(Date.now() / 1000) - (10 - i) * 60,
+            metrics: [
+              {
+                name: "performance",
+                value: 100 + i * 10, // Clear linear trend
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
     }
 
@@ -157,10 +199,10 @@ test.describe("Chart UI - Data Visualization", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(10);
+    expect(apiData.length).toBe(10);
 
     // Verify data has the trend we expect
-    const values = apiData.results.map((r: any) => r.value).sort();
+    const values = apiData.map((r: any) => r.metrics[0].value).sort();
     expect(values[0]).toBe(100);
     expect(values[values.length - 1]).toBe(190);
 
@@ -181,14 +223,28 @@ test.describe("Chart UI - Data Visualization", () => {
     const testName = `ui-chart-single-${Date.now()}`;
 
     // Create single data point
-    await request.post("http://localhost:8001/api/v0/result", {
-      headers: { Authorization: `Bearer ${token}` },
-      data: {
-        test_name: testName,
-        value: 150,
-        unit: "ms",
-        timestamp: Math.floor(Date.now() / 1000),
+    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json"
       },
+      data: [
+        {
+          timestamp: Math.floor(Date.now() / 1000),
+          metrics: [
+            {
+              name: "performance",
+              value: 150,
+              unit: "ms"
+            }
+          ],
+          attributes: {
+            git_repo: "https://github.com/nyrkio/nyrkio",
+            branch: "ui-testing",
+            git_commit: "test123"
+          }
+        }
+      ],
     });
 
     // Verify API has the point
@@ -199,8 +255,8 @@ test.describe("Chart UI - Data Visualization", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(1);
-    expect(apiData.results[0].value).toBe(150);
+    expect(apiData.length).toBe(1);
+    expect(apiData[0].metrics[0].value).toBe(150);
 
     // Navigate to test page
     await page.goto(`/result/${testName}`);
@@ -236,14 +292,28 @@ test.describe("Chart UI - Change Point Visualization", () => {
 
     let timestamp = Date.now() - allValues.length * 60000;
     for (const value of allValues) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: value + (Math.random() - 0.5) * 5, // Small noise
-          unit: "ms",
-          timestamp: Math.floor(timestamp / 1000),
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor(timestamp / 1000),
+            metrics: [
+              {
+                name: "performance",
+                value: value + (Math.random() - 0.5) * 5, // Small noise
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
       timestamp += 60000;
     }
@@ -256,7 +326,7 @@ test.describe("Chart UI - Change Point Visualization", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(30);
+    expect(apiData.length).toBe(30);
 
     // Navigate to test page
     await page.goto(`/result/${testName}`);
@@ -302,14 +372,28 @@ test.describe("Chart UI - Time Range and Zoom", () => {
     const oneDay = 24 * 60 * 60 * 1000;
 
     for (let i = 0; i < 7; i++) {
-      await request.post("http://localhost:8001/api/v0/result", {
-        headers: { Authorization: `Bearer ${token}` },
-        data: {
-          test_name: testName,
-          value: 100 + Math.random() * 20,
-          unit: "ms",
-          timestamp: Math.floor((now - i * oneDay) / 1000),
+      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json"
         },
+        data: [
+          {
+            timestamp: Math.floor((now - i * oneDay) / 1000),
+            metrics: [
+              {
+                name: "performance",
+                value: 100 + Math.random() * 20,
+                unit: "ms"
+              }
+            ],
+            attributes: {
+              git_repo: "https://github.com/nyrkio/nyrkio",
+              branch: "ui-testing",
+              git_commit: "test123"
+            }
+          }
+        ],
       });
     }
 
@@ -321,10 +405,10 @@ test.describe("Chart UI - Time Range and Zoom", () => {
       }
     );
     const apiData = await apiResponse.json();
-    expect(apiData.results.length).toBe(7);
+    expect(apiData.length).toBe(7);
 
     // Verify time range spans a week
-    const timestamps = apiData.results.map((r: any) => r.timestamp * 1000);
+    const timestamps = apiData.map((r: any) => r.timestamp * 1000);
     const minTime = Math.min(...timestamps);
     const maxTime = Math.max(...timestamps);
     const timeSpan = maxTime - minTime;
@@ -360,16 +444,32 @@ test.describe("Chart UI - Multiple Metrics", () => {
     ];
 
     for (const test of tests) {
+      let timestamp = Math.floor(Date.now() / 1000);
       for (const value of test.values) {
-        await request.post("http://localhost:8001/api/v0/result", {
-          headers: { Authorization: `Bearer ${token}` },
-          data: {
-            test_name: test.name,
-            value: value,
-            unit: test.unit,
-            timestamp: Math.floor(Date.now() / 1000),
+        await request.post(`http://localhost:8001/api/v0/result/${test.name}`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
           },
+          data: [
+            {
+              timestamp: timestamp,
+              metrics: [
+                {
+                  name: "performance",
+                  value: value,
+                  unit: test.unit
+                }
+              ],
+              attributes: {
+                git_repo: "https://github.com/nyrkio/nyrkio",
+                branch: "ui-testing",
+                git_commit: "test123"
+              }
+            }
+          ],
         });
+        timestamp -= 1; // Decrement to ensure unique timestamps
       }
 
       // Verify each test in API
@@ -380,8 +480,8 @@ test.describe("Chart UI - Multiple Metrics", () => {
         }
       );
       const apiData = await apiResponse.json();
-      expect(apiData.results.length).toBe(test.values.length);
-      expect(apiData.results[0].unit).toBe(test.unit);
+      expect(apiData.length).toBe(test.values.length);
+      expect(apiData[0].metrics[0].unit).toBe(test.unit);
 
       // Navigate to test page
       await page.goto(`/result/${test.name}`);
