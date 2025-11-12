@@ -29,7 +29,7 @@ async def background_worker():
     if len(done_work) > 0:
         logger.info(f"Background worker launched {len(done_work)} github runners.")
         for runner in done_work:
-            logger.debug(runner)
+            logger.info(runner)
 
         return len(done_work)
 

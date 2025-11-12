@@ -293,7 +293,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
       setRedraw(Math.random());
     };
 
-    if (subtree.length>0 && subtree.length<30)
+    if (subtree.length>0 && subtree.length<50)
         return(
           <>  <div style={{textAlign: "right"}}>
               <button className="btn btn-nothing text-right mt-5 col-xs-6 col-md-5 col-lg-4 col-xl-3" style={{right: 0}} title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"

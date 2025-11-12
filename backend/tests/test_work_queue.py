@@ -29,7 +29,7 @@ def test_work_queue(mock_get_token, mock_launcher, client, superuser_client):
 
     mock_get_token.assert_called_once_with()
     mock_launcher.assert_called_once_with(
-        org_name=None, installation_id=6666, repo_full_name="ghuser2/reponame"
+        org_name="ghuser2", installation_id=6666, repo_full_name="ghuser2/reponame"
     )
 
 
