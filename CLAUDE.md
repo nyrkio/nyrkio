@@ -1,0 +1,2 @@
+- when you make commits make sure the CI checks on github pass
+- when you create a test run it and all the other tests to validate that it works

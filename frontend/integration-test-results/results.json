@@ -1,0 +1,431 @@
+{
+  "config": {
+    "configFile": "/Users/jdrumgoole/GIT/nyrkio/frontend/playwright.config.integration.ts",
+    "rootDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/tests/integration",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "integration-test-results/results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "integration-test-results/html-report"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/tests/integration",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.integration.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "ui-pr-integration.integration.ts",
+      "file": "ui-pr-integration.integration.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Pull Request Integration - PR List Display",
+          "file": "ui-pr-integration.integration.ts",
+          "line": 56,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should display pull requests from API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6456,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:19.821Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-a8370bb0e181c2b5dadb",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 63,
+              "column": 3
+            },
+            {
+              "title": "should handle user with no PR results",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5313,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:26.522Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-92688e52dca78607ff4d",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 88,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Pull Request Integration - PR Results Display",
+          "file": "ui-pr-integration.integration.ts",
+          "line": 108,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should submit PR result via API and verify storage",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3827,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:31.841Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-a8c735d6835a35c0ca4a",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 115,
+              "column": 3
+            },
+            {
+              "title": "should retrieve PR result via API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3640,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:35.674Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-917c58b489bdf222c038",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 176,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Pull Request Integration - PR Changes Display",
+          "file": "ui-pr-integration.integration.ts",
+          "line": 230,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should get PR changes via API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3445,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:39.320Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-cde07d4f7d0f86d79d11",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 237,
+              "column": 3
+            },
+            {
+              "title": "should get PR changes for specific test via API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3722,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:42.770Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-339ab0ddf1b6828816b2",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 296,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Pull Request Integration - PR Deletion",
+          "file": "ui-pr-integration.integration.ts",
+          "line": 379,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should delete PR results via API",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3853,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:46.500Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-e93016d5b02764324af7",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 386,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Pull Request Integration - Error Handling",
+          "file": "ui-pr-integration.integration.ts",
+          "line": 475,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should handle non-existent PR gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3653,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:50.361Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-3dc2a35a8cc69cec59a4",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 482,
+              "column": 3
+            },
+            {
+              "title": "should handle invalid PR data gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3542,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:15:54.021Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c5a3928c53f7b7f851e1-cdaa2bb670ac8252c66c",
+              "file": "ui-pr-integration.integration.ts",
+              "line": 500,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-12T01:15:19.323Z",
+    "duration": 38282.845,
+    "expected": 9,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

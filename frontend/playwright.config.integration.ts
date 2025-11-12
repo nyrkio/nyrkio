@@ -21,28 +21,12 @@ export default defineConfig({
   // Run tests serially to avoid conflicts with shared backend state
   workers: 1,
 
-  // Start both frontend and backend servers
-  webServer: [
-    {
-      command: "python3 ../etc/nyrkio_backend.py start",
-      url: "http://127.0.0.1:8001/docs",
-      reuseExistingServer: !process.env.CI,
-      timeout: 30000,
-      // stdout: "pipe",
-      // stderr: "pipe",
-    },
-    {
-      command: "npm run dev",
-      url: "http://127.0.0.1:5173",
-      reuseExistingServer: !process.env.CI,
-      timeout: 30000,
-      // stdout: "pipe",
-      // stderr: "pipe",
-    },
-  ],
+  // Note: Frontend and backend servers must be running before tests
+  // Start frontend with: npm run dev
+  // Backend should already be running via nyrkio_backend.py
 
   use: {
-    baseURL: "http://127.0.0.1:5173",
+    baseURL: "http://localhost:5173",
 
     // Slower action timeout for integration tests
     actionTimeout: 15000,
@@ -62,8 +46,8 @@ export default defineConfig({
 
   reporter: [
     ["list"],
-    ["json", { outputFile: "test-results/integration-results.json" }],
-    ["html", { outputFolder: "test-results/integration-report" }],
+    ["json", { outputFile: "integration-test-results/results.json" }],
+    ["html", { outputFolder: "integration-test-results/html-report" }],
   ],
 
   // Test directory for integration tests
