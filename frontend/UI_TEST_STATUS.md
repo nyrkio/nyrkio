@@ -327,9 +327,30 @@ npx playwright test tests/integration/ui-dashboard.integration.ts \
 - Empty state handling for tests without configuration
 - Toggle state persistence across multiple updates
 
+### Public Dashboard UI Tests - 4/8 PASSING ⚠️
+**Passing Tests** (4):
+1. ✅ "should reject access to private test via public API"
+2. ✅ "should handle non-existent public test gracefully"
+3. ✅ "should navigate to public test page without authentication"
+4. ✅ "should display public test data correctly in UI"
+
+**Failing Tests** (4 - Backend Limitation):
+5. ❌ "should access public test via API without authentication" - `/api/v0/public/result/{testName}` returns 404
+6. ❌ "should retrieve public test data with correct format" - `/api/v0/public/result/{testName}` returns 404
+7. ❌ "should access public test changes without authentication" - `/api/v0/public/result/{testName}/changes` returns 404
+8. ❌ "should toggle test from private to public and verify access" - `/api/v0/public/result/{testName}` returns 404
+
+**Known Issue**: The `/api/v0/public/result/{testName}` endpoint returns 404 even for tests marked as public via config. The public/private toggle is correctly stored in the config (verified by Test Configuration tests), but the public result endpoint may not be fully implemented or requires additional backend work to respect the public flag.
+
+**Tests Validating Important Functionality**:
+- Private test access is properly rejected (security validation)
+- Non-existent test handling works correctly
+- UI pages load without authentication errors
+- Public visibility toggle persistence works
+
 ## Test Coverage Summary
 
-**Total UI Integration Tests**: 58/58 passing (100%) ✅
+**Total UI Integration Tests**: 62/66 passing (94%) ⚠️
 
 - ✅ Dashboard UI: 6/6 passing
 - ✅ User Settings UI: 6/6 passing
@@ -337,7 +358,8 @@ npx playwright test tests/integration/ui-dashboard.integration.ts \
 - ✅ Org Management UI: 13/13 passing
 - ✅ PR Integration UI: 9/9 passing
 - ✅ **Change Point Detection UI: 8/8 passing**
-- ✅ **Test Configuration UI: 9/9 passing** (NEW!)
+- ✅ **Test Configuration UI: 9/9 passing**
+- ⚠️ **Public Dashboard UI: 4/8 passing** (NEW!)
 
 **Test Quality**: All tests follow the three-layer validation pattern:
 1. Submit data via API
