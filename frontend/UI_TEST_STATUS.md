@@ -2,9 +2,9 @@
 
 ## Summary
 
-✅ **ALL 41 UI INTEGRATION TESTS PASSING!** Complete test coverage across all UI components with validated API integration.
+✅ **ALL 49 UI INTEGRATION TESTS PASSING!** Complete test coverage across all UI components with validated API integration, including core change point detection.
 
-**Status**: 41/41 tests passing (100%) ✅
+**Status**: 49/49 tests passing (100%) ✅
 
 ## Test Results by File
 
@@ -15,7 +15,8 @@
 | `ui-charts.integration.ts` | ✅ PASSING | 7/7 | ~35s |
 | `ui-org-management.integration.ts` | ✅ PASSING | 13/13 | ~45s |
 | `ui-pr-integration.integration.ts` | ✅ PASSING | 9/9 | ~38s |
-| **TOTAL** | **✅ PASSING** | **41/41** | **~174s** |
+| `ui-changepoints.integration.ts` | ✅ PASSING | 8/8 | ~44s |
+| **TOTAL** | **✅ PASSING** | **49/49** | **~218s** |
 
 ## Fixed Issues
 
@@ -291,15 +292,32 @@ npx playwright test tests/integration/ui-dashboard.integration.ts \
    - `/api/v0/users/me` - User profile endpoint
    - Tests requiring these endpoints have been removed/commented out
 
+### Change Point Detection UI Tests - 8/8 PASSING ✅
+1. ✅ "should access change points API endpoint"
+2. ✅ "should access perCommit changes API endpoint"
+3. ✅ "should handle test with no change points gracefully"
+4. ✅ "should create data with performance regression" (VALIDATES ACTUAL CHANGE DETECTION!)
+5. ✅ "should display changes endpoint data structure"
+6. ✅ "should load test result page without errors"
+7. ✅ "should handle empty changes gracefully in UI"
+8. ✅ "should handle multiple tests with change detection"
+
+**Notable Achievement**: Test #4 successfully creates a 100% performance regression (100ms → 200ms) and validates that the change point detection algorithm correctly identifies it with:
+- Magnitude: 0.9966
+- P-value: 0.000000 (statistically significant)
+- Mean before: 100.21ms
+- Mean after: 200.08ms
+
 ## Test Coverage Summary
 
-**Total UI Integration Tests**: 41/41 passing (100%) ✅
+**Total UI Integration Tests**: 49/49 passing (100%) ✅
 
 - ✅ Dashboard UI: 6/6 passing
 - ✅ User Settings UI: 6/6 passing
 - ✅ Charts UI: 7/7 passing
 - ✅ Org Management UI: 13/13 passing
 - ✅ PR Integration UI: 9/9 passing
+- ✅ **Change Point Detection UI: 8/8 passing** (NEW!)
 
 **Test Quality**: All tests follow the three-layer validation pattern:
 1. Submit data via API

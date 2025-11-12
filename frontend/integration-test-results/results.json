@@ -64,20 +64,20 @@
   },
   "suites": [
     {
-      "title": "ui-pr-integration.integration.ts",
-      "file": "ui-pr-integration.integration.ts",
+      "title": "ui-changepoints.integration.ts",
+      "file": "ui-changepoints.integration.ts",
       "column": 0,
       "line": 0,
       "specs": [],
       "suites": [
         {
-          "title": "Pull Request Integration - PR List Display",
-          "file": "ui-pr-integration.integration.ts",
-          "line": 56,
+          "title": "Change Point Detection - API Endpoint Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 57,
           "column": 6,
           "specs": [
             {
-              "title": "should display pull requests from API",
+              "title": "should access change points API endpoint",
               "ok": true,
               "tags": [],
               "tests": [
@@ -92,12 +92,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6456,
+                      "duration": 4010,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:19.821Z",
+                      "startTime": "2025-11-12T01:25:32.727Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -105,13 +105,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-a8370bb0e181c2b5dadb",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 63,
+              "id": "a2514f40fd2b5c7a75e6-d6290432a547b6ff0372",
+              "file": "ui-changepoints.integration.ts",
+              "line": 64,
               "column": 3
             },
             {
-              "title": "should handle user with no PR results",
+              "title": "should access perCommit changes API endpoint",
               "ok": true,
               "tags": [],
               "tests": [
@@ -126,12 +126,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5313,
+                      "duration": 3251,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:26.522Z",
+                      "startTime": "2025-11-12T01:25:36.986Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -139,21 +139,21 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-92688e52dca78607ff4d",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 88,
+              "id": "a2514f40fd2b5c7a75e6-61ee7469ebfaf28a14e4",
+              "file": "ui-changepoints.integration.ts",
+              "line": 98,
               "column": 3
             }
           ]
         },
         {
-          "title": "Pull Request Integration - PR Results Display",
-          "file": "ui-pr-integration.integration.ts",
-          "line": 108,
+          "title": "Change Point Detection - No Changes State",
+          "file": "ui-changepoints.integration.ts",
+          "line": 134,
           "column": 6,
           "specs": [
             {
-              "title": "should submit PR result via API and verify storage",
+              "title": "should handle test with no change points gracefully",
               "ok": true,
               "tags": [],
               "tests": [
@@ -168,12 +168,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3827,
+                      "duration": 6037,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:31.841Z",
+                      "startTime": "2025-11-12T01:25:40.243Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -181,55 +181,21 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-a8c735d6835a35c0ca4a",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 115,
-              "column": 3
-            },
-            {
-              "title": "should retrieve PR result via API",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3640,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2025-11-12T01:15:35.674Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "c5a3928c53f7b7f851e1-917c58b489bdf222c038",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 176,
+              "id": "a2514f40fd2b5c7a75e6-f42155ab943e716dcbe7",
+              "file": "ui-changepoints.integration.ts",
+              "line": 141,
               "column": 3
             }
           ]
         },
         {
-          "title": "Pull Request Integration - PR Changes Display",
-          "file": "ui-pr-integration.integration.ts",
-          "line": 230,
+          "title": "Change Point Detection - With Regression Data",
+          "file": "ui-changepoints.integration.ts",
+          "line": 195,
           "column": 6,
           "specs": [
             {
-              "title": "should get PR changes via API",
+              "title": "should create data with performance regression",
               "ok": true,
               "tags": [],
               "tests": [
@@ -244,12 +210,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3445,
+                      "duration": 9583,
                       "errors": [],
-                      "stdout": [],
+                      "stdout": [
+                        {
+                          "text": "Change points for cp-regression-1762910749453: {\n  \"cp-regression-1762910749453\": [\n    {\n      \"time\": 1762909849,\n      \"attributes\": {\n        \"git_commit\": \"regressed0\",\n        \"branch\": \"main\",\n        \"git_repo\": \"https://github.com/nyrkio/nyrkio\"\n      },\n      \"changes\": [\n        {\n          \"metric\": \"performance\",\n          \"index\": 15,\n          \"time\": 1762909849,\n          \"forward_change_percent\": \"100\",\n          \"magnitude\": \"0.996628\",\n          \"mean_before\": \"100.210830\",\n          \"stddev_before\": \"1.285653\",\n          \"mean_after\": \"200.083760\",\n          \"stddev_after\": \"1.711350\",\n          \"pvalue\": \"0.000000\"\n        }\n      ]\n    }\n  ]\n}\n"
+                        }
+                      ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:39.320Z",
+                      "startTime": "2025-11-12T01:25:46.287Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -257,13 +227,13 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-cde07d4f7d0f86d79d11",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 237,
+              "id": "a2514f40fd2b5c7a75e6-19b5d9988a73e43b8e09",
+              "file": "ui-changepoints.integration.ts",
+              "line": 202,
               "column": 3
             },
             {
-              "title": "should get PR changes for specific test via API",
+              "title": "should display changes endpoint data structure",
               "ok": true,
               "tags": [],
               "tests": [
@@ -278,12 +248,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3722,
+                      "duration": 3373,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:42.770Z",
+                      "startTime": "2025-11-12T01:25:55.878Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -291,21 +261,21 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-339ab0ddf1b6828816b2",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 296,
+              "id": "a2514f40fd2b5c7a75e6-7c08c9abe3496551af21",
+              "file": "ui-changepoints.integration.ts",
+              "line": 295,
               "column": 3
             }
           ]
         },
         {
-          "title": "Pull Request Integration - PR Deletion",
-          "file": "ui-pr-integration.integration.ts",
-          "line": 379,
+          "title": "Change Point Detection - UI Display Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 331,
           "column": 6,
           "specs": [
             {
-              "title": "should delete PR results via API",
+              "title": "should load test result page without errors",
               "ok": true,
               "tags": [],
               "tests": [
@@ -320,12 +290,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3853,
+                      "duration": 5278,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:46.500Z",
+                      "startTime": "2025-11-12T01:25:59.258Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -333,21 +303,55 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-e93016d5b02764324af7",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 386,
+              "id": "a2514f40fd2b5c7a75e6-3d769bb2d08f67a00e74",
+              "file": "ui-changepoints.integration.ts",
+              "line": 338,
+              "column": 3
+            },
+            {
+              "title": "should handle empty changes gracefully in UI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5664,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:26:04.544Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-3cebb4ab78c9ef298c8d",
+              "file": "ui-changepoints.integration.ts",
+              "line": 371,
               "column": 3
             }
           ]
         },
         {
-          "title": "Pull Request Integration - Error Handling",
-          "file": "ui-pr-integration.integration.ts",
-          "line": 475,
+          "title": "Change Point Detection - Multiple Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 412,
           "column": 6,
           "specs": [
             {
-              "title": "should handle non-existent PR gracefully",
+              "title": "should handle multiple tests with change detection",
               "ok": true,
               "tags": [],
               "tests": [
@@ -362,12 +366,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3653,
+                      "duration": 5660,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2025-11-12T01:15:50.361Z",
+                      "startTime": "2025-11-12T01:26:10.215Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -375,43 +379,9 @@
                   "status": "expected"
                 }
               ],
-              "id": "c5a3928c53f7b7f851e1-3dc2a35a8cc69cec59a4",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 482,
-              "column": 3
-            },
-            {
-              "title": "should handle invalid PR data gracefully",
-              "ok": true,
-              "tags": [],
-              "tests": [
-                {
-                  "timeout": 60000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
-                  "projectId": "",
-                  "projectName": "",
-                  "results": [
-                    {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 3542,
-                      "errors": [],
-                      "stdout": [],
-                      "stderr": [],
-                      "retry": 0,
-                      "startTime": "2025-11-12T01:15:54.021Z",
-                      "annotations": [],
-                      "attachments": []
-                    }
-                  ],
-                  "status": "expected"
-                }
-              ],
-              "id": "c5a3928c53f7b7f851e1-cdaa2bb670ac8252c66c",
-              "file": "ui-pr-integration.integration.ts",
-              "line": 500,
+              "id": "a2514f40fd2b5c7a75e6-dec3708a18ebb7a36d26",
+              "file": "ui-changepoints.integration.ts",
+              "line": 419,
               "column": 3
             }
           ]
@@ -421,9 +391,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2025-11-12T01:15:19.323Z",
-    "duration": 38282.845,
-    "expected": 9,
+    "startTime": "2025-11-12T01:25:32.247Z",
+    "duration": 43665.068,
+    "expected": 8,
     "skipped": 0,
     "unexpected": 0,
     "flaky": 0
