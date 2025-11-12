@@ -2,9 +2,9 @@
 
 ## Summary
 
-✅ **ALL 49 UI INTEGRATION TESTS PASSING!** Complete test coverage across all UI components with validated API integration, including core change point detection.
+✅ **ALL 58 UI INTEGRATION TESTS PASSING!** Complete test coverage across all UI components with validated API integration, including core change point detection and test configuration.
 
-**Status**: 49/49 tests passing (100%) ✅
+**Status**: 58/58 tests passing (100%) ✅
 
 ## Test Results by File
 
@@ -16,7 +16,8 @@
 | `ui-org-management.integration.ts` | ✅ PASSING | 13/13 | ~45s |
 | `ui-pr-integration.integration.ts` | ✅ PASSING | 9/9 | ~38s |
 | `ui-changepoints.integration.ts` | ✅ PASSING | 8/8 | ~44s |
-| **TOTAL** | **✅ PASSING** | **49/49** | **~218s** |
+| `ui-test-config.integration.ts` | ✅ PASSING | 9/9 | ~28s |
+| **TOTAL** | **✅ PASSING** | **58/58** | **~246s** |
 
 ## Fixed Issues
 
@@ -308,16 +309,35 @@ npx playwright test tests/integration/ui-dashboard.integration.ts \
 - Mean before: 100.21ms
 - Mean after: 200.08ms
 
+### Test Configuration UI Tests - 9/9 PASSING ✅
+1. ✅ "should access config API endpoint"
+2. ✅ "should create new test configuration via API"
+3. ✅ "should set test to public via API"
+4. ✅ "should set test to private via API"
+5. ✅ "should toggle test visibility multiple times"
+6. ✅ "should store git repo in config"
+7. ✅ "should store branch in config"
+8. ✅ "should handle test with no config gracefully"
+9. ✅ "should create config for new test"
+
+**Key Features Tested**:
+- Public/private visibility toggles via `/api/v0/config/{testName}` POST
+- Git repository and branch attribute persistence
+- Configuration retrieval and validation
+- Empty state handling for tests without configuration
+- Toggle state persistence across multiple updates
+
 ## Test Coverage Summary
 
-**Total UI Integration Tests**: 49/49 passing (100%) ✅
+**Total UI Integration Tests**: 58/58 passing (100%) ✅
 
 - ✅ Dashboard UI: 6/6 passing
 - ✅ User Settings UI: 6/6 passing
 - ✅ Charts UI: 7/7 passing
 - ✅ Org Management UI: 13/13 passing
 - ✅ PR Integration UI: 9/9 passing
-- ✅ **Change Point Detection UI: 8/8 passing** (NEW!)
+- ✅ **Change Point Detection UI: 8/8 passing**
+- ✅ **Test Configuration UI: 9/9 passing** (NEW!)
 
 **Test Quality**: All tests follow the three-layer validation pattern:
 1. Submit data via API
