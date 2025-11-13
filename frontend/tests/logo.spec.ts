@@ -1,4 +1,4 @@
-import { test, expect } from "playwright/test";
+import { test, expect } from "@playwright/test";
 
 test("logo on front page", async ({ page }) => {
   await page.goto("./");
