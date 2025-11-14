@@ -131,7 +131,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("OneLogin submit");
-    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth")
+    const redirectUri="https://nyrkio.onelogin.com/oidc/2/auth";
+    const q =  "client_id=3fdb352d9d4ab340f7c7d017e8d4b81aa485c72ecc1d268efb6e8d5b208431c7&nonce="+Math.round(Math.random()*10000)+"&redirect_uri="+redirectUri+"&response_type=id_token&scope=openid&state="
+    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth?"+q)
     .then((response) => response.json())
     .then((url) => url["authorization_url"])
     .then((url) => {
