@@ -131,11 +131,12 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("OneLogin submit");
-    const data = await fetch("/api/v0/auth/onelogin/authorize")
+    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth")
     .then((response) => response.json())
     .then((url) => url["authorization_url"])
     .then((url) => {
       console.log(url);
+      sleep(120);
       window.location.href = url;
     })
     .catch((error) => console.log(error));
