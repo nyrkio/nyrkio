@@ -231,7 +231,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
                 />
             </div>
             <div className="text-center mt-2">
-              <button type="submit" className="btn btn-success mb-5">
+              <button type="submit" className="btn-secondary btn-success mb-5">
                 Login
               </button>
             </div>
