@@ -33,7 +33,7 @@ class OneLoginOAuth2(OpenID):
         super().__init__(
             client_id,
             client_secret,
-            f"https://{onelogin_domain}/.well-known/openid-configuration",
+            f"https://{onelogin_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
             base_scopes=scopes,
         )

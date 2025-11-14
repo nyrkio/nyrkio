@@ -33,7 +33,7 @@ from backend.db.db import (
     OAuthAccount,
 )
 from backend.auth.github import github_oauth
-from backend.auth.onelogin import get_onelogin_oauth
+from backend.auth.onelogin import get_onelogin_oauth, ONELOGIN_REDIRECT_URI
 from backend.auth.superuser import SuperuserStrategy
 
 from backend.auth.common import (
@@ -131,7 +131,7 @@ async def admin_route(user: User = Depends(current_active_superuser)):
     return {"message": f"Hello admin {user.email}!"}
 
 
-oauth2_authorize_callback = OAuth2AuthorizeCallback(
+github_oauth2_authorize_callback = OAuth2AuthorizeCallback(
     github_oauth, redirect_url=REDIRECT_URI
 )
 
@@ -163,7 +163,9 @@ async def verify_email(
 @auth_router.get("/github/mycallback", include_in_schema=False)
 async def github_callback(
     request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        github_oauth2_authorize_callback
+    ),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
@@ -275,26 +277,29 @@ async def github_callback(
 @auth_router.get("/onelogin/mycallback", include_in_schema=False)
 async def onelogin_callback(
     request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        OAuth2AuthorizeCallback(
+            Depends(get_onelogin_oauth()), redirect_url=ONELOGIN_REDIRECT_URI
+        )
+    ),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
 
-    onelogin_oauth = get_onelogin_oauth()
-    account_id, account_email = await onelogin_oauth.get_id_email(token["access_token"])
-
-    if account_email is None:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=ErrorCode.OAUTH_NOT_AVAILABLE_EMAIL,
-        )
+    print(token["access_token"])
+    # account_id, account_email = await onelogin_oauth.get_id_email(token["access_token"])
+    # if account_email is None:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=ErrorCode.OAUTH_NOT_AVAILABLE_EMAIL,
+    #     )
 
     try:
         user = await user_manager.oauth_callback(
-            onelogin_oauth.name,
+            "oneloginNyrkioClient",
             token["access_token"],
-            account_id,
-            account_email,
+            token.get("account_id"),
+            token.get("account_email"),
             token.get("expires_at"),
             token.get("refresh_token"),
             request,
@@ -326,11 +331,11 @@ async def onelogin_callback(
     else:
         orgs = response.json()
 
-        # Find the github account in the user's oauth_accounts
+        # Find this github account in the user's oauth_accounts
         for account in user.oauth_accounts:
             if (
-                account.oauth_name == onelogin_oauth.name
-                and account.account_id == account_id
+                account.oauth_name == "oneloginNyrkioClient"
+                and account.account_id == token.get("account_id")
             ):
                 account.organizations = orgs
 
