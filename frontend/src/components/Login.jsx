@@ -141,7 +141,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("OneLogin submit");
-    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
+    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
     const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
                             {
                              method:"POST",
