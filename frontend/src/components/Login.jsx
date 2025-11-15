@@ -164,7 +164,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   // username and navigate to the home page.
   // const query = new URLSearchParams(window.location.search);
   const c = new URLSearchParams(document.cookie);
-  const query = new URLSearchParams(window.location.search);
   if (query.get("state") === "onelogin_success") {
     const token = c.get("sub_session_onelogin.com");
     console.log(token);
@@ -210,21 +209,21 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
         <div className="text-left mt-4 mb-4">
-          <button className="btn-secondary btn-success col-sm-4" onClick={oneLoginSubmit}  style={{"color":"#ffffff", "height":"3.5em", "maxHeight":"4em", "padding-top":"1em"}}>
+          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <svg
           xmlns="http://www.w3.org/2000/svg"
           width="25"
           height="20"
           fill="currentColor"
           className="bi"
-          viewBox="-40 -57 110 110"
+          viewBox="-40 -57 100 105"
           >
           <path
           fill="#ffffff"
           d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
           />
           <path
-          fill="#667722"
+          fill="#b28b56"
           d="m 6.4135741,10.746842 c 0,0.9538 -0.4998967,1.45342 -1.4534901,1.45342 h -9.0836437 c -0.9536934,0 -1.45349,-0.49962 -1.45349,-1.45342 v -21.891638 h -6.9490583 c -0.953594,0 -1.452991,-0.49961 -1.452991,-1.45337 v -9.083697 c 0,-0.9538 0.499397,-1.45337 1.452991,-1.45337 H 5.186984 c 0.9540934,0 1.1809901,0.49957 1.1809901,1.18085 v 32.701225 z"
           />
           </svg>{" "}
