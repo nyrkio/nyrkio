@@ -177,15 +177,14 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "nyrkio.onelogin.com");
     posthog.capture("login", { property: username });
-    sleep(100);
 
-    try {
-      window.location.href = "/";
-    } catch (error) {
-      console.log("gh_login was success, but then something went wrong:")
-      console.log(error);
-    }
-  }
+//     try {
+//       window.location.href = "/";
+//     } catch (error) {
+//       console.log("gh_login was success, but then something went wrong:")
+//       console.log(error);
+//     }
+   }
 
   return (
     <div className="container">
