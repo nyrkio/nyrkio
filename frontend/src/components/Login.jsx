@@ -137,10 +137,11 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     });
   }
 
+  const redirectUri="https://staging.nyrkio.com/login";
   const oneLoginSubmit = async (e) => {
+    return;
     e.preventDefault();
     console.log("OneLogin submit");
-    const redirectUri="https://nyrkio.com/login";
     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
     const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
                             {
@@ -209,7 +210,16 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
         <div className="text-left mt-4 mb-4">
-          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+          <form action="https://nyrkio.onelogin.com/oidc/2/auth" method="POST">
+          <input type="hidden" name="nonce" value={uuidv4()} />
+          <input type="hidden" name="redirect_uri" value={redirectUri} />
+          <input type="hidden" name="response_type" value="code" />
+          <input type="hidden" name="scope" value="openid" />
+          <input type="hidden" name="client_id" value="204875a0-a341-013e-75df-29e1f863f4bd253438" />
+          <input type="hidden" name="response_type" value="id_token" />
+          <input type="hidden" name="state" value="onelogin_success" />
+
+          <button className="btn-info btn col-sm-4" onClick={"oneLoginSubmit"}  style={{"height":"3em", "maxHeight":"3em"}}>
           <svg
           xmlns="http://www.w3.org/2000/svg"
           width="25"
@@ -229,6 +239,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </svg>{" "}
             OneLogin
           </button>
+          </form>
         </div>
       </div>
       <div className="text-center mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
