@@ -83,13 +83,13 @@ export const SignUpPage = () => {
       <div id="signup" className="container">
         <div className="row">
           <div className="col">
-            <h2 className="text-center mt-5">Create new account</h2>
+            <h2 className="text-left mt-5">Create new account</h2>
           </div>
         </div>
         <div className="row ">
           <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
             <hr />
-            <p>           <strong className="nyrkio-accent">Recommended:</strong><br /> Install Nyrkiö as a GitHub app <sup>*</sup>:</p>
+            <p>           <strong className="nyrkio-accent">Recommended:</strong><br /> Create account &amp; Install Nyrkiö as a GitHub app <sup>*</sup>:</p>
             <button className="btn btn-success" onClick={githubInstall}>
             <svg
               xmlns="http://www.w3.org/2000/svg"

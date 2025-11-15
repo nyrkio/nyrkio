@@ -33,6 +33,7 @@ from backend.db.db import (
     OAuthAccount,
 )
 from backend.auth.github import github_oauth
+from backend.auth.onelogin import get_onelogin_oauth, ONELOGIN_REDIRECT_URI
 from backend.auth.superuser import SuperuserStrategy
 
 from backend.auth.common import (
@@ -130,7 +131,7 @@ async def admin_route(user: User = Depends(current_active_superuser)):
     return {"message": f"Hello admin {user.email}!"}
 
 
-oauth2_authorize_callback = OAuth2AuthorizeCallback(
+github_oauth2_authorize_callback = OAuth2AuthorizeCallback(
     github_oauth, redirect_url=REDIRECT_URI
 )
 
@@ -162,7 +163,9 @@ async def verify_email(
 @auth_router.get("/github/mycallback", include_in_schema=False)
 async def github_callback(
     request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        github_oauth2_authorize_callback
+    ),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
@@ -243,6 +246,96 @@ async def github_callback(
             if (
                 account.oauth_name == github_oauth.name
                 and account.account_id == account_id
+            ):
+                account.organizations = orgs
+
+        data = user.oauth_accounts
+        update = UserUpdate(oauth_accounts=data)
+        user = await user_manager.update(update, user, safe=True)
+
+    # Apparently this should work too / list orgs where Nyrkiö was installed.
+    response2 = await client.get(
+        "https://api.github.com/user/installations",
+        headers={"Authorization": f"Bearer {token['access_token']}"},
+    )
+    if response.status_code >= 400:
+        logging.warn(
+            f"Failed to fetch organizations from GitHub/user/installations: {response.status_code}: {response.text}"
+        )
+    else:
+        # TODO: maybe use this later
+        logging.debug(response2)
+
+    response = await jwt_backend.login(get_jwt_strategy(), user)
+    await user_manager.on_after_login(user, request, response)
+    cookie_token = await get_jwt_strategy().write_token(user)
+    response = RedirectResponse("/login?gh_login=success&username=" + user.email)
+    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    return response
+
+
+@auth_router.get("/onelogin/mycallback", include_in_schema=False)
+async def onelogin_callback(
+    request: Request,
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        OAuth2AuthorizeCallback(
+            Depends(get_onelogin_oauth()), redirect_url=ONELOGIN_REDIRECT_URI
+        )
+    ),
+    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+):
+    token, state = access_token_state
+
+    print(token["access_token"])
+    # account_id, account_email = await onelogin_oauth.get_id_email(token["access_token"])
+    # if account_email is None:
+    #     raise HTTPException(
+    #         status_code=status.HTTP_400_BAD_REQUEST,
+    #         detail=ErrorCode.OAUTH_NOT_AVAILABLE_EMAIL,
+    #     )
+
+    try:
+        user = await user_manager.oauth_callback(
+            "oneloginNyrkioClient",
+            token["access_token"],
+            token.get("account_id"),
+            token.get("account_email"),
+            token.get("expires_at"),
+            token.get("refresh_token"),
+            request,
+            associate_by_email=True,
+            is_verified_by_default=True,
+        )
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.OAUTH_USER_ALREADY_EXISTS,
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.LOGIN_BAD_CREDENTIALS,
+        )
+
+    # Find all organizations the user is a member of
+    client = httpx.AsyncClient()
+    response = await client.get(
+        "https://api.github.com/user/memberships/orgs",
+        headers={"Authorization": f"Bearer {token['access_token']}"},
+    )
+    if response.status_code != 200:
+        logging.error(
+            f"Failed to fetch organizations from GitHub: {response.status_code}: {response.text}"
+        )
+    else:
+        orgs = response.json()
+
+        # Find this github account in the user's oauth_accounts
+        for account in user.oauth_accounts:
+            if (
+                account.oauth_name == "oneloginNyrkioClient"
+                and account.account_id == token.get("account_id")
             ):
                 account.organizations = orgs
 
