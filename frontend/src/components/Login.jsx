@@ -164,7 +164,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   // If we were redirected here by the OneLogin OAuth flow, we need to stash the
   // username and navigate to the home page.
   // const query = new URLSearchParams(window.location.search);
-  const c = URLSearchParams(document.cookie);
+  const c = new URLSearchParams(document.cookie);
   if (c) {
     const token = c.get("sub_session_onelogin.com");
     console.log(token);
