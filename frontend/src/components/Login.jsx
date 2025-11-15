@@ -141,7 +141,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     e.preventDefault();
     console.log("OneLogin submit");
     const redirectUri="https://nyrkio.com/login";
-    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token&state=`
+    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
     const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
                             {
                              method:"POST",
@@ -155,7 +155,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     .then((url) => url["authorization_url"])
     .then((url) => {
       console.log(data);
-      sleep(20);
       window.location.href = url;
     })
     .catch((error) => console.log(error));
@@ -165,10 +164,10 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   // username and navigate to the home page.
   // const query = new URLSearchParams(window.location.search);
   const c = new URLSearchParams(document.cookie);
-  if (c) {
+  const query = new URLSearchParams(window.location.search);
+  if (query.get("state") === "onelogin_success") {
     const token = c.get("sub_session_onelogin.com");
     console.log(token);
-    const query = new URLSearchParams(window.location.search);
     console.log(query);
     const username = query.get("username");
     setLoggedIn(true);
