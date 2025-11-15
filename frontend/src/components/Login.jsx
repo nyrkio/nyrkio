@@ -139,7 +139,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
   const redirectUri="https://staging.nyrkio.com/login";
   const oneLoginSubmit = async (e) => {
-    return;
     e.preventDefault();
     console.log("OneLogin submit");
     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
@@ -218,6 +217,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           <input type="hidden" name="client_id" value="204875a0-a341-013e-75df-29e1f863f4bd253438" />
           <input type="hidden" name="response_type" value="id_token" />
           <input type="hidden" name="state" value="onelogin_success" />
+          </form>
 
           <button className="btn-info btn col-sm-4" onClick={"oneLoginSubmit"}  style={{"height":"3em", "maxHeight":"3em"}}>
           <svg
@@ -239,7 +239,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </svg>{" "}
             OneLogin
           </button>
-          </form>
         </div>
       </div>
       <div className="text-center mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>

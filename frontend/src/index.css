@@ -545,20 +545,12 @@ button:focus-visible {
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  height: 3em;
-  max-height: 3em;
 }
 
 .btn-primary {
   background-color: var(--nyrkio-light-gray);
   border-color: var(--nyrkio-dark-gray);
   margin: 10px;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  height: 3em;
-  max-height: 3em;
 }
 .btn-primary:hover {
   background-color: var(--nyrkio-light-gray4);
