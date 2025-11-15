@@ -282,7 +282,7 @@ async def onelogin_callback(
             Depends(get_onelogin_oauth()), redirect_url=ONELOGIN_REDIRECT_URI
         )
     ),
-    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+                                                                                                                                                                                                                        : BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
 

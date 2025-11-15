@@ -128,17 +128,32 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     }
   }
 
+  function uuidv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
+    .replace(/[xy]/g, function (c) {
+      const r = Math.random() * 16 | 0,
+             v = c == 'x' ? r : (r & 0x3 | 0x8);
+             return v.toString(16);
+    });
+  }
+
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
     console.log("OneLogin submit");
-    const redirectUri="https://nyrkio.onelogin.com/oidc/2/auth";
-    const q =  "client_id=3fdb352d9d4ab340f7c7d017e8d4b81aa485c72ecc1d268efb6e8d5b208431c7&nonce="+Math.round(Math.random()*10000)+"&redirect_uri="+redirectUri+"&response_type=id_token&scope=openid&state="
-    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth?"+q)
+    const redirectUri="https://nyrkio.com/login";
+    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token&state=`
+    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
+                             "method":"POST",
+                             postData,
+                             headers: {
+                                "Content-Type": "application/x-www-form-urlencoded",
+                              },
+                        )
     .then((response) => response.json())
     .then((url) => url["authorization_url"])
     .then((url) => {
-      console.log(url);
-      sleep(120);
+      console.log(data);
+      sleep(20);
       window.location.href = url;
     })
     .catch((error) => console.log(error));
@@ -147,7 +162,12 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   // If we were redirected here by the OneLogin OAuth flow, we need to stash the
   // username and navigate to the home page.
   // const query = new URLSearchParams(window.location.search);
-  if (query.get("TODO") === "success") {
+  const c = URLSearchParams(document.cookie);
+  if (c) {
+    const token = c.get("sub_session_onelogin.com");
+    console.log(token);
+    const query = new URLSearchParams(window.location.search);
+    console.log(query);
     const username = query.get("username");
     setLoggedIn(true);
     localStorage.setItem("loggedIn", "true");
@@ -155,6 +175,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "nyrkio.onelogin.com");
     posthog.capture("login", { property: username });
+    sleep(100);
 
     try {
       window.location.href = "/";
