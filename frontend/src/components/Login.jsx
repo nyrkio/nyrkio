@@ -143,11 +143,13 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     const redirectUri="https://nyrkio.com/login";
     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&response_type=code&scope=openid&state=&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token&state=`
     const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
-                             "method":"POST",
-                             postData,
+                            {
+                             method:"POST",
+                             body: postData,
                              headers: {
                                 "Content-Type": "application/x-www-form-urlencoded",
                               },
+                            }
                         )
     .then((response) => response.json())
     .then((url) => url["authorization_url"])
