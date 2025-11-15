@@ -140,9 +140,21 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const redirectUri="https://staging.nyrkio.com/login";
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
+    console.log("onelogin submit");
+    const data = await fetch("https://staging.nyrkio.com/api/v0/auth/onelogin/authorize")
+    .then((response) => response.json())
+    .then((url) => url["authorization_url"])
+    .then((url) => {
+      console.log(url);
+      window.location.href = url;
+    })
+    .catch((error) => console.log(error));
+    };
+const OFFoneLoginSubmit = async (e) => {
+    e.preventDefault();
     console.log("OneLogin submit");
     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
-    const data = await fetch("https://nyrkio.onelogin.com/oidc/2/auth",
+    const data = await fetch("https://staging.nyrkio.onelogin.com/oidc/2/auth",
                             {
                              method:"POST",
                              body: postData,
@@ -219,7 +231,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           <input type="hidden" name="state" value="onelogin_success" />
           </form>
 
-          <button className="btn-info btn col-sm-4" onClick={"oneLoginSubmit"}  style={{"height":"3em", "maxHeight":"3em"}}>
+          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <svg
           xmlns="http://www.w3.org/2000/svg"
           width="25"
@@ -241,7 +253,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
       </div>
-      <div className="text-center mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
+      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
         <div className="row">
         <div className="col-xs-1 col-md-2">
         </div>
@@ -264,7 +276,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
                 />
             </div>
             <div className="text-center mt-2">
-              <button type="submit" className="btn-secondary btn-success mb-5">
+              <button type="submit" className="btn btn-info mb-5">
                 Login
               </button>
             </div>
