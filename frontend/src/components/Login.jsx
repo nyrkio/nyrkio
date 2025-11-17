@@ -23,7 +23,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
   const authSubmit = async (e) => {
     e.preventDefault();
-    console.log("Auth submit: " + username + " " + password);
+    console.log("Auth submit: " + username + " " + password.substring(0,2));
     let credentialsData = new URLSearchParams();
     credentialsData.append("username", username);
     credentialsData.append("password", password);
@@ -140,42 +140,76 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   const redirectUri="https://staging.nyrkio.com/login";
   const oneLoginSubmit = async (e) => {
     e.preventDefault();
-    console.log("onelogin submit");
-    const data = await fetch("https://staging.nyrkio.com/api/v0/auth/onelogin/authorize")
+    console.log("OneLogin submit");
+    const data = await fetch("/api/v0/auth/onelogin/authorize")
     .then((response) => response.json())
-    .then((url) => url["authorization_url"])
     .then((url) => {
       console.log(url);
-      window.location.href = url;
-    })
-    .catch((error) => console.log(error));
-    };
-const OFFoneLoginSubmit = async (e) => {
-    e.preventDefault();
-    console.log("OneLogin submit");
-    const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
-    const data = await fetch("https://staging.nyrkio.onelogin.com/oidc/2/auth",
-                            {
-                             method:"POST",
-                             body: postData,
-                             headers: {
-                                "Content-Type": "application/x-www-form-urlencoded",
-                              },
-                            }
-                        )
-    .then((response) => response.json())
-    .then((url) => url["authorization_url"])
+      url["authorization_url"]);
+    }
     .then((url) => {
-      console.log(data);
-      window.location.href = url;
+      console.log(url);
+      setTimeout(()=>{window.location.href = url;}, 20000);
     })
     .catch((error) => console.log(error));
   };
+//   const oneLoginSubmit = async (e) => {
+//     e.preventDefault();
+//     console.log("onelogin submit");
+//     const data = await fetch("https://staging.nyrkio.com/api/v0/auth/onelogin/authorize")
+//     .then((response) => response.json())
+//     .then((url) => url["authorization_url"])
+//     .then((url) => {
+//       console.log(url);
+//       window.location.href = url;
+//     })
+//     .catch((error) => console.log(error));
+//     };
+// const OFFoneLoginSubmit = async (e) => {
+//     e.preventDefault();
+//     console.log("OneLogin submit");
+//     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
+//     const data = await fetch("https://staging.nyrkio.onelogin.com/oidc/2/auth",
+//                             {
+//                              method:"POST",
+//                              body: postData,
+//                              headers: {
+//                                 "Content-Type": "application/x-www-form-urlencoded",
+//                               },
+//                             }
+//                         )
+//     .then((response) => response.json())
+//     .then((url) => url["authorization_url"])
+//     .then((url) => {
+//       console.log(data);
+//       window.location.href = url;
+//     })
+//     .catch((error) => console.log(error));
+//   };
 
   // If we were redirected here by the OneLogin OAuth flow, we need to stash the
   // username and navigate to the home page.
+  const query = new URLSearchParams(window.location.search);
+  if (query.get("onelogin_login") === "success") {
+    const username = query.get("username");
+    setLoggedIn(true);
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", username);
+    localStorage.setItem("authMethod", "oauth");
+    localStorage.setItem("authServer", "onelogin.com");
+    posthog.capture("login", { property: username });
+
+    //     try {
+    //       window.location.href = "/";
+    //     } catch (error) {
+    //       console.log("gh_login was success, but then something went wrong:")
+    //       console.log(error);
+    //     }
+  }
+  // If we were redirected here by the OneLogin OAuth flow, we need to stash the
+  // username and navigate to the home page.
   // const query = new URLSearchParams(window.location.search);
-  const c = new URLSearchParams(document.cookie);
+  /*const c = new URLSearchParams(document.cookie);
   if (query.get("state") === "onelogin_success") {
     const token = c.get("sub_session_onelogin.com");
     console.log(token);
@@ -187,14 +221,14 @@ const OFFoneLoginSubmit = async (e) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "nyrkio.onelogin.com");
     posthog.capture("login", { property: username });
-
-//     try {
-//       window.location.href = "/";
-//     } catch (error) {
-//       console.log("gh_login was success, but then something went wrong:")
-//       console.log(error);
-//     }
-   }
+  */
+    //     try {
+    //       window.location.href = "/";
+    //     } catch (error) {
+    //       console.log("gh_login was success, but then something went wrong:")
+    //       console.log(error);
+    //     }
+  }
 
   return (
     <div className="container">
