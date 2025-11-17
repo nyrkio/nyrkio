@@ -20,7 +20,7 @@ class OneLoginOAuth2(OpenID):
         client_secret: str,
         onelogin_domain: str,
         scopes: Optional[List[str]] = BASE_SCOPES,
-        name: str = "oneloginNyrkioClient",
+        name: str = "onelogin",
     ):
         """
         Args:
