@@ -33,7 +33,11 @@ from backend.db.db import (
     OAuthAccount,
 )
 from backend.auth.github import github_oauth
-from backend.auth.onelogin import onelogin_oauth, ONELOGIN_REDIRECT_URI
+from backend.auth.onelogin import (
+    onelogin_oauth,
+    ONELOGIN_REDIRECT_URI,
+    CLIENT_SECRET as ONELOGIN_CLIENT_SECRET,
+)
 from backend.auth.superuser import SuperuserStrategy
 
 from backend.auth.common import (
@@ -94,6 +98,17 @@ auth_router.include_router(
         redirect_url=REDIRECT_URI,
     ),
     prefix="/github",
+    tags=["auth"],
+)
+
+auth_router.include_router(
+    fastapi_users.get_oauth_router(
+        onelogin_oauth,
+        jwt_backend,
+        ONELOGIN_CLIENT_SECRET,
+        redirect_url=ONELOGIN_REDIRECT_URI,
+    ),
+    prefix="/onelogin",
     tags=["auth"],
 )
 
