@@ -291,6 +291,7 @@ async def github_callback(
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/login?gh_login=success&username=" + user.email)
     response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    response.headers["Authorization"] = f"Bearer {cookie_token}"
     return response
 
 
@@ -316,7 +317,7 @@ async def onelogin_callback(
 
     try:
         user = await user_manager.oauth_callback(
-            "oneloginNyrkioClient",
+            "onelogin",
             token["access_token"],
             account_id,
             account_email,
@@ -347,6 +348,7 @@ async def onelogin_callback(
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/login?onelogin_login=success&username=" + user.email)
     response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    response.headers["Authorization"] = f"Bearer {cookie_token}"
     return response
 
 
