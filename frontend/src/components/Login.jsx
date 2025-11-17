@@ -146,7 +146,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     .then((url) => {
       console.log(url);
       url["authorization_url"];
-    }
+    })
     .then((url) => {
       console.log(url);
       setTimeout(()=>{window.location.href = url;}, 20000);
