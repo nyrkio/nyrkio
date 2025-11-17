@@ -145,11 +145,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     .then((response) => response.json())
     .then((url) => {
       console.log(url);
-      url["authorization_url"];
-    })
-    .then((url) => {
-      console.log(url);
-      setTimeout(()=>{window.location.href = url;}, 20000);
+      const u = url["authorization_url"];
+      console.log(u);
+      setTimeout(()=>{window.location.href = u;}, 20000);
     })
     .catch((error) => console.log(error));
   };
@@ -258,7 +256,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           <form action="https://nyrkio.onelogin.com/oidc/2/auth" method="POST">
           <input type="hidden" name="nonce" value={uuidv4()} />
           <input type="hidden" name="redirect_uri" value={redirectUri} />
-          <input type="hidden" name="response_type" value="code" />
           <input type="hidden" name="scope" value="openid" />
           <input type="hidden" name="client_id" value="204875a0-a341-013e-75df-29e1f863f4bd253438" />
           <input type="hidden" name="response_type" value="id_token" />
