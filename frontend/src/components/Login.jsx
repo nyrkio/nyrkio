@@ -189,7 +189,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
   // If we were redirected here by the OneLogin OAuth flow, we need to stash the
   // username and navigate to the home page.
-  const query = new URLSearchParams(window.location.search);
+  //const query = new URLSearchParams(window.location.search);
   if (query.get("onelogin_login") === "success") {
     const username = query.get("username");
     setLoggedIn(true);
@@ -228,7 +228,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     //       console.log("gh_login was success, but then something went wrong:")
     //       console.log(error);
     //     }
-  }
+//   }
 
   return (
     <div className="container">
