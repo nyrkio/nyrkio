@@ -38,6 +38,7 @@ class OneLoginOAuth2(OpenID):
             base_scopes=scopes,
         )
 
+
 print(CLIENT_SECRET[:3])
 print(CLIENT_ID)
 onelogin_oauth = OneLoginOAuth2(
