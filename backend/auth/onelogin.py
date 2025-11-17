@@ -39,7 +39,9 @@ class OneLoginOAuth2(OpenID):
         )
 
 
-print(CLIENT_SECRET[:3] if CLIENT_SECRET is not None else "ONE_LOGIN_CLIENT_SECRET=None")
+print(
+    CLIENT_SECRET[:3] if CLIENT_SECRET is not None else "ONE_LOGIN_CLIENT_SECRET=None"
+)
 print(CLIENT_ID)
 onelogin_oauth = OneLoginOAuth2(
     client_id=CLIENT_ID,
