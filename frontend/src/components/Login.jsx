@@ -145,7 +145,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     .then((response) => response.json())
     .then((url) => {
       console.log(url);
-      url["authorization_url"]);
+      url["authorization_url"];
     }
     .then((url) => {
       console.log(url);

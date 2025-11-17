@@ -282,7 +282,9 @@ async def github_callback(
 @auth_router.get("/onelogin/mycallback", include_in_schema=False)
 async def onelogin_callback(
     request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(onelogin_oauth2_authorize_callback),
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        onelogin_oauth2_authorize_callback
+    ),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
@@ -324,7 +326,6 @@ async def onelogin_callback(
     data = user.oauth_accounts
     update = UserUpdate(oauth_accounts=data)
     user = await user_manager.update(update, user, safe=True)
-
 
     response = await jwt_backend.login(get_jwt_strategy(), user)
     await user_manager.on_after_login(user, request, response)
