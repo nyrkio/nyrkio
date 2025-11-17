@@ -47,5 +47,5 @@ onelogin_oauth = OneLoginOAuth2(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
     onelogin_domain="nyrkio.onelogin.com",
-    scopes=["user", "user:email", "read:org"],
+    scopes=["user", "user:email", "read:org", "openid", "email"],
 )
