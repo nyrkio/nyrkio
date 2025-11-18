@@ -155,6 +155,38 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         </div>
       </div>
       <div className="row ">
+      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
+        <div className="row">
+        <div className="col-xs-1 col-md-2">
+        </div>
+        <div className="text-center col-xs-10 col-md-8">
+          <form onSubmit={authSubmit}>
+            <div className="mb-3 text-center">
+              <input
+                type="text"
+                placeholder="email"
+                className="form-control mb-2"
+                id="exampleInputEmail1"
+                onChange={(e) => setUsername(e.target.value)}
+              />
+                <input
+                  placeholder="passw0rd"
+                  type="password"
+                  className="form-control mb-2"
+                  id="exampleInputPassword1"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
+            <div className="text-center mt-2">
+              <button type="submit" className="btn btn-info mb-5">
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+        </div>
+        <ErrorMessage className="mb-5"/>
+      </div>
       <div className="text-justify mt-3 col-lg-6  sso-login"  style={{"paddingRight": "1em"}}>
         <div className="text-left mt-3 mb-3">
           <button className="text-left btn btn-success col-sm-4" onClick={githubSubmit}>
@@ -193,39 +225,25 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             OneLogin
           </button>
         </div>
+        <div className="text-left mt-4 mb-4">
+          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+          <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="20"
+          fill="currentColor"
+          className="bi"
+          viewBox="-40 -57 100 105"
+          >
+          <path
+          fill="#ffffff"
+          d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
+          />
+          </svg>{" "}
+            Okta
+          </button>
+        </div>
       </div>
-      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
-        <div className="row">
-        <div className="col-xs-1 col-md-2">
-        </div>
-        <div className="text-center col-xs-10 col-md-8">
-          <form onSubmit={authSubmit}>
-            <div className="mb-3 text-center">
-              <input
-                type="text"
-                placeholder="email"
-                className="form-control mb-2"
-                id="exampleInputEmail1"
-                onChange={(e) => setUsername(e.target.value)}
-              />
-                <input
-                  placeholder="passw0rd"
-                  type="password"
-                  className="form-control mb-2"
-                  id="exampleInputPassword1"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div className="text-center mt-2">
-              <button type="submit" className="btn btn-info mb-5">
-                Login
-              </button>
-            </div>
-          </form>
-        </div>
-        </div>
-        <ErrorMessage className="mb-5"/>
-        </div>
         <div>&nbsp;</div>
         <div>&nbsp;</div>
         <div>&nbsp;</div>

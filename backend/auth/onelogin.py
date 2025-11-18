@@ -40,6 +40,7 @@ class OneLoginOAuth2(OpenID):
             name=name,
             base_scopes=scopes,
         )
+        print(self.openid_configuration)
 
     # Override so we can get more of the data than just an email
     async def get_id_email(self, token: str) -> Tuple[str, Optional[str]]:
