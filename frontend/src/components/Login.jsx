@@ -119,22 +119,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "github.com");
     posthog.capture("login", { property: username });
-
-    try {
-      window.location.href = "/";
-    } catch (error) {
-      console.log("gh_login was success, but then something went wrong:")
-      console.log(error);
-    }
-  }
-
-  function uuidv4() {
-    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'
-    .replace(/[xy]/g, function (c) {
-      const r = Math.random() * 16 | 0,
-             v = c == 'x' ? r : (r & 0x3 | 0x8);
-             return v.toString(16);
-    });
+    window.location.href = "/";
   }
 
   const redirectUri="https://staging.nyrkio.com/login";
@@ -146,49 +131,12 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     .then((url) => {
       console.log(url);
       const u = url["authorization_url"];
-      console.log(u);
-      setTimeout(()=>{window.location.href = u;}, 20000);
+      window.location.href = u; // Goes to onelogin.com, from there to the backend, mycallback, and eventually continues below
     })
     .catch((error) => console.log(error));
   };
-//   const oneLoginSubmit = async (e) => {
-//     e.preventDefault();
-//     console.log("onelogin submit");
-//     const data = await fetch("https://staging.nyrkio.com/api/v0/auth/onelogin/authorize")
-//     .then((response) => response.json())
-//     .then((url) => url["authorization_url"])
-//     .then((url) => {
-//       console.log(url);
-//       window.location.href = url;
-//     })
-//     .catch((error) => console.log(error));
-//     };
-// const OFFoneLoginSubmit = async (e) => {
-//     e.preventDefault();
-//     console.log("OneLogin submit");
-//     const postData =  `nonce=${uuidv4()}&redirect_uri=${redirectUri}&scope=openid&state=onelogin_success&client_id=204875a0-a341-013e-75df-29e1f863f4bd253438&response_type=id_token`
-//     const data = await fetch("https://staging.nyrkio.onelogin.com/oidc/2/auth",
-//                             {
-//                              method:"POST",
-//                              body: postData,
-//                              headers: {
-//                                 "Content-Type": "application/x-www-form-urlencoded",
-//                               },
-//                             }
-//                         )
-//     .then((response) => response.json())
-//     .then((url) => url["authorization_url"])
-//     .then((url) => {
-//       console.log(data);
-//       window.location.href = url;
-//     })
-//     .catch((error) => console.log(error));
-//   };
 
-  // If we were redirected here by the OneLogin OAuth flow, we need to stash the
-  // username and navigate to the home page.
-  //const query = new URLSearchParams(window.location.search);
-  if (query.get("onelogin_login") === "success") {
+  if (query.get("onelogin_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
     const username = query.get("username");
     setLoggedIn(true);
     localStorage.setItem("loggedIn", "true");
@@ -196,37 +144,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "onelogin.com");
     posthog.capture("login", { property: username });
-
-    //     try {
-    //       window.location.href = "/";
-    //     } catch (error) {
-    //       console.log("gh_login was success, but then something went wrong:")
-    //       console.log(error);
-    //     }
+    window.location.href = "/";
   }
-  // If we were redirected here by the OneLogin OAuth flow, we need to stash the
-  // username and navigate to the home page.
-  // const query = new URLSearchParams(window.location.search);
-  /*const c = new URLSearchParams(document.cookie);
-  if (query.get("state") === "onelogin_success") {
-    const token = c.get("sub_session_onelogin.com");
-    console.log(token);
-    console.log(query);
-    const username = query.get("username");
-    setLoggedIn(true);
-    localStorage.setItem("loggedIn", "true");
-    localStorage.setItem("username", username);
-    localStorage.setItem("authMethod", "oauth");
-    localStorage.setItem("authServer", "nyrkio.onelogin.com");
-    posthog.capture("login", { property: username });
-  */
-    //     try {
-    //       window.location.href = "/";
-    //     } catch (error) {
-    //       console.log("gh_login was success, but then something went wrong:")
-    //       console.log(error);
-    //     }
-//   }
 
   return (
     <div className="container">
@@ -253,15 +172,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
         <div className="text-left mt-4 mb-4">
-          <form action="https://nyrkio.onelogin.com/oidc/2/auth" method="POST">
-          <input type="hidden" name="nonce" value={uuidv4()} />
-          <input type="hidden" name="redirect_uri" value={redirectUri} />
-          <input type="hidden" name="scope" value="openid" />
-          <input type="hidden" name="client_id" value="204875a0-a341-013e-75df-29e1f863f4bd253438" />
-          <input type="hidden" name="response_type" value="id_token" />
-          <input type="hidden" name="state" value="onelogin_success" />
-          </form>
-
           <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <svg
           xmlns="http://www.w3.org/2000/svg"

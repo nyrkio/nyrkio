@@ -338,8 +338,17 @@ async def onelogin_callback(
             detail="This user is deactivated at nyrkio.com",
         )
 
-    data = user.oauth_accounts
-    update = UserUpdate(oauth_accounts=data)
+    print(user.oauth_accounts)
+    userinfo = await onelogin_oauth.get_userinfo()
+    print(userinfo)
+    orgs = [{"id": 1, "login": "dummy1"}, {"id": 2, "login": "dummy2"}]
+
+    if user.oauth_accounts.get("organizations", None) is None:
+        user.oauth_accounts["organizations"] = []
+    for org in orgs:
+        user.oauth_accounts["organizations"].append(org)
+
+    update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
 
     response = await jwt_backend.login(get_jwt_strategy(), user)
