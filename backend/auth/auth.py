@@ -339,7 +339,7 @@ async def onelogin_callback(
         )
 
     print(user.oauth_accounts)
-    userinfo = await onelogin_oauth.get_userinfo()
+    userinfo = await onelogin_oauth.get_userinfo(token["access_token"])
     print(userinfo)
     orgs = [{"id": 1, "login": "dummy1"}, {"id": 2, "login": "dummy2"}]
 
