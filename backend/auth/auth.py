@@ -344,13 +344,18 @@ async def onelogin_callback(
     orgs = [{"id": 1, "login": "dummy1"}, {"id": 2, "login": "dummy2"}]
 
     for oauth_acct in user.oauth_accounts:
-        if oauth_acct.get("oauth_name", "") != "onelogin":
+        if oauth_acct.oauth_name != "onelogin":
             continue
+        if oauth_acct.email != account_email:
+            print("Someone screwed up")
+            print(account_email, oauth_acct.email)
+            raise HTTPException(
+                status_code=500,
+                detail="This should never happen",
+            )
 
-        if oauth_acct.get("organizations", None) is None:
-            user.oauth_accounts["organizations"] = []
-        for org in orgs:
-            user.oauth_accounts["organizations"].append(org)
+
+        oauth_acct.organizations = orgs
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
