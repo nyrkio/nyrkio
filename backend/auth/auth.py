@@ -344,7 +344,7 @@ async def onelogin_callback(
     orgs = [{"id": 1, "login": "dummy1"}, {"id": 2, "login": "dummy2"}]
 
     for oauth_acct in user.oauth_accounts:
-        if oaut_acct.get("oauth_name", "") != "onelogin":
+        if oauth_acct.get("oauth_name", "") != "onelogin":
             continue
 
         if oauth_acct.get("organizations", None) is None:
