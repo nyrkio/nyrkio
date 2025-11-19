@@ -189,17 +189,19 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       </div>
 
       <div className="row ">
-      <div className="mt-3 w-100 sso-login" style={{"textAlign": "center"}}>
-        <div className="text-center mb-4  col-xs-12">
+        <div className="text-right mb-4 mt-3 sso-login col-sm-5 col-xs-5">
         <input
         type="text"
         placeholder="your domain"
-        className="form-control mb-2 w-50"
-        style={{"display": "inline"}}
+        className="form-control mb-2 w-100"
+        style={{"display": "inline", "textAlign": "right"}}
         id="oauth_my_domain"
         onChange={(e) => setUsername(e.target.value)}
-        />&nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
-        <button className="btn-info btn col-md-3 col-lg-2 col-sm-4 mt-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        />
+        </div>
+        <div className="text-left mb-4 mt-4 col-sm-6 col-xs-6 sso-login ">
+        &nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
+        <button className="btn-info btn col-md-8 col-lg-6 col-sm-12 mt-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -223,7 +225,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
         <p style={{"color":"#999999"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
-      </div>
       </div>
 
       <div className="mt-3 mb-3">

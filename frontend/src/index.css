@@ -564,10 +564,15 @@ button:focus-visible {
   border-color: var(--nyrkio-dark-gray);
   margin: 10px;
 }
+.sso-login .btn-info:hover,
+.btn-info:hover,
 .btn-primary:hover {
   background-color: var(--nyrkio-light-gray4);
   border-color: var(--nyrkio-dark-red);
   margin: 10px;
+}
+.sso-login .btn-info:focus {
+  border-width: 3px;
 }
 
 .btn-secondary:focus,
