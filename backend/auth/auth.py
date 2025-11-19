@@ -145,7 +145,7 @@ sso_oauth2_authorize_callbacks = {}
 sso_routers = {}
 
 
-@auth_router.post("/start/sso/login")
+@auth_router.get("/start/sso/login")
 async def start_sso_login(
     oauth_my_domain: str,
     oauth_tld: str,
