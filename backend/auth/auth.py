@@ -209,13 +209,11 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
                 oauth_full_domain, sso_oauth, request, access_token_state, user_manager
             )
 
-        auth_router.include_router(
-            sso_router,
-            prefix=f"/sso/{oauth_issuer}",
-            tags=["auth"],
+        from backend.api.api import app
+
+        app.include_router(
+            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{oauth_issuer}"
         )
-        print(sso_router)
-        print(auth_router)
 
 
 @auth_router.get("/verify-email/{token}")
