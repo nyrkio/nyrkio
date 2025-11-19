@@ -413,7 +413,7 @@ async def _sso_mycallback_handler(
     response = await jwt_backend.login(get_jwt_strategy(), user)
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
-    response = RedirectResponse("/login?onelogin_login=success&username=" + user.email)
+    response = RedirectResponse("/login?sso_login=success&username=" + user.email)
     response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
     return response
 
