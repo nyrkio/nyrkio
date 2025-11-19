@@ -9,7 +9,7 @@ CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)
 ONELOGIN_REDIRECT_URI = "https://staging.nyrkio.com/api/v0/auth/onelogin/mycallback"
 ONELOGIN_OIDC_HOST = "openid-connect.onelogin.com"
 
-BASE_SCOPES = ["openid", "email"]
+BASE_SCOPES = ["openid", "profile", "groups"]
 
 
 class OneLoginOAuth2(OpenID):
