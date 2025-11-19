@@ -1,8 +1,7 @@
 import os
-from typing import Optional, List, Any, Tuple, Dict, T
+from typing import Optional, List
 
 from httpx_oauth.clients.openid import OpenID
-from httpx_oauth.errors import GetIdEmailError
 
 CLIENT_ID = os.environ.get("ONE_LOGIN_CLIENT_ID", None)
 CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)
@@ -40,45 +39,8 @@ class OneLoginOAuth2(OpenID):
             name=name,
             base_scopes=BASE_SCOPES,
         )
-        print(self.openid_configuration)
-
-    # Override so we can get more of the data than just an email
-    async def get_id_email(self, token: str) -> Tuple[str, Optional[str]]:
-        async with self.get_httpx_client() as client:
-            response = await client.get(
-                self.openid_configuration["userinfo_endpoint"],
-                headers={**self.request_headers, "Authorization": f"Bearer {token}"},
-            )
-
-            if response.status_code >= 400:
-                raise GetIdEmailError(response.json())
-
-            self.userinfo: Dict[str, Any] = response.json()
-
-            return str(self.userinfo["sub"]), self.userinfo.get("email")
-
-    async def get_userinfo(self, token: str) -> Dict[str, Any]:
-        if self.userinfo is None:
-            await self.get_id_email(token)
-        return self.userinfo
-
-    async def get_authorization_url(
-        self,
-        redirect_uri: str,
-        state: Optional[str] = None,
-        scope: Optional[List[str]] = None,
-        extras_params: Optional[T] = None,
-    ) -> str:
-        if scope is not None and "groups" not in scope:
-            scope.append("groups")
-
-        return await super().get_authorization_url(redirect_uri, state, scope, extras_params)
 
 
-print(
-    CLIENT_SECRET[:3] if CLIENT_SECRET is not None else "ONE_LOGIN_CLIENT_SECRET=None"
-)
-print(CLIENT_ID)
 onelogin_oauth = OneLoginOAuth2(
     client_id=CLIENT_ID,
     client_secret=CLIENT_SECRET,
