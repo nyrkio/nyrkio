@@ -83,7 +83,7 @@ export const SignUpPage = () => {
       <div id="signup" className="container">
         <div className="row">
           <div className="col">
-            <h2 className="text-left mt-5">Create new account</h2>
+            <h4 className="text-left mt-5">Create new account</h4>
           </div>
         </div>
         <div className="row ">
@@ -153,7 +153,7 @@ export const SignUpPage = () => {
                 </div>
               </div>
               <div className="text-justify">
-                <button type="submit" className="btn btn-success">
+                <button type="submit" className="btn btn-nothing">
                   Submit
                 </button>
               </div>

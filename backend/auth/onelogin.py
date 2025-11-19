@@ -72,7 +72,7 @@ class OneLoginOAuth2(OpenID):
         if scope is not None and "groups" not in scope:
             scope.append("groups")
 
-        return super().get_authorization_url(redirect_uri, state, scope, extras_params)
+        return await super().get_authorization_url(redirect_uri, state, scope, extras_params)
 
 
 print(

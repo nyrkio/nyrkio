@@ -525,7 +525,6 @@ button:focus-visible {
     background-color: var(--nyrkio-light-gray);
   border: 1px solid var(--nyrkio-horn-dark-brown);
   color: var(--nyrkio-horn-dark-brown);
-  text-align: center;
   padding-top: 0.5em;
   padding-bottom: 0.5em;
   box-shadow: none;
@@ -534,7 +533,6 @@ button:focus-visible {
   margin: 10px;
   }
   .sso-login .btn-secondary{
-    text-align: left;
     padding-left: 1em;
     padding-top: 0.5em;
     padding-bottom: 0.5em;

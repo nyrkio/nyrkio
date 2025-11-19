@@ -187,9 +187,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         </div>
         <ErrorMessage className="mb-5"/>
       </div>
-      <div className="text-justify mt-3 col-lg-6  sso-login"  style={{"paddingRight": "1em"}}>
-        <div className="text-left mt-3 mb-3">
-          <button className="text-center btn btn-success col-sm-4" onClick={githubSubmit}>
+      <div className="mt-3 col-lg-6  sso-login" style={{"textAlign": "center"}}>
+        <div className="mt-3 mb-3">
+          <button className="btn btn-success col-sm-4" onClick={githubSubmit}>
             <div className="svgwrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -205,8 +205,11 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             GitHub
           </button>
         </div>
-        <div className="text-left mt-5 mb-3">
-          <button className="btn-primary btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <div className="">
+        &nbsp;
+        </div>
+        <div className="text-left mt-5 mb-2">
+          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -229,8 +232,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           OneLogin
           </button>
         </div>
-        <div className="text-left mt-3 mb-4">
-          <button className="btn-nothing btn col-sm-4" onClick={()=>setErrorText("Coming soon: Okta Single Sign On")}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <div className="text-left mt-2 mb-3">
+          <button className="btn-nothing btn col-sm-4" onClick={()=>setErrorText("Coming soon: Okta Single Sign On")}  style={{"height":"3em", "maxHeight":"3em", "color": "#bbbbbb"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
