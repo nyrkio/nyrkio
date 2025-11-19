@@ -152,7 +152,7 @@ async def start_sso_login(
 ):
     store = DBStore()
     oauth_full_domain = oauth_my_domain + "." + oauth_tld
-    oauth_config = store.get_sso_config(oauth_full_domain=oauth_full_domain)
+    oauth_config = await store.get_sso_config(oauth_full_domain=oauth_full_domain)
     if not oauth_config:
         raise HTTPException(
             status_code=404,

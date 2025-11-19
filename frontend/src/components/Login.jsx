@@ -158,13 +158,13 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h4 className="text-left mb-5 mt-3">Log In With...</h4>
+          <h4 className="text-center mb-5 mt-3">Login</h4>
         </div>
       </div>
       <div className="row ">
-      <div className="mt-3 col-lg-6 col-md-6  sso-login" style={{"textAlign": "center"}}>
+      <div className="mt-3 col-lg-12 col-md-10  sso-login" style={{"textAlign": "center"}}>
         <div className="mt-3 mb-3">
-          <button className="btn btn-success col-sm-6" onClick={githubSubmit}>
+          <button className="btn btn-success col-md-4 col-lg-3 col-sm-6 col-xs-12" onClick={githubSubmit}>
             <div className="svgwrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -180,10 +180,12 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             GitHub
           </button>
         </div>
-      </div>
+        <p><em>Recommended</em></p>
+        </div>
       </div>
       <div className="mt-5 mb-5">
       &nbsp;
+      <hr />
       </div>
 
       <div className="row ">
@@ -196,7 +198,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         id="oauth_my_domain"
         onChange={(e) => setUsername(e.target.value)}
         />.<span className="oauth_tld">onelogin.com</span>
-        <button className="btn-info btn col-sm-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <button className="btn-nothing btn col-sm-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -207,36 +209,16 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           viewBox="-40 -57 100 105"
           >
           <path
-          fill="#ffffff"
+          fill="#b28b56"
           d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
           />
           <path
-          fill="#b28b56"
+          fill="#ffffff"
           d="m 6.4135741,10.746842 c 0,0.9538 -0.4998967,1.45342 -1.4534901,1.45342 h -9.0836437 c -0.9536934,0 -1.45349,-0.49962 -1.45349,-1.45342 v -21.891638 h -6.9490583 c -0.953594,0 -1.452991,-0.49961 -1.452991,-1.45337 v -9.083697 c 0,-0.9538 0.499397,-1.45337 1.452991,-1.45337 H 5.186984 c 0.9540934,0 1.1809901,0.49957 1.1809901,1.18085 v 32.701225 z"
           />
           </svg>{" "}
           </div>
           OneLogin
-          </button>
-        </div>
-        <div className="text-left mt-2 mb-3">
-          <button className="btn-nothing btn col-sm-4" onClick={()=>setErrorText("Coming soon: Okta Single Sign On")}  style={{"height":"3em", "maxHeight":"3em", "color": "#bbbbbb"}}>
-          <div className="svgwrapper">
-          <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="20"
-          fill="currentColor"
-          className="bi"
-          viewBox="-40 -57 100 105"
-          >
-          <path
-          fill="#ffffff"
-          d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
-          />
-          </svg>{" "}
-          </div>
-              Okta
           </button>
         </div>
       </div>
