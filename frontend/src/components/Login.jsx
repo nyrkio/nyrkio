@@ -222,7 +222,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           OneLogin
           </button>
         </div>
-        <p><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
+        <p style={{"color":"#999999"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
       </div>
       </div>
 

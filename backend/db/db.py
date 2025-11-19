@@ -1597,6 +1597,7 @@ class DBStore(object):
         if org_domain is not None:
             q["org_domain"] = org_domain
         results = await coll.find(q).to_list(None)
+        print(q, results)
         return results
 
 
