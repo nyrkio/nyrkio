@@ -339,6 +339,7 @@ async def onelogin_callback(
 
     for oauth_acct in user.oauth_accounts:
         if oauth_acct.oauth_name != "onelogin":
+            print("skip", oauth_acct)
             continue
         if oauth_acct.account_email != account_email:
             print("Someone screwed up")
@@ -348,7 +349,8 @@ async def onelogin_callback(
                 detail="This should never happen",
             )
 
-        oauth_acct.organizations = [userinfo]
+        oauth_acct.organizations = []
+        oauth_acct.organizations.append(userinfo)
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
