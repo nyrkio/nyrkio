@@ -227,12 +227,12 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         <p style={{"color":"#999999"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
       </div>
 
-      <div className="mt-3 mb-3">
+      <div className="mt-1 mb-1">
       &nbsp;
       <hr />
       </div>
       <div className="row ">
-      <div className="mt-3 w-100 sso-login" style={{"textAlign": "center"}}>
+      <div className="mt-1 w-100 sso-login" style={{"textAlign": "center"}}>
         <div className="row">
           <form onSubmit={authSubmit}>
           <div className="col-xs-3">
