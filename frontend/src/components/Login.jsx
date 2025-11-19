@@ -183,7 +183,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         <p><em>Recommended</em></p>
         </div>
       </div>
-      <div className="mt-5 mb-5">
+      <div className="mt-3 mb-3">
       &nbsp;
       <hr />
       </div>
@@ -194,10 +194,11 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         <input
         type="text"
         placeholder="your domain"
-        className="form-control mb-2"
+        className="form-control mb-2 w-50"
+        style={{"display": "inline"}}
         id="oauth_my_domain"
         onChange={(e) => setUsername(e.target.value)}
-        />.<span className="oauth_tld">onelogin.com</span>
+        />&nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
         <button className="btn-nothing btn col-sm-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
@@ -222,9 +223,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
       </div>
+      </div>
 
-
-
+      <div className="row ">
       <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
         <div className="row">
         <div className="col-xs-1 col-md-2">
