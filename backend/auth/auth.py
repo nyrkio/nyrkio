@@ -34,9 +34,8 @@ from backend.db.db import (
 )
 from backend.auth.github import github_oauth
 from backend.auth.onelogin import (
-    onelogin_oauth,
-    ONELOGIN_REDIRECT_URI,
     CLIENT_SECRET as ONELOGIN_CLIENT_SECRET,
+    OneLoginOAuth2,
 )
 from backend.auth.superuser import SuperuserStrategy
 
@@ -58,6 +57,8 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
+
+sso_secrets = {"onelogin": ONELOGIN_CLIENT_SECRET}
 
 cookie_backend = AuthenticationBackend(
     name="cookie",
@@ -101,16 +102,6 @@ auth_router.include_router(
     tags=["auth"],
 )
 
-auth_router.include_router(
-    fastapi_users.get_oauth_router(
-        onelogin_oauth,
-        jwt_backend,
-        ONELOGIN_CLIENT_SECRET,
-        redirect_url=ONELOGIN_REDIRECT_URI,
-    ),
-    prefix="/onelogin",
-    tags=["auth"],
-)
 
 auth_router.include_router(
     fastapi_users.get_auth_router(jwt_backend, SECRET), prefix="/jwt", tags=["auth"]
@@ -150,9 +141,77 @@ github_oauth2_authorize_callback = OAuth2AuthorizeCallback(
     github_oauth, redirect_url=REDIRECT_URI
 )
 
-onelogin_oauth2_authorize_callback = OAuth2AuthorizeCallback(
-    onelogin_oauth, redirect_url=ONELOGIN_REDIRECT_URI
-)
+sso_oauth2_authorize_callbacks = {}
+sso_routers = {}
+
+
+@auth_router.post("/start/sso/login")
+async def start_sso_login(
+    oauth_my_domain: str,
+    oauth_tld: str,
+):
+    store = DBStore()
+    oauth_full_domain = oauth_my_domain + "." + oauth_tld
+    oauth_config = store.get_sso_config(oauth_full_domain=oauth_full_domain)
+    if not oauth_config:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Not found: {oauth_full_domain} is not configured as a known SSO issuer for Nyrkiö. To add your SSO to Nyrkiö, please contact sales@nyrkio.com",
+        )
+
+    if len(oauth_config) > 1:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Found more than one SSO issuer for {oauth_full_domain}. This is an error on our side and I don't know how to continue. I'm truly sorry about this.",
+        )
+
+    _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
+    oauth_issuer = oauth_config["oauth_issuer"]
+    return {"next_url": f"/api/v0/auth/{oauth_issuer}/authorize"}
+
+
+async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
+    oauth_issuer = oauth_config["oauth_issuer"]
+    redirect_url = (
+        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
+    )
+    if oauth_issuer not in sso_oauth2_authorize_callbacks:
+        sso_oauth = OneLoginOAuth2(
+            sso_domain=oauth_full_domain,
+            scopes=oauth_config["scopes"],
+        )
+
+        sso_oauth2_authorize_callback = OAuth2AuthorizeCallback(
+            sso_oauth,
+            redirect_url=redirect_url,
+        )
+        sso_oauth2_authorize_callbacks[oauth_issuer] = sso_oauth2_authorize_callback
+        sso_router = fastapi_users.get_oauth_router(
+            sso_oauth,
+            jwt_backend,
+            sso_secrets[oauth_issuer],
+            redirect_url=redirect_url,
+        )
+
+        @sso_router.get("/mycallback", include_in_schema=False)
+        async def sso_callback(
+            request: Request,
+            access_token_state: Tuple[OAuth2Token, str] = Depends(
+                sso_oauth2_authorize_callback
+            ),
+            user_manager: BaseUserManager[models.UP, models.ID] = Depends(
+                get_user_manager
+            ),
+        ):
+            _sso_mycallback_handler(
+                oauth_full_domain, sso_oauth, request, access_token_state, user_manager
+            )
+
+        auth_router.include_router(
+            sso_router,
+            prefix=f"/sso/{oauth_issuer}",
+            tags=["auth"],
+        )
 
 
 @auth_router.get("/verify-email/{token}")
@@ -294,17 +353,11 @@ async def github_callback(
     return response
 
 
-@auth_router.get("/onelogin/mycallback", include_in_schema=False)
-async def onelogin_callback(
-    request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(
-        onelogin_oauth2_authorize_callback
-    ),
-    user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
+async def _sso_mycallback_handler(
+    oauth_full_domain, sso_oauth, request, access_token_state, user_manager
 ):
     token, state = access_token_state
-    print(state)
-    account_id, account_email = await onelogin_oauth.get_id_email(token["access_token"])
+    account_id, account_email = await sso_oauth.get_id_email(token["access_token"])
     if account_email is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -335,7 +388,7 @@ async def onelogin_callback(
             detail="This user is deactivated at nyrkio.com",
         )
 
-    userinfo = await onelogin_oauth.get_userinfo(token["access_token"])
+    userinfo = await sso_oauth.get_userinfo(token["access_token"])
 
     for oauth_acct in user.oauth_accounts:
         if oauth_acct.oauth_name != "onelogin":

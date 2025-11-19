@@ -123,17 +123,24 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   }
 
   const redirectUri="https://staging.nyrkio.com/login";
-  const oneLoginSubmit = async (e) => {
+  const ssoSubmit = async (e) => {
     e.preventDefault();
-    console.log("OneLogin submit");
-    const data = await fetch("/api/v0/auth/onelogin/authorize")
-    .then((response) => response.json())
-    .then((url) => {
-      console.log(url);
-      const u = url["authorization_url"];
-      window.location.href = u; // Goes to onelogin.com, from there to the backend, mycallback, and eventually continues below
-    })
-    .catch((error) => console.log(error));
+    console.log("SSO submit");
+    const oauth_my_domain = document.getElementById("oauth_my_domain").value;
+    const oauth_tld = "onelogin.com";
+    const startData = await fetch(`/api/v0/auth/start/sso/login?oauth_my_domain=${oauth_my_domain}&amp;oauth_tld=${oauth_tld}`)
+      .then((resp) => resp.json())
+      .then(async (next) => {
+          const data = await fetch(next.next_url)
+          .then((response) => response.json())
+          .then((url) => {
+            console.log(url);
+            const u = url["authorization_url"];
+            window.location.href = u; // Goes to onelogin.com, from there to the backend, mycallback, and eventually continues below
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
   };
 
   if (query.get("onelogin_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
@@ -182,7 +189,14 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       <div className="row ">
       <div className="mt-3 col-lg-6  sso-login" style={{"textAlign": "center"}}>
         <div className="text-left mb-2">
-          <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <input
+        type="text"
+        placeholder="your domain"
+        className="form-control mb-2"
+        id="oauth_my_domain"
+        onChange={(e) => setUsername(e.target.value)}
+        />.<span className="oauth_tld">onelogin.com</span>
+        <button className="btn-info btn col-sm-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"

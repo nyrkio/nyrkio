@@ -19,7 +19,7 @@ class OneLoginOAuth2(OpenID):
         self,
         client_id: str,
         client_secret: str,
-        onelogin_domain: str,
+        sso_domain: str,
         scopes: Optional[List[str]] = BASE_SCOPES,
         name: str = "onelogin",
     ):
@@ -34,11 +34,11 @@ class OneLoginOAuth2(OpenID):
         self.userinfo = None  # None means we didn't even try to get it yet.
 
         super().__init__(
-            client_id,
-            client_secret,
-            f"https://{onelogin_domain}/oidc/2/.well-known/openid-configuration",
+            CLIENT_ID,
+            CLIENT_SECRET,
+            f"https://{sso_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
-            base_scopes=BASE_SCOPES,
+            base_scopes=scopes,
         )
         print(self.openid_configuration)
 
@@ -61,11 +61,3 @@ class OneLoginOAuth2(OpenID):
         if self.userinfo is None:
             await self.get_id_email(token)
         return self.userinfo
-
-
-onelogin_oauth = OneLoginOAuth2(
-    client_id=CLIENT_ID,
-    client_secret=CLIENT_SECRET,
-    onelogin_domain="nyrkio.onelogin.com",
-    scopes=["openid", "profile", "groups"],
-)

@@ -1585,6 +1585,20 @@ class DBStore(object):
         )
         print("done", result)
 
+    async def get_sso_config(
+        self, oauth_domain=None, oauth_issuer=None, org_domain=None
+    ):
+        coll = self.db.sso
+        q = {}
+        if oauth_domain is not None:
+            q["oauth_domain"] = oauth_domain
+        if oauth_issuer is not None:
+            q["oauth_issuer"] = oauth_issuer
+        if org_domain is not None:
+            q["org_domain"] = org_domain
+        results = coll.find(q).to_list[None]
+        return results
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
