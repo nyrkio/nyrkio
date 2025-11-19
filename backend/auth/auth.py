@@ -348,7 +348,7 @@ async def onelogin_callback(
                 detail="This should never happen",
             )
 
-        oauth_acct.organizations = userinfo
+        oauth_acct.organizations = [userinfo]
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
