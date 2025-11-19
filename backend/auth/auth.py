@@ -354,7 +354,6 @@ async def onelogin_callback(
                 detail="This should never happen",
             )
 
-
         oauth_acct.organizations = orgs
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
