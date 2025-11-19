@@ -1,5 +1,5 @@
 import os
-from typing import Optional, List, Any, Tuple, Dict
+from typing import Optional, List, Any, Tuple, Dict, T
 
 from httpx_oauth.clients.openid import OpenID
 from httpx_oauth.errors import GetIdEmailError
@@ -38,8 +38,7 @@ class OneLoginOAuth2(OpenID):
             client_secret,
             f"https://{onelogin_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
-            base_scopes=scopes,
-            scopes=scopes,
+            base_scopes=BASE_SCOPES,
         )
         print(self.openid_configuration)
 
@@ -62,6 +61,18 @@ class OneLoginOAuth2(OpenID):
         if self.userinfo is None:
             await self.get_id_email(token)
         return self.userinfo
+
+    async def get_authorization_url(
+        self,
+        redirect_uri: str,
+        state: Optional[str] = None,
+        scope: Optional[List[str]] = None,
+        extras_params: Optional[T] = None,
+    ) -> str:
+        if scope is not None and "groups" not in scope:
+            scope.append("groups")
+
+        return super().get_authorization_url(redirect_uri, state, scope, extras_params)
 
 
 print(
