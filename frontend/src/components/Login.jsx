@@ -253,11 +253,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
       </div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <SignUpPage />
       </div>
     </div>
   );

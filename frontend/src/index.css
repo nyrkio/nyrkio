@@ -521,8 +521,8 @@ button:focus-visible {
 }
 
 .sso-login .btn-info.btn,
-  .sso-login .btn-info{
-    background-color: var(--nyrkio-light-gray);
+.sso-login .btn-info{
+  background-color: var(--nyrkio-light-gray);
   border: 1px solid var(--nyrkio-horn-dark-brown);
   color: var(--nyrkio-horn-dark-brown);
   padding-top: 0.5em;
@@ -531,8 +531,8 @@ button:focus-visible {
   height: 3em;
   max-height: 3em;
   margin: 10px;
-  }
-  .sso-login .btn-secondary{
+}
+.sso-login .btn-secondary{
     padding-left: 1em;
     padding-top: 0.5em;
     padding-bottom: 0.5em;
@@ -540,11 +540,13 @@ button:focus-visible {
     height: 3em;
     max-height: 3em;
     margin: 10px;
-  }
+}
 
 .sso-login .btn-success,
 .sso-login .btn-nothing {
   margin: 10px;
+  height: 3em;
+  max-height: 3em;
 }
 
 .btn-success:focus:hover,
@@ -555,8 +557,6 @@ button:focus-visible {
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
-  height: 3em;
-  max-height: 3em;
 }
 
 .btn-primary {

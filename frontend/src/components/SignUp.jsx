@@ -88,7 +88,6 @@ export const SignUpPage = () => {
         </div>
         <div className="row ">
           <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
-            <hr />
             <p>           <strong className="nyrkio-accent">Recommended:</strong><br /> Create account &amp; Install Nyrkiö as a GitHub app <sup>*</sup>:</p>
             <button className="btn btn-success" onClick={githubInstall}>
             <svg
@@ -124,10 +123,8 @@ export const SignUpPage = () => {
             </button>
           </div>
           */}
-          <div className="text-justify  mt-5 mb-5 col-lg-6" style={{"paddingLeft": "2em"}}>
-            <hr />
-            <p><strong>Nyrkiö unplugged</strong> (no GitHub):<br />
-            Just use your email address and choose a password:</p>
+          <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
+            <p><em>Nyrkiö unplugged (no GitHub):</em></p>
             <form onSubmit={signUpSubmit}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
@@ -138,6 +135,7 @@ export const SignUpPage = () => {
                   className="form-control w-50"
                   id="emailInput"
                   onChange={(e) => setEmail(e.target.value)}
+                  style={{"marginLeft": "25%", "marginRight": "25%"}}
                 />
                 <label htmlFor="passwordInput" className="form-label">
                   Password
@@ -147,7 +145,8 @@ export const SignUpPage = () => {
                   className="form-control w-50"
                   id="passwordInput"
                   onChange={(e) => setPassword(e.target.value)}
-                />
+                  style={{"marginLeft": "25%", "marginRight": "25%"}}
+                  />
                 <div id="emailHelp" className="form-text">
                   We'll send you an email once your account is ready.
                 </div>
