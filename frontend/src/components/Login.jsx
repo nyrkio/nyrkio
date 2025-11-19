@@ -143,7 +143,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       .catch((error) => console.log(error));
   };
 
-  if (query.get("onelogin_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
+  if (query.get("sso_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
     const username = query.get("username");
     setLoggedIn(true);
     localStorage.setItem("loggedIn", "true");

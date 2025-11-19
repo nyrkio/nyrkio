@@ -176,12 +176,13 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
     redirect_url = (
         f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
     )
+    print(sso_oauth2_authorize_callbacks)
     if oauth_issuer not in sso_oauth2_authorize_callbacks:
         sso_oauth = OneLoginOAuth2(
             sso_domain=oauth_full_domain,
             scopes=oauth_config["scopes"],
         )
-
+        print(sso_oauth)
         sso_oauth2_authorize_callback = OAuth2AuthorizeCallback(
             sso_oauth,
             redirect_url=redirect_url,
@@ -194,7 +195,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
             redirect_url=redirect_url,
         )
 
-        @sso_router.get("/mycallback", include_in_schema=False)
+        @sso_router.get("/mycallback", include_in_schema=True)
         async def sso_callback(
             request: Request,
             access_token_state: Tuple[OAuth2Token, str] = Depends(
@@ -213,6 +214,8 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
             prefix=f"/sso/{oauth_issuer}",
             tags=["auth"],
         )
+        print(sso_router)
+        print(auth_router)
 
 
 @auth_router.get("/verify-email/{token}")
