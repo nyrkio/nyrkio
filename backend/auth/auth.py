@@ -164,6 +164,7 @@ async def start_sso_login(
             status_code=500,
             detail=f"Found more than one SSO issuer for {oauth_full_domain}. This is an error on our side and I don't know how to continue. I'm truly sorry about this.",
         )
+    oauth_config = oauth_config[0]
 
     _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
     oauth_issuer = oauth_config["oauth_issuer"]
