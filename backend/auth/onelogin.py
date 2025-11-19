@@ -17,8 +17,6 @@ class OneLoginOAuth2(OpenID):
 
     def __init__(
         self,
-        client_id: str,
-        client_secret: str,
         sso_domain: str,
         scopes: Optional[List[str]] = BASE_SCOPES,
         name: str = "onelogin",
