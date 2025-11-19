@@ -205,7 +205,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
                 get_user_manager
             ),
         ):
-            _sso_mycallback_handler(
+            return await _sso_mycallback_handler(
                 oauth_full_domain, sso_oauth, request, access_token_state, user_manager
             )
 
