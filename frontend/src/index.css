@@ -515,10 +515,9 @@ button:focus-visible {
   color: var(--nyrkio-horn-dark-brown);
 }
 
-.sso-login .btn svg {
-  left: 1em;
-  position: absolute;
-  border: blue 3px solid;
+.sso-login .btn .svgwrapper {
+  text-align: left;
+  height: 1px;
 }
 
 .sso-login .btn-info.btn,
@@ -532,15 +531,22 @@ button:focus-visible {
   box-shadow: none;
   height: 3em;
   max-height: 3em;
+  margin: 10px;
   }
-.sso-login .btn-secondary{
-  text-align: left;
-  padding-left: 1em;
-  padding-top: 0.5em;
-  padding-bottom: 0.5em;
-  box-shadow: none;
-  height: 3em;
-  max-height: 3em;
+  .sso-login .btn-secondary{
+    text-align: left;
+    padding-left: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    box-shadow: none;
+    height: 3em;
+    max-height: 3em;
+    margin: 10px;
+  }
+
+.sso-login .btn-success,
+.sso-login .btn-nothing {
+  margin: 10px;
 }
 
 .btn-success:focus:hover,
@@ -551,6 +557,8 @@ button:focus-visible {
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
+  height: 3em;
+  max-height: 3em;
 }
 
 .btn-primary {
@@ -583,7 +591,7 @@ button:focus-visible {
 .btn-nothing:focus,
 .btn-nothing {
   color: var(--nyrkio-arrow-brown);
-  border-color: none;
+  border-color: #dddddd;
   max-height: 2.5em;
   padding-top: 5px;
   box-shadow: none;
@@ -595,6 +603,9 @@ button:focus-visible {
   color: var(--nyrkio-bear-brown);
   border-color: var(--nyrkio-dark-gray);
   background-color: none;
+}
+.btn-nothing:active {
+  background-color: var(--nyrkio-dark-gray);
 }
 
 .btn-danger {

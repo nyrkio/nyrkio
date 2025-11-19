@@ -39,7 +39,6 @@ class OneLoginOAuth2(OpenID):
             f"https://{onelogin_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
             base_scopes=scopes,
-            claims=scopes,
             scopes=scopes,
         )
         print(self.openid_configuration)
