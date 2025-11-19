@@ -346,7 +346,7 @@ async def onelogin_callback(
     for oauth_acct in user.oauth_accounts:
         if oauth_acct.oauth_name != "onelogin":
             continue
-        if oauth_acct.email != account_email:
+        if oauth_acct.account_email != account_email:
             print("Someone screwed up")
             print(account_email, oauth_acct.email)
             raise HTTPException(
