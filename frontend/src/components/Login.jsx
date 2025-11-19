@@ -128,7 +128,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     console.log("SSO submit");
     const oauth_my_domain = document.getElementById("oauth_my_domain").value;
     const oauth_tld = "onelogin.com";
-    const startData = await fetch(`/api/v0/auth/start/sso/login?oauth_my_domain=${oauth_my_domain}&amp;oauth_tld=${oauth_tld}`)
+    const startData = await fetch(`/api/v0/auth/start/sso/login?oauth_my_domain=${oauth_my_domain}&oauth_tld=${oauth_tld}`)
       .then((resp) => resp.json())
       .then(async (next) => {
           const data = await fetch(next.next_url)
