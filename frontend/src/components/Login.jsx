@@ -162,7 +162,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         </div>
       </div>
       <div className="row ">
-      <div className="mt-3 col-lg-12 col-md-10  sso-login" style={{"textAlign": "center"}}>
+      <div className="mt-3 col-xs-12 sso-login" style={{"textAlign": "center"}}>
         <div className="mt-3 mb-3">
           <button className="btn btn-success col-md-4 col-lg-3 col-sm-6 col-xs-12" onClick={githubSubmit}>
             <div className="svgwrapper">
@@ -189,8 +189,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       </div>
 
       <div className="row ">
-      <div className="mt-3 col-lg-6  sso-login" style={{"textAlign": "center"}}>
-        <div className="text-left mb-2">
+      <div className="mt-3 w-100 sso-login" style={{"textAlign": "center"}}>
+        <div className="text-center mb-4  col-xs-12">
         <input
         type="text"
         placeholder="your domain"
@@ -199,7 +199,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         id="oauth_my_domain"
         onChange={(e) => setUsername(e.target.value)}
         />&nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
-        <button className="btn-nothing btn col-sm-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <button className="btn-info btn col-md-3 col-lg-2 col-sm-4 mt-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -214,7 +214,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
           />
           <path
-          fill="#ffffff"
+          fill="#422b16"
           d="m 6.4135741,10.746842 c 0,0.9538 -0.4998967,1.45342 -1.4534901,1.45342 h -9.0836437 c -0.9536934,0 -1.45349,-0.49962 -1.45349,-1.45342 v -21.891638 h -6.9490583 c -0.953594,0 -1.452991,-0.49961 -1.452991,-1.45337 v -9.083697 c 0,-0.9538 0.499397,-1.45337 1.452991,-1.45337 H 5.186984 c 0.9540934,0 1.1809901,0.49957 1.1809901,1.18085 v 32.701225 z"
           />
           </svg>{" "}
@@ -222,30 +222,36 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           OneLogin
           </button>
         </div>
+        <p><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
       </div>
       </div>
 
+      <div className="mt-3 mb-3">
+      &nbsp;
+      <hr />
+      </div>
       <div className="row ">
-      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
+      <div className="mt-3 w-100 sso-login" style={{"textAlign": "center"}}>
         <div className="row">
-        <div className="col-xs-1 col-md-2">
-        </div>
-        <div className="text-center col-xs-10 col-md-8">
           <form onSubmit={authSubmit}>
-            <div className="mb-3 text-center">
+          <div className="col-xs-3">
+          </div>
+          <div className="col-xs-6 mb-3 text-center">
               <input
                 type="text"
                 placeholder="email"
-                className="form-control mb-2"
+                className="form-control mb-2 w-50"
                 id="exampleInputEmail1"
                 onChange={(e) => setUsername(e.target.value)}
-              />
+                style={{"marginLeft": "25%"}}
+                />
                 <input
                   placeholder="passw0rd"
                   type="password"
-                  className="form-control mb-2"
+                  className="form-control mb-2 w-50"
                   id="exampleInputPassword1"
                   onChange={(e) => setPassword(e.target.value)}
+                  style={{"marginLeft": "25%"}}
                 />
             </div>
             <div className="text-center mt-2">
@@ -254,7 +260,6 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
               </button>
             </div>
           </form>
-        </div>
         </div>
         <ErrorMessage className="mb-5"/>
       </div>

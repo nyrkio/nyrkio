@@ -1596,7 +1596,7 @@ class DBStore(object):
             q["oauth_issuer"] = oauth_issuer
         if org_domain is not None:
             q["org_domain"] = org_domain
-        results = coll.find(q).to_list(None)
+        results = await coll.find(q).to_list(None)
         return results
 
 
