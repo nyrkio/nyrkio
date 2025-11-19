@@ -151,45 +151,13 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h4 className="text-left mt-3">Log In With...</h4>
+          <h4 className="text-left mb-5 mt-3">Log In With...</h4>
         </div>
       </div>
       <div className="row ">
-      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
-        <div className="row">
-        <div className="col-xs-1 col-md-2">
-        </div>
-        <div className="text-center col-xs-10 col-md-8">
-          <form onSubmit={authSubmit}>
-            <div className="mb-3 text-center">
-              <input
-                type="text"
-                placeholder="email"
-                className="form-control mb-2"
-                id="exampleInputEmail1"
-                onChange={(e) => setUsername(e.target.value)}
-              />
-                <input
-                  placeholder="passw0rd"
-                  type="password"
-                  className="form-control mb-2"
-                  id="exampleInputPassword1"
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-            </div>
-            <div className="text-center mt-2">
-              <button type="submit" className="btn btn-nothing mb-5">
-                Login
-              </button>
-            </div>
-          </form>
-        </div>
-        </div>
-        <ErrorMessage className="mb-5"/>
-      </div>
-      <div className="mt-3 col-lg-6  sso-login" style={{"textAlign": "center"}}>
+      <div className="mt-3 col-lg-6 col-md-6  sso-login" style={{"textAlign": "center"}}>
         <div className="mt-3 mb-3">
-          <button className="btn btn-success col-sm-4" onClick={githubSubmit}>
+          <button className="btn btn-success col-sm-6" onClick={githubSubmit}>
             <div className="svgwrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -205,10 +173,15 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             GitHub
           </button>
         </div>
-        <div className="">
-        &nbsp;
-        </div>
-        <div className="text-left mt-5 mb-2">
+      </div>
+      </div>
+      <div className="mt-5 mb-5">
+      &nbsp;
+      </div>
+
+      <div className="row ">
+      <div className="mt-3 col-lg-6  sso-login" style={{"textAlign": "center"}}>
+        <div className="text-left mb-2">
           <button className="btn-info btn col-sm-4" onClick={oneLoginSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
           <div className="svgwrapper">
           <svg
@@ -253,8 +226,43 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           </button>
         </div>
       </div>
+
+
+
+      <div className="text-center mt-5 col-lg-6 sso-login "  style={{"paddingRight": "1em"}}>
+        <div className="row">
+        <div className="col-xs-1 col-md-2">
+        </div>
+        <div className="text-center col-xs-10 col-md-8">
+          <form onSubmit={authSubmit}>
+            <div className="mb-3 text-center">
+              <input
+                type="text"
+                placeholder="email"
+                className="form-control mb-2"
+                id="exampleInputEmail1"
+                onChange={(e) => setUsername(e.target.value)}
+              />
+                <input
+                  placeholder="passw0rd"
+                  type="password"
+                  className="form-control mb-2"
+                  id="exampleInputPassword1"
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+            </div>
+            <div className="text-center mt-2">
+              <button type="submit" className="btn btn-nothing mb-5">
+                Login
+              </button>
+            </div>
+          </form>
+        </div>
+        </div>
+        <ErrorMessage className="mb-5"/>
       </div>
-    </div>
+      </div>
+      </div>
   );
 };
 

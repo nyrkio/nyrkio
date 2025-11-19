@@ -303,7 +303,7 @@ async def onelogin_callback(
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
-
+    print(state)
     account_id, account_email = await onelogin_oauth.get_id_email(token["access_token"])
     if account_email is None:
         raise HTTPException(
@@ -334,6 +334,21 @@ async def onelogin_callback(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="This user is deactivated at nyrkio.com",
         )
+
+    userinfo = await onelogin_oauth.get_userinfo(token["access_token"])
+
+    for oauth_acct in user.oauth_accounts:
+        if oauth_acct.oauth_name != "onelogin":
+            continue
+        if oauth_acct.account_email != account_email:
+            print("Someone screwed up")
+            print(account_email, oauth_acct.email)
+            raise HTTPException(
+                status_code=500,
+                detail="This should never happen",
+            )
+
+        oauth_acct.organizations = userinfo
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)

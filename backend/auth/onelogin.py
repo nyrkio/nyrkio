@@ -1,7 +1,8 @@
 import os
-from typing import Optional, List
+from typing import Optional, List, Any, Tuple, Dict
 
 from httpx_oauth.clients.openid import OpenID
+from httpx_oauth.errors import GetIdEmailError
 
 CLIENT_ID = os.environ.get("ONE_LOGIN_CLIENT_ID", None)
 CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)
@@ -39,6 +40,27 @@ class OneLoginOAuth2(OpenID):
             name=name,
             base_scopes=BASE_SCOPES,
         )
+        print(self.openid_configuration)
+
+    # Override so we can get more of the data than just an email
+    async def get_id_email(self, token: str) -> Tuple[str, Optional[str]]:
+        async with self.get_httpx_client() as client:
+            response = await client.get(
+                self.openid_configuration["userinfo_endpoint"],
+                headers={**self.request_headers, "Authorization": f"Bearer {token}"},
+            )
+
+            if response.status_code >= 400:
+                raise GetIdEmailError(response.json())
+
+            self.userinfo: Dict[str, Any] = response.json()
+
+            return str(self.userinfo["sub"]), self.userinfo.get("email")
+
+    async def get_userinfo(self, token: str) -> Dict[str, Any]:
+        if self.userinfo is None:
+            await self.get_id_email(token)
+        return self.userinfo
 
 
 onelogin_oauth = OneLoginOAuth2(
