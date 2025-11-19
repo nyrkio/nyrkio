@@ -168,7 +168,7 @@ async def start_sso_login(
 
     await _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
     oauth_issuer = oauth_config["oauth_issuer"]
-    return {"next_url": f"/api/v0/auth/{oauth_issuer}/authorize"}
+    return {"next_url": f"/api/v0/auth/sso/{oauth_issuer}/authorize"}
 
 
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
