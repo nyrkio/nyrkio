@@ -23,7 +23,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
   const authSubmit = async (e) => {
     e.preventDefault();
-    console.log("Auth submit: " + username + " " + password);
+    console.log("Auth submit: " + username + " " + password.substring(0,2));
     let credentialsData = new URLSearchParams();
     credentialsData.append("username", username);
     credentialsData.append("password", password);
@@ -119,29 +119,56 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "github.com");
     posthog.capture("login", { property: username });
+    window.location.href = "/";
+  }
 
-    try {
-      window.location.href = "/";
-    } catch (error) {
-      console.log("gh_login was success, but then something went wrong:")
-      console.log(error);
-    }
+  const redirectUri="https://staging.nyrkio.com/login";
+  const ssoSubmit = async (e) => {
+    e.preventDefault();
+    console.log("SSO submit");
+    const oauth_my_domain = document.getElementById("oauth_my_domain").value;
+    const oauth_tld = "onelogin.com";
+    const startData = await fetch(`/api/v0/auth/start/sso/login?oauth_my_domain=${oauth_my_domain}&oauth_tld=${oauth_tld}`)
+      .then((resp) => resp.json())
+      .then(async (next) => {
+          const data = await fetch(next.next_url)
+          .then((response) => response.json())
+          .then((url) => {
+            console.log(url);
+            const u = url["authorization_url"];
+            window.location.href = u; // Goes to onelogin.com, from there to the backend, mycallback, and eventually continues below
+          })
+          .catch((error) => console.log(error));
+      })
+      .catch((error) => console.log(error));
+  };
+
+  if (query.get("sso_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
+    const username = query.get("username");
+    setLoggedIn(true);
+    localStorage.setItem("loggedIn", "true");
+    localStorage.setItem("username", username);
+    localStorage.setItem("authMethod", "oauth");
+    localStorage.setItem("authServer", "onelogin.com");
+    posthog.capture("login", { property: username });
+    window.location.href = "/";
   }
 
   return (
     <div className="container">
       <div className="row">
         <div className="col">
-          <h2 className="text-center mt-5">Log In</h2>
+          <h4 className="text-center mb-5 mt-3">Login</h4>
         </div>
       </div>
       <div className="row ">
-      <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
-        <div className="text-center mt-5 mb-5">
-          <button className="btn btn-success" onClick={githubSubmit}>
+      <div className="mt-3 col-xs-12 sso-login" style={{"textAlign": "center"}}>
+        <div className="mt-3 mb-3">
+          <button className="btn btn-success col-md-4 col-lg-3 col-sm-6 col-xs-12" onClick={githubSubmit}>
+            <div className="svgwrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              width="16"
+              width="25"
               height="16"
               fill="currentColor"
               className="bi bi-github"
@@ -149,58 +176,98 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             >
               <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
             </svg>{" "}
-            Login with GitHub
+            </div>
+            GitHub
           </button>
         </div>
+        <p><em>Recommended</em></p>
+        </div>
       </div>
-      <div className="text-center mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
-        <div className="text-center mt-3 mb-5">
-        Or login with your email and password if you created a password account:
+      <div className="mt-3 mb-3">
+      &nbsp;
+      <hr />
+      </div>
+
+      <div className="row ">
+        <div className="text-right mb-4 mt-3 sso-login col-sm-5 col-xs-5">
+        <input
+        type="text"
+        placeholder="your domain"
+        className="form-control mb-2 w-100"
+        style={{"display": "inline", "textAlign": "right"}}
+        id="oauth_my_domain"
+        onChange={(e) => setUsername(e.target.value)}
+        />
         </div>
+        <div className="text-left mb-4 mt-4 col-sm-6 col-xs-6 sso-login ">
+        &nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
+        <button className="btn-info btn col-md-8 col-lg-6 col-sm-12 mt-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+          <div className="svgwrapper">
+          <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="25"
+          height="20"
+          fill="currentColor"
+          className="bi"
+          viewBox="-40 -57 100 105"
+          >
+          <path
+          fill="#b28b56"
+          d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
+          />
+          <path
+          fill="#422b16"
+          d="m 6.4135741,10.746842 c 0,0.9538 -0.4998967,1.45342 -1.4534901,1.45342 h -9.0836437 c -0.9536934,0 -1.45349,-0.49962 -1.45349,-1.45342 v -21.891638 h -6.9490583 c -0.953594,0 -1.452991,-0.49961 -1.452991,-1.45337 v -9.083697 c 0,-0.9538 0.499397,-1.45337 1.452991,-1.45337 H 5.186984 c 0.9540934,0 1.1809901,0.49957 1.1809901,1.18085 v 32.701225 z"
+          />
+          </svg>{" "}
+          </div>
+          OneLogin
+          </button>
+        </div>
+        <p style={{"color":"#999999"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
+      </div>
+
+      <div className="mt-3 mb-3">
+      &nbsp;
+      <hr />
+      </div>
+      <div className="row ">
+      <div className="mt-3 w-100 sso-login" style={{"textAlign": "center"}}>
         <div className="row">
-        <div className="col-xs-1 col-md-2">
-        </div>
-        <div className="text-center col-xs-10 col-md-8">
           <form onSubmit={authSubmit}>
-            <div className="mb-3 text-center">
-              <label htmlFor="exampleInputEmail1" className="form-label">
-                Email address
-              </label>
+          <div className="col-xs-3">
+          </div>
+          <div className="col-xs-6 mb-3 text-center">
               <input
                 type="text"
-                className="form-control"
+                placeholder="email"
+                className="form-control mb-2 w-50"
                 id="exampleInputEmail1"
                 onChange={(e) => setUsername(e.target.value)}
-              />
-              <div className="mb-3">
-                <label htmlFor="exampleInputPassword1" className="form-label">
-                  Password
-                </label>
+                style={{"marginLeft": "25%"}}
+                />
                 <input
+                  placeholder="passw0rd"
                   type="password"
-                  className="form-control"
+                  className="form-control mb-2 w-50"
                   id="exampleInputPassword1"
                   onChange={(e) => setPassword(e.target.value)}
+                  style={{"marginLeft": "25%"}}
                 />
-              </div>
             </div>
             <div className="text-center mt-2">
-              <button type="submit" className="btn btn-success mb-5">
+              <button type="submit" className="btn btn-nothing mb-5">
                 Login
               </button>
             </div>
           </form>
-        </div>
+          <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user accout here</a>.</em></p>
+
         </div>
         <ErrorMessage className="mb-5"/>
-        </div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <div>&nbsp;</div>
-        <SignUpPage />
       </div>
-    </div>
+      </div>
+      </div>
   );
 };
 
