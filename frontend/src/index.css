@@ -515,6 +515,12 @@ button:focus-visible {
   color: var(--nyrkio-horn-dark-brown);
 }
 
+.sso-login .btn svg {
+  left: 1em;
+  position: absolute;
+  border: blue 3px solid;
+}
+
 .sso-login .btn-info.btn,
   .sso-login .btn-info{
     background-color: var(--nyrkio-light-gray);

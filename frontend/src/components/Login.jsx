@@ -151,7 +151,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     <div className="container">
       <div className="row">
         <div className="col">
-          <h2 className="text-left mt-3">Log In With...</h2>
+          <h4 className="text-left mt-3">Log In With...</h4>
         </div>
       </div>
       <div className="row ">
@@ -178,7 +178,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
                 />
             </div>
             <div className="text-center mt-2">
-              <button type="submit" className="btn btn-info mb-5">
+              <button type="submit" className="btn btn-nothing mb-5">
                 Login
               </button>
             </div>
@@ -189,7 +189,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       </div>
       <div className="text-justify mt-3 col-lg-6  sso-login"  style={{"paddingRight": "1em"}}>
         <div className="text-left mt-3 mb-3">
-          <button className="text-left btn btn-success col-sm-4" onClick={githubSubmit}>
+          <button className="text-center btn btn-success col-sm-4" onClick={githubSubmit}>
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="25"

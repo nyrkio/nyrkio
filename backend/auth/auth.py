@@ -343,10 +343,14 @@ async def onelogin_callback(
     print(userinfo)
     orgs = [{"id": 1, "login": "dummy1"}, {"id": 2, "login": "dummy2"}]
 
-    if user.oauth_accounts.get("organizations", None) is None:
-        user.oauth_accounts["organizations"] = []
-    for org in orgs:
-        user.oauth_accounts["organizations"].append(org)
+    for oauth_acct in user.oauth_accounts:
+        if oaut_acct.get("oauth_name", "") != "onelogin":
+            continue
+
+        if oauth_acct.get("organizations", None) is None:
+            user.oauth_accounts["organizations"] = []
+        for org in orgs:
+            user.oauth_accounts["organizations"].append(org)
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
