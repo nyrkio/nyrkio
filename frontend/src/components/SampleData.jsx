@@ -19,15 +19,15 @@ const publicCustomers = [
 ];
 
 export const SampleData = ( { customerName } ) => {
-  const [redraw, setRedraw] = useState(1);
+  const randomNum = Math.floor(Math.random() * (publicCustomers.length));
+  const [redraw, setRedraw] = useState(randomNum);
   let customerLogo = tursoLogo;
   let orgRepo = "tursodatabase/turso"
   let customerUrl = "https://turso.tech";
   let testName = "main/nightly/turso/main/Execute__SELECT_1_/limbo_execute_select_1";
   let graphName = "time";
   if (customerName === undefined) {
-    const randomNum = Math.floor(Math.random() * (publicCustomers.length));
-    const c = publicCustomers[randomNum];
+    const c = publicCustomers[redraw];
     customerName = c[0];
     customerUrl = c[1];
     customerLogo = c[2];
@@ -114,7 +114,7 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
     <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample  p-3 ">
     <p style={{textAlign: "left", width:"100%", float:"left", display:"inline-block"}}>
     <span style={{display:"inline-block"}}>
-    <a id="clickme" href="#clickme" onClick={()=>{const next =redraw+1; setRedraw(next);}}>Show next graph&gt;&gt;&gt;</a></span>
+    <a id="clickme" href="#clickme" onClick={()=>{const c = redraw % publicCustomers.length; setRedraw(c);}}>Show next graph&gt;&gt;&gt;</a></span>
     <span style={{align:"right", textAlign:"right", fontSize: "80%", float:"right"}}> <a href="mailto:helloworld@nyrkio.com">Saw a nice graph?<br />
     Tell us to feature it here.</a></span></p>
     <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
