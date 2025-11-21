@@ -12,16 +12,18 @@ import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
 
 const publicCustomers = [
   ["TigerBeetle", "https://tigerbeetle.com", tigerBeetleLogo, "tigerbeetle/tigerbeetle", "main/devhub", "TPS" ],
-  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
-  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
-  ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/nightly/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+  ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "No instrumentation"]
 ];
 
 export const SampleData = ( { customerName } ) => {
+  const [redraw, setRedraw] = useState(1);
   let customerLogo = tursoLogo;
-  let orgRepo = "tursodatabase/limbo"
+  let orgRepo = "tursodatabase/turso"
   let customerUrl = "https://turso.tech";
-  let testName = "main/turso/main/mvcc-ops-throughput/read";
+  let testName = "main/nightly/turso/main/Execute__SELECT_1_/limbo_execute_select_1";
   let graphName = "time";
   if (customerName === undefined) {
     const randomNum = Math.floor(Math.random() * (publicCustomers.length));
@@ -53,7 +55,10 @@ export const SampleData = ( { customerName } ) => {
             customerLogo={customerLogo}
             orgRepo={orgRepo}
             testName={testName}
-            graphName={graphName} />
+            graphName={graphName}
+            setRedraw={setRedraw}
+            redraw={redraw}
+            />
 }
 
 const CustomerLogo = ( { customerLogo, customerName, customerUrl }) => {
@@ -71,7 +76,7 @@ const CustomerLogo = ( { customerLogo, customerName, customerUrl }) => {
 
 
 
-const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, testName, graphName}) => {
+const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, testName, graphName, setRedraw, redraw}) => {
   const [testData, setTestData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [changePointData, setChangePointData] = useState([]);
@@ -107,6 +112,11 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
   return (
     <div className="row">
     <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample  p-3 ">
+    <p style={{textAlign: "left", width:"100%", float:"left", display:"inline-block"}}>
+    <span style={{display:"inline-block"}}>
+    <a id="clickme" href="#clickme" onClick={()=>{const next =redraw+1; setRedraw(next);}}>Show next graph&gt;&gt;&gt;</a></span>
+    <span style={{align:"right", textAlign:"right", fontSize: "80%", float:"right"}}> <a href="mailto:helloworld@nyrkio.com">Saw a nice graph?<br />
+    Tell us to feature it here.</a></span></p>
     <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
         <p><CustomerLogo customerName={customerName} customerUrl={customerUrl} customerLogo={customerLogo} /></p>
       <div className="row justify-content-center text-center pt-5">

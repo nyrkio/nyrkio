@@ -9,7 +9,8 @@ import signal
 import time
 import shutil
 from pathlib import Path
-
+from pprint import pprint
+# pprint(vars(subprocess))
 
 def get_pid_file():
     """Get the path to the PID file"""
@@ -42,14 +43,14 @@ def check_npm():
 
 def check_node_modules():
     """Check if node_modules exists"""
-    frontend_dir = Path(__file__).parent / "frontend"
+    frontend_dir = Path(__file__).parent.parent / "frontend"
     node_modules = frontend_dir / "node_modules"
     return node_modules.exists()
 
 
 def install_dependencies():
     """Install npm dependencies"""
-    frontend_dir = Path(__file__).parent / "frontend"
+    frontend_dir = Path(__file__).parent.parent / "frontend"
 
     print("Installing frontend dependencies...")
     print("This may take a few minutes...")
@@ -91,7 +92,7 @@ def start_frontend(mode="production", port=5173):
         print("  https://nodejs.org/")
         sys.exit(1)
 
-    frontend_dir = Path(__file__).parent / "frontend"
+    frontend_dir = Path(__file__).parent.parent / "frontend"
 
     # Check for node_modules
     if not check_node_modules():
@@ -125,14 +126,14 @@ def start_frontend(mode="production", port=5173):
         "--host", "0.0.0.0"
     ]
 
-    # Start npm in background
-    process = subprocess.Popen(
+    # Start npm in background -> PIPE and background not compatible
+    process = subprocess.run(
         cmd,
         cwd=frontend_dir,
         env=env,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        preexec_fn=os.setpgrp if sys.platform != 'win32' else None
+        # stdout=subprocess.PIPE,
+        # stderr=subprocess.STDOUT,
+        preexec_fn=os.setpgrp if sys.platform != 'win32' else None,
     )
 
     # Save PID
