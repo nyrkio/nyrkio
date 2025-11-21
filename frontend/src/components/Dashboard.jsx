@@ -756,7 +756,7 @@ export const SingleResultWithTestname = ({
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           <div className="container">
             <div className="row justify-content-center">
-              <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} />
+              <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} redraw={redraw}/>
             </div>
 
             {hideSettings?"":
@@ -782,7 +782,7 @@ export const SingleResultWithTestname = ({
                     testName={testName}
                     timestamps={timestamps}
                     displayData={displayData}
-                    key={testName+"/"+metric.name}
+                    key={testName+"/"+metric.name +"/"+redraw }
                     searchParams={searchParams}
                     graphSize={graphSize}
                   />
