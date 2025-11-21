@@ -132,6 +132,7 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
             loading={loading}
             setLoading={setLoading}
             embed="yes"
+            redraw={redraw}
           />
         )}
       </div>
