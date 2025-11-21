@@ -33,6 +33,10 @@ from backend.db.db import (
     OAuthAccount,
 )
 from backend.auth.github import github_oauth
+from backend.auth.onelogin import (
+    CLIENT_SECRET as ONELOGIN_CLIENT_SECRET,
+    OneLoginOAuth2,
+)
 from backend.auth.superuser import SuperuserStrategy
 
 from backend.auth.common import (
@@ -53,6 +57,8 @@ SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
+
+sso_secrets = {"onelogin": ONELOGIN_CLIENT_SECRET}
 
 cookie_backend = AuthenticationBackend(
     name="cookie",
@@ -96,6 +102,7 @@ auth_router.include_router(
     tags=["auth"],
 )
 
+
 auth_router.include_router(
     fastapi_users.get_auth_router(jwt_backend, SECRET), prefix="/jwt", tags=["auth"]
 )
@@ -130,9 +137,83 @@ async def admin_route(user: User = Depends(current_active_superuser)):
     return {"message": f"Hello admin {user.email}!"}
 
 
-oauth2_authorize_callback = OAuth2AuthorizeCallback(
+github_oauth2_authorize_callback = OAuth2AuthorizeCallback(
     github_oauth, redirect_url=REDIRECT_URI
 )
+
+sso_oauth2_authorize_callbacks = {}
+sso_routers = {}
+
+
+@auth_router.get("/start/sso/login")
+async def start_sso_login(
+    oauth_my_domain: str,
+    oauth_tld: str,
+):
+    store = DBStore()
+    oauth_full_domain = oauth_my_domain + "." + oauth_tld
+    oauth_config = await store.get_sso_config(oauth_full_domain=oauth_full_domain)
+    if not oauth_config:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Not found: {oauth_full_domain} is not configured as a known SSO issuer for Nyrkiö. To add your SSO to Nyrkiö, please contact sales@nyrkio.com",
+        )
+
+    if len(oauth_config) > 1:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Found more than one SSO issuer for {oauth_full_domain}. This is an error on our side and I don't know how to continue. I'm truly sorry about this.",
+        )
+    oauth_config = oauth_config[0]
+
+    await _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
+    oauth_issuer = oauth_config["oauth_issuer"]
+    return {"next_url": f"/api/v0/auth/sso/{oauth_issuer}/authorize"}
+
+
+async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
+    oauth_issuer = oauth_config["oauth_issuer"]
+    redirect_url = (
+        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
+    )
+    print(sso_oauth2_authorize_callbacks)
+    if oauth_issuer not in sso_oauth2_authorize_callbacks:
+        sso_oauth = OneLoginOAuth2(
+            sso_domain=oauth_full_domain,
+            scopes=oauth_config["scopes"],
+        )
+        print(sso_oauth)
+        sso_oauth2_authorize_callback = OAuth2AuthorizeCallback(
+            sso_oauth,
+            redirect_url=redirect_url,
+        )
+        sso_oauth2_authorize_callbacks[oauth_issuer] = sso_oauth2_authorize_callback
+        sso_router = fastapi_users.get_oauth_router(
+            sso_oauth,
+            jwt_backend,
+            sso_secrets[oauth_issuer],
+            redirect_url=redirect_url,
+        )
+
+        @sso_router.get("/mycallback", include_in_schema=True)
+        async def sso_callback(
+            request: Request,
+            access_token_state: Tuple[OAuth2Token, str] = Depends(
+                sso_oauth2_authorize_callback
+            ),
+            user_manager: BaseUserManager[models.UP, models.ID] = Depends(
+                get_user_manager
+            ),
+        ):
+            return await _sso_mycallback_handler(
+                oauth_full_domain, sso_oauth, request, access_token_state, user_manager
+            )
+
+        from backend.api.api import app
+
+        app.include_router(
+            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{oauth_issuer}"
+        )
 
 
 @auth_router.get("/verify-email/{token}")
@@ -162,7 +243,9 @@ async def verify_email(
 @auth_router.get("/github/mycallback", include_in_schema=False)
 async def github_callback(
     request: Request,
-    access_token_state: Tuple[OAuth2Token, str] = Depends(oauth2_authorize_callback),
+    access_token_state: Tuple[OAuth2Token, str] = Depends(
+        github_oauth2_authorize_callback
+    ),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
@@ -213,6 +296,7 @@ async def github_callback(
             associate_by_email=True,
             is_verified_by_default=True,
         )
+    # This seems to never happen? If it did, wouldn't we at this point then just .get() the user and consider them logged in?
     except UserAlreadyExists:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -267,6 +351,69 @@ async def github_callback(
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/login?gh_login=success&username=" + user.email)
+    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    return response
+
+
+async def _sso_mycallback_handler(
+    oauth_full_domain, sso_oauth, request, access_token_state, user_manager
+):
+    token, state = access_token_state
+    account_id, account_email = await sso_oauth.get_id_email(token["access_token"])
+    if account_email is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.OAUTH_NOT_AVAILABLE_EMAIL,
+        )
+
+    try:
+        user = await user_manager.oauth_callback(
+            "onelogin",
+            token["access_token"],
+            account_id,
+            account_email,
+            token.get("expires_at"),
+            token.get("refresh_token"),
+            request,
+            associate_by_email=True,
+            is_verified_by_default=True,
+        )
+    except UserAlreadyExists:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=ErrorCode.OAUTH_USER_ALREADY_EXISTS,
+        )
+
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="This user is deactivated at nyrkio.com",
+        )
+
+    userinfo = await sso_oauth.get_userinfo(token["access_token"])
+
+    for oauth_acct in user.oauth_accounts:
+        if oauth_acct.oauth_name != "onelogin":
+            print("skip", oauth_acct)
+            continue
+        if oauth_acct.account_email != account_email:
+            print("Someone screwed up")
+            print(account_email, oauth_acct.email)
+            raise HTTPException(
+                status_code=500,
+                detail="This should never happen",
+            )
+
+        oauth_acct.organizations = []
+        oauth_acct.organizations.append(userinfo)
+
+    update = UserUpdate(oauth_accounts=user.oauth_accounts)
+    user = await user_manager.update(update, user, safe=True)
+
+    response = await jwt_backend.login(get_jwt_strategy(), user)
+    await user_manager.on_after_login(user, request, response)
+    cookie_token = await get_jwt_strategy().write_token(user)
+    response = RedirectResponse("/login?sso_login=success&username=" + user.email)
     response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
     return response
 
