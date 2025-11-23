@@ -162,9 +162,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
         </div>
       </div>
       <div className="row ">
-      <div className="mt-3 col-xs-12 sso-login" style={{"textAlign": "center"}}>
-        <div className="mt-3 mb-3">
-          <button className="btn btn-success col-md-4 col-lg-3 col-sm-6 col-xs-12" onClick={githubSubmit}>
+      <div className="mt-3 sso-login" style={{"textAlign": "center"}}>
+      <div className="text-center mb-4 mt-3 sso-login xs-10">
+        <button className="btn-success btn col-lg-3 col-md-4 col-sm-8 col-xs-10" onClick={githubSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
             <div className="svgwrapper">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -189,19 +189,26 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       </div>
 
       <div className="row ">
-        <div className="text-right mb-4 mt-3 sso-login col-sm-5 col-xs-5">
-        <input
+      <div className="text-right mb-4 mt-3 sso-login col-md-4 col-sm-1 col-xs-0">
+      </div>
+      <div className="text-right mb-4 mt-3 sso-login col-md-4 col-sm-6 col-xs-8" style={{maxWidth:"60%"}} >
+      <input
         type="text"
         placeholder="your domain"
-        className="form-control mb-2 w-100"
+        className="form-control mb-2"
         style={{"display": "inline", "textAlign": "right"}}
         id="oauth_my_domain"
         onChange={(e) => setUsername(e.target.value)}
         />
         </div>
-        <div className="text-left mb-4 mt-4 col-sm-6 col-xs-6 sso-login ">
-        &nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span><br />
-        <button className="btn-info btn col-md-8 col-lg-6 col-sm-12 mt-4" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em"}}>
+        <div className="text-left mb-4 mt-3 col-md-4 col-sm-3 col-xs-4"  style={{maxWidth:"30%"}}>
+        &nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span>
+        </div>
+        </div>
+
+        <div className="row ">
+        <div className="text-center mb-4 mt-3 sso-login xs-10">
+        <button className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-10" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -224,49 +231,50 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
           OneLogin
           </button>
         </div>
-        <p style={{"color":"#999999"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
+        <p style={{"color":"#999999", textAlign: "center"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
       </div>
 
-      <div className="mt-1 mb-1">
+      <div className="mt-1 mb-1 row">
       &nbsp;
       <hr />
       </div>
-      <div className="row ">
-      <div className="mt-1 w-100 sso-login" style={{"textAlign": "center"}}>
-        <div className="row">
-          <form onSubmit={authSubmit}>
-          <div className="col-xs-3">
-          </div>
-          <div className="col-xs-6 mb-3 text-center">
-              <input
+      <form className="row mt-1 sso-login text-center" onSubmit={authSubmit}>
+            <div className="col-xl-3 col-lg-2 col-md-1 col-sm-0 col-xs-0">
+            </div>
+            <div className="col-xl-6 col-lg-8 col-md-10 col-sm-12 col-xs-12">
+            <input
                 type="text"
                 placeholder="email"
-                className="form-control mb-2 w-50"
+                className="form-control"
                 id="exampleInputEmail1"
                 onChange={(e) => setUsername(e.target.value)}
-                style={{"marginLeft": "25%"}}
+                style={{lineHeight:"0"}}
                 />
+          <br                   style={{lineHeight:"10px"}}
+          />
                 <input
                   placeholder="passw0rd"
                   type="password"
-                  className="form-control mb-2 w-50"
+                  className="form-control"
                   id="exampleInputPassword1"
                   onChange={(e) => setPassword(e.target.value)}
-                  style={{"marginLeft": "25%"}}
-                />
+                  style={{lineHeight:"0"}}
+                  />
+            <br                   style={{lineHeight:"10px"}}
+            />
             </div>
-            <div className="text-center mt-2">
-              <button type="submit" className="btn btn-nothing mb-5">
+            <br />
+            <div className="text-center mb-4 mt-3 sso-login xs-10">
+            <button type="submit" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-12" style={{minWidth:"12em"}}>
                 Login
               </button>
             </div>
+            <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user accout here</a>.</em></p>
           </form>
-          <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user accout here</a>.</em></p>
 
+        <div className="row">
+          <ErrorMessage className="mb-5"/>
         </div>
-        <ErrorMessage className="mb-5"/>
-      </div>
-      </div>
       </div>
   );
 };
