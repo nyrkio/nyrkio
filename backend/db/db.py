@@ -577,14 +577,14 @@ class DBStore(object):
             if pr_commit:
                 pull_query["attributes.git_commit"] = pr_commit
 
-            print(pull_query)
+            # print(pull_query)
             # New strategy: Just get the pr first. This could be a graphLookup query but this is easy to follow.
             pr_result = (
                 await test_results.find(pull_query, exclude_projection)
                 .sort("timestamp", -1)
                 .to_list(None)
             )
-            print(pr_result)
+            # print(pr_result)
             if len(pr_result) == 0:
                 return [], []
             pr_result = pr_result[0]
@@ -626,7 +626,7 @@ class DBStore(object):
 
             if pr_commit is not None:
                 results = filter_out_pr_results(results, pr_commit)
-                print(results)
+                # print(results)
         else:
             results = (
                 await test_results.find(
@@ -1223,7 +1223,7 @@ class DBStore(object):
         if git_commit:
             query["attributes.git_commit"] = git_commit
 
-        print(query)
+        # print(query)
         pipeline = [
             {"$match": query},
             {
