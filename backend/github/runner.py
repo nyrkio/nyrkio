@@ -652,7 +652,7 @@ async def get_github_runner_registration_token(
             f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
         )
         # Skip known cases but want alerts for new ones
-        if not org_name in ["pedrocarlo"]:
+        if org_name not in ["pedrocarlo"]:
             raise Exception(
                 f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
             )
