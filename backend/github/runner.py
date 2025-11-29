@@ -89,14 +89,20 @@ async def workflow_job_event(queued_gh_event):
         runs_on.pop(),
         registration_token=runner_registration_token,
     )
-    await launcher.launch()
-    return_message = f"Launched an instance of type {labels}"
-
-    default_message = "Thank you for using Nyrkiö. For Faster Software!"
-    return {
-        "status": "success" if return_message else "nothing to do",
-        "message": return_message if return_message else default_message,
-    }
+    launched_runners = await launcher.launch()
+    if launched_runners:
+        return_message = f"Launched an instance of type {labels}"
+        return {
+            "status": "success",
+            "message": return_message,
+            "instances": str(launched_runners),
+        }
+    else:
+        default_message = "Thank you for using Nyrkiö. For Faster Software!"
+        return {
+            "status": "nothing to do",
+            "message": default_message,
+        }
 
 
 class RunnerLauncher(object):
@@ -576,7 +582,7 @@ class RunnerLauncher(object):
             logging.warning(
                 f"Couldn't find or create a runner group at http://github.com/{gh_org}"
             )
-            return
+            return []
 
         all_instances = []
         for i in range(min(self.config["instance_count"], self.config["max_runners"])):
