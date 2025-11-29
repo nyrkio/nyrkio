@@ -189,7 +189,7 @@ async def _calc_changes(test_name, user_id=None, pull_request=None, pr_commit=No
         # because is_cached is mostly or only used by callers to determine whether we
         # had to do the heavy computation work to get these results, or whether the
         # result might contain new information. And the answer to both of those is no.
-        return series, [], True
+        return series, {}, True
 
     changes, is_cached = await get_cached_or_calc_changes(
         user_id,
