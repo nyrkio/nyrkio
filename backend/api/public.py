@@ -369,6 +369,15 @@ def build_public_test_name(test_entry):
             + "/"
             + test_entry["test_name"]
         )
+        # Backward compatibility: tursodatabase org goes into pekka's user id...
+        # But we pretend it's the tursodatabase org
+        if str(test_entry["user_id"]) == "65d5fd1c69f0a9fb177e31f5":
+            return (
+                "tursodatabase"
+                + extract_public_test_name(test_entry["attributes"])
+                + "/"
+                + test_entry["test_name"]
+            )
 
     return test_entry["test_name"]
 
