@@ -960,6 +960,7 @@ class DBStore(object):
             c["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
             internal_configs.append(c)
 
+        print("set_test_config()", {"_id": c["_id"]}, c)
         # Perform an upsert
         for c in internal_configs:
             await test_config.update_one({"_id": c["_id"]}, {"$set": c}, upsert=True)
