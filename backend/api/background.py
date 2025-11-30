@@ -98,6 +98,10 @@ async def loop_installations():
                 ):
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                elif return_status.get("status", "") == "nothing to do":
+                    logger.info(
+                        "Checked all installations for workflow jobs that could need runners. Nobody needed anything. (nothing to do)"
+                    )
                 else:
                     logger.error(return_status)
                     break
