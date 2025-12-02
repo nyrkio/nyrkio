@@ -198,8 +198,8 @@ export const FrontPage = ({loggedIn}) => {
 
           <div className="text-left coming-soon">
           <a href="https://www.youtube.com/shorts/auZY4_PljWw" target="youtube">
-          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "15em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "5em", marginRight: "5em", marginBottom: "15em", }} />
-          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "15em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "5em",  marginRight: "5em", marginBottom: "15em", }} />
+          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginBottom: "15em", }} />
+          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginBottom: "15em", }} />
           </a>
 
           <h2>Coming soon...</h2>
