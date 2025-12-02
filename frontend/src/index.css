@@ -177,6 +177,18 @@ body #root div.container-fluid {
   opacity: 0.1;
 }
 
+#main-content div.coming-soon,
+#main-content2 div.coming-soon {
+font-size: 120%;
+text-align: left;
+margin-left: 25em;
+margin-bottom: 10em;
+}
+#main-content2 div.coming-soon img#idautumnRunner:hover {
+   opacity: 0;
+
+}
+
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1,
