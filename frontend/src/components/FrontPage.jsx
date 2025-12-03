@@ -6,6 +6,8 @@ import commit from "../static/commit.png";
 import { Logo } from "./Logo";
 import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
+import AutumnRunner from "../static/AutumnRunner.jpg";
+import AutumnRunnerYoutube from "../static/AutumnRunnerYoutube.jpg";
 
 const FeatureHighlight = () => {
   return (
@@ -75,8 +77,8 @@ export const DemoVideo = () => {
   return (
     <iframe
       id="demo-video"
-      style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "203px"}}
-      src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
+      style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
+      src="https://youtube.com/shorts/auZY4_PljWw?si=cva-pBaJ5QhAXWVu"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -193,21 +195,35 @@ export const FrontPage = ({loggedIn}) => {
     <>
 
       <div className="frontpage container-fluid text-center w-100">
-           <div className="padding-block "></div>
 
-          <DemoVideo />
-          <div className="padding-block-sm "></div>
-          {loggedIn? "" :
-            (<button className="btn btn-success">
-                <a className="btn-link" href="/signup">
-                Create account &amp; get started
-                </a>
-                </button>
-                )}
-          <div className="padding-block-sm "></div>
+          <div className="text-left coming-soon">
+          <a href="https://www.youtube.com/shorts/auZY4_PljWw" target="youtube">
+          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginBottom: "15em", }} />
+          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginBottom: "15em", }} />
+          </a>
+
+          <h2>Coming soon...</h2>
+          <p className=""><em><strong>Nyrkiö runners</strong></em></p>
+          <p>Continuous Benchmarking with nanosecond precision!</p>
+          <p>Be among the first to hear about it: <br />
+          <a href="https://nyrkio.activehosted.com/f/5"><strong>Sign up for our upcoming product news mailing list</strong> &gt;&gt;&gt;</a></p>
+
+          </div>
+
+          <div className="padding-block-sm " style={{clear:"both"}}></div>
+
 
           <FeatureBanner1 />
 
+          <div className="padding-block-sm "></div>
+          {loggedIn? "" :
+            (<button className="btn btn-success">
+            <a className="btn-link" href="/signup">
+            Create account &amp; get started
+            </a>
+            </button>
+            )}
+            <div className="padding-block-sm "></div>
 
           <div className="user-carousel">
           <h1>What our users say</h1>
