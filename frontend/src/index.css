@@ -769,12 +769,23 @@ div.card div.card-header {
   border-radius: 7px;
   font-size: 105%;
 }
+
 #dashboard_settings div.card div.card-header {
   color: var(--bs-heading-color);
   background-color: var(--nyrkio-dark-gray);
   border-color: 1px solid var(--nyrkio-dark-gray);
 }
 
+.graphNavWidgets button {
+color: #212529;
+}
+
+.graphNavWidgets button{
+  width: 100%;
+  position: relative;
+  left: -9px;
+}
+.graphNavWidgets button,
 #dashboard_settings .prWidgets select {
   border: solid 1px var(--nyrkio-dark-gray);
   background-color: var(--nyrkio-light-gray);
@@ -784,11 +795,16 @@ div.card div.card-header {
     background: var(--nyrkio-light-gray);
 }
 
+.graphNavWidgets button.btn-primary:focus,
+.graphNavWidgets button.graph-nav:hover,
+.graphNavWidgets button.graph-nav.btn-primary:active,
 #dashboard_settings .prWidgets select:focus,
 #dashboard_settings .prWidgets select:hover,
 #dashboard_settings .prWidgets select:active {
   border: solid 1px var(--nyrkio-bear-brown);
   box-shadow: none;
+  background-color: var(--nyrkio-light-gray2);
+  color: #212529;
 }
 
 #dashboard_settings .prWidgets select#commitPicker:focus,
