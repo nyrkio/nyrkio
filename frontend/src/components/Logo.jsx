@@ -42,7 +42,7 @@ export const LogoSlogan = () => {
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-small "
     />
-    <h1><span className="git">git blame</span><span className="for"> for performance</span></h1>
+    <h1><span className="git">Continuous Benchmarking</span><span className="for"> as a Service</span></h1>
     </div>
   );
 };
@@ -54,7 +54,7 @@ export const LogoBrownSlogan = () => {
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-small "
     />
-    <h1>git blame for performance</h1>
+    <h1>Continuous Benchmarking as a Service</h1>
     </div>
   );
 };
@@ -67,7 +67,7 @@ export const LogoSloganNarrow = () => {
         alt="Nyrkiö (logo)"
         className="nyrkio-logo-img nyrkio-logo-img-small "
       />
-      <h1>git blame for performance</h1>
+      <h1>Benchmarking as a Service</h1>
     </div>
   );
 };
