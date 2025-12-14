@@ -1,14 +1,10 @@
 :root {
-  font-family:  Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
   line-height: 1.5;
-  font-weight: 400;
-  font-optical-sizing: auto;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   /*background-color: #242424;*/
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -40,8 +36,11 @@
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
-  --bs-body-font-family: Helvetica, Arial, sans-serif;
-  --bs-body-font-size: 12pt;
+  --bs-body-font-size: 13pt;
+  --bs-body-font-family: "apple-ui", "system-ui", "Helvetica";
+  --bs-body-font-style: normal;
+  --bs-body-font-weight: 400;
+  --bs-body-letter-spacing: 0.01rem;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);
   --bs-link-color: var(--nyrkio-text);
@@ -73,10 +72,10 @@
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
-  offfont-size: var(--bs-body-font-size);
+  font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
-  line-height: var(--bs-body-line-height);
-  letter-spacing: 0.0rem;
+  line-height: 1.5em;
+  letter-spacing: var(--bs-body-letter-spacing);
   color: var(--nyrkio-text);
   text-align: var(--bs-body-text-align);
   background-color: var(--bs-body-bg);
@@ -84,11 +83,32 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+body em {
+  padding-left:5px;
+  padding-right:5px;
+  letter-spacing: 0.0rem;
+  font-weight: 300;
+  font-family: "Times";
+  font-size: 110%;
+}
+
 .row {
   margin-left: 0;
   margin-right: 0;
 }
 
+body.section-dashboards {
+  font-size: 12pt;
+  font-weight: var(--bs-body-font-weight);
+  line-height: 1em;
+  letter-spacing: 0;
+
+  margin-top: 1em;
+  margin-bottom:0em;
+}
+body.section-dashboards .card-header {
+  font-family: Arial, Inter, Helvetica;
+}
 div.nyyrikki-banner-right,
 body.nyyrikki-banner-right,
 body.nyyrikki-banner-right.section-about {
@@ -279,19 +299,24 @@ hr {
   border-top: 1px solid;
 }
 
+.row h1,
+.row h2,
+.row h3 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
 h3,
 .h3,
 h2,
 .h2,
 h1,
 .h1 {
-  margin-top: 3rem;
   margin-bottom: 2rem;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.2;
-  letter-spacing: 0.2rem;
+  letter-spacing: ;
   color: var(--bs-heading-color);
-  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
+  font-family: "Arial", "Helvetica", sans;
 }
 h1,
 .h1 {
@@ -315,7 +340,7 @@ h4,
   line-height: 1.2;
   letter-spacing: 0.01rem;
   color: var(--bs-heading-color2);
-  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
+  font-family: "Arial", sans;
 }
 h6,
 .h6 {
@@ -451,6 +476,9 @@ button:focus-visible {
   border-bottom: 1px solid var(--nyrkio-light-gray2);
   background-color: transparent;
   margin-bottom: 0.5em;
+  letter-spacing: 0;
+  font-size: 11pt;
+  line-height: 1em;
 }
 .border-top {
   background-color: var(--nyrkio-arrow-brown);
@@ -475,6 +503,9 @@ button:focus-visible {
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
+    letter-spacing: 0;
+    font-size: 12pt;
+    line-height: 1.1em;
 }
 .navbar-light .navbar-nav .nav-link {
   padding-right: 1em;
@@ -767,7 +798,8 @@ div.card div.card-header {
   background-color: var(--nyrkio-light-gray);
   border-color: 1px solid var(--nyrkio-dark-gray);
   border-radius: 7px;
-  font-size: 105%;
+  font-size: 115%;
+  padding: 0.7em;
 }
 
 #dashboard_settings div.card div.card-header {
