@@ -54,7 +54,7 @@ export const AboutPage = () => {
         </div>
           <h2>How</h2>
           <p>
-            We've been privileged to work on the major open source projects of
+            We've been privileged to work on the major <em>open source</em> projects of
             our lifetime: Linux, MySQL, MongoDB, Cassandra... and so many
             smaller projects and utilities! Nyrkiö is no different.{" "}
             <a href="https://github.com/nyrkio/">
@@ -65,7 +65,8 @@ export const AboutPage = () => {
           <p>
           After meeting with several investors in the first year of operations, we've ended up as a self funded startup,
           with no outside investors, at least for now. One reason for this is that we didn't want to impose on ourselves
-          some artificial deadline coming from the investment fund's expiration date.
+          some artificial deadline coming from the investment fund's expiration date. We're here to transform the performance
+          engineering industry. It might take some time, but we aren't going anywhere, we are here for the long term.
           </p>
           <p>For example, this has allowed us to adopt a principle where we always prioritize our existing customers needs
              before we spend time on new customer acquisition. Thanks to this, our subsciption renewal rate in the first years
