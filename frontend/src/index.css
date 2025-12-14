@@ -84,8 +84,8 @@ body {
 }
 
 body em {
-  padding-left:5px;
-  padding-right:5px;
+  padding-left:2px;
+  padding-right:3px;
   letter-spacing: 0.0rem;
   font-weight: 300;
   font-family: "Times";
@@ -228,12 +228,14 @@ margin-bottom: 10em;
 .frontpage .nyrkio-title h1 {
   max-width:90%;
   color: var(--nyrkio-tattoo-red);
-  font-size: 3em;
-  letter-spacing: 0.6rem;
+  font-size: 2em;
+  font-family: "Bebas Neue";
+  font-weight: 100;
+  letter-spacing: .3rem;
   margin-bottom: 2.5em;
   position: relative;
-  left: 1em;
-  top: -1.7em;
+  left: 2.85em;
+  top: -1.1em;
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
