@@ -5,6 +5,7 @@ export const UsersPage = () => {
     <Turso />
     <Dremio />
     <Tigerbeetle />
+    <Kieker />
     <hr />
     <div className="row">
     <p>Want more? Read about how Netflix, Confluent, RedHat, MongoDB, DataStax and Tarantool use Change Point Detection in their Continuous Performance Engineering workflows over at <a href="/about/ecosystem">our Open Source Ecosystem page</a>.</p>
@@ -214,4 +215,74 @@ export const TigerbeetleLinks = () => {
     );
 };
 
+
+
+
+
+
+export const KiekerQuote = () =>{
+    return (
+        <div className="row nyrkio-user-photo-quote">
+        <p><img src={kiekerYang} style={{maxWidth: "100%"}} className="col-xs-12 col-lg-6"/>
+        <br />
+        <span style={{fontSize: "4em"}}>&nbsp;</span>
+        <br />
+
+        <q>We use Nyrkiö as an implementation of the E-Divisive Change Point Detection algorithm in parallel with our own monitoring dashboard.
+        This provides independent validation of our own findings. We also like that the graphs look prettier than our own!</q></p>
+        <p className="user quote-attribution">Dr Shinhyung Yang, Kiel Universität</p>
+        </div>
+    );
+};
+
+import kiekerLogo from "../static/kieker-logo.svg";
+import kiekerYang from "../static/people/ShinhyungYang-600x800.jpg";
+export const Kieker = () => {
+    return (<>
+    <div className={cols} style={style}>
+    <KiekerLogo />
+    <KiekerDescription />
+    <KiekerQuote />
+    <KiekerLinks />
+    </div>
+    </>
+    );
+};
+
+export const KiekerMini = ({addClassName="", onClick}) => {
+    return (<>
+    <div className={addClassName + " " + colsCarousel} style={style} onClick={onClick}>
+    <KiekerLogo />
+    <KiekerQuote />
+    <p><a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Fshinhyungyang%2Fmoobench/main/Kieker-java">Kieker project on Nyrkiö</a></p>
+    </div>
+    </>);
+};
+
+export const KiekerLogo = () => {
+    return (<h4 style={imgTitleStyle}><img src={kiekerLogo} style={imgStyle} /></h4>);
+};
+export const KiekerDescription = () => {
+    return (<>
+    <p>Kieker is a research project by Computer Science Department of Kiel University (et.al.). The project has long traditions in the area of software performance, going back to the very beginnings of the <a href="https://icpe.spec.org/">ICPE community</a> in 2009-2012. </p>
+    <p>They produce a framework for monitoring and instrumenting your software development projects. An interesting sub-project is that they constantly monitor the overhead incurred by their own monitoring framework, and other frameworks. As a by-product, they end up producing a valuable service to the entire GitHub community: Their dashboard effectively monitors the performance variations in the standard GitHub Actions test runners.</p>
+    </>);
+};
+
+export const KiekerLinks = () => {
+    return (<>
+    <ul>
+    <li>
+    <a href="https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Fshinhyungyang%2Fmoobench/main/Kieker-java">Kieker project on Nyrkiö</a>
+    </li>
+    <li>
+    <a href="https://arxiv.org/abs/2510.11310">Detection of Performance Changes in MooBench Results Using Nyrkiö on GitHub Actions</a>, joint research article.
+    </li>
+    <li>
+    <a href="https://kieker-monitoring.net/">Kieker project homepage</a>
+    </li>
+    </ul>
+    </>
+    );
+};
 

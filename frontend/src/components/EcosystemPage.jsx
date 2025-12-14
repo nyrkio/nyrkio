@@ -6,16 +6,17 @@ import { MongoDB, Netflix, Datastax, Confluent, RedHat, Tarantool } from "./OssU
 export const EcosystemPage = () => {
   return (<>
   <div className="container section-ecosystem">
-  <div className="row">
+  <div className="row wide">
     <div className="col-sm-12 col-xl-12">
         <h1 className="mb-5">Open Source Ecosystem</h1>
         <p>Nyrkiö is based on open source performance tools that Henrik and Matt have been involved in developing as part of their previous jobs,
         working in the performánce engineering teams at MongoDB, Datastax, and others. <a href="https://blog.nyrkio.com/2025/05/08/welcome-apache-otava-incubating-project/">Read more about the history of Apache Otava on the Nyrkiö blog</a>.
         </p>
-        </div>
+      </div>
 
-        <div className="row">
-        <div className="col-sm-12 col-lg-4"><img src={imgStars} style={{maxWidth: "85%", margin: "1em", marginTop: "9em", objectFit: "scale-down", borderRadius: "10px"}}/></div>
+      <div className="row">
+        <div className="col-sm-12 col-lg-4"><img src={imgStars} style={{maxWidth: "85%", margin: "1em", marginTop: "9em", objectFit: "scale-down", borderRadius: "10px"}}/>
+        </div>
         <div className="col-sm-12 col-lg-8">
         <h2>Apache Otava (incubating)</h2>
         <p>Originally known as Hunter, this code was written by Piotr Kołaczkowski at Datastax, and Datastax has eventually kindly donated the project to the Apache Software Foundation, to allow other users to contribute their improvements and to allow the project to grow. A proto-version of what is today Apache Otava was first used in production at MongoDB around 2017. After MongoDB published the code as open source, in 2020, Netflix and Datastax were quick to follow.</p>
@@ -30,7 +31,8 @@ export const EcosystemPage = () => {
 
         </div>
         </div>
-        <div className="row">
+      </div>
+      <div className="row wide">
         <div className="col-sm-4 col-md-3 col-lg-2"></div>
         <h3 id="otava-users" style={{marginTop: "4em", marginBottom: "3em", textAlign: "center"}}
         >Users</h3>
@@ -42,7 +44,6 @@ export const EcosystemPage = () => {
         <RedHat />
         <Tarantool />
 
-        </div>
         </div>
         </div>
 
