@@ -4,6 +4,7 @@ import { JoeCard } from "./people/Joe.jsx";
 import { MattCard } from "./people/Matt.jsx";
 import { YoutubeEmbed } from "./Youtube.jsx";
 import imgTbChangePoints from "../static/tigerbeetle-change-points-2-trans.png"
+import imgGHA from "../static/Nyrkio_GHA.png";
 
 export const AboutPage = () => {
   return (
@@ -33,9 +34,9 @@ export const AboutPage = () => {
           all the work we used to do in our past careers,
           and condense it into one more of those green check boxes that you want to see at the bottom of your PR.
           </p>
-          <p>We call this <em>Continuous Performance Engineering</em><br /> or <em>Continuous Benchmarking</em></p>
+          <p>We call this <em>Continuous Performance Engineering</em> or <em>Continuous Benchmarking</em></p>
 
-          <img src={imgTbChangePoints} alt="tigerbeetle demo data 2023" style={{zIndex:-3, position:"relative", top: "-50px", width:"inherit", marginBottom:"-60px"}}/>
+          <div className="col-sm-2 col-md-3 col-lg-4"><img src={imgGHA} style={{maxWidth: "85%", border: "solid 4px darkgray", margin: "1em", objectFit: "scale-down", borderRadius: "10px"}}/></div>
           <p>
             <a href="https://blog.nyrkio.com/2024/04/17/why-we-started-a-software-performance-company/">
               Read more about why we started Nyrkiö...
