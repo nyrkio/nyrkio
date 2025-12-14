@@ -102,7 +102,7 @@ const FeatureBanner1 = () => {
             when the random variation in your benchmarking results is often bigger than that.
           </p>
           <p>
-            Nyrkiö uses <big>Change Point Detection</big> to identify every change
+            Nyrkiö uses <em>Change Point Detection</em> to identify every change
             in your performance data.
             Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every performance regression, however small or large.
@@ -230,10 +230,10 @@ export const FrontPage = ({loggedIn}) => {
           <MyUserCarousel />
           </div>
           <div className="padding-block-sm "></div>
-          <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
+          <p style={{fontSize: "120%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
-          <p style={{fontSize: "150%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
+          <p style={{fontSize: "120%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
 
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
