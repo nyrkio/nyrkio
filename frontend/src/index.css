@@ -180,6 +180,17 @@ body #root div.container-fluid {
   padding-right: 0px;
 }
 
+@media (min-width: 1200px) {
+  .section-about #main-content .container {
+    max-width: none;
+  }
+  .section-about #main-content .container .who {
+    max-width: 100%;
+  }
+  .section-about #main-content .container div:not(.who) {
+    max-width: 1140px;
+  }
+}
 
 #main-content .nyrkio-title.nyrkio-logo,
 #main-content div.nyrkio-logo,

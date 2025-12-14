@@ -10,7 +10,7 @@ export const AboutPage = () => {
   return (
     <>
       <div className="container about-page">
-        <div className="row col-xl-10 mt-8 p-5">
+        <div className="row col-xl-12 mt-2 p-3">
           <h1 className="text-center mb-5">About Us</h1>
           <h2>Why</h2>
           <p>
@@ -43,15 +43,26 @@ export const AboutPage = () => {
             </a>
           </p>
 
-          <h2>Who</h2>
         </div>
-        <div className="col-xl-10 justify-content-center">
+        <div className="row w-100 who">
+        <h2>Who</h2>
+        <div className="col-xs-12 col-md-10 col-lg-6">
           <HenrikCard />
-          <SannaCard />
-          <JoeCard />
-          <p>&nbsp;</p>
-          <MattCard/>
         </div>
+        <div className="col-xs-12 col-md-10 col-lg-6">
+          <SannaCard />
+          </div>
+          <div className="col-xs-12 col-md-10 col-lg-6">
+          <JoeCard />
+          </div>
+          <div className="col-xs-12 col-md-10 col-lg-6">
+          &nbsp;
+          </div>
+          <div className="col-xs-12 col-md-10 col-lg-6">
+          <MattCard/>
+          </div>
+        </div>
+        <div className="row justify-content-center">
           <h2>How</h2>
           <p>
             We've been privileged to work on the major <em>open source</em> projects of
@@ -77,6 +88,7 @@ export const AboutPage = () => {
           can find, wherever they happen to live.
           </p>
           <YoutubeEmbed embedId="v1Cu5LUWTpw"/>
+        </div>
       </div>
     </>
   );
