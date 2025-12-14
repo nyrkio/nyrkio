@@ -228,10 +228,10 @@ margin-bottom: 10em;
 .frontpage .nyrkio-title h1 {
   max-width:90%;
   color: var(--nyrkio-tattoo-red);
-  font-size: 3em;
-  font-family: "Big Shoulders";
+  font-size: 2em;
+  font-family: "Bebas Neue";
   font-weight: 100;
-  letter-spacing: 0.3rem;
+  letter-spacing: .3rem;
   margin-bottom: 2.5em;
   position: relative;
   left: 0.85em;
