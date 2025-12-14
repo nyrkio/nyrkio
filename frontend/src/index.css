@@ -184,11 +184,13 @@ body #root div.container-fluid {
   .section-about #main-content .container {
     max-width: none;
   }
-  .section-about #main-content .container .who {
-    max-width: 100%;
-  }
-  .section-about #main-content .container div:not(.who) {
+  .section-about #main-content .container div {
     max-width: 1140px;
+  }
+  .section-about #main-content .container.section-ecosystem,
+  .section-about #main-content .container div.wide,
+  .section-about #main-content .container .who {
+      max-width: 100%;
   }
 }
 
