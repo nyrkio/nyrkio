@@ -84,8 +84,8 @@ body {
 }
 
 body em {
-  padding-left:5px;
-  padding-right:5px;
+  padding-left:2px;
+  padding-right:3px;
   letter-spacing: 0.0rem;
   font-weight: 300;
   font-family: "Times";
