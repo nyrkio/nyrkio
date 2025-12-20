@@ -85,7 +85,7 @@ async def workflow_job_event(queued_gh_event):
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
 
-    if runner_registration_token:
+    if runner_registration_token and nyrkio_org:
         launcher = RunnerLauncher(
             nyrkio_user,
             nyrkio_org,
@@ -128,6 +128,12 @@ async def workflow_job_event(queued_gh_event):
                     "message": return_message,
                     "instances": str(launched_runners),
                 }
+        else:
+            s = "runner registration token denied"
+            return {
+                "status": s,
+                "message": "Although {repo_owner} has scheduled jobs that expect Nyrkio runners, they did not grant the necessary permissions to provide a runner to them.",
+            }
 
     default_message = "Thank you for using Nyrkiö. For Faster Software!"
     return {
