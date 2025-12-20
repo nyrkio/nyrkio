@@ -152,11 +152,14 @@ def configsh(label, repo_owner, token):
     EPHEMERAL = "--ephemeral"
     # LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
     NAME = f"nyrkio-perf-{number}"
-    GROUP = "nyrkio"
+    # GROUP = "nyrkio"
     NYRKIO_CONFIG = (
-        f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {label}"
+        f"{EPHEMERAL} --unattended --name {NAME} --labels {label}"
     )
-    return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/{repo_owner} --token {token}"""
+    RUNNER_GROUP = ""
+    if org_or_user_repo=="org":
+        RUNNER_GROUP="--runnergroup nyrkio"
+    return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} {RUNNER_GROUP} --url https://github.com/{repo_owner} --token {token}"""
 
 
 # Append something like this in runner.py before uploading the script
