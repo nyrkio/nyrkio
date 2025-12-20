@@ -47,25 +47,6 @@ async def workflow_job_event(queued_gh_event):
     supported = supported_instance_types()
     runs_on = [lab for lab in labels if lab in supported]
 
-    try:
-        (
-            runner_registration_token,
-            org_or_user_repo,
-        ) = await get_github_runner_registration_token(
-            org_name=org_name,
-            installation_id=installation_id,
-            repo_full_name=f"{repo_owner}/{repo_name}",
-        )
-    except Exception as e:
-        if os.environ.get("NYRKIO_TESTING") == "True":
-            raise
-        # Error was already logged
-        logger.debug(e)
-        return {
-            "status": "error",
-            "message": str(e),
-        }
-
     # repo_owner is either the user or an org
     nyrkio_user = await store.get_user_by_github_username(repo_owner)
     nyrkio_org = None
@@ -89,6 +70,27 @@ async def workflow_job_event(queued_gh_event):
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
+
+    try:
+        (
+            runner_registration_token,
+            org_or_user_repo,
+        ) = await get_github_runner_registration_token(
+            org_name=org_name,
+            installation_id=installation_id,
+            repo_full_name=f"{repo_owner}/{repo_name}",
+            nyrkio_user=nyrkio_user
+        )
+    except Exception as e:
+        if os.environ.get("NYRKIO_TESTING") == "True":
+            raise
+        # Error was already logged
+        logger.debug(e)
+        return {
+            "status": "error",
+            "message": str(e),
+        }
+
 
     # To register a self hosted runner for a repo in a users own namespace,
     # first of all is a different API call, but worst of all, required Administrator permission to
@@ -673,7 +675,7 @@ class RunnerLauncher(object):
 
 # Get a one time token to register a new runner
 async def get_github_runner_registration_token(
-    org_name=None, repo_full_name=None, installation_id=None
+    org_name=None, repo_full_name=None, installation_id=None, nyrkio_user=None
 ):
     token = await fetch_access_token(
         token_url=None, expiration_seconds=600, installation_id=installation_id
@@ -738,8 +740,6 @@ async def get_github_runner_registration_token(
                 "Geting a runner registration token for user repo succeeded. Now onto deploy some VMs."
             )
             return response.json()["token"], "user"
-
-
 
     # logging.info(
     #     f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
