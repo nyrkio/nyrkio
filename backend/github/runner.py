@@ -7,6 +7,7 @@ from fabric import Connection
 from paramiko.ssh_exception import NoValidConnectionsError
 import httpx
 from fastapi import HTTPException
+import os
 
 from backend.github.runner_configs import gh_runner_config
 from backend.github.remote_scripts import (
@@ -56,6 +57,8 @@ async def workflow_job_event(queued_gh_event):
             repo_full_name=f"{repo_owner}/{repo_name}",
         )
     except Exception as e:
+        if os.environ.get("NYRKIO_TESTING") == "True":
+            raise
         # Error was already logged
         logger.debug(e)
         return {
@@ -692,3 +695,4 @@ async def get_github_runner_registration_token(
         raise Exception(
             f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
         )
+    return None, None
