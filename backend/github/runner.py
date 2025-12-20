@@ -714,12 +714,14 @@ async def get_github_runner_registration_token(
         return response.json()["token"], "user"
 
     # "else"
-    logging.info(
-        f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-    )
-    # Skip known cases but want alerts for new ones
-    if org_name not in ["pedrocarlo"]:
-        raise Exception(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-        )
+
+    # We'll still try to use a Personal Access Token after this, so don't raise just yet
+    # logging.info(
+    #     f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+    # )
+    # # Skip known cases but want alerts for new ones
+    # if org_name not in ["pedrocarlo"]:
+    #     raise Exception(
+    #         f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+    #     )
     return None, None
