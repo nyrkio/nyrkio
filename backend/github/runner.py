@@ -547,7 +547,7 @@ class RunnerLauncher(object):
         logging.info(result.stdout)
 
         file_name == "/tmp/provisioning.sh"
-        cmd = configsh(self.instance_type, repo_owner, registration_token)
+        cmd = configsh(self.instance_type, repo_owner, registration_token, self.org_or_user_repo)
         # cmd = f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
         logging.info("About to call home to mother ship...")
         logging.info(cmd)
