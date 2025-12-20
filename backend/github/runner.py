@@ -90,10 +90,10 @@ async def workflow_job_event(queued_gh_event):
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
     if runner_registration_token is None:
-        message = "Did not get a registration token for {org_name}/{repo_owner}/{sender}. Typically this can happen when permission wasn't granted to connect runners with this user or org."
+        message = f"Did not get a registration token for {org_name}/{repo_owner}/{sender}. Typically this can happen when permission wasn't granted to connect runners with this user or org."
         logger.info(message)
         return {
-            "status": "nothing to do",
+            "status": "runner registration token denied",
             "message": message,
         }
 

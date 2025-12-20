@@ -98,6 +98,14 @@ async def loop_installations():
                 ):
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                elif (
+                    return_status.get("status", "")
+                    == "runner registration token denied"
+                ):
+                    logger.info(
+                        f"Did not get a runner registration token from {repo_owner}. Continue to next user."
+                    )
+                    break
                 elif return_status.get("status", "") == "nothing to do":
                     logger.info(
                         "Checked all installations for workflow jobs that could need runners. Nobody needed anything. (nothing to do)"
