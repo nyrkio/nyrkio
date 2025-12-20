@@ -147,18 +147,16 @@ cd /home/runner
 provisioning = provisioning1 + "\n" + orig_labels + provisioning2
 
 
-def configsh(label, repo_owner, token):
+def configsh(label, repo_owner, token, org_or_user_repo):
     number = random.randint(1, 99999)
     EPHEMERAL = "--ephemeral"
     # LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
     NAME = f"nyrkio-perf-{number}"
     # GROUP = "nyrkio"
-    NYRKIO_CONFIG = (
-        f"{EPHEMERAL} --unattended --name {NAME} --labels {label}"
-    )
+    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --labels {label}"
     RUNNER_GROUP = ""
-    if org_or_user_repo=="org":
-        RUNNER_GROUP="--runnergroup nyrkio"
+    if org_or_user_repo == "org":
+        RUNNER_GROUP = "--runnergroup nyrkio"
     return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} {RUNNER_GROUP} --url https://github.com/{repo_owner} --token {token}"""
 
 

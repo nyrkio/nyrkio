@@ -47,7 +47,10 @@ async def workflow_job_event(queued_gh_event):
     runs_on = [lab for lab in labels if lab in supported]
 
     try:
-        runner_registration_token, org_or_user_repo = await get_github_runner_registration_token(
+        (
+            runner_registration_token,
+            org_or_user_repo,
+        ) = await get_github_runner_registration_token(
             org_name=org_name,
             installation_id=installation_id,
             repo_full_name=f"{repo_owner}/{repo_name}",
@@ -90,8 +93,8 @@ async def workflow_job_event(queued_gh_event):
         nyrkio_billing_user,
         queued_gh_event,
         runs_on,
-        registration_token=runner_registration_token,
-        org_or_user_repo
+        runner_registration_token,
+        org_or_user_repo,
     )
     launched_runners = await launcher.launch()
     if launched_runners:
@@ -118,7 +121,7 @@ class RunnerLauncher(object):
         gh_event,
         runs_on,
         registration_token,
-        org_or_user_repo
+        org_or_user_repo,
     ):
         self.registration_token = registration_token
         self.org_or_user_repo = org_or_user_repo
@@ -585,7 +588,7 @@ class RunnerLauncher(object):
         ec2 = session.client("ec2")
         ec2r = session.resource("ec2")
 
-        if org_or_user_repo=="org" and not await self.ensure_runner_group():
+        if self.org_or_user_repo == "org" and not await self.ensure_runner_group():
             gh_org = self.gh_event.get("organization", {}).get("login")
             logging.warning(
                 f"Couldn't find or create a runner group at http://github.com/{gh_org}"
@@ -679,8 +682,6 @@ async def get_github_runner_registration_token(
             "Geting a runner registration token for user repo succeeded. Now onto deploy some VMs."
         )
         return response.json()["token"], "user"
-
-
 
     # "else"
     logging.info(
