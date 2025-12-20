@@ -100,6 +100,8 @@ async def workflow_job_event(queued_gh_event):
     org_or_user_token = None
     if runner_registration_token is not None and org_or_user_repo == "org":
         org_or_user_token = runner_registration_token
+    elif runner_registration_token is not None and org_or_user_repo == "user":
+        org_or_user_token = runner_registration_token
 
     elif nyrkio_user and runner_registration_token is None:
         store = DBStore()
