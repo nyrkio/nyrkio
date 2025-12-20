@@ -734,6 +734,7 @@ async def get_github_runner_registration_token(
                 "Authorization": f"Bearer {github_pat}",
             },
         )
+        print(response.status_code)
         if response.status_code in [200, 201]:
             logging.debug(
                 "Geting a runner registration token for user repo succeeded. Now onto deploy some VMs."
