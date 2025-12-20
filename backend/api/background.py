@@ -27,7 +27,7 @@ async def background_worker():
 
     done_work = await loop_installations()
     if len(done_work) > 0:
-        logger.info(f"Background worker launched {len(done_work)} github runners.")
+        logger.info(f"Background worker returned with {len(done_work)} messages.")
         for runner in done_work:
             logger.info(runner)
 
