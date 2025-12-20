@@ -118,7 +118,8 @@ sudo chown -R runner:runner /home/runner
 
 
 ##########################################################333
-LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral
+LABELS={labels}
+#LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral
 NAME=nyrkio-perf-$\{RANDOM\}e
 GROUP=nyrkio
 NYRKIO_CONFIG="$EPHEMERAL --unattended --name $NAME --runnergroup $GROUP --labels $LABELS"
@@ -164,3 +165,11 @@ all_scripts = {
     "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
     "/tmp/provisioning.sh": provisioning,
 }
+
+def render_remote_files(labels):
+    _provisioning = provisioning.format(labels=labels)
+    return {
+        "/home/runner/runsh_wrapper.sh": runsh_wrapper,
+        "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
+        "/tmp/provisioning.sh": _provisioning,
+    }

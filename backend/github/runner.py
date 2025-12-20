@@ -9,7 +9,7 @@ import httpx
 from fastapi import HTTPException
 
 from backend.github.runner_configs import gh_runner_config
-from backend.github.remote_scripts import all_scripts as all_files, configsh
+from backend.github.remote_scripts import all_scripts as all_files, configsh, render_remote_files
 from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 from backend.db.db import DBStore
@@ -80,13 +80,13 @@ async def workflow_job_event(queued_gh_event):
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
-    # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
+
     launcher = RunnerLauncher(
         nyrkio_user,
         nyrkio_org,
         nyrkio_billing_user,
         queued_gh_event,
-        runs_on.pop(),
+        runs_on,
         registration_token=runner_registration_token,
     )
     launched_runners = await launcher.launch()
@@ -120,7 +120,9 @@ class RunnerLauncher(object):
         self.nyrkio_org_id = nyrkio_org_id
         self.nyrkio_billing_user = nyrkio_billing_user
         self.gh_event = gh_event
-        self.instance_type = instance_type
+        self.runs_on = runs_on
+        # Note: supported_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
+        self.instance_type = runs_on.pop()
         self.config = gh_runner_config(self.instance_type)
         self.tags = self.gh_event_to_aws_tags(self.gh_event)
         logging.info(
@@ -604,12 +606,15 @@ class RunnerLauncher(object):
                 self.config["spot_price"],
                 i,
             )
+
+            # labels used to register the runner with github
+            labels = ",".join(this.runs_on)
             await self.provision_instance_with_fabric(
                 public_ip,
                 self.config["ssh_user"],
                 self.config["ssh_key_file"],
                 # self.config["local_files"],
-                all_files,
+                render_remote_files(labels=labels),
                 self.gh_event["repository"]["owner"]["login"],
                 self.registration_token,
             )
