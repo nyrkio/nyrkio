@@ -573,8 +573,13 @@ class RunnerLauncher(object):
         logging.info(result.stdout)
 
         file_name == "/tmp/provisioning.sh"
+        repo_name = self.gh_event["repository"]["name"]
         cmd = configsh(
-            self.instance_type, repo_owner, registration_token, self.org_or_user_repo
+            self.instance_type,
+            repo_owner,
+            registration_token,
+            self.org_or_user_repo,
+            repo_name,
         )
         # cmd = f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
         logging.info("About to call home to mother ship...")
