@@ -722,6 +722,25 @@ async def get_github_runner_registration_token(
     # "else"
 
     # We'll still try to use a Personal Access Token after this, so don't raise just yet
+    store = DBStore()
+    github_pat = await store.get_pat(nyrkio_user)
+    if github_pat:
+        client = httpx.AsyncClient()
+        response = await client.post(
+            f"https://api.github.com/repos/{repo_full_name}/actions/runners/registration-token",
+            headers={
+                "Accept": "application/vnd.github.v3+json",
+                "Authorization": f"Bearer {github_pat}",
+            },
+        )
+        if response.status_code in [200, 201]:
+            logging.debug(
+                "Geting a runner registration token for user repo succeeded. Now onto deploy some VMs."
+            )
+            return response.json()["token"], "user"
+
+
+
     # logging.info(
     #     f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
     # )

@@ -155,7 +155,7 @@ def configsh(label, repo_owner, token, org_or_user_repo, repo_name):
     # GROUP = "nyrkio"
     NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --labels {label}"
     RUNNER_GROUP = ""
-    URL = f"https://github.com/repos/{repo_owner}/{repo_name}/actions/runners/registration-token"
+    URL = f"https://github.com/repos/{repo_owner}/{repo_name}"
     if org_or_user_repo == "org":
         RUNNER_GROUP = "--runnergroup nyrkio"
         URL = f"https://github.com/{repo_owner}"
