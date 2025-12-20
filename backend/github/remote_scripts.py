@@ -26,7 +26,7 @@ source /home/runner/.bashrc
 screen  -dmS nyrkioGhRunner /home/runner/runsh_wrapper.sh
 """
 
-provisioning = """#!/bin/bash
+provisioning1 = """#!/bin/bash
 
 # MIT licensed
 # (c) Nyrkiö Oy, 2025
@@ -114,12 +114,13 @@ sudo sysctl -w vm.max_map_count=262144
 echo "/home/runner/_diag/core_files/core.\%\e.%p.%h.%t" |sudo tee -a  /proc/sys/kernel/core_pattern > /dev/null
 sudo mkdir -p "/home/runner/_diag/core_files"
 sudo chown -R runner:runner /home/runner
+"""
 
+orig_labels = (
+    """LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"""
+)
 
-
-##########################################################333
-LABELS={labels}
-#LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral
+provisioning2 = """
 NAME=nyrkio-perf-$\{RANDOM\}e
 GROUP=nyrkio
 NYRKIO_CONFIG="$EPHEMERAL --unattended --name $NAME --runnergroup $GROUP --labels $LABELS"
@@ -142,6 +143,8 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 
 cd /home/runner
 """
+
+provisioning = provisioning1 + "\n" + orig_labels + provisioning2
 
 
 def configsh(label, repo_owner, token):
@@ -168,7 +171,9 @@ all_scripts = {
 
 
 def render_remote_files(labels):
-    _provisioning = provisioning.format(labels=labels)
+    _provisioning = (
+        provisioning1 + "LABELS={labels}\n".format(labels=labels) + provisioning2
+    )
     return {
         "/home/runner/runsh_wrapper.sh": runsh_wrapper,
         "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
