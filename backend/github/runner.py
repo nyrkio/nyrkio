@@ -9,7 +9,10 @@ import httpx
 from fastapi import HTTPException
 
 from backend.github.runner_configs import gh_runner_config
-from backend.github.remote_scripts import all_scripts as all_files, configsh, render_remote_files
+from backend.github.remote_scripts import (
+    configsh,
+    render_remote_files,
+)
 from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 from backend.db.db import DBStore
@@ -112,8 +115,8 @@ class RunnerLauncher(object):
         nyrkio_org_id,
         nyrkio_billing_user,
         gh_event,
-        instance_type=None,
-        registration_token=None,
+        runs_on,
+        registration_token,
     ):
         self.registration_token = registration_token
         self.nyrkio_user_id = nyrkio_user_id
@@ -122,7 +125,7 @@ class RunnerLauncher(object):
         self.gh_event = gh_event
         self.runs_on = runs_on
         # Note: supported_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
-        self.instance_type = runs_on.pop()
+        self.instance_type = runs_on[0]
         self.config = gh_runner_config(self.instance_type)
         self.tags = self.gh_event_to_aws_tags(self.gh_event)
         logging.info(
@@ -608,7 +611,7 @@ class RunnerLauncher(object):
             )
 
             # labels used to register the runner with github
-            labels = ",".join(this.runs_on)
+            labels = ",".join(self.runs_on)
             await self.provision_instance_with_fabric(
                 public_ip,
                 self.config["ssh_user"],

@@ -166,6 +166,7 @@ all_scripts = {
     "/tmp/provisioning.sh": provisioning,
 }
 
+
 def render_remote_files(labels):
     _provisioning = provisioning.format(labels=labels)
     return {
