@@ -79,7 +79,7 @@ async def workflow_job_event(queued_gh_event):
             org_name=org_name,
             installation_id=installation_id,
             repo_full_name=f"{repo_owner}/{repo_name}",
-            nyrkio_user=nyrkio_user
+            nyrkio_user=nyrkio_user,
         )
     except Exception as e:
         if os.environ.get("NYRKIO_TESTING") == "True":
@@ -90,7 +90,6 @@ async def workflow_job_event(queued_gh_event):
             "status": "error",
             "message": str(e),
         }
-
 
     # To register a self hosted runner for a repo in a users own namespace,
     # first of all is a different API call, but worst of all, required Administrator permission to
