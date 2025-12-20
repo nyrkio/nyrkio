@@ -97,17 +97,17 @@ async def workflow_job_event(queued_gh_event):
     # But we still have one lifeline to try: If the user has created a Personal Access Token (fine grained)
     # we can use it.
     org_or_user_token = None
-    if nyrkio_user and runner_registration_token is None:
+    if runner_registration_token is not None and org_or_user_repo == "org":
+        org_or_user_token = runner_registration_token
+
+    elif nyrkio_user and runner_registration_token is None:
         store = DBStore()
         github_pat = await store.get_pat(nyrkio_user)
         if github_pat:
             org_or_user_token = github_pat
             org_or_user_repo = "user"
 
-    elif runner_registration_token is not None and org_or_user_repo == "org":
-        org_or_user_token = runner_registration_token
-
-    else:
+    if org_or_user_token is None:
         message = f"Did not get a registration token for {org_name}/{repo_owner}/{sender}. Typically this can happen when permission wasn't granted to connect runners with this user or org."
         logger.info(message)
         return {
