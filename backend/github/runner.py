@@ -97,11 +97,12 @@ async def workflow_job_event(queued_gh_event):
     # But we still have one lifeline to try: If the user has created a Personal Access Token (fine grained)
     # we can use it.
     org_or_user_token = None
-    if nyrkio_user and runner_registration_token is None and org_or_user_repo == "user":
+    if nyrkio_user and runner_registration_token is None:
         store = DBStore()
         github_pat = await store.get_pat(nyrkio_user)
         if github_pat:
             org_or_user_token = github_pat
+            org_or_user_repo = "user"
 
     elif runner_registration_token is not None and org_or_user_repo == "org":
         org_or_user_token = runner_registration_token
