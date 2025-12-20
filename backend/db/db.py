@@ -1601,6 +1601,18 @@ class DBStore(object):
         print(q, results)
         return results
 
+    async def get_pat(self, user_id):
+        coll = self.db.User
+        u = await coll.find_one({"_id": user_id})
+        print(type(u))
+        if isinstance(u, dict):
+            return u.get("github_pat")
+        return
+
+    async def set_pat(self, user_id, pat):
+        coll = self.db.User
+        await coll.update_one({"_id": user_id}, {"github_pat": {"$set": pat}})
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
