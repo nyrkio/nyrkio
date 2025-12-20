@@ -102,6 +102,14 @@ async def loop_installations():
                     logger.info(
                         "Checked all installations for workflow jobs that could need runners. Nobody needed anything. (nothing to do)"
                     )
+                elif (
+                    return_status.get("status", "")
+                    == "runner registration token denied"
+                ):
+                    logger.info(
+                        f"Did not get a runner registration token from {repo_owner}. Continue to next user."
+                    )
+                    break
                 else:
                     logger.error(return_status)
                     break
