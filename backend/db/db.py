@@ -1604,7 +1604,8 @@ class DBStore(object):
     async def get_pat(self, user_id):
         coll = self.db.User
         u = await coll.find_one({"_id": user_id})
-        if len(u) == 1 and u.get("github_pat", None):
+        print(type(u))
+        if isinstance(u, dict):
             return u.get("github_pat")
         return
 
