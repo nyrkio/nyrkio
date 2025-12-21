@@ -78,7 +78,7 @@ export const DemoVideo = () => {
     <iframe
       id="demo-video"
       style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
-      src="https://youtube.com/shorts/auZY4_PljWw?si=cva-pBaJ5QhAXWVu"
+      src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
