@@ -132,7 +132,7 @@ async def workflow_job_event(queued_gh_event):
             s = "runner registration token denied"
             return {
                 "status": s,
-                "message": "Although {repo_owner} has scheduled jobs that expect Nyrkio runners, they did not grant the necessary permissions to provide a runner to them.",
+                "message": f"Although {repo_owner} has scheduled jobs that expect Nyrkio runners, they did not grant the necessary permissions to provide a runner to them.",
             }
 
     default_message = "Thank you for using Nyrkiö. For Faster Software!"
