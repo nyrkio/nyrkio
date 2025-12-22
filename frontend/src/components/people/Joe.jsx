@@ -8,7 +8,7 @@ export const JoeCard = () => {
           <div className="card-header p-5 justify-content-center text-center">
             <img src={headShot} alt="Head shot" className="rounded-3" />
             <h4 className="my-2">Joe Drumgoole</h4>
-            <p>Developer Relations</p>
+            <p>Go To Market</p>
           </div>
         </div>
       </div>
@@ -19,7 +19,7 @@ export const JoeCard = () => {
         <p>
         From Oracle to founding startups of his own, Joe brings with him decades of experience from the Dublin tech scene. Joe and Henrik met in 2013 when MongoDB expanded to Europe and assembled a "dream team" of database experts that the European database industry had not seen before, and probably never will. Most recently Joe worked at PostgreSQL shop Neon.
         </p>
-        <p>At Nyrkiö Joe has a "player-coach" role. Part advisor to the CEO on marketing and Go-To-Market approach, part hands on developer relations projects. With a little help from AI, Joe caught up 2 years worth of technical debt, in a single 100 thousand line patch of playwright tests! All those tests we promised to add "later"... we finally did!</p>
+        <p>Joe joined Nyrkiö in 2025 shouldering a broad hands on role fitting the entrepreneurial spirit in the company. While formally responsible for marketing and developer relations, Joe has also managed to evolve R&D processes in the company by dragging Henrik into the AI era: In a single AI generated 100k line patch, Joe caught up 2 years worth of technical debt in playwright tests! All those tests we promised to add "later"... we finally did!</p>
       </div>
     </div>
   );
