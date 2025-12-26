@@ -54,7 +54,7 @@ export const LogoBrownSlogan = () => {
     alt="Nyrkiö (logo)"
     className="nyrkio-logo-img nyrkio-logo-img-small "
     />
-    <h1>Continuous Benchmarking as a Service</h1>
+    <h1>Continuous Benchmarking</h1>
     </div>
   );
 };
@@ -67,7 +67,7 @@ export const LogoSloganNarrow = () => {
         alt="Nyrkiö (logo)"
         className="nyrkio-logo-img nyrkio-logo-img-small "
       />
-      <h1>Benchmarking as a Service</h1>
+      <h1>Continuous Benchmarking</h1>
     </div>
   );
 };

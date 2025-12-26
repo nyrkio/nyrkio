@@ -119,6 +119,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
 
   const colDefs = [
     { field: "date", sort: "desc",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const text = params.value;
         if (text == queryStringTextTimestamp){
@@ -128,6 +129,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
       }
     },
     { field: "metric",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const metric_name = params.value;
         const url = "#"+metric_name;
@@ -139,6 +141,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
       }
     },
     { field: "change",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const { changeValue, metric_name } = params.value;
         // const d = directionFormatter(changeValue, metric_name);
@@ -155,6 +158,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
     },
     {
       field: "commit",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const { commit, commit_msg, repo } = params.value;
 
