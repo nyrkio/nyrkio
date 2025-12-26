@@ -203,10 +203,10 @@ export const FrontPage = ({loggedIn}) => {
           </a>
 
           <h2>Coming soon...</h2>
-          <p className=""><em><strong>Nyrkiö runners</strong></em></p>
+          <h1><strong>Nyrkiö runners</strong></h1>
           <p>Continuous Benchmarking with nanosecond precision!</p>
-          <p>Be among the first to hear about it: <br />
-          <a href="https://nyrkio.activehosted.com/f/5"><strong>Sign up for our upcoming product news mailing list</strong> &gt;&gt;&gt;</a></p>
+          <p>Be among the first to hear about it: </p>
+          <p><a href="https://nyrkio.activehosted.com/f/5"><strong>Sign up for our upcoming product news mailing list</strong> &gt;&gt;&gt;</a></p>
 
           </div>
 
