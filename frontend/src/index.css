@@ -255,7 +255,7 @@ margin-bottom: 10em;
   letter-spacing: 1.3rem;
   margin-bottom: 2.5em;
   text-align: center;
-  top: -0.4em;
+  top: 0.4em;
   left: 5%;
   position: relative;
 }
@@ -275,7 +275,7 @@ margin-bottom: 10em;
   letter-spacing: 0.15em;
   display: block;
   text-align: right;
-  padding-right: 3em;
+  padding-right: 25%;
   margin-top: 0.7em;
 }
 
