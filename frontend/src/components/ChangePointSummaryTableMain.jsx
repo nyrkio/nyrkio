@@ -170,6 +170,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   let prevDate, prevCommit, prevTest;
   let colDefs = [
     { field: "date", sort: "desc",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const text = params.value.date;
         const isSame = params.value.isSame;
@@ -201,6 +202,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       }
     },
     { field: "test",
+      suppressMovable: true,
       cellRenderer: (params) => {
         let test_name = params.value.test_name;
         const branchName = params.value.branchName;
@@ -228,6 +230,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       },
     },
     { field: "metric",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const metric_name = params.value.metric_name;
         const test_name = params.value.test_name;
@@ -251,6 +254,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       },
     },
     { field: "change",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const { changeValue, metric_name } = params.value;
         // const d = directionFormatter(changeValue, metric_name);
@@ -267,6 +271,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
     },
     {
       field: "commit",
+      suppressMovable: true,
       cellRenderer: (params) => {
         const { commit, commit_msg, repo } = params.value;
         const isSame = params.value.isSame;
