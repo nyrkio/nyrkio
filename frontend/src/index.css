@@ -283,7 +283,39 @@ margin-bottom: 10em;
   font-size: 2em;
   letter-spacing: 0.1rem;
 }
-
+@media (max-width: 899px) {
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1,
+  .frontpage .nyrkio-title h1 {
+    font-size: 1em;
+    font-family: "Bebas Neue";
+    font-weight: 100;
+    letter-spacing: 0.3rem;
+    margin-bottom: 2.5em;
+    text-align: center;
+    top: 0.4em;
+  }
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1 .git,
+  .frontpage .nyrkio-title h1 .git {
+    text-shadow: -2px -2px 1px var(--nyrkio-light-gray);
+  }
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1 .for,
+  .frontpage .nyrkio-title h1 .for {
+    text-shadow: 2px -2px 1px var(--nyrkio-light-gray);
+    font-family: "Big Shoulders";
+    font-size: 14pt;
+    letter-spacing: 0.1em;
+    display: block;
+    text-align: right;
+    padding-right: 2em;
+    margin-top: 0.7em;
+  }
+}
 #demo-video {
   width: 960px;
   height: 540px;
