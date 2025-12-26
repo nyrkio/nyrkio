@@ -230,7 +230,7 @@ export const KiekerQuote = () =>{
 
         <q>We use Nyrkiö as an implementation of the E-Divisive Change Point Detection algorithm in parallel with our own monitoring dashboard.
         This provides independent validation of our own findings. We also like that the graphs look prettier than our own!</q></p>
-        <p className="user quote-attribution">Dr Shinhyung Yang, Kiel Universität</p>
+        <p className="user quote-attribution">Dr Shinhyung Yang, Kiel University</p>
         </div>
     );
 };
