@@ -86,9 +86,6 @@ body {
 body em {
   padding-left:2px;
   padding-right:3px;
-  letter-spacing: 0.0rem;
-  font-weight: 300;
-  font-family: "Times", cursive;
   font-size: 110%;
 }
 
@@ -248,34 +245,33 @@ margin-bottom: 10em;
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   max-width:90%;
-  color: var(--nyrkio-tattoo-red);
   font-size: 2em;
   font-family: "Bebas Neue";
   font-weight: 100;
   letter-spacing: 1.3rem;
-  margin-bottom: 2.5em;
+  margin-bottom: 5.5em;
   text-align: center;
   top: 0.4em;
   left: 5%;
   position: relative;
+  color: var(--bs-heading-color2);
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .git,
 .frontpage .nyrkio-title h1 .git {
-  text-shadow: -5px -5px 3px var(--nyrkio-light-gray);
+  text-shadow: -2px -2px 5px var(--nyrkio-dark-gray);
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .for,
 .frontpage .nyrkio-title h1 .for {
-  text-shadow: 5px -5px 3px var(--nyrkio-light-gray);
   font-family: "Big Shoulders";
   font-size: 20pt;
   letter-spacing: 0.15em;
   display: block;
   text-align: right;
-  padding-right: 25%;
+  padding-right: 20%;
   margin-top: 0.7em;
 }
 
@@ -283,7 +279,7 @@ margin-bottom: 10em;
   font-size: 2em;
   letter-spacing: 0.1rem;
 }
-@media (max-width: 899px) {
+@media (max-width: 950px) {
   .nyrkio-logo.nyrkio-title h2,
   .frontpage .nyrkio-title h2,
   .nyrkio-logo.nyrkio-title h1,
@@ -292,25 +288,23 @@ margin-bottom: 10em;
     font-family: "Bebas Neue";
     font-weight: 100;
     letter-spacing: 0.3rem;
-    margin-bottom: 2.5em;
-    text-align: center;
+    margin-bottom: 9.5em;
     top: 0.4em;
   }
   .nyrkio-logo.nyrkio-title h2,
   .frontpage .nyrkio-title h2,
   .nyrkio-logo.nyrkio-title h1 .git,
   .frontpage .nyrkio-title h1 .git {
-    text-shadow: -2px -2px 1px var(--nyrkio-light-gray);
+    text-shadow: 0px 0px 0px var(--nyrkio-dark-gray);
   }
   .nyrkio-logo.nyrkio-title h2,
   .frontpage .nyrkio-title h2,
   .nyrkio-logo.nyrkio-title h1 .for,
   .frontpage .nyrkio-title h1 .for {
-    text-shadow: 2px -2px 1px var(--nyrkio-light-gray);
     font-family: "Big Shoulders";
     font-size: 14pt;
     letter-spacing: 0.1em;
-    display: block;
+    display: none;
     text-align: right;
     padding-right: 2em;
     margin-top: 0.7em;

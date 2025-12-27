@@ -102,7 +102,7 @@ const FeatureBanner1 = () => {
             when the random variation in your benchmarking results is often bigger than that.
           </p>
           <p>
-            Nyrkiö uses <em>Change Point Detection</em> to identify every change
+            Nyrkiö uses <strong>Change Point Detection</strong> to identify every change
             in your performance data.
             Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every performance regression, however small or large.
@@ -196,17 +196,16 @@ export const FrontPage = ({loggedIn}) => {
 
       <div className="frontpage container-fluid text-center w-100">
 
-          <div className="text-left coming-soon">
+          <div className="coming-soon">
           <a href="https://www.youtube.com/shorts/auZY4_PljWw" target="youtube">
-          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginBottom: "15em", }} />
-          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "25%", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginBottom: "15em", }} />
+          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
+          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
           </a>
 
-          <h2>Coming soon...</h2>
-          <h1><strong>Nyrkiö runners</strong></h1>
+          <p>Coming soon: &nbsp;&nbsp;<big><strong class="nyrkio-accent">Nyrkiö runners</strong></big></p>
           <p>Continuous Benchmarking with nanosecond precision!</p>
           <p>Be among the first to hear about it: </p>
-          <p><a href="https://nyrkio.activehosted.com/f/5"><strong>Sign up for our upcoming product news mailing list</strong> &gt;&gt;&gt;</a></p>
+          <p><a href="https://nyrkio.activehosted.com/f/5">Sign up for our upcoming product news mailing list ...</a></p>
 
           </div>
 
