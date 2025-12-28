@@ -992,7 +992,7 @@ def test_add_and_get_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
     config = {
-        "notifiers": {"slack": True, "github": False, "since_days": 14},
+        "notifiers": {"slack": True, "github_pr": False, "github": False, "since_days": 14},
     }
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
@@ -1005,7 +1005,7 @@ def test_add_and_get_user_config(client):
 def test_add_and_get_partial_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
-    config = {"notifiers": {"slack": True, "github": False, "since_days": 14}}
+    config = {"notifiers": {"slack": True, "github_pr": False, "github": False, "since_days": 14}}
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -1020,7 +1020,7 @@ def test_add_and_get_partial_user_config(client):
 def test_update_existing_user_config(client):
     """Ensure that we can update an existing user configuration"""
     client.login()
-    config = {"notifiers": {"slack": True, "github": False, "since_days": 14}}
+    config = {"notifiers": {"slack": True, "github_pr": False, "github": False, "since_days": 14}}
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -1031,7 +1031,7 @@ def test_update_existing_user_config(client):
         "billing": None,
     }
 
-    new_config = {"notifiers": {"slack": False, "github": True, "since_days": 14}}
+    new_config = {"notifiers": {"slack": False, "github_pr": False, "github": True, "since_days": 14}}
     response = client.put("/api/v0/user/config", json=new_config)
     assert response.status_code == 200
 
