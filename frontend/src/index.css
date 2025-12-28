@@ -103,6 +103,7 @@ body.section-dashboards {
   margin-top: 1em;
   margin-bottom:0em;
 }
+div.card div.card-header,
 body.section-settings div.card div.card-header,
 body.section-dashboards div.card div.card-header {
   font-family: "Bebas neue", Arial, Inter, Helvetica;
