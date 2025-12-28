@@ -7,13 +7,13 @@ export const MattCard = () => {
         <div className="card m-3 rounded-3 shadow people-card">
           <div className="card-header p-5 justify-content-center text-center">
             <h4 className="my-2">Matt Fleming</h4>
-            <p>&nbsp;</p>
-            <p>
-            Matt Fleming was a co-founder and the CTO for the first 1-2 years. He not only wrote most of the first version of Nyrkiö Change Detection, but he even came up with the Company name, and many other things. Matt had to take a break from the startup lifestyle, and now works at CloudFlare on Linux kernel stuff again.        </p>
+            <p>Co-founder</p>
             </div>
         </div>
       </div>
       <div className="col p-4">
+      <p>
+      Matt Fleming was a co-founder and the CTO for the first 1-2 years. He not only wrote most of the first version of Nyrkiö Change Detection, but he even came up with the Company name, and many other things. Matt had to take a break from the startup lifestyle, and now works at CloudFlare on Linux kernel stuff again.        </p>
       </div>
     </div>
   );
