@@ -1633,6 +1633,7 @@ class DBStore(object):
                 "user_id": user_id,
                 "runner_usage": user_runner_usage,
                 "report": report_key,
+                "nyrkio_datetime": datetime.now(tz=timezone.utc),
             }
         )
 
