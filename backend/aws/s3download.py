@@ -34,7 +34,7 @@ def get_latest_runner_usage(seen_previously=None):
     s3client = boto3.resource("s3")
     bucket_name = "nyrkiorunnersusage"
     bucket = s3client.Bucket(bucket_name)
-
+    logger.info(str(bucket))
     runner_usage_reports = list(
         filter(
             lambda o: o.key.endswith("/NyrkioRunnersByUser-00001.csv.gz"),
@@ -43,7 +43,8 @@ def get_latest_runner_usage(seen_previously=None):
     )
     # print(runner_usage_reports)
     runner_usage_reports.sort(key=lambda o: o.key)
-    latest_report = None
+    logger.info(str(runner_usage_reports))
+    latest_report = runner_usage_reports[-1] if runner_usage_reports else None
     if seen_previously:
         temp = []
         start_collecting = False
@@ -58,6 +59,7 @@ def get_latest_runner_usage(seen_previously=None):
         runner_usage_reports = temp
 
     pivot = {}
+    logger.info(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
 
