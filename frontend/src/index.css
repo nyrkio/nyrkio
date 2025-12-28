@@ -579,7 +579,7 @@ button:focus-visible {
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
-    letter-spacing: 0.9pt;
+    letter-spacing: 0.7pt;
     font-size: 12pt;
     line-height: 1.5em;
     font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
