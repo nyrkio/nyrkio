@@ -1626,7 +1626,7 @@ class DBStore(object):
             {"_id": "latest_usage_report"}, {"$set": {"key": key}}, upsert=True
         )
 
-    async def set_user_runner_usage(self, user_id, user_runner_usage, report_key=None):
+    async def add_user_runner_usage(self, user_id, user_runner_usage, report_key=None):
         coll = self.db.runner_usage
         await coll.insert(
             {
