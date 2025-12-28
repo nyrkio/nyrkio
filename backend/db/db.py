@@ -1613,6 +1613,29 @@ class DBStore(object):
         coll = self.db.User
         await coll.update_one({"_id": user_id}, {"github_pat": {"$set": pat}})
 
+    async def get_latest_runner_report(self):
+        coll = self.db.runner_usage_latest_report
+        res = await coll.find_one({"_id": "latest_usage_report"})
+        if res:
+            return res["key"]
+        return "not found"
+
+    async def set_latest_runner_report(self, key):
+        coll = self.db.runner_usage_latest_report
+        await coll.update_one(
+            {"_id": "latest_usage_report"}, {"$set": {"key": key}}, upsert=True
+        )
+
+    async def set_user_runner_usage(self, user_id, user_runner_usage, report_key=None):
+        coll = self.db.runner_usage
+        await coll.insert(
+            {
+                "user_id": user_id,
+                "runner_usage": user_runner_usage,
+                "report": report_key,
+            }
+        )
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False
