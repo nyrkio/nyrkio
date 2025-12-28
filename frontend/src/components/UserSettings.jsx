@@ -5,11 +5,13 @@ import { throttle } from "../lib/utils";
 import { Modal } from "react-bootstrap";
 
 export const UserSettings = () => {
+  // TODO: Get entire config once here
   return (
     <>
       <div className="container">
         <ApiKey />
         <HunterSettings />
+        <NotificationSettings />
         <SlackSettings />
         <UserInfo />
       </div>
@@ -85,7 +87,7 @@ const ApiKey = () => {
       <div className="row pt-5 justify-content-center">
         <div className="col-md-8">
           <div className="card">
-            <div className="card-header p-2">API keys</div>
+            <div className="card-header ">API keys</div>
             <div className="card-body"></div>
             <div className="row">
               <b>
@@ -93,7 +95,7 @@ const ApiKey = () => {
                 retrieved after closing the dialog.
               </b>
             </div>
-            <div className="row p-2">
+            <div className="row ">
               <div className="col-6">
                 <button className="btn btn-success" onClick={generateApiKey}>
                   Generate API key
@@ -227,6 +229,7 @@ export const HunterSettings = ({callback=noop}) => {
     ) {
       //minMagnitudeSet(data.core.min_magnitude);
       //pvalueSet(data.core.max_pvalue);
+
       return data.core;
     }
 
@@ -464,7 +467,7 @@ export const HunterSettings = ({callback=noop}) => {
     <div className="row pt-5 justify-content-center">
       <div className="col-md-8">
         <div className="card">
-          <div className="card-header p-2">Change Point Detection</div>
+          <div className="card-header ">Change Point Detection</div>
           <div className="card-body">
             <p className="card-text">
               These settings are global for all your metrics.
@@ -533,7 +536,7 @@ const SlackSettings = () => {
     <div className="row pt-5 justify-content-center">
       <div className="col-md-8">
         <div className="card">
-          <div className="card-header p-2">Slack</div>
+          <div className="card-header ">Slack</div>
           <div className="card-body">
             {Object.keys(slackData).length > 0 ? (
               <>
@@ -694,7 +697,7 @@ const UserInfo = () => {
     <div className="row pt-5 justify-content-center">
       <div className="col-md-8">
         <div className="card" id="nyrkio-settings-userinfo">
-          <div className="card-header p-2">Information about your user account</div>
+          <div className="card-header ">Information about your user account</div>
           <div className="card-body">
             <p className="card-text">
               <label>Username:</label> {username}
@@ -712,6 +715,126 @@ const UserInfo = () => {
           </div>
         </div>
       </div>
+    </div>
+  );
+};
+
+const NotificationSettings = () => {
+
+  const defaultConfig = {slack: false, github:true, github_pr: true, since_days: 14};
+  const [notifiersConfig, setNotifiersConfig] = useState(defaultConfig);
+  const [githubCheckbox, setGithubCheckbox] = useState(defaultConfig.github);
+  const [githubPrCheckbox, setGithubPrCheckbox] = useState(defaultConfig.github);
+  const [daysSince, setDaysSince] = useState(defaultConfig.since_days);
+  const fetchNotificationConfig = async () => {
+    const response = await fetch("/api/v0/user/config", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status == 200) {
+      console.debug(response);
+    } else if (response.status == 401){
+      console.debug("User has logged out or wrong password or whatever");
+    } else {
+      console.error("Failed to GET Nyrkiö notification user settings");
+      console.log(response);
+      return {defaultConfig};
+    }
+
+    const data = await response.json();
+    console.debug(data);
+    if (
+      data &&
+      data.notifiers &&
+      Object.keys(data).length > 0 &&
+      data.hasOwnProperty("notifiers") &&
+      Object.keys(data.notifiers).length > 0
+    ) {
+
+      return data.notifiers;
+    }
+
+    return defaultConfig;
+  };
+
+  const saveNotificationConfig = async (c) => {
+    const response = await fetch("/api/v0/user/config", {
+      method: "PUT",
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({notifiers: c})
+    });
+    if (response.status == 200) {
+      console.debug(response);
+    } else if (response.status == 401){
+      console.debug("User has logged out or wrong password or whatever");
+    } else {
+      console.error("Failed to save Nyrkiö notification user settings (PUT)");
+      console.log(response);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotificationConfig().then((c) => {
+      setNotifiersConfig(c);
+      setGithubCheckbox(c.github?true:false)
+      setDaysSince(c.since_days?c.since_days:0)
+      setGithubPrCheckbox(c.github_pr?true:false)
+      console.log(notifiersConfig);
+    });
+  }, []);
+
+  const toggleGithub = async (e) => {
+    setGithubCheckbox(e.target.checked);
+
+    const c = notifiersConfig;
+    c.github = e.target.checked;
+    await saveNotificationConfig(c);
+    setNotifiersConfig(c);
+  };
+  const changeDays = async (e) => {
+    setDaysSince(e.target.value);
+
+    const c = notifiersConfig;
+    c.since_days = e.target.value;
+    console.log(c);
+    await saveNotificationConfig(c);
+    setNotifiersConfig(c);
+  };
+  const toggleGithubPr = async (e) => {
+    setGithubPrCheckbox(e.target.checked);
+
+    const c = notifiersConfig;
+    c.github_pr = e.target.checked;
+    await saveNotificationConfig(c);
+    setNotifiersConfig(c);
+  };
+  return (
+    <div className="row pt-5 justify-content-center">
+    <div className="col-md-8">
+    <div className="card">
+    <div className="card-header ">Notification settings</div>
+    <div className="card-body">
+      <form>
+      <p>
+      <input type="checkbox" id="notifiers_github_issues" name="notifiers_github_issues" checked={githubCheckbox} onChange={(e) => toggleGithub(e)}/>{" "}
+      Create a GitHub issue if a change point was found and the commit is at most
+      <br />
+      <input style={{width: "3em", textAlign: "right"}} type="text" id="notifiers_since_days" name="notifiers_since_days" value={daysSince} onChange={(e)=>changeDays(e)}/>{" "}
+      days old. (At most one issue per commit is created.)
+      </p>
+      <p>
+      <input type="checkbox" id="notifiers_github_pr" name="notifiers_github_pr" checked={githubPrCheckbox} onChange={(e) => toggleGithubPr(e)}/>{" "}
+      Post a comment on pull requests.
+      </p>
+      </form>
+    </div>
+    </div>
+    </div>
     </div>
   );
 };
