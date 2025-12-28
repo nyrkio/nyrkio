@@ -44,12 +44,12 @@ async def check_runner_usage():
     runner_usage, latest_usage_report = get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
-    logger.info(str(runner_usage))
-    logger.info(str(latest_usage_report))
+    logger.debug(str(runner_usage))
+    logger.debug(str(latest_usage_report))
     if runner_usage:
         for user_id, user_runner_usage in runner_usage.items():
             logger.info(f"Updating runner usage data for {user_id}")
-            await store.add_user_runner_usage(user_id, user_runner_usage)
+            await store.add_user_runner_usage(user_id, user_runner_usage, latest_usage_report)
     if latest_usage_report:
         logger.info(
             f"We now imported s3 consumption reports up to and including {latest_usage_report}"

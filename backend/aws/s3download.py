@@ -43,7 +43,7 @@ def get_latest_runner_usage(seen_previously=None):
     )
     # print(runner_usage_reports)
     runner_usage_reports.sort(key=lambda o: o.key)
-    logger.info(str(runner_usage_reports))
+    logger.debug(str(runner_usage_reports))
     latest_report = str(runner_usage_reports[0].key) if runner_usage_reports else None
     if seen_previously:
         temp = []
@@ -59,7 +59,7 @@ def get_latest_runner_usage(seen_previously=None):
         runner_usage_reports = temp
 
     pivot = {}
-    logger.info(str(runner_usage_reports))
+    logger.debug(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
 
