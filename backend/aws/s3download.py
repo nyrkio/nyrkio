@@ -44,7 +44,7 @@ def get_latest_runner_usage(seen_previously=None):
     # print(runner_usage_reports)
     runner_usage_reports.sort(key=lambda o: o.key)
     logger.info(str(runner_usage_reports))
-    latest_report = runner_usage_reports[-1] if runner_usage_reports else None
+    latest_report = str(runner_usage_reports[-1].key) if runner_usage_reports else None
     if seen_previously:
         temp = []
         start_collecting = False
@@ -54,7 +54,7 @@ def get_latest_runner_usage(seen_previously=None):
                 continue
             if start_collecting:
                 temp.append(r)
-                latest_report = r.key
+                latest_report = str(r.key)
 
         runner_usage_reports = temp
 
