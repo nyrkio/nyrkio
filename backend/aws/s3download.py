@@ -57,6 +57,7 @@ def get_latest_runner_usage(seen_previously=None):
 
         runner_usage_reports = temp
 
+    pivot = {}
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
 
@@ -71,7 +72,6 @@ def get_latest_runner_usage(seen_previously=None):
         csv_data = csv.reader(csv_buf, delimiter=",", quotechar='"')
         # print(csv_data)
         column = {}
-        pivot = {}
         for row in csv_data:
             if not column:
                 # first row
