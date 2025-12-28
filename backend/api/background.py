@@ -38,11 +38,13 @@ async def background_worker():
 
 
 async def check_runner_usage():
+    logger.info("check_runner_usage() data from s3")
     store = DBStore()
     latest_usage_report = await store.get_latest_runner_report()
     runner_usage, latest_usage_report = get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
+    logger.info(runner_usage, latest_usage_report)
     if runner_usage:
         for user_id, user_runner_usage in runner_usage.items():
             logger.info(f"Updating runner usage data for {user_id}")
