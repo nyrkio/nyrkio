@@ -1628,7 +1628,7 @@ class DBStore(object):
 
     async def add_user_runner_usage(self, user_id, user_runner_usage, report_key=None):
         coll = self.db.runner_usage
-        await coll.insert(
+        await coll.insert_one(
             {
                 "user_id": user_id,
                 "runner_usage": user_runner_usage,
