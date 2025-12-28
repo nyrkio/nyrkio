@@ -110,8 +110,10 @@ body.section-dashboards div.card div.card-header {
   color: var(--nyrkio-horn-dark-brown);
   padding-top:0.5em;
   padding-bottom: 0.3em;
-  padding-left: 2em;
+  padding-left: 1.5em;
   text-align: left;
+  line-height: 1.5em;
+  font-size: 14pt;
 }
 
 body.section-dashboards div.card div.card-body,
