@@ -55,7 +55,7 @@ def get_latest_runner_usage(seen_previously=None):
     runner_usage_reports.sort(key=lambda o: o.key)
     logger.debug(str(runner_usage_reports))
     latest_report = (
-        str(runner_usage_reports[0].key) if runner_usage_reports else seen_previously
+        str(runner_usage_reports[-1].key) if runner_usage_reports else seen_previously
     )
 
     pivot = {}
