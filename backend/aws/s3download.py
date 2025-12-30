@@ -99,7 +99,7 @@ def get_latest_runner_usage(seen_previously=None):
             )
 
             parts = str(latest_csv_obj.key).split("/")
-            date_part = parts[4].split("Z-")[0] + "Z"
+            date_part = parts[4].split("Z-")[0]  # TODO: python 3.11 supports Z
             aws_timestamp = datetime.fromisoformat(date_part)
             d, m, r = _ensure_buckets(pivot, raw, nyrkio_user_id, aws_timestamp)
 
@@ -166,8 +166,8 @@ def get_latest_runner_usage(seen_previously=None):
 
 
 def _ensure_buckets(pivot, raw, user_id, timestamp):
-    daily_bucket = datetime.strftime("%Y%m%d")
-    monthly_bucket = datetime.strftime("%Y%m")
+    daily_bucket = timestamp.strftime("%Y%m%d")
+    monthly_bucket = timestamp.strftime("%Y%m")
     # print(user_id)
     if user_id not in pivot:
         pivot[user_id] = {"daily": {}, "monthly": {}}
