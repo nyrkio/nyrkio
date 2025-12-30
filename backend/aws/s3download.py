@@ -152,7 +152,7 @@ def get_latest_runner_usage(seen_previously=None):
             # Note that if we ever allow bigger EBS disks or something else that costs extra, this wiill have to update
             d["nyrkio-cpu-hours"] = d.get("nyrkio-cpu-hours", 0.0) + float(
                 values["line_item_usage_amount"]
-            ) * float(meta["product"]["vcpu"])
+            ) * float(meta["product"].get("vcpu", 0))
 
             d["count"] = d.get("count", 0) + 1
             d[aws_idempotent_str] = d.get(aws_idempotent, 0) + 1
