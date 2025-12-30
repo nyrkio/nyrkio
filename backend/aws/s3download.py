@@ -47,7 +47,7 @@ def get_latest_runner_usage(seen_previously=None):
     if seen_previously:
         runner_usage_reports = list(
             filter(
-                lambda s: s > seen_previously,
+                lambda s: s.key > seen_previously,
                 runner_usage_reports,
             )
         )
