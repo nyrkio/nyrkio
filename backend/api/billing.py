@@ -21,15 +21,47 @@ class BillingInfo(BaseModel):
     quantity: int
 
 
+@billing_router.post("/create-checkout-session-postpaid")
+async def create_checkout_session_postpaid(
+    mode: str, lookup_key: Annotated[str, Form()]
+):
+    if mode not in ["postpaid-cpuhours"]:
+        logging.error(f"Invalid checkout mode: {mode}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid checkout mode, expected 'postpaid-cpuhours'",
+        )
+
+    try:
+        prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
+
+        checkout_session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price": prices.data[0].id,
+                }
+            ],
+            mode=mode,
+            success_url=stripe_success_url(),
+            cancel_url=stripe_cancel_url(),
+        )
+        return RedirectResponse(checkout_session.url, status_code=303)
+    except Exception as e:
+        logging.error(f"Error creating checkout session: {e}")
+        raise HTTPException(
+            status_code=500, detail="Error creating checkout session {e}"
+        )
+
+
 @billing_router.post("/create-checkout-session")
 async def create_checkout_session(
     mode: str, lookup_key: Annotated[str, Form()], quantity: Annotated[int, Form()]
 ):
-    if mode != "subscription" and mode != "payment":
+    if mode not in ["subscription", "payment", "prepaid-cpuhours"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'subscription' or 'payment'",
+            detail="Invalid checkout mode, expected 'subscription', 'prepaid-cpuhours' or 'payment'",
         )
 
     if mode == "payment":
