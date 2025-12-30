@@ -1618,7 +1618,7 @@ class DBStore(object):
         res = await coll.find_one({"_id": "latest_usage_report"})
         if res:
             return res["key"]
-        return "not found"
+        return None
 
     async def set_latest_runner_report(self, key):
         coll = self.db.runner_usage_latest_report
