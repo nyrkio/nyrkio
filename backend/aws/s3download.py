@@ -175,6 +175,7 @@ def get_latest_runner_usage(seen_previously=None):
                     "user_github_job_id": meta["resource_tags"].get(
                         "user_github_job_id"
                     ),
+                    "report": latest_csv_obj.key
                 }
             )
             # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
