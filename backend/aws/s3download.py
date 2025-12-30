@@ -166,8 +166,8 @@ def get_latest_runner_usage(seen_previously=None):
 
 
 def _ensure_buckets(pivot, raw, user_id, timestamp):
-    daily_bucket = datetime.strftime("%Y%m%d")
-    monthly_bucket = datetime.strftime("%Y%m")
+    daily_bucket = timestamp.strftime("%Y%m%d")
+    monthly_bucket = timestamp.strftime("%Y%m")
     # print(user_id)
     if user_id not in pivot:
         pivot[user_id] = {"daily": {}, "monthly": {}}
