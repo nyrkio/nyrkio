@@ -210,7 +210,7 @@ def _ensure_buckets(pivot, raw, user_id, timestamp):
     # mobj = pivot[user_id]["monthly"][monthly_bucket]
 
     if user_id not in raw:
-        raw[user_id] = {}
+        raw[user_id] = []
 
     return dobj, raw
 
