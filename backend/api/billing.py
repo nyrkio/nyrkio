@@ -36,11 +36,6 @@ async def create_checkout_session_postpaid(
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
         checkout_session = stripe.checkout.Session.create(
-            line_items=[
-                {
-                    "price": prices.data[0].id,
-                }
-            ],
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
