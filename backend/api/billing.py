@@ -65,7 +65,7 @@ async def create_checkout_session(
         )
 
     if mode == "payment":
-        quantity = 1
+        quantity = quantity if quantity else 1
 
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
