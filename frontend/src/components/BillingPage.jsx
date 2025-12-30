@@ -27,6 +27,7 @@ const SubscribeSuccess = ({ sessionId }) => {
   }, []);
 
   return (
+    <>
     <div className="container text-center">
       <div className="row justify-content-center">
         <div className="col-md-8">
@@ -35,11 +36,14 @@ const SubscribeSuccess = ({ sessionId }) => {
         </div>
       </div>
     </div>
+    <UserBillingPage />
+    </>
   );
 };
 
 const SubscribeCancel = () => {
   return (
+    <>
     <div className="container text-center">
       <div className="row justify-content-center">
         <div className="col-md-8">
@@ -48,11 +52,14 @@ const SubscribeCancel = () => {
         </div>
       </div>
     </div>
+    <UserBillingPage />
+    </>
   );
 };
 
 const UserBillingPage = () => {
   const [billingPlan, setBillingPlan] = useState("free");
+  const [runnerPlan, setRunnerPlan] = useState();
   const [loading, setLoading] = useState(true);
   const fetchBillingInfo = async () => {
     const response = await fetch("/api/v0/user/config", {
@@ -78,6 +85,9 @@ const UserBillingPage = () => {
     if (data.billing && data.billing.plan) {
       setBillingPlan(data.billing.plan);
     }
+    if (data.billing_runners && data.billing_runners.plan) {
+      setRunnerPlan(data.billing_runners.plan);
+    }
     setLoading(false);
   };
 
@@ -98,6 +108,8 @@ const UserBillingPage = () => {
     simple_enterprise_yearly: "Nyrkiö Enterprise (Annual)",
     simple_test_monthly: "Nyrkiö Test subscriptions (Monthly)",
     simple_test_yearly: "Nyrkiö Test subscriptions (Annual)",
+    runner_postpaid_10: "Monthly CpuHours",
+    runner_prepaid_10: "Prepaid 100 CpuHours",
   };
 
   const onClick = async () => {
@@ -151,6 +163,21 @@ const UserBillingPage = () => {
           <p>Manage your subscription here.</p>
         </div>
       </div>
+      {runnerPlan?(
+      <>
+      <div className="row p-5">
+        <div className="card nyrkio-billing">
+          <div className="card-body shadow">
+            <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
+            <p className="card-body-text">{planMap[runnerPlan]}</p>
+            <BillingButton plan={planMap[runnerPlan]}/>
+          </div>
+        </div>
+      </div>
+      </>
+       ):""}
+      {!runnerPlan || billingPlan != "free"?(
+      <>
       <div className="row p-5">
         <div className="card nyrkio-billing">
           <div className="card-body shadow">
@@ -160,6 +187,8 @@ const UserBillingPage = () => {
           </div>
         </div>
       </div>
+      </>
+       ):""}
     </div>
   );
 };

@@ -25,6 +25,7 @@ def test_add_and_get_user_config(client):
     assert json == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
     config = {"core": {"max_pvalue": 0.00001, "min_magnitude": 0.5}}
@@ -43,6 +44,7 @@ def test_add_and_get_user_config(client):
             "slack": True,
         },
         "billing": None,
+        "billing_runners": None,
     }
 
 
@@ -66,6 +68,7 @@ def test_update_existing_user_config(client):
     assert json == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
     new_config = {
@@ -85,6 +88,7 @@ def test_update_existing_user_config(client):
     assert json == {
         **new_config,
         "billing": None,
+        "billing_runners": None,
     }
 
 
@@ -103,7 +107,7 @@ def test_user_config_set_min_magnitude_max_pvalue(client):
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
     json = response.json()
-    assert json == {**config, "billing": None}
+    assert json == {**config, "billing": None, "billing_runners": None}
 
 
 def test_user_config_set_max_pvalue_invalid(client):
