@@ -60,6 +60,7 @@ def get_latest_runner_usage(seen_previously=None):
 
     pivot = {}
     raw = {}
+
     logger.debug(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
@@ -101,7 +102,8 @@ def get_latest_runner_usage(seen_previously=None):
             parts = str(latest_csv_obj.key).split("/")
             date_part = parts[4].split("Z-")[0]  # TODO: python 3.11 supports Z
             aws_timestamp = datetime.fromisoformat(date_part)
-            d, m, r = _ensure_buckets(pivot, raw, nyrkio_user_id, aws_timestamp)
+
+            d, r = _ensure_buckets(pivot, raw, nyrkio_user_id, aws_timestamp)
 
             get_meta = ["resource_tags", "product"]
             get_labels = [
@@ -151,16 +153,19 @@ def get_latest_runner_usage(seen_previously=None):
             d["meta"] = d.get("meta", []) + [meta]
             d["labels"] = d.get("labels", []) + [labels]
 
-            m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
-                values["line_item_usage_amount"]
-            )
-            m[labels["pricing_currency"]] = m.get(
-                labels["pricing_currency"], 0.0
-            ) + float(values["pricing_public_on_demand_cost"])
-            m["count"] = m.get("count", 0) + 1
-            m[aws_idempotent_str] = m.get(aws_idempotent, 0) + 1
-            m["meta"] = m.get("meta", []) + [meta]
-            m["labels"] = m.get("labels", []) + [labels]
+            # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
+            #     values["line_item_usage_amount"]
+            # )
+            # m[labels["pricing_currency"]] = m.get(
+            #     labels["pricing_currency"], 0.0
+            # ) + float(values["pricing_public_on_demand_cost"])
+            # m["count"] = m.get("count", 0) + 1
+            # m[aws_idempotent_str] = m.get(aws_idempotent, 0) + 1
+            # m["meta"] = m.get("meta", []) + [meta]
+            # m["labels"] = m.get("labels", []) + [labels]
+        # Exit at the end of the loop that corresponds to a single ec2 report
+        # This is necessary to keep Mongodb documents below 16 MB
+        return pivot, latest_csv_obj.key
 
     return pivot, latest_report
 
@@ -170,19 +175,20 @@ def _ensure_buckets(pivot, raw, user_id, timestamp):
     monthly_bucket = timestamp.strftime("%Y%m")
     # print(user_id)
     if user_id not in pivot:
-        pivot[user_id] = {"daily": {}, "monthly": {}}
+        pivot[user_id] = {"daily": {}}
+        # pivot[user_id] = {"daily": {}, "monthly": {}}
     if daily_bucket not in pivot[user_id]["daily"]:
         pivot[user_id]["daily"][daily_bucket] = {}
-    if monthly_bucket not in pivot[user_id]["monthly"]:
-        pivot[user_id]["monthly"][monthly_bucket] = {}
+    # if monthly_bucket not in pivot[user_id]["monthly"]:
+    #     pivot[user_id]["monthly"][monthly_bucket] = {}
 
     dobj = pivot[user_id]["daily"][daily_bucket]
-    mobj = pivot[user_id]["monthly"][monthly_bucket]
+    # mobj = pivot[user_id]["monthly"][monthly_bucket]
 
     if user_id not in raw:
         raw[user_id] = {}
 
-    return dobj, mobj, raw
+    return dobj, raw
 
 
 # if __name__ == "__main__":
