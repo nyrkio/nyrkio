@@ -25,11 +25,11 @@ class BillingInfo(BaseModel):
 async def create_checkout_session_postpaid(
     mode: str, lookup_key: Annotated[str, Form()]
 ):
-    if mode not in ["postpaid-cpuhours"]:
+    if mode not in ["setup"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'postpaid-cpuhours'",
+            detail="Invalid checkout mode, expected 'setup'",
         )
 
     try:
@@ -61,7 +61,7 @@ async def create_checkout_session(
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'subscription', 'prepaid-cpuhours' or 'payment'",
+            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
         )
 
     if mode == "payment":
