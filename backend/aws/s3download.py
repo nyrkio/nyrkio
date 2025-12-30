@@ -45,10 +45,10 @@ def get_latest_runner_usage(seen_previously=None):
         )
     )
     if seen_previously:
-        runner_usage_reports = filter(
+        runner_usage_reports = list(filter(
             lambda s: s > seen_previously,
             runner_usage_reports,
-        )
+        ))
     # print(runner_usage_reports)
     runner_usage_reports.sort(key=lambda o: o.key)
     logger.debug(str(runner_usage_reports))
