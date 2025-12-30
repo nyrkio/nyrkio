@@ -1637,7 +1637,7 @@ class DBStore(object):
             }
         )
 
-    async def add_user_runner_usage_raw(user_runner_usage):
+    async def add_user_runner_usage_raw(self, user_runner_usage):
         coll = self.db.runner_usage_raw
         await coll.insert_many(user_runner_usage)
 
