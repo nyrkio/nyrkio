@@ -68,30 +68,37 @@ instance_types = OrderedDict(
         INSTANCE_TYPE_NAME: {
             "instance_type": "c7a.large",
             "price_per_hour": {"EUR": 0.2},
+            "cpus": 2,
         },  # Default
         "nyrkio_perf_server_4cpu_ubuntu2404": {
             "instance_type": "c7a.xlarge",
             "price_per_hour": {"EUR": 0.4},
+            "cpus": 4,
         },
         "nyrkio_perf_server_8cpu_ubuntu2404": {
             "instance_type": "c7a.2xlarge",
             "price_per_hour": {"EUR": 0.8},
+            "cpus": 8,
         },
         "nyrkio_perf_server_16cpu_ubuntu2404": {
             "instance_type": "c7a.4xlarge",
             "price_per_hour": {"EUR": 1.6},
+            "cpus": 16,
         },
         "nyrkio_perf_server_32cpu_ubuntu2404": {
             "instance_type": "c7a.8xlarge",
             "price_per_hour": {"EUR": 3.2},
+            "cpus": 32,
         },
         "nyrkio_perf_server_64cpu_ubuntu2404": {
             "instance_type": "c7a.16xlarge",
             "price_per_hour": {"EUR": 6.4},
+            "cpus": 64,
         },
         "nyrkio_perf_server_96cpu_ubuntu2404": {
             "instance_type": "c7a.24xlarge",
             "price_per_hour": {"EUR": 9.6},
+            "cpus": 96,
         },
     }
 )
