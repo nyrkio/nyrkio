@@ -2,6 +2,7 @@ import base64
 import boto3
 import datetime
 import asyncio
+import uuid
 import logging
 from fabric import Connection
 from paramiko.ssh_exception import NoValidConnectionsError
@@ -294,6 +295,14 @@ class RunnerLauncher(object):
             {"Key": "nyrkio_org", "Value": str(self.nyrkio_org_id)},
             {"Key": "owner", "Value": str(self.nyrkio_billing_user)},
             {"Key": "billing_user", "Value": str(self.nyrkio_billing_user)},
+            {"Key": "cpus", "Value": str(self.config["cpus"])},
+            {
+                "Key": "nyrkio_price_per_hour",
+                "Value": str(self.config["price_per_hour"]),
+            },
+            {"Key": "ec2_instance_type", "Value": self.config["instance_type"]},
+            {"Key": "nyrkio_instance_type", "Value": self.instance_type},
+            {"Key": "nyrkio_unique_id", "Value": uuid.uuid4()},
         ]
         tags = [
             {"Key": str(t["Key"]), "Value": str(t["Value"])[0:254]}
