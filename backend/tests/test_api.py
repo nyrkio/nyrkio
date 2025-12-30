@@ -1004,7 +1004,7 @@ def test_add_and_get_user_config(client):
 
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
-    assert response.json() == {**config, "billing": None}
+    assert response.json() == {**config, "billing": None, "billing_runners": None}
 
 
 def test_add_and_get_partial_user_config(client):
@@ -1026,6 +1026,7 @@ def test_add_and_get_partial_user_config(client):
     assert response.json() == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
 
@@ -1048,6 +1049,7 @@ def test_update_existing_user_config(client):
     assert response.json() == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
     new_config = {
@@ -1066,6 +1068,7 @@ def test_update_existing_user_config(client):
     assert response.json() == {
         **new_config,
         "billing": None,
+        "billing_runners": None,
     }
 
 

@@ -44,6 +44,7 @@ class UserConfig(BaseModel):
     notifiers: Optional[Notifiers] = None
     core: Optional[Core] = None
     billing: Optional[Billing] = None
+    billing_runners: Optional[Billing] = None
     github: Optional[GitHubConfig] = None
 
 
@@ -56,6 +57,8 @@ def validate_config(config: UserConfig):
 
     if config.billing is not None:
         raise HTTPException(status_code=400, detail="You cannot set billing plan")
+    if config.billing_runners is not None:
+        raise HTTPException(status_code=400, detail="You cannot set billing plan")
 
     if config.github is not None:
         raise HTTPException(status_code=400, detail="You cannot set github app config")
@@ -67,6 +70,9 @@ async def get_user_config(user: User = Depends(auth.current_active_user)):
     config, _ = await store.get_user_config(user.id)
 
     config["billing"] = {"plan": user.billing["plan"]} if user.billing else None
+    config["billing_runners"] = (
+        {"plan": user.billing_runners["plan"]} if user.billing_runners else None
+    )
 
     return config
 
