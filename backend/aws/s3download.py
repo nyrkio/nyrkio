@@ -169,8 +169,12 @@ def get_latest_runner_usage(seen_previously=None):
                     "hours": float(values["line_item_usage_amount"]),
                     "aws_cost": float(values["pricing_public_on_demand_cost"]),
                     "vcpu": float(meta["product"]["vcpu"]),
-                    "user_github_job_html_url": meta["resource_tags"].get("user_github_job_html_url"),
-                    "user_github_job_id": meta["resource_tags"].get("user_github_job_id"),
+                    "user_github_job_html_url": meta["resource_tags"].get(
+                        "user_github_job_html_url"
+                    ),
+                    "user_github_job_id": meta["resource_tags"].get(
+                        "user_github_job_id"
+                    ),
                 }
             )
             # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
