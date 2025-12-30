@@ -211,8 +211,9 @@ def _ensure_buckets(pivot, raw, user_id, timestamp):
 
     if user_id not in raw:
         raw[user_id] = []
+    r = raw[user_id]
 
-    return dobj, raw
+    return dobj, r
 
 
 # if __name__ == "__main__":
