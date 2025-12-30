@@ -148,13 +148,29 @@ def get_latest_runner_usage(seen_previously=None):
             d[labels["pricing_currency"]] = d.get(
                 labels["pricing_currency"], 0.0
             ) + float(values["pricing_public_on_demand_cost"])
+
+            # Note that if we ever allow bigger EBS disks or something else that costs extra, this wiill have to update
+            d["nyrkio-cpu-hours"] = d.get(labels["nyrkio-cpu-hours"], 0.0) + float(
+                values["line_item_usage_amount"]
+            ) * float(meta["product"]["vcpu"])
+
             d["count"] = d.get("count", 0) + 1
             d[aws_idempotent_str] = d.get(aws_idempotent, 0) + 1
-            d["meta"] = d.get("meta", {})
-            d["meta"] = meta
-            d["labels"] = d.get("labels", {})
-            d["labels"] = labels
+            d["meta"] = d.get("meta", []) + [meta]
+            d["labels"] = d.get("labels", []) + [labels]
 
+            # raw lineitems, we probably use this with Stripe
+            r.append(
+                {
+                    "user_id": nyrkio_user_id,
+                    "aws_idempotent_str": aws_idempotent_str,
+                    "nyrkio-cpu-hours": float(values["line_item_usage_amount"])
+                    * float(meta["product"]["vcpu"]),
+                    "hours": float(values["line_item_usage_amount"]),
+                    "aws_cost": float(values["pricing_public_on_demand_cost"]),
+                    "vcpu": float(meta["product"]["vcpu"]),
+                }
+            )
             # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
             #     values["line_item_usage_amount"]
             # )
@@ -167,7 +183,7 @@ def get_latest_runner_usage(seen_previously=None):
             # m["labels"] = m.get("labels", []) + [labels]
         # Exit at the end of the loop that corresponds to a single ec2 report
         # This is necessary to keep Mongodb documents below 16 MB
-        return pivot, latest_csv_obj.key
+        return pivot, raw, latest_csv_obj.key
 
     return pivot, latest_report
 
