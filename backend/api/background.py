@@ -54,9 +54,7 @@ async def check_runner_usage():
             )
         for user_id, user_raw_usage in raw_line_items.items():
             if user_raw_usage:
-                await store.add_user_runner_usage_raw(
-                    user_id, user_raw_usage, latest_usage_report
-                )
+                await store.add_user_runner_usage_raw(user_raw_usage)
 
     if latest_usage_report:
         logger.info(
