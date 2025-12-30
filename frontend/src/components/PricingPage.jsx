@@ -444,7 +444,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Use coupon <em>RunnerTrial50</em></li>
                 </ul>
                   <form
-                    action="/api/v0/billing/create-checkout-session-postpaid?mode=postpaid-cpuhours"
+                    action="/api/v0/billing/create-checkout-session-postpaid?mode=setup"
                     method="POST"
                   >
                     <input
@@ -479,7 +479,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>10% discount when pre-paying</li>
                 </ul>
                   <form
-                    action="/api/v0/billing/create-checkout-session?mode=prepaid-cpuhours"
+                    action="/api/v0/billing/create-checkout-session?mode=payment"
                     method="POST"
                   >
                     <input
