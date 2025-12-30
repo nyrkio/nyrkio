@@ -165,10 +165,10 @@ def get_latest_runner_usage(seen_previously=None):
                     "user_id": nyrkio_user_id,
                     "aws_idempotent_str": aws_idempotent_str,
                     "nyrkio-cpu-hours": float(values["line_item_usage_amount"])
-                    * float(meta["product"]["vcpu"]),
+                    * float(meta["product"].get("vcpu", 0)),
                     "hours": float(values["line_item_usage_amount"]),
                     "aws_cost": float(values["pricing_public_on_demand_cost"]),
-                    "vcpu": float(meta["product"]["vcpu"]),
+                    "vcpu": float(meta["product"].get("vcpu", 0)),
                     "user_github_job_html_url": meta["resource_tags"].get(
                         "user_github_job_html_url"
                     ),
