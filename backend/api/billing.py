@@ -111,9 +111,15 @@ async def subscribe_success(
         plan = items["data"][0]["price"]["lookup_key"]
         customer_id = session["customer"]
         billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
-        update = UserUpdate(billing=billing)
-        user.billing = billing
-        user = await user_manager.update(update, user, safe=True)
+        if plan in ["runner_postpaid_10"]:
+            update = UserUpdate(billing_runners=billing)
+            user.billing_runners = billing
+            user = await user_manager.update(update, user, safe=True)
+
+        else:
+            update = UserUpdate(billing=billing)
+            user.billing = billing
+            user = await user_manager.update(update, user, safe=True)
     except Exception as e:
         logging.error(f"Error subscribing user: {e}")
         raise HTTPException(status_code=500, detail="Error subscribing user: {e}")
@@ -137,12 +143,16 @@ def stripe_return_url():
 
 @billing_router.get("/create-portal-session")
 async def create_portal_session(user: User = Depends(auth.current_active_user)):
-    if not user.billing:
+    if not user.billing or user.billing_runners:
         logging.error(f"User {user.email} has no billing information")
         raise HTTPException(status_code=400, detail="User has no billing information")
 
+    logging.info("Starting billing/create-portal-session")
+    logging.info(user)
+    logging.info(user.billing)
+    logging.info(user.billing_runners)
     # session_id = user.billing["session_id"]
-    customer_id = user.billing["customer_id"]
+    customer_id = user.billing.get("customer_id") or user.billing_runners["customer_id"]
     try:
         # checkout_session = stripe.checkout.Session.retrieve(session_id)
         session = stripe.billing_portal.Session.create(
