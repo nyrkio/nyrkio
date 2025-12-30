@@ -25,17 +25,22 @@ class BillingInfo(BaseModel):
 async def create_checkout_session_postpaid(
     mode: str, lookup_key: Annotated[str, Form()]
 ):
-    if mode not in ["setup"]:
+    if mode not in ["subscription"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'setup'",
+            detail="Invalid checkout mode, expected 'subscription'",
         )
 
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
         checkout_session = stripe.checkout.Session.create(
+            line_items=[
+                {
+                    "price": prices.data[0].id,
+                }
+            ],
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),

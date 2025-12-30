@@ -444,7 +444,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Use coupon <em>RunnerTrial50</em></li>
                 </ul>
                   <form
-                    action="/api/v0/billing/create-checkout-session-postpaid?mode=setup"
+                    action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
                     method="POST"
                   >
                     <input
