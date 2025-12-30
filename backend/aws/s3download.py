@@ -150,7 +150,7 @@ def get_latest_runner_usage(seen_previously=None):
             ) + float(values["pricing_public_on_demand_cost"])
 
             # Note that if we ever allow bigger EBS disks or something else that costs extra, this wiill have to update
-            d["nyrkio-cpu-hours"] = d.get(labels["nyrkio-cpu-hours"], 0.0) + float(
+            d["nyrkio-cpu-hours"] = d.get("nyrkio-cpu-hours", 0.0) + float(
                 values["line_item_usage_amount"]
             ) * float(meta["product"]["vcpu"])
 
