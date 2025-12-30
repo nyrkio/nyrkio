@@ -150,8 +150,10 @@ def get_latest_runner_usage(seen_previously=None):
             ) + float(values["pricing_public_on_demand_cost"])
             d["count"] = d.get("count", 0) + 1
             d[aws_idempotent_str] = d.get(aws_idempotent, 0) + 1
-            d["meta"] = d.get("meta", []) + [meta]
-            d["labels"] = d.get("labels", []) + [labels]
+            d["meta"] = d.get("meta", {})
+            d["meta"] = meta
+            d["labels"] = d.get("labels", {})
+            d["labels"] = labels
 
             # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
             #     values["line_item_usage_amount"]
@@ -172,7 +174,7 @@ def get_latest_runner_usage(seen_previously=None):
 
 def _ensure_buckets(pivot, raw, user_id, timestamp):
     daily_bucket = timestamp.strftime("%Y%m%d")
-    monthly_bucket = timestamp.strftime("%Y%m")
+    # monthly_bucket = timestamp.strftime("%Y%m")
     # print(user_id)
     if user_id not in pivot:
         pivot[user_id] = {"daily": {}}
