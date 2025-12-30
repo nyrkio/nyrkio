@@ -147,7 +147,7 @@ def get_latest_runner_usage(seen_previously=None):
                 labels["pricing_currency"], 0.0
             ) + float(values["pricing_public_on_demand_cost"])
             d["count"] = d.get("count", 0) + 1
-            d[aws_idempotent] = d.get(aws_idempotent, 0) + 1
+            d[aws_idempotent_str] = d.get(aws_idempotent, 0) + 1
             d["meta"] = d.get("meta", []) + [meta]
             d["labels"] = d.get("labels", []) + [labels]
 
