@@ -1637,18 +1637,9 @@ class DBStore(object):
             }
         )
 
-    async def add_user_runner_usage_raw(
-        self, user_id, user_runner_usage, report_key=None
-    ):
+    async def add_user_runner_usage_raw(user_runner_usage):
         coll = self.db.runner_usage_raw
-        await coll.insert_many(
-            {
-                "user_id": user_id,
-                "runner_usage": user_runner_usage,
-                "report": report_key,
-                "nyrkio_datetime": datetime.now(tz=timezone.utc),
-            }
-        )
+        await coll.insert_many(user_runner_usage)
 
 
 # Will be patched by conftest.py if we're running tests
