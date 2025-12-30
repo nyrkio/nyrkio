@@ -148,8 +148,8 @@ def get_latest_runner_usage(seen_previously=None):
             ) + float(values["pricing_public_on_demand_cost"])
             d["count"] = d.get("count", 0) + 1
             d[aws_idempotent] = d.get(aws_idempotent, 0) + 1
-            d["meta"] = d.get("meta", {}) + [meta]
-            d["labels"] = d.get("labels", {}) + [labels]
+            d["meta"] = d.get("meta", []) + [meta]
+            d["labels"] = d.get("labels", []) + [labels]
 
             m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
                 values["line_item_usage_amount"]
@@ -159,8 +159,8 @@ def get_latest_runner_usage(seen_previously=None):
             ) + float(values["pricing_public_on_demand_cost"])
             m["count"] = m.get("count", 0) + 1
             m[aws_idempotent_str] = m.get(aws_idempotent, 0) + 1
-            m["meta"] = m.get("meta", {}) + [meta]
-            m["labels"] = m.get("labels", {}) + [labels]
+            m["meta"] = m.get("meta", []) + [meta]
+            m["labels"] = m.get("labels", []) + [labels]
 
     return pivot, latest_report
 
