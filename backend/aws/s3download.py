@@ -171,9 +171,9 @@ def _ensure_buckets(pivot, raw, user_id, timestamp):
     # print(user_id)
     if user_id not in pivot:
         pivot[user_id] = {"daily": {}, "monthly": {}}
-    if daily_bucket not in pivot[user_id]["daily"][daily_bucket]:
+    if daily_bucket not in pivot[user_id]["daily"]:
         pivot[user_id]["daily"][daily_bucket] = {}
-    if monthly_bucket not in pivot[user_id]["monthly"][monthly_bucket]:
+    if monthly_bucket not in pivot[user_id]["monthly"]:
         pivot[user_id]["monthly"][monthly_bucket] = {}
 
     dobj = pivot[user_id]["daily"][daily_bucket]
