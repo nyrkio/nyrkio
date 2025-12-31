@@ -85,9 +85,9 @@ async def create_checkout_session(
                     "adjustable_quantity": {
                         "enabled": True,
                     },
-                    "allow_promotion_codes": True,
                 }
             ],
+            allow_promotion_codes=True,
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
