@@ -84,6 +84,7 @@ async def create_checkout_session_prepaid(
                     "quantity": quantity,
                     "adjustable_quantity": {
                         "enabled": True,
+                        "maximum": 10000,
                     },
                 }
             ],
