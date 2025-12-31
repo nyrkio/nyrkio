@@ -23,7 +23,9 @@ class BillingInfo(BaseModel):
 
 @billing_router.post("/create-checkout-session-postpaid")
 async def create_checkout_session_postpaid(
-    mode: str, lookup_key: Annotated[str, Form()]
+    mode: str,
+    lookup_key: Annotated[str, Form()],
+    user: User = Depends(auth.current_active_user),
 ):
     if mode not in ["subscription"]:
         logging.error(f"Invalid checkout mode: {mode}")
@@ -32,10 +34,30 @@ async def create_checkout_session_postpaid(
             detail="Invalid checkout mode, expected 'subscription'",
         )
 
+    stripe_user_id = None
+    if user.billing and "customer_id" in user.billing:
+        stripe_user_id = user.billing["customer_id"]
+    if user.billing_runners and "customer_id" in user.billing_runners:
+        stripe_user_id = user.billing_runners["customer_id"]
+    if (
+        user.billing
+        and "customer_id" in user.billing
+        and user.billing_runners
+        and "customer_id" in user.billing_runners
+        and user.billing["customer_id"] != user.billing_runners["customer_id"]
+    ):
+        stripe_id1 = user.billing["customer_id"]
+        stripe_id2 = user.billing_runners["customer_id"]
+        logging.error(
+            f"User {user.email} has two different stipe customer_id: {stripe_id1} and {stripe_id2}"
+        )
+
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
         checkout_session = stripe.checkout.Session.create(
+            customer=stripe_user_id,
+            customer_email=user.email,
             line_items=[
                 {
                     "price": prices.data[0].id,
@@ -152,8 +174,10 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
     logging.info(user.billing)
     logging.info(user.billing_runners)
     # session_id = user.billing["session_id"]
-    customer_id = user.billing.get("customer_id")
-    if customer_id is None:
+    customer_id = None
+    if user.billing:
+        customer_id = user.billing.get("customer_id")
+    if customer_id is None and user.billing_runners:
         customer_id = user.billing_runners["customer_id"]
     try:
         # checkout_session = stripe.checkout.Session.retrieve(session_id)
