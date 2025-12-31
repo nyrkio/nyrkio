@@ -143,7 +143,7 @@ def stripe_return_url():
 
 @billing_router.get("/create-portal-session")
 async def create_portal_session(user: User = Depends(auth.current_active_user)):
-    if not user.billing or user.billing_runners:
+    if not user.billing and not user.billing_runners:
         logging.error(f"User {user.email} has no billing information")
         raise HTTPException(status_code=400, detail="User has no billing information")
 
