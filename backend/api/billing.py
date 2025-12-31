@@ -44,6 +44,7 @@ async def create_checkout_session_postpaid(
                     "price": prices.data[0].id,
                 }
             ],
+            allow_promotion_codes=True,
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
@@ -88,7 +89,6 @@ async def create_checkout_session_prepaid(
                     },
                 }
             ],
-            allow_promotion_codes=True,
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
