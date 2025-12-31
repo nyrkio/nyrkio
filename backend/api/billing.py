@@ -82,6 +82,10 @@ async def create_checkout_session(
                 {
                     "price": prices.data[0].id,
                     "quantity": quantity,
+                    "adjustable_quantity": {
+                        "enabled": True,
+                    },
+                    "allow_promotion_codes": True,
                 }
             ],
             mode=mode,
