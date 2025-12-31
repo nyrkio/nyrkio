@@ -34,29 +34,10 @@ async def create_checkout_session_postpaid(
             detail="Invalid checkout mode, expected 'subscription'",
         )
 
-    stripe_user_id = None
-    if user.billing and "customer_id" in user.billing:
-        stripe_user_id = user.billing["customer_id"]
-    if user.billing_runners and "customer_id" in user.billing_runners:
-        stripe_user_id = user.billing_runners["customer_id"]
-    if (
-        user.billing
-        and "customer_id" in user.billing
-        and user.billing_runners
-        and "customer_id" in user.billing_runners
-        and user.billing["customer_id"] != user.billing_runners["customer_id"]
-    ):
-        stripe_id1 = user.billing["customer_id"]
-        stripe_id2 = user.billing_runners["customer_id"]
-        logging.error(
-            f"User {user.email} has two different stipe customer_id: {stripe_id1} and {stripe_id2}"
-        )
-
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
         checkout_session = stripe.checkout.Session.create(
-            customer=stripe_user_id,
             customer_email=user.email,
             line_items=[
                 {
@@ -77,9 +58,12 @@ async def create_checkout_session_postpaid(
 
 @billing_router.post("/create-checkout-session")
 async def create_checkout_session(
-    mode: str, lookup_key: Annotated[str, Form()], quantity: Annotated[int, Form()]
+    mode: str,
+    lookup_key: Annotated[str, Form()],
+    quantity: Annotated[int, Form()],
+    user: User = Depends(auth.current_active_user),
 ):
-    if mode not in ["subscription", "payment", "prepaid-cpuhours"]:
+    if mode not in ["subscription", "payment", "setup"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
@@ -93,6 +77,7 @@ async def create_checkout_session(
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
 
         checkout_session = stripe.checkout.Session.create(
+            customer_email=user.email,
             line_items=[
                 {
                     "price": prices.data[0].id,
