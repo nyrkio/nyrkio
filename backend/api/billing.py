@@ -56,6 +56,52 @@ async def create_checkout_session_postpaid(
         )
 
 
+@billing_router.post("/create-checkout-session-prepaid")
+async def create_checkout_session_prepaid(
+    mode: str,
+    lookup_key: Annotated[str, Form()],
+    quantity: Annotated[int, Form()],
+    user: User = Depends(auth.current_active_user),
+):
+    if mode not in ["payment"]:
+        logging.error(f"Invalid checkout mode: {mode}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid checkout mode, expected 'payment'",
+        )
+
+    try:
+        prices = stripe.Price.list(
+            billing_scheme="per_unit",
+            unit_amount=9,
+            lookup_keys=[lookup_key],
+            expand=["data.product"],
+        )
+
+        checkout_session = stripe.checkout.Session.create(
+            customer_email=user.email,
+            line_items=[
+                {
+                    "price": prices.data[0].id,
+                    "quantity": quantity,
+                    "adjustable_quantity": {
+                        "enabled": True,
+                    },
+                }
+            ],
+            allow_promotion_codes=True,
+            mode=mode,
+            success_url=stripe_success_url(),
+            cancel_url=stripe_cancel_url(),
+        )
+        return RedirectResponse(checkout_session.url, status_code=303)
+    except Exception as e:
+        logging.error(f"Error creating checkout session: {e}")
+        raise HTTPException(
+            status_code=500, detail="Error creating checkout session {e}"
+        )
+
+
 @billing_router.post("/create-checkout-session")
 async def create_checkout_session(
     mode: str,
