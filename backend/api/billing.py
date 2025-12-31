@@ -45,7 +45,7 @@ async def create_checkout_session_postpaid(
                 }
             ],
             allow_promotion_codes=True,
-            automatic_tax=True,
+            automatic_tax={"enabled": True},
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
@@ -90,7 +90,7 @@ async def create_checkout_session_prepaid(
                     },
                 }
             ],
-            automatic_tax=True,
+            automatic_tax={"enabled": True},
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
@@ -135,7 +135,7 @@ async def create_checkout_session(
                 }
             ],
             allow_promotion_codes=True,
-            automatic_tax=True,
+            automatic_tax={"enabled": True},
             mode=mode,
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
