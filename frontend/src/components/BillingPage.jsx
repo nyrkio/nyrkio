@@ -47,8 +47,8 @@ const SubscribeCancel = () => {
     <div className="container text-center">
       <div className="row justify-content-center">
         <div className="col-md-8">
-          <h1>Subscription cancelled</h1>
-          <p>Oh no! Your subscription has been cancelled.</p>
+          <h1>Checkout process was cancellled.</h1>
+          <p>If you have questions or something isn't working, please contact sales@nyrkio.com.</p>
         </div>
       </div>
     </div>
