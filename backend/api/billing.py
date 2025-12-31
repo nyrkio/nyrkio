@@ -72,6 +72,7 @@ async def create_checkout_session_prepaid(
 
     try:
         prices = stripe.Price.list(
+            billing_scheme="per_unit",
             lookup_keys=[lookup_key],
             expand=["data.product"],
         )
@@ -81,7 +82,6 @@ async def create_checkout_session_prepaid(
             line_items=[
                 {
                     "price": prices.data[0].id,
-                    "unit_amount": 9,
                     "quantity": quantity,
                     "adjustable_quantity": {
                         "enabled": True,
