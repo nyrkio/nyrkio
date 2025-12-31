@@ -479,7 +479,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>10% discount when pre-paying</li>
                 </ul>
                   <form
-                    action="/api/v0/billing/create-checkout-session?mode=payment"
+                    action="/api/v0/billing/create-checkout-session-prepaid?mode=payment"
                     method="POST"
                   >
                     <input
