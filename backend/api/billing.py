@@ -152,7 +152,9 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
     logging.info(user.billing)
     logging.info(user.billing_runners)
     # session_id = user.billing["session_id"]
-    customer_id = user.billing.get("customer_id") or user.billing_runners["customer_id"]
+    customer_id = user.billing.get("customer_id")
+    if customer_id is None:
+        customer_id = user.billing_runners["customer_id"]
     try:
         # checkout_session = stripe.checkout.Session.retrieve(session_id)
         session = stripe.billing_portal.Session.create(
