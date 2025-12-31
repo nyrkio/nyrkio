@@ -488,12 +488,12 @@ export const PricingPage = ({ loggedIn }) => {
                       value="runner_prepaid_100"
                     />
                     <select id="runner_prepaid_100_quantity" name="quantity" defaultValue={1} style={{width: "90%"}}>
-                      <option value="1">1 pack, 100 cpu-hours</option>
-                      <option value="2">2 pack, 200 cpu-hours</option>
-                      <option value="3">3 pack, 300 cpu-hours</option>
-                      <option value="4">4 pack, 400 cpu-hours</option>
-                      <option value="5">5 pack, 500 cpu-hours</option>
-                      <option value="10">10 pack, 1000 cpu-hours</option>
+                      <option value="100">1 pack, 100 cpu-hours</option>
+                      <option value="200">2 pack, 200 cpu-hours</option>
+                      <option value="300">3 pack, 300 cpu-hours</option>
+                      <option value="400">4 pack, 400 cpu-hours</option>
+                      <option value="500">5 pack, 500 cpu-hours</option>
+                      <option value="1000">10 pack, 1000 cpu-hours</option>
                       <option value="-1">For larger quantities, please buy suitable subscription above</option>
                     </select>
                     <button
