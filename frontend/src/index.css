@@ -581,7 +581,7 @@ button:focus-visible {
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
-    letter-spacing: 0.7pt;
+    letter-spacing: 0.3pt;
     font-size: 12pt;
     line-height: 1.5em;
     font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
@@ -1173,6 +1173,13 @@ color: #212529;
 }
 
 /* Pricing page */
+
+.text-shoulders {
+  font-family: "Big Shoulders";
+  font-size: 16pt;
+  letter-spacing: 0.4pt;
+  margin-top: 0em;
+}
 
 .nyrkio-pricing .nyrkio-compare-plans {
   margin-top: 2em;
