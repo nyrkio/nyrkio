@@ -175,6 +175,12 @@ def get_latest_runner_usage(seen_previously=None):
                     "user_github_job_id": meta["resource_tags"].get(
                         "user_github_job_id"
                     ),
+                    "github_job_run_id": meta["resource_tags"].get(
+                        "user_github_job_run_id"
+                    ),
+                    "github_job_run_attempt": meta["resource_tags"].get(
+                        "user_github_job_run_attempt"
+                    ),
                     "report": latest_csv_obj.key,
                 }
             )
