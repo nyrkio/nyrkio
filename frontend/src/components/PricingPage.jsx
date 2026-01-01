@@ -70,7 +70,7 @@ export const PricingPage = ({ loggedIn }) => {
     <>
       <div
         className="nyrkio-pricing container py-3"
-        style={{ maxWidth: "960px" }}
+        style={{ maxWidth: "2000px" }}
       >
         <div className="container-fluid justify-content-center text-center w-100">
           <h1>Pricing</h1>
@@ -95,7 +95,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 <button
                   type="button"
-                  className="w-100 btn btn-lg btn-outline-success"
+                  className="w-100 btn btn-lg btn-outline-success p-3"
                 >
                   Sign up for free
                 </button>
@@ -136,7 +136,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-business"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
@@ -153,7 +153,7 @@ export const PricingPage = ({ loggedIn }) => {
                 ) : (
                   <button
                     type="button"
-                    className="w-100 btn btn-lg btn-success"
+                    className="w-100 btn btn-lg btn-success p-3"
                   >
                     <a className="btn-link" href="/signup">
                       Sign up
@@ -199,7 +199,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                     >
                       Get started
                     </button>
@@ -207,7 +207,7 @@ export const PricingPage = ({ loggedIn }) => {
                 ) : (
                   <button
                     type="button"
-                    className="w-100 btn btn-lg btn-success"
+                    className="w-100 btn btn-lg btn-success p-3"
                   >
                     <a className="btn-link" href="/signup">
                       Sign up
@@ -403,7 +403,7 @@ export const PricingPage = ({ loggedIn }) => {
       ) : (
         <button
         type="button"
-        className="w-100 btn btn-lg btn-success"
+        className="w-100 btn btn-lg btn-success p-3"
         >
         <a className="btn-link" href="/signup">
         Sign up
@@ -430,7 +430,8 @@ export const PricingPage = ({ loggedIn }) => {
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
-                <h4 className="my-0 fw-normal">Nyrkiö Runner <br/> for GitHub</h4>
+                <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
+                <span className="text-shoulders">for GitHub</span>
               </div>
               <div className="card-body">
                 <p className="nyrkio-annual"></p>
@@ -455,7 +456,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-runner_postpaid_10"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                     >
                       File your credit card...
                     </button>
@@ -466,7 +467,8 @@ export const PricingPage = ({ loggedIn }) => {
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
-                <h4 className="my-0 fw-normal">Nyrkiö Runner <br/> Pre-paid</h4>
+                <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
+                <span class="text-shoulders">Pre-paid</span>
               </div>
               <div className="card-body">
                 <p className="nyrkio-annual"></p>
@@ -499,7 +501,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-runner_prepaid_100"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                     >
                       Checkout
                     </button>
