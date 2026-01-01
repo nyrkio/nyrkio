@@ -192,7 +192,7 @@ def get_latest_runner_usage(seen_previously=None):
         # This is necessary to keep Mongodb documents below 16 MB
         return pivot, raw, latest_csv_obj.key
 
-    return pivot, latest_report
+    return pivot, raw, latest_report
 
 
 def _ensure_buckets(pivot, raw, user_id, timestamp):
