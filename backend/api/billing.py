@@ -10,6 +10,7 @@ import stripe
 
 from backend.auth import auth
 from backend.db.db import User, UserUpdate
+from backend.api.metered import query_meter_consumption
 
 billing_router = APIRouter(prefix="/billing")
 
@@ -226,3 +227,15 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
     except Exception as e:
         logging.error(f"Error creating portal session: {e}")
         raise HTTPException(status_code=500, detail="Error creating portal session")
+
+
+@billing_router.get("/meter")
+async def get_meter(user: User = Depends(auth.current_active_user)):
+    if not user.billing and not user.billing_runners:
+        logging.error(f"User {user.email} has no billing information")
+        raise HTTPException(status_code=400, detail="User has no billing information")
+
+    stripe_customer_id = user.billing_runners.get(
+        "customer_id", user.billing.get("customer_id", user.email)
+    )
+    return query_meter_consumption(stripe_customer_id)
