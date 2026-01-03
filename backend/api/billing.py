@@ -10,7 +10,7 @@ import stripe
 
 from backend.auth import auth
 from backend.db.db import User, UserUpdate
-from backend.metered import query_meter_consumption
+from backend.api.metered import query_meter_consumption
 
 billing_router = APIRouter(prefix="/billing")
 
