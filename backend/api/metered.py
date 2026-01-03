@@ -11,9 +11,20 @@ logger = logging.getLogger(__file__)
 CPU_HOURS_METER = "runner-cpu-hours"
 
 
-def report_cpu_hours_consumed(stripe_customer_id, cpu_hours, unique_id):
+def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_id):
+    if not isinstance(timestamp, datetime):
+        logger.error(
+            "report_cpu_hours_consumed: Timestamp must be of the format datetime."
+        )
+        return
+
+    if timestamp < datetime.utcnow - timedelta(days=30):
+        logger.error("timestamp was too old:  {timestamp}")
+        return
+
     logger.info(
-        "Reporting ec2 consumption to stripe: %s %s cpu-hours (%s)",
+        "Reporting ec2 consumption to stripe: %s :: %s %s cpu-hours (%s)",
+        timestamp,
         stripe_customer_id,
         cpu_hours,
         unique_id,
@@ -23,6 +34,8 @@ def report_cpu_hours_consumed(stripe_customer_id, cpu_hours, unique_id):
         event_name=CPU_HOURS_METER,
         payload={"value": cpu_hours, "stripe_customer_id": stripe_customer_id},
         identifier=unique_id,  # For idempotency
+        timestamp=timestamp.isoformat(),
+        created=datetime.utcnow().isoformat(),
     )
     logger.debug(cpu_hours_reported)
 
@@ -37,4 +50,11 @@ def query_meter_consumption(stripe_customer_id):
             "gte": (now - timedelta(months=15)).isoformat(),
             "lte": now.isoformat(),
         },
+    )
+
+
+def generate_unique_nyrkio_id(raw_line_item):
+    k = raw_line_item["unique_key"]
+    return (
+        f"{k['nyrkio_unique_id']}::{k['unique_time_slot']}::{k['unique_time_slot_end']}"
     )
