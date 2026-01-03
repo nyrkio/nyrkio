@@ -118,14 +118,10 @@ def get_latest_runner_usage(seen_previously=None):
                 "line_item_usage_start_date",
                 "pricing_currency",
                 "pricing_unit",
+                "ec2_instance_type",
+                "product_instance_type",
             ]
-            # coming_soon = [
-            # "cpus",
-            # "nyrkio_price_per_hour",
-            # "ec2_instance_type",
-            # "nyrkio_instance_type",
-            # "nyrkio_unique_id",
-            # ]
+
             get_values = ["pricing_public_on_demand_cost", "line_item_usage_amount"]
 
             meta = dict((k, json.loads(row[column[k]])) for k in get_meta)
@@ -162,19 +158,25 @@ def get_latest_runner_usage(seen_previously=None):
             # raw lineitems, we probably use this with Stripe
             r.append(
                 {
-                    "user_id": nyrkio_user_id,
+                    "billable_nyrkio_user_id": nyrkio_user_id,
+                    "nyrkio_user": meta["resource_tags"].get("nyrkio_user"),
+                    "nyrkio_org": meta["resource_tags"].get("nyrkio_org"),
                     "aws_idempotent_str": aws_idempotent_str,
+                    "github_event_id": meta["resource_tags"].get(
+                        "user_github_event_id"
+                    ),
+                    "nyrkio_unique_id": meta["resource_tags"].get(
+                        "user_nyrkio_unique_id"
+                    ),
                     "nyrkio-cpu-hours": float(values["line_item_usage_amount"])
                     * float(meta["product"].get("vcpu", 0)),
                     "hours": float(values["line_item_usage_amount"]),
                     "aws_cost": float(values["pricing_public_on_demand_cost"]),
                     "vcpu": float(meta["product"].get("vcpu", 0)),
-                    "user_github_job_html_url": meta["resource_tags"].get(
+                    "github_job_html_url": meta["resource_tags"].get(
                         "user_github_job_html_url"
                     ),
-                    "user_github_job_id": meta["resource_tags"].get(
-                        "user_github_job_id"
-                    ),
+                    "github_job_id": meta["resource_tags"].get("user_github_job_id"),
                     "github_job_run_id": meta["resource_tags"].get(
                         "user_github_job_run_id",
                         meta["resource_tags"].get("github_job_run_id"),
