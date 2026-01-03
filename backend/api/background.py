@@ -12,6 +12,7 @@ from backend.github.runner import (
 )
 from backend.github.runner_configs import supported_instance_types
 from backend.aws.s3download import get_latest_runner_usage
+from backend.api.metered import generate_unique_nyrkio_id, report_cpu_hours_consumed
 
 logger = logging.getLogger(__file__)
 
@@ -43,20 +44,24 @@ async def check_runner_usage():
     logger.info("check_runner_usage() data from s3")
     store = DBStore()
     latest_usage_report = await store.get_latest_runner_report()
-    runner_usage, raw_line_items, latest_usage_report = get_latest_runner_usage(
+    raw_line_items, latest_usage_report = get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
-    logger.debug(str(runner_usage))
+    logger.debug(str(raw_line_items))
     logger.debug(str(latest_usage_report))
-    if runner_usage:
-        for user_id, user_runner_usage in runner_usage.items():
-            logger.info(f"Updating runner usage data for {user_id}")
-            await store.add_user_runner_usage(
-                user_id, user_runner_usage, latest_usage_report
-            )
+    if raw_line_items:
         for user_id, user_raw_usage in raw_line_items.items():
             if user_raw_usage:
                 await store.add_user_runner_usage_raw(user_raw_usage)
+
+            if user_raw_usage["plan_info"]["type"] == "stripe_metered":
+                unique_key = generate_unique_nyrkio_id(user_raw_usage)
+
+                report_cpu_hours_consumed(
+                    user_raw_usage["plan_info"]["stripe_customer_id"],
+                    user_raw_usage["consumption"]["nyrkio_cpu_hours"],
+                    unique_key,
+                )
 
     if latest_usage_report:
         logger.info(
@@ -64,7 +69,7 @@ async def check_runner_usage():
         )
         await store.set_latest_runner_report(latest_usage_report)
 
-    return bool(runner_usage)
+    return bool(raw_line_items)
 
 
 async def loop_installations():

@@ -5,7 +5,8 @@ import gzip
 import logging
 import boto3
 from datetime import datetime
-
+from bson.objectid import ObjectId
+from backend.db.db import DBStore
 
 logger = logging.getLogger(__file__)
 
@@ -58,7 +59,6 @@ def get_latest_runner_usage(seen_previously=None):
         str(runner_usage_reports[-1].key) if runner_usage_reports else seen_previously
     )
 
-    pivot = {}
     raw = {}
 
     logger.debug(str(runner_usage_reports))
@@ -95,15 +95,21 @@ def get_latest_runner_usage(seen_previously=None):
         for row in filtered:
             cost_category = row[column["cost_category"]]
             nyrkio_user_dict = json.loads(cost_category)
-            nyrkio_user_id = nyrkio_user_dict.get(
+            billable_user_id = nyrkio_user_dict.get(
                 "by_nyrkio_user", "000000000000000000000000"
             )
+
+            # In general the billable nyrkio user will always have a user.billable subscription active
+            # It will be checked before they can launch any cloud resource in the first place. But...
+            # there will be glitches, so let's not assume anything.
+            plan_info = get_user_info(billable_user_id) if billable_user_id else None
+            nyrkio_user_id = plan_info.get("nyrkio_user_id", billable_user_id)
 
             parts = str(latest_csv_obj.key).split("/")
             date_part = parts[4].split("Z-")[0]  # TODO: python 3.11 supports Z
             aws_timestamp = datetime.fromisoformat(date_part)
 
-            d, r = _ensure_buckets(pivot, raw, nyrkio_user_id, aws_timestamp)
+            r = _ensure_buckets(raw, nyrkio_user_id)
 
             get_meta = ["resource_tags", "product"]
             get_labels = [
@@ -131,100 +137,133 @@ def get_latest_runner_usage(seen_previously=None):
                 labels["line_item_usage_end_date"],
                 labels["identity_line_item_id"],
             )
-            aws_idempotent_str = (
-                str(labels["line_item_usage_start_date"])
-                + str(labels["line_item_usage_end_date"])
-                + str(labels["identity_line_item_id"])
-            )
-
-            d[labels["pricing_unit"]] = d.get(labels["pricing_unit"], 0.0) + float(
-                values["line_item_usage_amount"]
-            )
-            d[labels["pricing_currency"]] = d.get(
-                labels["pricing_currency"], 0.0
-            ) + float(values["pricing_public_on_demand_cost"])
-
-            # Note that if we ever allow bigger EBS disks or something else that costs extra, this wiill have to update
-            d["nyrkio-cpu-hours"] = d.get("nyrkio-cpu-hours", 0.0) + float(
-                values["line_item_usage_amount"]
-            ) * float(meta["product"].get("vcpu", 0))
-
-            d["count"] = d.get("count", 0) + 1
-            d[aws_idempotent_str] = d.get(aws_idempotent, 0) + 1
-            d["meta"] = d.get("meta", []) + [meta]
-            d["labels"] = d.get("labels", []) + [labels]
+            # aws_idempotent_str = (
+            #     str(labels["line_item_usage_start_date"])
+            #     + str(labels["line_item_usage_end_date"])
+            #     + str(labels["identity_line_item_id"])
+            # )
 
             # raw lineitems, we probably use this with Stripe
             r.append(
                 {
-                    "billable_nyrkio_user_id": nyrkio_user_id,
-                    "nyrkio_user": meta["resource_tags"].get("nyrkio_user"),
-                    "nyrkio_org": meta["resource_tags"].get("nyrkio_org"),
-                    "aws_idempotent_str": aws_idempotent_str,
-                    "github_event_id": meta["resource_tags"].get(
-                        "user_github_event_id"
-                    ),
-                    "nyrkio_unique_id": meta["resource_tags"].get(
-                        "user_nyrkio_unique_id"
-                    ),
-                    "nyrkio-cpu-hours": float(values["line_item_usage_amount"])
-                    * float(meta["product"].get("vcpu", 0)),
-                    "hours": float(values["line_item_usage_amount"]),
-                    "aws_cost": float(values["pricing_public_on_demand_cost"]),
-                    "vcpu": float(meta["product"].get("vcpu", 0)),
-                    "github_job_html_url": meta["resource_tags"].get(
-                        "user_github_job_html_url"
-                    ),
-                    "github_job_id": meta["resource_tags"].get("user_github_job_id"),
-                    "github_job_run_id": meta["resource_tags"].get(
-                        "user_github_job_run_id",
-                        meta["resource_tags"].get("github_job_run_id"),
-                    ),
-                    "github_job_run_attempt": meta["resource_tags"].get(
-                        "user_github_job_run_attempt",
-                        meta["resource_tags"].get("github_job_run_attempt"),
-                    ),
+                    "unique_key": {
+                        "nyrkio_unique_id": meta["resource_tags"].get(
+                            "user_nyrkio_unique_id",
+                            labels["identity_line_item_id"],  # Fallback
+                        ),
+                        "unique_time_slot": labels["line_item_usage_start_date"],
+                        "unique_time_slot_end": ["line_item_usage_end_date"],
+                    },
+                    # Just for the record then
+                    "additional_unique_keys": {
+                        "aws_idempotent": aws_idempotent,
+                        "identity_line_item_id": labels["identity_line_item_id"],
+                    },
+                    "user": {
+                        "billable_nyrkio_user_id": nyrkio_user_id,
+                        "nyrkio_user": meta["resource_tags"].get("nyrkio_user"),
+                        "nyrkio_org": meta["resource_tags"].get("nyrkio_org"),
+                        "stripe_user_id": plan_info["stripe_user_id"],
+                        "user_email": plan_info["email"],
+                    },
+                    "plan_info": plan_info,
+                    "consumption": {
+                        "nyrkio_cpu_hours": float(values["line_item_usage_amount"])
+                        * float(meta["product"].get("vcpu", 0)),
+                        "hours": float(values["line_item_usage_amount"]),
+                        "aws_cost": float(values["pricing_public_on_demand_cost"]),
+                        "vcpu": float(meta["product"].get("vcpu", 0)),
+                    },
+                    # Link back to github workflow, and other meta data
+                    "github": {
+                        "github_event_id": meta["resource_tags"].get(
+                            "user_github_event_id"
+                        ),
+                        "github_job_html_url": meta["resource_tags"].get(
+                            "user_github_job_html_url"
+                        ),
+                        "github_job_id": meta["resource_tags"].get(
+                            "user_github_job_id"
+                        ),
+                        "github_job_run_id": meta["resource_tags"].get(
+                            "user_github_job_run_id",
+                            meta["resource_tags"].get("github_job_run_id"),
+                        ),
+                        "github_job_run_attempt": meta["resource_tags"].get(
+                            "user_github_job_run_attempt",
+                            meta["resource_tags"].get("github_job_run_attempt"),
+                        ),
+                    },
                     "report": latest_csv_obj.key,
+                    "report_aws_timestamp": aws_timestamp.isoformat(),
                 }
             )
-            # m[labels["pricing_unit"]] = m.get(labels["pricing_unit"], 0.0) + float(
-            #     values["line_item_usage_amount"]
-            # )
-            # m[labels["pricing_currency"]] = m.get(
-            #     labels["pricing_currency"], 0.0
-            # ) + float(values["pricing_public_on_demand_cost"])
-            # m["count"] = m.get("count", 0) + 1
-            # m[aws_idempotent_str] = m.get(aws_idempotent, 0) + 1
-            # m["meta"] = m.get("meta", []) + [meta]
-            # m["labels"] = m.get("labels", []) + [labels]
         # Exit at the end of the loop that corresponds to a single ec2 report
-        # This is necessary to keep Mongodb documents below 16 MB
-        return pivot, raw, latest_csv_obj.key
+        # In an earlier version this was to keep MongoDB docs below 16 MB, now it's more to keep this computation small
+        return raw, latest_csv_obj.key
 
-    return pivot, raw, latest_report
+    return raw, latest_report
 
 
-def _ensure_buckets(pivot, raw, user_id, timestamp):
-    daily_bucket = timestamp.strftime("%Y%m%d")
-    # monthly_bucket = timestamp.strftime("%Y%m")
-    # print(user_id)
-    if user_id not in pivot:
-        pivot[user_id] = {"daily": {}}
-        # pivot[user_id] = {"daily": {}, "monthly": {}}
-    if daily_bucket not in pivot[user_id]["daily"]:
-        pivot[user_id]["daily"][daily_bucket] = {}
-    # if monthly_bucket not in pivot[user_id]["monthly"]:
-    #     pivot[user_id]["monthly"][monthly_bucket] = {}
-
-    dobj = pivot[user_id]["daily"][daily_bucket]
-    # mobj = pivot[user_id]["monthly"][monthly_bucket]
-
+# Group by user. Not really important but kept it for nostalgia reasons or something
+def _ensure_buckets(raw, user_id):
     if user_id not in raw:
         raw[user_id] = []
     r = raw[user_id]
 
-    return dobj, r
+    return r
 
 
-# if __name__ == "__main__":
-#     print(json.dumps(get_latest_runner_usage(), indent=4, sort_keys=True))
+plan_type = {
+    "runner_postpaid_10": "stripe_meter",
+    "runner_prepaid_100": "stripe_meter",
+    "simple_enterprise_monthly": "nyrkio_meter",
+    "simple_enterprise_yearly": "nyrkio_meter",
+    "simple_business_monthly": "nyrkio_meter",
+    "simple_business_yearly": "nyrkio_meter",
+}
+
+
+async def get_user_info(billable_user_id):
+    db = DBStore()
+    db_user_id = None
+    plan_type = None
+    org_id = None
+    # user or org
+    if len(billable_user_id) > 20:
+        db_user_id = (
+            billable_user_id
+            if isinstance(billable_user_id, ObjectId)
+            else ObjectId(billable_user_id)
+        )
+    else:
+        org_id = (
+            billable_user_id
+            if isinstance(billable_user_id, int)
+            else int(billable_user_id)
+        )
+        config = await db.get_user_config(org_id)
+        plan = config.get("billing_runners", {}).get("paid_by", {})
+
+    user = await db.get_user_without_any_fastapi_nonsense(db_user_id)
+    email = user.email
+    plan = user.billing_runners
+    if plan is None:
+        if user.billing:
+            plan = user.billing
+
+    if plan is None:
+        logger.error(
+            f"Did not find billing info for {billable_user_id} ({db_user_id} {email})"
+        )
+        return None
+
+    return {
+        "stripe_customer_id": plan["customer_id"],
+        "nyrkio_org_id": org_id,
+        "nyrkio_user_id": db_user_id,
+        "billable_user_id": billable_user_id,
+        "email": email,
+        "plan": plan["plan"],
+        "type": plan_type[plan["plan"]],
+    }
