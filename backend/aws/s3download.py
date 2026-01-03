@@ -118,7 +118,6 @@ def get_latest_runner_usage(seen_previously=None):
                 "line_item_usage_start_date",
                 "pricing_currency",
                 "pricing_unit",
-                "ec2_instance_type",
                 "product_instance_type",
             ]
 
