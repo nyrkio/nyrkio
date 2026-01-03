@@ -102,7 +102,9 @@ def get_latest_runner_usage(seen_previously=None):
             # In general the billable nyrkio user will always have a user.billable subscription active
             # It will be checked before they can launch any cloud resource in the first place. But...
             # there will be glitches, so let's not assume anything.
-            plan_info = await get_user_info(billable_user_id) if billable_user_id else None
+            plan_info = (
+                await get_user_info(billable_user_id) if billable_user_id else None
+            )
             nyrkio_user_id = plan_info.get("nyrkio_user_id", billable_user_id)
 
             parts = str(latest_csv_obj.key).split("/")
