@@ -1353,6 +1353,21 @@ class DBStore(object):
             }
         )
 
+    async def get_user_without_any_fastapi_nonsense(self, user_id):
+        # Note that using pydantic models with MongoDB results in the user id quickly becoming a string
+        # We must recreate the MongoDB ObjectId here so queries match what's actually in the database
+        users_collection = self.db.User
+        db_user_id = user_id
+        if not isinstance(user_id, ObjectId):
+            if isinstance(user_id, str):
+                db_user_id = ObjectId(user_id)
+            else:
+                raise ValueError(
+                    f"user_id must be a str or ObjectId ({user_id} is {type(user_id)})"
+                )
+
+        return await users_collection.find_one({"_id": db_user_id})
+
     async def list_users(self):
         users_collection = self.db.User
         query: Dict[str, Any] = {"is_active": True}
