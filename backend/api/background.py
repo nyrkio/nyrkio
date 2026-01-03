@@ -24,7 +24,9 @@ async def old_background_worker():
 
 
 async def background_worker():
-    await check_runner_usage()
+    for _ in range(15):
+        if not await check_runner_usage():
+            break
 
     done_work = await loop_installations()
     if len(done_work) > 0:
@@ -61,6 +63,8 @@ async def check_runner_usage():
             f"We now imported s3 consumption reports up to and including {latest_usage_report}"
         )
         await store.set_latest_runner_report(latest_usage_report)
+
+    return bool(runner_usage)
 
 
 async def loop_installations():
