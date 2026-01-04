@@ -172,7 +172,7 @@ async def get_latest_runner_usage(seen_previously=None):
                             labels["identity_line_item_id"],  # Fallback
                         ),
                         "unique_time_slot": labels["line_item_usage_start_date"],
-                        "unique_time_slot_end": ["line_item_usage_end_date"],
+                        "unique_time_slot_end": labels["line_item_usage_end_date"],
                     },
                     # Just for the record then
                     "additional_unique_keys": {
