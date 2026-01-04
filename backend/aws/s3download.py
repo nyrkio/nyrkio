@@ -122,6 +122,7 @@ async def get_latest_runner_usage(seen_previously=None):
                     # Already logged in previous functions
                     continue
 
+            logger.info(plan_info)
             nyrkio_user_id = plan_info.get("nyrkio_user_id", billable_user_id)
 
             parts = str(latest_csv_obj.key).split("/")
