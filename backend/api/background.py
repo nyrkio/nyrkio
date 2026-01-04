@@ -56,7 +56,7 @@ async def check_runner_usage():
                 await store.add_user_runner_usage_raw(user_raw_usage)
 
             for raw_line_item in user_raw_usage:
-                if raw_line_item["plan_info"]["type"] == "stripe_metered":
+                if raw_line_item["plan_info"]["type"] == "stripe_meter":
                     unique_key = generate_unique_nyrkio_id(raw_line_item)
                     report_cpu_hours_consumed(
                         datetime.fromtimestamp(
