@@ -44,7 +44,7 @@ async def check_runner_usage():
     logger.info("check_runner_usage() data from s3")
     store = DBStore()
     latest_usage_report = await store.get_latest_runner_report()
-    raw_line_items, latest_usage_report = get_latest_runner_usage(
+    raw_line_items, latest_usage_report = await get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
     logger.debug(str(raw_line_items))
