@@ -262,7 +262,14 @@ async def get_user_info(billable_user_id):
             else int(billable_user_id)
         )
         config, _ = await db.get_user_config(org_id)
-        plan = config.get("billing_runners", {}).get("paid_by", {})
+        plan = config.get("billing_runners", {})
+        db_user_id = plan.get("paid_by", None)
+
+    if not db_user_id:
+        logger.error(
+            f"Couldn't find a meaningful billable nyrkio user for {billable_user_id} {db_user_id}"
+        )
+        return None
 
     user = await db.get_user_without_any_fastapi_nonsense(db_user_id)
     if not user:
