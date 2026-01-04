@@ -58,6 +58,9 @@ async def check_runner_usage():
                 if raw_line_item["plan_info"]["type"] == "stripe_metered":
                     unique_key = generate_unique_nyrkio_id(raw_line_item)
                     report_cpu_hours_consumed(
+                        datetime.fromtimestamp(
+                            raw_line_item["plan_info"]["unique_key"]["unique_time_slot"]
+                        ),
                         raw_line_item["plan_info"]["stripe_customer_id"],
                         raw_line_item["consumption"]["nyrkio_cpu_hours"],
                         unique_key,
