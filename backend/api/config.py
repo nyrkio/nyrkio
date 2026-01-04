@@ -7,6 +7,7 @@ from backend.auth import auth
 from backend.db.db import User, DBStore
 from backend.api.public import build_public_test_name
 from backend.api.metered import query_meter_consumption
+
 config_router = APIRouter()
 
 
@@ -90,9 +91,8 @@ async def delete_config(
     await store.delete_test_config(user.id, test_name)
     return {}
 
+
 @config_router.get("/metered-status")
-async def get_strip(
-    user: User = Depends(auth.current_active_user)
-) -> Dict:
+async def get_strip(user: User = Depends(auth.current_active_user)) -> Dict:
     stripe_customer_id = user.billing_runners.customer_id
-    return query_metered_consumption(stripe_customer_id)
+    return query_meter_consumption(stripe_customer_id)
