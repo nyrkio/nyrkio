@@ -60,8 +60,12 @@ async def check_runner_usage():
                     unique_key = generate_unique_nyrkio_id(raw_line_item)
 
                     slot_start_at = raw_line_item["unique_key"]["unique_time_slot"]
-                    launched_at = raw_line_item["github"].get("user_launched_at",slot_start_at)
-                    exact_start_at = max(launched_at, slot_start_at)
+                    launched_at = raw_line_item["github"].get("user_launched_at")
+                    exact_start_at = (
+                        max(launched_at, slot_start_at)
+                        if launched_at is not None
+                        else slot_start_at
+                    )
 
                     report_cpu_hours_consumed(
                         datetime.fromisoformat(exact_start_at),
