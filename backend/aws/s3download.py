@@ -246,7 +246,6 @@ plan_type = {
 async def get_user_info(billable_user_id):
     db = DBStore()
     db_user_id = None
-    plan_type = None
     org_id = None
     # user or org
     if len(billable_user_id) > 20:
