@@ -44,7 +44,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         )
     except stripe.InvalidRequestError as e:
         logger.info(
-            "Got stripe.InvalidRequestError. This might be harmless / unavoidable, Stripe among other things returns this when I first sent an event once, Stripe told me to fix something, now it complains that an event with the same id exists and I can't change it..."
+            "Got stripe.InvalidRequestError. This might be harmless / unavoidable in small quantities?"
         )
         logger.warning(e)
     finally:

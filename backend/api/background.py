@@ -45,35 +45,29 @@ async def check_runner_usage():
     logger.info("check_runner_usage() data from s3")
     store = DBStore()
     latest_usage_report = await store.get_latest_runner_report()
-    raw_line_items, latest_usage_report = await get_latest_runner_usage(
+    raw_events, latest_usage_report = await get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
-    logger.debug(str(raw_line_items))
-    logger.debug(str(latest_usage_report))
-    if raw_line_items:
-        for user_id, user_raw_usage in raw_line_items.items():
-            if user_raw_usage:
-                await store.add_user_runner_usage_raw(user_raw_usage)
+    await store.add_user_runner_usage_raw(raw_events)
+    for raw in raw_events:
+        if raw["plan_info"]["type"] == "stripe_meter":
+            unique_key = generate_unique_nyrkio_id(raw)
 
-            for raw_line_item in user_raw_usage:
-                if raw_line_item["plan_info"]["type"] == "stripe_meter":
-                    unique_key = generate_unique_nyrkio_id(raw_line_item)
+            slot_start_at = raw["unique_key"]["unique_time_slot"]
+            launched_at = raw["github"].get("user_launched_at")
+            exact_start_at = (
+                max(launched_at, slot_start_at)
+                if launched_at is not None
+                else slot_start_at
+            )
+            exact_start_at = exact_start_at.replace("Z", "+00:00")
 
-                    slot_start_at = raw_line_item["unique_key"]["unique_time_slot"]
-                    launched_at = raw_line_item["github"].get("user_launched_at")
-                    exact_start_at = (
-                        max(launched_at, slot_start_at)
-                        if launched_at is not None
-                        else slot_start_at
-                    )
-                    exact_start_at = exact_start_at.replace("Z", "+00:00")
-
-                    report_cpu_hours_consumed(
-                        datetime.fromisoformat(exact_start_at),
-                        raw_line_item["plan_info"]["stripe_customer_id"],
-                        raw_line_item["consumption"]["nyrkio_cpu_hours"],
-                        unique_key,
-                    )
+            report_cpu_hours_consumed(
+                datetime.fromisoformat(exact_start_at),
+                raw["plan_info"]["stripe_customer_id"],
+                raw["consumption"]["nyrkio_cpu_hours"],
+                unique_key,
+            )
 
     if latest_usage_report:
         logger.info(
@@ -81,7 +75,7 @@ async def check_runner_usage():
         )
         await store.set_latest_runner_report(latest_usage_report)
 
-    return bool(raw_line_items)
+    return len(raw_events)
 
 
 async def loop_installations():
