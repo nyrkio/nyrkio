@@ -90,7 +90,8 @@ async def get_latest_runner_usage(seen_previously=None):
             filtered.append(row)
 
         filtered.sort(key=lambda r: r[column["line_item_usage_start_date"]])
-        raw = {}
+        r = []
+        raw = {"notused": r}
         for row in filtered:
             cost_category = row[column["cost_category"]]
             nyrkio_user_dict = json.loads(cost_category)
@@ -130,7 +131,7 @@ async def get_latest_runner_usage(seen_previously=None):
             date_part = parts[4].split("Z-")[0]  # TODO: python 3.11 supports Z
             aws_timestamp = datetime.fromisoformat(date_part)
 
-            r = _ensure_buckets(raw, nyrkio_user_id)
+            # r = _ensure_buckets(raw, nyrkio_user_id)
 
             get_meta = ["resource_tags", "product"]
             get_labels = [
