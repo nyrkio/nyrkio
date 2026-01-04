@@ -6,6 +6,7 @@ import sys
 import os
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
+import stripe
 
 from backend.auth import auth
 from backend.auth import challenge_publish
