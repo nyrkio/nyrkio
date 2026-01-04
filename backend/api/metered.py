@@ -9,6 +9,7 @@ logger = logging.getLogger(__file__)
 
 
 CPU_HOURS_METER = "runner-cpu-hours"
+CPU_HOURS_VALUE = "cpu-hours"  # This is the "value" field
 
 
 def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_id):
@@ -18,7 +19,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         )
         return
     if timestamp < datetime.utcnow() - timedelta(days=30):
-        logger.error("timestamp was too old:  {timestamp}")
+        logger.error(f"timestamp was too old:  {timestamp}")
         return
 
     logger.info(
@@ -31,7 +32,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
     # Despite the name, this includes the HTTP POST
     cpu_hours_reported = stripe.billing.MeterEvent.create(
         event_name=CPU_HOURS_METER,
-        payload={"value": cpu_hours, "stripe_customer_id": stripe_customer_id},
+        payload={CPU_HOURS_VALUE: cpu_hours, "stripe_customer_id": stripe_customer_id},
         identifier=unique_id,  # For idempotency
         timestamp=int(timestamp.timestamp()),
     )
