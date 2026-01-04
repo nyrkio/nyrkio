@@ -190,7 +190,7 @@ const UserBillingPage = () => {
       </>
        ):""}
       <div className="row p-5">
-      Want to upgrade your subscription, or need professional services? Check out all Nyrkiö <a href="/pricing">products</a> and <a href="/services">services</a>.
+      <p>Want to upgrade your subscription, or need professional services? Check out all Nyrkiö <a href="/pricing">products</a> and <a href="/services">services</a>.</p>
       </div>
     </div>
   );
