@@ -112,7 +112,6 @@ async def get_latest_runner_usage(seen_previously=None):
                     "type": "internal",
                 }
             else:
-
                 # In general the billable nyrkio user will always have a user.billable subscription active
                 # It will be checked before they can launch any cloud resource in the first place. But...
                 # there will be glitches, so let's not assume anything.
