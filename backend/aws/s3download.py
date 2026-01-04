@@ -105,6 +105,10 @@ async def get_latest_runner_usage(seen_previously=None):
             plan_info = (
                 await get_user_info(billable_user_id) if billable_user_id else None
             )
+            if not plan_info:
+                # Already logged in previous functions
+                continue
+
             nyrkio_user_id = plan_info.get("nyrkio_user_id", billable_user_id)
 
             parts = str(latest_csv_obj.key).split("/")
