@@ -261,7 +261,7 @@ async def get_user_info(billable_user_id):
             if isinstance(billable_user_id, int)
             else int(billable_user_id)
         )
-        config = await db.get_user_config(org_id)
+        config, _ = await db.get_user_config(org_id)
         plan = config.get("billing_runners", {}).get("paid_by", {})
 
     user = await db.get_user_without_any_fastapi_nonsense(db_user_id)
