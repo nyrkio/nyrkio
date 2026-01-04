@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from backend.auth import auth
 from backend.db.db import User, DBStore
+from backend.api.metered import query_meter_consumption
 
 user_router = APIRouter(prefix="/user")
 
@@ -122,3 +123,9 @@ async def delete_user_config(user: User = Depends(auth.current_active_user)):
         )
     store = DBStore()
     await store.delete_user_config(user.id)
+
+
+@user_router.get("/meters")
+async def get_strip(user: User = Depends(auth.current_active_user)) -> Dict:
+    stripe_customer_id = user.billing_runners.customer_id
+    return query_meter_consumption(stripe_customer_id)
