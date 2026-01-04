@@ -74,14 +74,14 @@ def query_meter_consumption(stripe_customer_id):
     #     value_grouping_window="hour",
     #     )
     m = stripe.billing.Meter("mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8")
-    monthly = m.list_event_summaries(
+    daily = m.list_event_summaries(
         "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
         customer=stripe_customer_id,
         start_time=int(datetime(2025, 1, 1).timestamp()),
         end_time=int(datetime(2026, 12, 31).timestamp()),
-        value_grouping_window="month",
+        value_grouping_window="day",
     )
-    return monthly
+    return daily
     # return usage, meters
     # usage_data = stripe.billing.Analytics.MeterUsage.list(
     #     customer="cus_123456789",
