@@ -77,8 +77,8 @@ def query_meter_consumption(stripe_customer_id):
     monthly = m.list_event_summaries(
         "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
         customer=stripe_customer_id,
-        start_time=datetime(2025, 1, 1).timestamp(),
-        end_time=datetime(2026, 12, 31).timestamp(),
+        start_time=int(datetime(2025, 1, 1).timestamp()),
+        end_time=int(datetime(2026, 12, 31).timestamp()),
         value_grouping_window="month",
     )
     return monthly
