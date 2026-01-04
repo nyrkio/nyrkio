@@ -48,7 +48,8 @@ async def check_runner_usage():
     raw_events, latest_usage_report = await get_latest_runner_usage(
         seen_previously=latest_usage_report
     )
-    await store.add_user_runner_usage_raw(raw_events)
+    if raw_events:
+        await store.add_user_runner_usage_raw(raw_events)
     for raw in raw_events:
         if raw["plan_info"]["type"] == "stripe_meter":
             unique_key = generate_unique_nyrkio_id(raw)
