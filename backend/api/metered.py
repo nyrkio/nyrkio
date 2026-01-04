@@ -52,27 +52,37 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
 
 
 # def query_meter_consumption(stripe_customer_id, subscription_id):
-def query_meter_consumption(subscription_id):
+def query_meter_consumption(stripe_customer_id):
     # now = datetime.utcnow()
 
     # Get subscription
-    subscription = stripe.Subscription.retrieve(subscription_id)
-    items = [item["id"] for item in subscription["items"]["data"]]
-    usage = []
-    for item in items:
-        data = stripe.SubscriptionItem.list_usage_record_summaries(item)
-        usage.append(data)
-
-        for record in data:
-            print(f"Period: {record.period.start} to {record.period.end}")
-            print(f"Usage: {record.total_usage}")
-            print("---")
-
-    from pprint import pprint
-
-    pprint(usage)
-    pprint(items)
-    return usage
+    #     subscription = stripe.Subscription.retrieve(subscription_id)
+    #     items = [item["id"] for item in subscription["items"]["data"]]
+    #     usage = []
+    #     meters = []
+    #     for item in items:
+    #         if item["price"]["recurring"]["usage_type"] == "metered":
+    #             usage.append(item)
+    #
+    #             meter_id = item["plan"]["meter"]
+    #             m = stripe.billing.Meter(meter_id)
+    #     .list_event_summaries(
+    #     "mtr_test_61Q8nQMqIFK9fRQmr41CMAXJrFdZ5MnA",
+    #     customer="cus_Pp40waj64hdRxb",
+    #     start_time=1711584000,
+    #     end_time=1711666800,
+    #     value_grouping_window="hour",
+    #     )
+    m = stripe.billing.Meter("mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8")
+    monthly = m.list_event_summaries(
+        "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
+        customer=stripe_customer_id,
+        start_time=datetime(2025, 1, 1).timestamp(),
+        end_time=datetime(2026, 12, 31).timestamp(),
+        value_grouping_window="month",
+    )
+    return monthly
+    # return usage, meters
     # usage_data = stripe.billing.Analytics.MeterUsage.list(
     #     customer="cus_123456789",
     #     meters=["your_meter_name"],
