@@ -1366,7 +1366,8 @@ class DBStore(object):
                     f"user_id must be a str or ObjectId ({user_id} is {type(user_id)})"
                 )
 
-        logging.info(db_user_id)
+        logging.debug(db_user_id)
+        logging.debug(type(db_user_id))
         return await users_collection.find_one({"_id": db_user_id})
 
     async def list_users(self):
