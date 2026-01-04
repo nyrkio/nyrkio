@@ -30,6 +30,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         unique_id,
     )
 
+    cpu_hours_reported = None
     try:
         # Despite the name, this includes the HTTP POST
         cpu_hours_reported = stripe.billing.MeterEvent.create(
