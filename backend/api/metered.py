@@ -54,5 +54,5 @@ def query_meter_consumption(stripe_customer_id):
 def generate_unique_nyrkio_id(raw_line_item):
     k = raw_line_item["unique_key"]
     return (
-        f"{k['nyrkio_unique_id']}::{k['unique_time_slot']}::{k['unique_time_slot_end']}"
+        f"{k['nyrkio_unique_id']}_{k['unique_time_slot']}"
     )
