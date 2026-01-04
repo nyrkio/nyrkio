@@ -59,6 +59,8 @@ async def get_latest_runner_usage(seen_previously=None):
         str(runner_usage_reports[-1].key) if runner_usage_reports else seen_previously
     )
 
+    r = []
+    raw = {"notused": r}
     logger.debug(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
