@@ -248,6 +248,8 @@ async def get_user_info(billable_user_id):
         plan = config.get("billing_runners", {}).get("paid_by", {})
 
     user = await db.get_user_without_any_fastapi_nonsense(db_user_id)
+    if not user:
+        logger.error(f"User {billable_user_id} {db_user_id} NOT FOUND in database")
     email = user["email"]
     plan = user.get("billing_runners")
     if plan is None:
