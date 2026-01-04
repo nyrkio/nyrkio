@@ -3,7 +3,7 @@ import httpx
 import asyncio
 import os
 
-from datetime import datetime, timezone
+from datetime import datetime
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
 from backend.github.runner import (
@@ -69,7 +69,7 @@ async def check_runner_usage():
                     exact_start_at = exact_start_at.replace("Z", "+00:00")
 
                     report_cpu_hours_consumed(
-                        datetime.fromisoformat(exact_start_at, tzinfo=timezone.utc),
+                        datetime.fromisoformat(exact_start_at),
                         raw_line_item["plan_info"]["stripe_customer_id"],
                         raw_line_item["consumption"]["nyrkio_cpu_hours"],
                         unique_key,
