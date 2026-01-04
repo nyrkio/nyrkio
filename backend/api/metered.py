@@ -29,14 +29,25 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         cpu_hours,
         unique_id,
     )
-    # Despite the name, this includes the HTTP POST
-    cpu_hours_reported = stripe.billing.MeterEvent.create(
-        event_name=CPU_HOURS_METER,
-        payload={CPU_HOURS_VALUE: cpu_hours, "stripe_customer_id": stripe_customer_id},
-        identifier=unique_id,  # For idempotency
-        timestamp=int(timestamp.timestamp()),
-    )
-    logger.debug(cpu_hours_reported)
+
+    try:
+        # Despite the name, this includes the HTTP POST
+        cpu_hours_reported = stripe.billing.MeterEvent.create(
+            event_name=CPU_HOURS_METER,
+            payload={
+                CPU_HOURS_VALUE: cpu_hours,
+                "stripe_customer_id": stripe_customer_id,
+            },
+            identifier=unique_id,  # For idempotency
+            timestamp=int(timestamp.timestamp()),
+        )
+    except stripe.InvalidRequestError as e:
+        logger.info(
+            "Got stripe.InvalidRequestError. This might be harmless / unavoidable, Stripe among other things returns this when I first sent an event once, Stripe told me to fix something, now it complains that an event with the same id exists and I can't change it..."
+        )
+        logger.warning(e)
+    finally:
+        logger.debug(cpu_hours_reported)
 
 
 def query_meter_consumption(stripe_customer_id):
