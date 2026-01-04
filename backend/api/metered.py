@@ -1,7 +1,7 @@
 import os
 import stripe
 import logging
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "foo")
 
@@ -18,7 +18,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
             "report_cpu_hours_consumed: Timestamp must be of the format datetime."
         )
         return
-    if timestamp < datetime.now() - timedelta(days=30):
+    if timestamp < datetime.now(timezone.utc) - timedelta(days=30):
         logger.error(f"timestamp was too old:  {timestamp}")
         return
 
