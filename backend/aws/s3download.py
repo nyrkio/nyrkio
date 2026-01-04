@@ -182,7 +182,7 @@ async def get_latest_runner_usage(seen_previously=None):
                         "billable_nyrkio_user_id": nyrkio_user_id,
                         "nyrkio_user": meta["resource_tags"].get("nyrkio_user"),
                         "nyrkio_org": meta["resource_tags"].get("nyrkio_org"),
-                        "stripe_user_id": plan_info["stripe_user_id"],
+                        "stripe_customer_id": plan_info["stripe_customer_id"],
                         "user_email": plan_info["email"],
                     },
                     "plan_info": plan_info,
