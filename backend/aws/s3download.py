@@ -119,7 +119,9 @@ async def get_latest_runner_usage(seen_previously=None):
                     await get_user_info(billable_user_id) if billable_user_id else None
                 )
                 if not plan_info:
-                    # Already logged in previous functions
+                    logger.info(
+                        "get_latest_runner_usage: billable_user_id is None, next row"
+                    )
                     continue
 
             logger.debug(plan_info)
