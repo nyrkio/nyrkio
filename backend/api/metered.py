@@ -17,7 +17,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
             "report_cpu_hours_consumed: Timestamp must be of the format datetime."
         )
         return
-
+    if timestamp < datetime.utcnow() - timedelta(days=30):
         logger.error("timestamp was too old:  {timestamp}")
         return
 
@@ -54,3 +54,4 @@ def query_meter_consumption(stripe_customer_id):
 def generate_unique_nyrkio_id(raw_line_item):
     k = raw_line_item["unique_key"]
     return f"{k['nyrkio_unique_id']}_{k['unique_time_slot']}"
+                                 _
