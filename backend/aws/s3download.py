@@ -60,7 +60,7 @@ async def get_latest_runner_usage(seen_previously=None):
     )
 
     r = []
-    raw = {"notused": r}
+
     logger.debug(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
@@ -93,7 +93,7 @@ async def get_latest_runner_usage(seen_previously=None):
 
         filtered.sort(key=lambda r: r[column["line_item_usage_start_date"]])
         r = []
-        raw = {"notused": r}
+
         for row in filtered:
             cost_category = row[column["cost_category"]]
             nyrkio_user_dict = json.loads(cost_category)
@@ -227,18 +227,9 @@ async def get_latest_runner_usage(seen_previously=None):
             )
         # Exit at the end of the loop that corresponds to a single ec2 report
         # In an earlier version this was to keep MongoDB docs below 16 MB, now it's more to keep this computation small
-        return raw, latest_csv_obj.key
+        return r, latest_csv_obj.key
 
-    return raw, latest_report
-
-
-# Group by user. Not really important but kept it for nostalgia reasons or something
-def _ensure_buckets(raw, user_id):
-    if user_id not in raw:
-        raw[user_id] = []
-    r = raw[user_id]
-
-    return r
+    return r, latest_report
 
 
 plan_type = {
