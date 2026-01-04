@@ -57,7 +57,7 @@ my_git_sha = os.environ.get(
 )
 root_logger.info(f"Nyrkio backend starting up. GIT_SHA={my_git_sha}")
 root_logger.info(f"python version in prod is {sys.version}")
-
+root_logger.info(f"stripe = {stripe.VERSION}")
 api_router = APIRouter()
 
 
