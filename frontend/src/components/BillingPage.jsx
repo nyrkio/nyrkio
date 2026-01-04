@@ -60,6 +60,7 @@ const SubscribeCancel = () => {
 const UserBillingPage = () => {
   const [billingPlan, setBillingPlan] = useState("free");
   const [runnerPlan, setRunnerPlan] = useState();
+  const [meterStatus, setMeterStatus] = useState();
   const [loading, setLoading] = useState(true);
   const fetchBillingInfo = async () => {
     const response = await fetch("/api/v0/user/config", {
@@ -87,6 +88,7 @@ const UserBillingPage = () => {
     }
     if (data.billing_runners && data.billing_runners.plan) {
       setRunnerPlan(data.billing_runners.plan);
+      setMeterStatus(getMeteredUsageStatus());
     }
     setLoading(false);
   };
@@ -183,6 +185,8 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Current plan</h3>
             <p className="card-body-text">{planMap[billingPlan]}</p>
+            <p className="card-body-text">{meterStatus}</p>
+
             <BillingButton plan={planMap[billingPlan]}/>
           </div>
         </div>
