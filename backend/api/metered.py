@@ -9,7 +9,7 @@ logger = logging.getLogger(__file__)
 
 
 CPU_HOURS_METER = "runner-cpu-hours"
-CPU_HOURS_VALUE = "cpu-hours" # This is the "value" field
+CPU_HOURS_VALUE = "cpu-hours"  # This is the "value" field
 
 
 def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_id):
