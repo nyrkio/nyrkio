@@ -215,6 +215,9 @@ async def get_latest_runner_usage(seen_previously=None):
                             "user_github_job_run_attempt",
                             meta["resource_tags"].get("github_job_run_attempt"),
                         ),
+                        "user_launched_at": meta["resource_tags"].get(
+                            "user_launched_at"
+                        ),
                     },
                     "report": latest_csv_obj.key,
                     "report_aws_timestamp": aws_timestamp.isoformat(),

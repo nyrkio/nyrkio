@@ -58,10 +58,13 @@ async def check_runner_usage():
             for raw_line_item in user_raw_usage:
                 if raw_line_item["plan_info"]["type"] == "stripe_meter":
                     unique_key = generate_unique_nyrkio_id(raw_line_item)
+
+                    launched_at = raw_line_item["github"]["user_launched_at"]
+                    slot_start_at = raw_line_item["unique_key"]["unique_time_slot"]
+                    exact_start_at = max(launched_at, slot_start_at)
+
                     report_cpu_hours_consumed(
-                        datetime.fromtimestamp(
-                            raw_line_item["plan_info"]["unique_key"]["unique_time_slot"]
-                        ),
+                        datetime.fromisoformat(exact_start_at),
                         raw_line_item["plan_info"]["stripe_customer_id"],
                         raw_line_item["consumption"]["nyrkio_cpu_hours"],
                         unique_key,
