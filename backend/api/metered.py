@@ -34,8 +34,7 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         event_name=CPU_HOURS_METER,
         payload={"value": cpu_hours, "stripe_customer_id": stripe_customer_id},
         identifier=unique_id,  # For idempotency
-        timestamp=timestamp.isoformat(),
-        created=datetime.utcnow().isoformat(),
+        timestamp=timestamp.timestamp(),
     )
     logger.debug(cpu_hours_reported)
 
