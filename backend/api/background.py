@@ -66,11 +66,7 @@ async def check_runner_usage():
                         if launched_at is not None
                         else slot_start_at
                     )
-                    exact_start_at = (
-                        exact_start_at[:-1]
-                        if exact_start_at[-1] == "Z"
-                        else exact_start_at
-                    )
+                    exact_start_at = exact_start_at.replace("Z", "+00:00")
 
                     report_cpu_hours_consumed(
                         datetime.fromisoformat(exact_start_at, tzinfo=timezone.utc),
