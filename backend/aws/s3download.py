@@ -59,8 +59,6 @@ async def get_latest_runner_usage(seen_previously=None):
         str(runner_usage_reports[-1].key) if runner_usage_reports else seen_previously
     )
 
-    raw = {}
-
     logger.debug(str(runner_usage_reports))
     for latest_csv_obj in runner_usage_reports:
         # print(latest_csv_obj)
@@ -92,6 +90,7 @@ async def get_latest_runner_usage(seen_previously=None):
             filtered.append(row)
 
         filtered.sort(key=lambda r: r[column["line_item_usage_start_date"]])
+        raw = {}
         for row in filtered:
             cost_category = row[column["cost_category"]]
             nyrkio_user_dict = json.loads(cost_category)
