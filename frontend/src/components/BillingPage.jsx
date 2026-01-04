@@ -88,10 +88,35 @@ const UserBillingPage = () => {
     }
     if (data.billing_runners && data.billing_runners.plan) {
       setRunnerPlan(data.billing_runners.plan);
-      setMeterStatus(getMeteredUsageStatus());
+      const meter = await getMeteredUsageStatus();
+      setMeterStatus(meter);
     }
     setLoading(false);
   };
+
+  const getMeteredUsageStatus = async () => {
+    const response = await fetch("/api/v0/user/meters", {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+
+    if (!response.ok) {
+      console.error(
+        "Failed to fetch meter status (cpu-hours): " +
+        response.status +
+        " " +
+        response.statusText,
+      );
+      return;
+    }
+
+    const data = await response.json();
+    console.debug(data);
+    return data;
+  };
+
 
   useEffect(() => {
     setLoading(true);
