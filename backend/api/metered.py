@@ -18,7 +18,6 @@ def report_cpu_hours_consumed(timestamp, stripe_customer_id, cpu_hours, unique_i
         )
         return
 
-    if timestamp < datetime.utcnow - timedelta(days=30):
         logger.error("timestamp was too old:  {timestamp}")
         return
 
