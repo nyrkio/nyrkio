@@ -99,15 +99,29 @@ async def get_latest_runner_usage(seen_previously=None):
                 "by_nyrkio_user", "000000000000000000000000"
             )
 
-            # In general the billable nyrkio user will always have a user.billable subscription active
-            # It will be checked before they can launch any cloud resource in the first place. But...
-            # there will be glitches, so let's not assume anything.
-            plan_info = (
-                await get_user_info(billable_user_id) if billable_user_id else None
-            )
-            if not plan_info:
-                # Already logged in previous functions
-                continue
+            plan_info = None
+            if billable_user_id == "000000000000000000000000":
+                # Not a real user, skip database queries
+                plan_info = {
+                    "stripe_customer_id": None,
+                    "nyrkio_org_id": None,
+                    "nyrkio_user_id": billable_user_id,
+                    "billable_user_id": billable_user_id,
+                    "email": "internal use",
+                    "plan": "internal",
+                    "type": "internal",
+                }
+            else:
+
+                # In general the billable nyrkio user will always have a user.billable subscription active
+                # It will be checked before they can launch any cloud resource in the first place. But...
+                # there will be glitches, so let's not assume anything.
+                plan_info = (
+                    await get_user_info(billable_user_id) if billable_user_id else None
+                )
+                if not plan_info:
+                    # Already logged in previous functions
+                    continue
 
             nyrkio_user_id = plan_info.get("nyrkio_user_id", billable_user_id)
 
