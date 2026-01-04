@@ -32,7 +32,7 @@ def check_for_new_usage_report(seen_previously):
     return False
 
 
-def get_latest_runner_usage(seen_previously=None):
+async def get_latest_runner_usage(seen_previously=None):
     s3client = boto3.resource("s3")
     bucket_name = "nyrkiorunnersusage"
     bucket = s3client.Bucket(bucket_name)
