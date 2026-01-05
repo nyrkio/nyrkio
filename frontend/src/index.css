@@ -36,11 +36,11 @@
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
-  --bs-body-font-size: 16pt;
-  --bs-body-font-family: "Big Shoulders", "apple-ui", "system-ui", "Helvetica";
+  --bs-body-font-size: 16px;
+  --bs-body-font-family: "Helvetica", "Inter","Arial", "apple-ui", "system-ui", sans;
   --bs-body-font-style: normal;
-  --bs-body-font-weight: 150;
-  --bs-body-letter-spacing: 0.01rem;
+  --bs-body-font-weight: 400;
+  --bs-body-letter-spacing: 0.533px;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);
   --bs-link-color: var(--nyrkio-text);
@@ -274,13 +274,13 @@ margin-bottom: 10em;
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .for,
 .frontpage .nyrkio-title h1 .for {
-  font-family: "Big Shoulders";
-  font-size: 20pt;
-  letter-spacing: 0.15em;
+  font-family: "Helvetica";
+  font-size: 16px;
+  letter-spacing: 6px;
   display: block;
   text-align: right;
   padding-right: 20%;
-  margin-top: 0.7em;
+  margin-top: 16px;
 }
 
 .frontpage .nyrkio-title h5 {
@@ -310,12 +310,12 @@ margin-bottom: 10em;
   .nyrkio-logo.nyrkio-title h1 .for,
   .frontpage .nyrkio-title h1 .for {
     font-family: "Big Shoulders";
-    font-size: 14pt;
+    font-size: 16px;
     letter-spacing: 0.1em;
     display: none;
     text-align: right;
     padding-right: 2em;
-    margin-top: 0.7em;
+    margin-top: 32px;
   }
 }
 #demo-video {
@@ -1176,8 +1176,9 @@ color: #212529;
 
 .text-shoulders {
   font-family: "Big Shoulders";
-  font-size: 16pt;
+  font-size: 16px;
   letter-spacing: 0.4pt;
+  font-weight: 200;
   margin-top: 0em;
 }
 
