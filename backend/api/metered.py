@@ -1,7 +1,7 @@
 import os
 import stripe
 import logging
-from datetime import datetime, timedelta, timezone, date
+from datetime import datetime, timedelta, timezone
 
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY", "foo")
 
@@ -77,8 +77,8 @@ def query_meter_consumption(stripe_customer_id):
     daily = m.list_event_summaries(
         "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
         customer=stripe_customer_id,
-        start_time=int((date().utcnow() - timedelta(days=30)).timestamp()),
-        end_time=int(date().utcnow().timestamp()),
+        start_time=int((datetime().utcnow() - timedelta(days=30)).date().timestamp()),
+        end_time=int(datetime().utcnow().date().timestamp()),
         value_grouping_window="day",
     )
     return daily
