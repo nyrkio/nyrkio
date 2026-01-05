@@ -74,11 +74,14 @@ def query_meter_consumption(stripe_customer_id):
     #     value_grouping_window="hour",
     #     )
     m = stripe.billing.Meter("mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8")
+    now = datetime.utcnow()
+    today = datetime(now.year, now.month, now.day)
+    then = today - timedelta(days=30)
     daily = m.list_event_summaries(
         "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
         customer=stripe_customer_id,
-        start_time=int((datetime.utcnow() - timedelta(days=30)).date().timestamp()),
-        end_time=int(datetime.utcnow().date().timestamp()),
+        start_time=int(then.timestamp()),
+        end_time=int(today.timestamp()),
         value_grouping_window="day",
     )
     return daily
