@@ -508,6 +508,29 @@ button:focus-visible {
 
 }
 
+.nyrkio-billing table.stripedata .stripedataCollapse {
+  display: none;
+}
+.nyrkio-billing table.stripedata.stripedataShowAll .stripedataCollapse {
+  display: table-row;
+}
+
+.nyrkio-billing table.stripedata {
+  width: 90%;
+  align: center;
+  text-align: left;
+}
+.nyrkio-billing table.stripedata   th {
+}
+.nyrkio-billing table.stripedata   th,
+.nyrkio-billing table.stripedata   td {
+  border: none;
+}
+.nyrkio-billing .stripedata {
+    color: var(--nyrkio-horn-dark-brown);
+
+}
+
 .nyrkio-services .card .card-body .card-body-text {
   height: 15em;
   overflow: scroll;
@@ -1611,3 +1634,4 @@ h4.customer-logo-title{
   font-style: italic;
   font-size: 140%;
 }
+
