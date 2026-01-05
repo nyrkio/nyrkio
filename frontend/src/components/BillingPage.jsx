@@ -60,7 +60,7 @@ const SubscribeCancel = () => {
 const UserBillingPage = () => {
   const [billingPlan, setBillingPlan] = useState("free");
   const [runnerPlan, setRunnerPlan] = useState();
-  const [meterStatus, setMeterStatus] = useState();
+  const [meterStatus, setMeterStatus] = useState([]);
   const [loading, setLoading] = useState(true);
   const fetchBillingInfo = async () => {
     const response = await fetch("/api/v0/user/config", {
@@ -88,8 +88,7 @@ const UserBillingPage = () => {
     }
     if (data.billing_runners && data.billing_runners.plan) {
       setRunnerPlan(data.billing_runners.plan);
-      const meter = await getMeteredUsageStatus();
-      setMeterStatus(meter);
+
     }
     setLoading(false);
   };
@@ -101,7 +100,6 @@ const UserBillingPage = () => {
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
     });
-
     if (!response.ok) {
       console.error(
         "Failed to fetch meter status (cpu-hours): " +
@@ -109,29 +107,54 @@ const UserBillingPage = () => {
         " " +
         response.statusText,
       );
-      return;
     }
 
     const data = await response.json();
     console.debug(data);
-    return data;
+    setMeterStatus(data.data);
+  };
+  const CpuHoursTableData = ({stripedata}) => {
+    const initialRows = 3;
+    let rownr = 0;
+    return stripedata.map(day =>
+      <tr key={day.id} className={rownr++ >= initialRows? "stripedataCollapse" : ""}>
+      <td>{new Date(day.start_time*1000).toDateString()}</td>
+      <td>{Math.round(1000*day.aggregated_value)/1000}</td>
+      <td>Cpu-Hours,</td><td> =</td>
+      <td className="text-right">{Math.round(day.aggregated_value*10)/100} </td>
+      <td>€</td>
+      </tr>
+           );
   };
 
-  const CpuHoursTableData = ({stripedata}) => {
-    for (let day of stripedata.data) {
-      (<tr id={day.id} >
-      <td>{new Date(day.start_time)}</td>
-      <td>{day.aggregated_value}</td>
-      <td>Cpu-Hours</td>
-      <td>({day.aggregated_value*10} €)</td>
-      </tr>)
-    }
+  let toggleVisibility = false;
+  const collapseTable = (e) => {
+    e.preventDefault();
 
+    const t = document.getElementById("cpuhoursTable");
+    if ( ! toggleVisibility ) {
+      t.classList.add("stripedataShowAll");
+    }
+    else {
+      t.classList.remove("stripedataShowAll");
+    }
+    toggleVisibility = !toggleVisibility;
   }
+
   const CpuHoursTable = ({stripedata}) => {
     return (<>
-      <table className="cpuhours stripedata">
+      <table id="cpuhoursTable" className="cpuhours stripedata">
+      <thead>
+      <tr><th colSpan={6}>Consumption past 30 days</th></tr>
+      </thead>
+      <tbody>
       <CpuHoursTableData stripedata={stripedata} />
+      </tbody>
+      <tfoot>
+      <tr><th><a href="#" onClick={(e) => collapseTable(e)}><em>more<big>...</big></em></a></th>
+          <th></th><th></th><th></th><th></th><th></th>
+        </tr>
+      </tfoot>
       </table>
     </>)
   };
@@ -139,6 +162,7 @@ const UserBillingPage = () => {
   useEffect(() => {
     setLoading(true);
     fetchBillingInfo();
+    getMeteredUsageStatus();
   }, []);
 
   if (loading) {
@@ -215,6 +239,7 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
             <p className="card-body-text">{planMap[runnerPlan]}</p>
+            <CpuHoursTable stripedata={meterStatus} />
             <BillingButton plan={planMap[runnerPlan]}/>
           </div>
         </div>
@@ -228,7 +253,6 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Current plan</h3>
             <p className="card-body-text">{planMap[billingPlan]}</p>
-            <CpuHoursTable stripedata={runnerPlan} />
 
             <BillingButton plan={planMap[billingPlan]}/>
           </div>
