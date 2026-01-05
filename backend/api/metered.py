@@ -77,8 +77,8 @@ def query_meter_consumption(stripe_customer_id):
     daily = m.list_event_summaries(
         "mtr_61TtBEvjlAsWJr0H041DIPO697lkhTY8",
         customer=stripe_customer_id,
-        start_time=int((datetime().utcnow() - timedelta(days=30)).date().timestamp()),
-        end_time=int(datetime().utcnow().date().timestamp()),
+        start_time=int((datetime.utcnow() - timedelta(days=30)).date().timestamp()),
+        end_time=int(datetime.utcnow().date().timestamp()),
         value_grouping_window="day",
     )
     return daily
