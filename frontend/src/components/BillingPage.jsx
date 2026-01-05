@@ -117,6 +117,24 @@ const UserBillingPage = () => {
     return data;
   };
 
+  const CpuHoursTableData = ({stripedata}) => {
+    for (let day of stripedata.data) {
+      (<tr id={day.id} >
+      <td>{new Date(day.start_time)}</td>
+      <td>{day.aggregated_value}</td>
+      <td>Cpu-Hours</td>
+      <td>({day.aggregated_value*10} €)</td>
+      </tr>)
+    }
+
+  }
+  const CpuHoursTable = ({stripedata}) => {
+    return (<>
+      <table className="cpuhours stripedata">
+      <CpuHoursTableData stripedata={stripedata} />
+      </table>
+    </>)
+  };
 
   useEffect(() => {
     setLoading(true);
@@ -210,7 +228,7 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Current plan</h3>
             <p className="card-body-text">{planMap[billingPlan]}</p>
-            <p className="card-body-text">{meterStatus}</p>
+            <CpuHoursTable stripedata={runnerPlan} />
 
             <BillingButton plan={planMap[billingPlan]}/>
           </div>
