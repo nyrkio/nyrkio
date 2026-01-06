@@ -1,0 +1,401 @@
+{
+  "config": {
+    "configFile": "/Users/jdrumgoole/GIT/nyrkio/frontend/playwright.config.integration.ts",
+    "rootDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/tests/integration",
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "integration-test-results/results.json"
+        }
+      ],
+      [
+        "html",
+        {
+          "outputFolder": "integration-test-results/html-report"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "quiet": false,
+    "projects": [
+      {
+        "outputDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/test-results",
+        "repeatEach": 1,
+        "retries": 1,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "",
+        "name": "",
+        "testDir": "/Users/jdrumgoole/GIT/nyrkio/frontend/tests/integration",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.integration.ts"
+        ],
+        "timeout": 60000
+      }
+    ],
+    "shard": null,
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.56.1",
+    "workers": 1,
+    "webServer": null
+  },
+  "suites": [
+    {
+      "title": "ui-changepoints.integration.ts",
+      "file": "ui-changepoints.integration.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Change Point Detection - API Endpoint Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 57,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should access change points API endpoint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4010,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:32.727Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-d6290432a547b6ff0372",
+              "file": "ui-changepoints.integration.ts",
+              "line": 64,
+              "column": 3
+            },
+            {
+              "title": "should access perCommit changes API endpoint",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3251,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:36.986Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-61ee7469ebfaf28a14e4",
+              "file": "ui-changepoints.integration.ts",
+              "line": 98,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Change Point Detection - No Changes State",
+          "file": "ui-changepoints.integration.ts",
+          "line": 134,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should handle test with no change points gracefully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 6037,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:40.243Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-f42155ab943e716dcbe7",
+              "file": "ui-changepoints.integration.ts",
+              "line": 141,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Change Point Detection - With Regression Data",
+          "file": "ui-changepoints.integration.ts",
+          "line": 195,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should create data with performance regression",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 9583,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "Change points for cp-regression-1762910749453: {\n  \"cp-regression-1762910749453\": [\n    {\n      \"time\": 1762909849,\n      \"attributes\": {\n        \"git_commit\": \"regressed0\",\n        \"branch\": \"main\",\n        \"git_repo\": \"https://github.com/nyrkio/nyrkio\"\n      },\n      \"changes\": [\n        {\n          \"metric\": \"performance\",\n          \"index\": 15,\n          \"time\": 1762909849,\n          \"forward_change_percent\": \"100\",\n          \"magnitude\": \"0.996628\",\n          \"mean_before\": \"100.210830\",\n          \"stddev_before\": \"1.285653\",\n          \"mean_after\": \"200.083760\",\n          \"stddev_after\": \"1.711350\",\n          \"pvalue\": \"0.000000\"\n        }\n      ]\n    }\n  ]\n}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:46.287Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-19b5d9988a73e43b8e09",
+              "file": "ui-changepoints.integration.ts",
+              "line": 202,
+              "column": 3
+            },
+            {
+              "title": "should display changes endpoint data structure",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3373,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:55.878Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-7c08c9abe3496551af21",
+              "file": "ui-changepoints.integration.ts",
+              "line": 295,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Change Point Detection - UI Display Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 331,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should load test result page without errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5278,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:25:59.258Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-3d769bb2d08f67a00e74",
+              "file": "ui-changepoints.integration.ts",
+              "line": 338,
+              "column": 3
+            },
+            {
+              "title": "should handle empty changes gracefully in UI",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5664,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:26:04.544Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-3cebb4ab78c9ef298c8d",
+              "file": "ui-changepoints.integration.ts",
+              "line": 371,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Change Point Detection - Multiple Tests",
+          "file": "ui-changepoints.integration.ts",
+          "line": 412,
+          "column": 6,
+          "specs": [
+            {
+              "title": "should handle multiple tests with change detection",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 60000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "",
+                  "projectName": "",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5660,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2025-11-12T01:26:10.215Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a2514f40fd2b5c7a75e6-dec3708a18ebb7a36d26",
+              "file": "ui-changepoints.integration.ts",
+              "line": 419,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2025-11-12T01:25:32.247Z",
+    "duration": 43665.068,
+    "expected": 8,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

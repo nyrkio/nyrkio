@@ -12,7 +12,7 @@ export default defineConfig({
       "/api": {
         target: "https://nyrkio.com",
         //target: "https://staging.nyrkio.com",
-        // target: "http://localhost",
+        target: "http://localhost:8001",
         changeOrigin: true,
         // rewrite: (path) => path.replace(/^\/api/, ""),
       },
