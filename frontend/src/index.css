@@ -515,10 +515,17 @@ button:focus-visible {
   display: table-row;
 }
 
+.nyrkio-billing div.cpuhours {
+  width: 100%;
+  margin-top: 6em;
+  margin-bottom: 3em;
+}
 .nyrkio-billing table.stripedata {
-  width: 90%;
-  align: center;
-  text-align: left;
+  width: 80%;
+  max-width: 90%;
+  min-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 }
 .nyrkio-billing table.stripedata   th {
 }
