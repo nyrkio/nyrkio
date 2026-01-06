@@ -119,10 +119,11 @@ const UserBillingPage = () => {
     return stripedata.map(day =>
       <tr key={day.id} className={rownr++ >= initialRows? "stripedataCollapse" : ""}>
       <td>{new Date(day.start_time*1000).toDateString()}</td>
-      <td>{Math.round(1000*day.aggregated_value)/1000}</td>
-      <td>Cpu-Hours,</td><td> =</td>
-      <td className="text-right">{Math.round(day.aggregated_value*10)/100} </td>
-      <td>€</td>
+      <td style={{textAlign: "right"}}>{Math.round(1000*day.aggregated_value)/1000}</td>
+      <td style={{textAlign: "left"}}>Cpu-Hours,</td>
+      <td style={{textAlign: "right", width:"1em"}}> =</td>
+      <td style={{textAlign: "right", width:"3em"}}>{Math.round(day.aggregated_value*10)/100} </td>
+      <td style={{textAlign: "left", width:"3em"}}>€</td>
       </tr>
            );
   };
@@ -143,6 +144,7 @@ const UserBillingPage = () => {
 
   const CpuHoursTable = ({stripedata}) => {
     return (<>
+      <div className="cpuhours">
       <table id="cpuhoursTable" className="cpuhours stripedata">
       <thead>
       <tr><th colSpan={6}>Consumption past 30 days</th></tr>
@@ -156,6 +158,7 @@ const UserBillingPage = () => {
         </tr>
       </tfoot>
       </table>
+      </div>
     </>)
   };
 
