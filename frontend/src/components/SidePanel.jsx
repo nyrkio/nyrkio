@@ -269,7 +269,7 @@ const SettingsSidePanel = ({ loggedIn, orgs }) => {
     <Link to="/billing" className="nav-link nav-link-login">
     <span className="bi bi-credit-card"></span> Billing
     </Link>
-    <Link to="/billing" className="nav-link nav-link-login">
+    <Link to="/pricing" className="nav-link nav-link-login">
     <span className="bi bi-credit-card"></span> Upgrade your subscription
     </Link>
     </>
