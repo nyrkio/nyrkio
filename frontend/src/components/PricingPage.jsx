@@ -434,15 +434,14 @@ export const PricingPage = ({ loggedIn }) => {
                 <span className="text-shoulders">for GitHub</span>
               </div>
               <div className="card-body">
-                <p className="nyrkio-annual"></p>
                 <h1 className="card-title pricing-card-title">
-                  0.1 <small className="text-body-secondary fw-light"> eur/hour/cpu</small>
+                  <span style={{letterSpacing: "4px"}}>0</span><span style={{letterSpacing: "-3px"}}>.1</span><span style={{letterSpacing: "12px"}}> </span><small className="text-body-secondary fw-light" style={{letterSpacing: "2px"}}> eur/hour/cpu</small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
-                  <li></li>
                   <li>Pay as you go, monthly</li>
-                  <li>First 100 subscribers get <br />50 cpu-hours free</li>
-                  <li>Use coupon <em>RunnerTrial50</em></li>
+                  <li>High Fidelity c7a instances</li>
+                  <li>Tuned for <em>stable performance</em></li>
+                  <li>Change Detection & Graphs included</li>
                 </ul>
                   <form
                     action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
@@ -464,7 +463,18 @@ export const PricingPage = ({ loggedIn }) => {
               </div>
             </div>
           </div>
-          <div className="col">
+          </div>
+          </div>
+          </>):
+          ""}
+    </>
+  );
+};
+
+const prePaidToBeUsedLater = () => {
+  return ( <>
+
+            <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
@@ -509,10 +519,7 @@ export const PricingPage = ({ loggedIn }) => {
               </div>
             </div>
           </div>
-          </div>
-          </div>
-          </>):
-          ""}
-    </>
+          </>
   );
+
 };
