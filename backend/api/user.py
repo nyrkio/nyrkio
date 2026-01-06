@@ -127,6 +127,8 @@ async def delete_user_config(user: User = Depends(auth.current_active_user)):
 
 @user_router.get("/meters")
 async def get_strip(user: User = Depends(auth.current_active_user)) -> Dict:
-    # stripe_customer_id = user.billing_runners.get("customer_id")
-    customer_id = user.billing_runners.get("customer_id")
-    return query_meter_consumption(customer_id)
+    if user.billing_runners:
+        customer_id = user.billing_runners.get("customer_id")
+        return query_meter_consumption(customer_id)
+    else:
+        return {}

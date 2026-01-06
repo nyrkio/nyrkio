@@ -183,6 +183,9 @@ const ProductSidePanel = ({ loggedIn }) => {
       <Link to="/services" className="nav-link">
       Services
       </Link>
+      <Link to="/billing" className="nav-link">
+      Billing
+      </Link>
       <Link to="/public" className="nav-link">
         Public Dashboards
         <br /> from other users
@@ -265,6 +268,9 @@ const SettingsSidePanel = ({ loggedIn, orgs }) => {
     <OrgsList orgs={orgs}/>
     <Link to="/billing" className="nav-link nav-link-login">
     <span className="bi bi-credit-card"></span> Billing
+    </Link>
+    <Link to="/billing" className="nav-link nav-link-login">
+    <span className="bi bi-credit-card"></span> Upgrade your subscription
     </Link>
     </>
   );
