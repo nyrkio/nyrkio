@@ -6,6 +6,7 @@ import sys
 import os
 
 from fastapi import FastAPI, APIRouter, Depends, HTTPException
+import stripe
 
 from backend.auth import auth
 from backend.auth import challenge_publish
@@ -56,7 +57,8 @@ my_git_sha = os.environ.get(
     "WARNING: GIT_SHA not set. This may not be a proper production deployment.",
 )
 root_logger.info(f"Nyrkio backend starting up. GIT_SHA={my_git_sha}")
-
+root_logger.info(f"python version in prod is {sys.version}")
+root_logger.info(f"stripe = {stripe.VERSION}")
 api_router = APIRouter()
 
 

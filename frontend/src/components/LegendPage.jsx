@@ -9,7 +9,7 @@ export const LegendPage = () => {
     <>
       <div className="container nyyrikki-legend">
         <div className="row col-xl-10 mt-8 p-5">
-          <h1 className="font-weight-bolder text-center nyrkio-accent-dark mb-5">
+          <h1 className="text-center nyrkio-accent-dark mb-5">
             Nyyrikki
           </h1>
           <h2 className="text-center nyrkio-accent-dark">The legend</h2>

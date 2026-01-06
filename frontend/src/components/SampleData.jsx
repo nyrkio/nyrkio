@@ -12,9 +12,10 @@ import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
 
 const publicCustomers = [
   ["TigerBeetle", "https://tigerbeetle.com", tigerBeetleLogo, "tigerbeetle/tigerbeetle", "main/devhub", "TPS" ],
-  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
-  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/limbo", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
-  ["Kiel Universität", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/tpc-h/main/Query__14__/limbo_tpc_h_query/14", "time"],
+  ["Turso", "https://turso.tech", tursoLogo, "tursodatabase/turso", "main/nightly/turso/main/Execute__SELECT_1_/limbo_execute_select_1", "time"],
+  ["Kiel University", "https://kieker-monitoring.net/research/projects/moobench/", kiekerLogo, "shinhyungyang/moobench", "main/Kieker-java", "Binary file"]
 ];
 
 export const SampleData = ( { customerName } ) => {

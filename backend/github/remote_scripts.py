@@ -26,7 +26,7 @@ source /home/runner/.bashrc
 screen  -dmS nyrkioGhRunner /home/runner/runsh_wrapper.sh
 """
 
-provisioning = """#!/bin/bash
+provisioning1 = """#!/bin/bash
 
 # MIT licensed
 # (c) Nyrkiö Oy, 2025
@@ -114,11 +114,13 @@ sudo sysctl -w vm.max_map_count=262144
 echo "/home/runner/_diag/core_files/core.\%\e.%p.%h.%t" |sudo tee -a  /proc/sys/kernel/core_pattern > /dev/null
 sudo mkdir -p "/home/runner/_diag/core_files"
 sudo chown -R runner:runner /home/runner
+"""
 
+orig_labels = (
+    """LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"""
+)
 
-
-##########################################################333
-LABELS=nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral
+provisioning2 = """
 NAME=nyrkio-perf-$\{RANDOM\}e
 GROUP=nyrkio
 NYRKIO_CONFIG="$EPHEMERAL --unattended --name $NAME --runnergroup $GROUP --labels $LABELS"
@@ -142,17 +144,26 @@ sudo chmod a+x /home/runner/wrapper_wrapper.sh
 cd /home/runner
 """
 
+provisioning = provisioning1 + "\n" + orig_labels + provisioning2
 
-def configsh(label, repo_owner, token):
+
+def configsh(labels, repo_owner, token):
     number = random.randint(1, 99999)
     EPHEMERAL = "--ephemeral"
     # LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
     NAME = f"nyrkio-perf-{number}"
     GROUP = "nyrkio"
-    NYRKIO_CONFIG = (
-        f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {label}"
-    )
+    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --runnergroup {GROUP} --labels {labels}"
     return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/{repo_owner} --token {token}"""
+
+
+def configsh_pat(labels, repo_owner, repo_name, pat_token):
+    number = random.randint(1, 99999)
+    EPHEMERAL = "--ephemeral"
+    # LABELS = "nyrkio-perf,nyrkio-perf-4vcpu,nyrkio-perf-4vcpu-ubuntu2404,ephemeral"
+    NAME = f"nyrkio-perf-{number}"
+    NYRKIO_CONFIG = f"{EPHEMERAL} --unattended --name {NAME} --labels {labels}"
+    return f"""cd /home/runner; sudo -u runner /home/runner/config.sh {NYRKIO_CONFIG} --url https://github.com/{repo_owner}/{repo_name} --pat {pat_token}"""
 
 
 # Append something like this in runner.py before uploading the script
@@ -164,3 +175,14 @@ all_scripts = {
     "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
     "/tmp/provisioning.sh": provisioning,
 }
+
+
+def render_remote_files(labels):
+    _provisioning = (
+        provisioning1 + "LABELS={labels}\n".format(labels=labels) + provisioning2
+    )
+    return {
+        "/home/runner/runsh_wrapper.sh": runsh_wrapper,
+        "/home/runner/wrapper_wrapper.sh": wrapper_wrapper,
+        "/tmp/provisioning.sh": _provisioning,
+    }

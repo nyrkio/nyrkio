@@ -6,6 +6,8 @@ import commit from "../static/commit.png";
 import { Logo } from "./Logo";
 import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
+import AutumnRunner from "../static/AutumnRunner.jpg";
+import AutumnRunnerYoutube from "../static/AutumnRunnerYoutube.jpg";
 
 const FeatureHighlight = () => {
   return (
@@ -75,8 +77,8 @@ export const DemoVideo = () => {
   return (
     <iframe
       id="demo-video"
-      style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "203px"}}
-      src="https://www.youtube.com/embed/EKAhgrdERfk?si=btV2C2wpDx4d-6lZ"
+      style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
+      src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
       title="YouTube video player"
       frameBorder="0"
       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -100,7 +102,7 @@ const FeatureBanner1 = () => {
             when the random variation in your benchmarking results is often bigger than that.
           </p>
           <p>
-            Nyrkiö uses <big>Change Point Detection</big> to identify every change
+            Nyrkiö uses <strong>Change Point Detection</strong> to identify every change
             in your performance data.
             Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every performance regression, however small or large.
@@ -193,31 +195,44 @@ export const FrontPage = ({loggedIn}) => {
     <>
 
       <div className="frontpage container-fluid text-center w-100">
-           <div className="padding-block "></div>
 
-          <DemoVideo />
-          <div className="padding-block-sm "></div>
-          {loggedIn? "" :
-            (<button className="btn btn-success">
-                <a className="btn-link" href="/signup">
-                Create account &amp; get started
-                </a>
-                </button>
-                )}
-          <div className="padding-block-sm "></div>
+          <div className="coming-soon">
+          <a href="https://www.youtube.com/shorts/auZY4_PljWw" target="youtube">
+          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
+          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
+          </a>
+
+          <p>Coming soon: &nbsp;&nbsp;<big><strong class="nyrkio-accent">Nyrkiö runners</strong></big></p>
+          <p>Continuous Benchmarking with nanosecond precision!</p>
+          <p>Be among the first to hear about it: </p>
+          <p><a href="https://nyrkio.activehosted.com/f/5">Sign up for our upcoming product news mailing list ...</a></p>
+
+          </div>
+
+          <div className="padding-block-sm " style={{clear:"both"}}></div>
+
 
           <FeatureBanner1 />
 
+          <div className="padding-block-sm "></div>
+          {loggedIn? "" :
+            (<button className="btn btn-success">
+            <a className="btn-link" href="/signup">
+            Create account &amp; get started
+            </a>
+            </button>
+            )}
+            <div className="padding-block-sm "></div>
 
           <div className="user-carousel">
           <h1>What our users say</h1>
           <MyUserCarousel />
           </div>
           <div className="padding-block-sm "></div>
-          <p style={{fontSize: "150%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
+          <p style={{fontSize: "120%"}}><a href="/product/user-testimonials">Read more about what Nyrkiö users think...</a></p>
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
-          <p style={{fontSize: "150%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
+          <p style={{fontSize: "120%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
 
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>

@@ -8,7 +8,14 @@ from backend.auth import auth
 def test_add_and_get_user_config(client):
     """Ensure that we can store and retrieve user configuration"""
     client.login()
-    config = {"notifiers": {"slack": True, "github": False, "since_days": 14}}
+    config = {
+        "notifiers": {
+            "slack": True,
+            "github_pr": False,
+            "github": False,
+            "since_days": 14,
+        }
+    }
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -18,6 +25,7 @@ def test_add_and_get_user_config(client):
     assert json == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
     config = {"core": {"max_pvalue": 0.00001, "min_magnitude": 0.5}}
@@ -29,15 +37,28 @@ def test_add_and_get_user_config(client):
     json = response.json()
     assert json == {
         **config,
-        "notifiers": {"github": False, "since_days": 14, "slack": True},
+        "notifiers": {
+            "github_pr": False,
+            "github": False,
+            "since_days": 14,
+            "slack": True,
+        },
         "billing": None,
+        "billing_runners": None,
     }
 
 
 def test_update_existing_user_config(client):
     """Ensure that we can update an existing user configuration"""
     client.login()
-    config = {"notifiers": {"slack": True, "github": False, "since_days": 14}}
+    config = {
+        "notifiers": {
+            "slack": True,
+            "github_pr": False,
+            "github": False,
+            "since_days": 14,
+        }
+    }
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -47,9 +68,17 @@ def test_update_existing_user_config(client):
     assert json == {
         **config,
         "billing": None,
+        "billing_runners": None,
     }
 
-    new_config = {"notifiers": {"slack": False, "github": True, "since_days": 45}}
+    new_config = {
+        "notifiers": {
+            "slack": False,
+            "github_pr": False,
+            "github": True,
+            "since_days": 45,
+        }
+    }
     response = client.put("/api/v0/user/config", json=new_config)
     assert response.status_code == 200
 
@@ -59,6 +88,7 @@ def test_update_existing_user_config(client):
     assert json == {
         **new_config,
         "billing": None,
+        "billing_runners": None,
     }
 
 
@@ -77,7 +107,7 @@ def test_user_config_set_min_magnitude_max_pvalue(client):
     response = client.get("/api/v0/user/config")
     assert response.status_code == 200
     json = response.json()
-    assert json == {**config, "billing": None}
+    assert json == {**config, "billing": None, "billing_runners": None}
 
 
 def test_user_config_set_max_pvalue_invalid(client):

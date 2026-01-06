@@ -4,6 +4,7 @@ from pydantic import BaseModel
 
 from backend.auth import auth
 from backend.db.db import User, DBStore
+from backend.api.metered import query_meter_consumption
 
 user_router = APIRouter(prefix="/user")
 
@@ -11,6 +12,7 @@ user_router = APIRouter(prefix="/user")
 class Notifiers(BaseModel):
     slack: bool
     github: bool
+    github_pr: bool
     since_days: int
 
 
@@ -43,6 +45,7 @@ class UserConfig(BaseModel):
     notifiers: Optional[Notifiers] = None
     core: Optional[Core] = None
     billing: Optional[Billing] = None
+    billing_runners: Optional[Billing] = None
     github: Optional[GitHubConfig] = None
 
 
@@ -55,6 +58,8 @@ def validate_config(config: UserConfig):
 
     if config.billing is not None:
         raise HTTPException(status_code=400, detail="You cannot set billing plan")
+    if config.billing_runners is not None:
+        raise HTTPException(status_code=400, detail="You cannot set billing plan")
 
     if config.github is not None:
         raise HTTPException(status_code=400, detail="You cannot set github app config")
@@ -66,6 +71,9 @@ async def get_user_config(user: User = Depends(auth.current_active_user)):
     config, _ = await store.get_user_config(user.id)
 
     config["billing"] = {"plan": user.billing["plan"]} if user.billing else None
+    config["billing_runners"] = (
+        {"plan": user.billing_runners["plan"]} if user.billing_runners else None
+    )
 
     return config
 
@@ -115,3 +123,12 @@ async def delete_user_config(user: User = Depends(auth.current_active_user)):
         )
     store = DBStore()
     await store.delete_user_config(user.id)
+
+
+@user_router.get("/meters")
+async def get_strip(user: User = Depends(auth.current_active_user)) -> Dict:
+    if user.billing_runners:
+        customer_id = user.billing_runners.get("customer_id")
+        return query_meter_consumption(customer_id)
+    else:
+        return {}

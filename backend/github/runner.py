@@ -2,6 +2,7 @@ import base64
 import boto3
 import datetime
 import asyncio
+import uuid
 import logging
 from fabric import Connection
 from paramiko.ssh_exception import NoValidConnectionsError
@@ -9,7 +10,11 @@ import httpx
 from fastapi import HTTPException
 
 from backend.github.runner_configs import gh_runner_config
-from backend.github.remote_scripts import all_scripts as all_files, configsh
+from backend.github.remote_scripts import (
+    configsh,
+    configsh_pat,
+    render_remote_files,
+)
 from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 from backend.db.db import DBStore
@@ -80,22 +85,61 @@ async def workflow_job_event(queued_gh_event):
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
-    # Note: suppoorted_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
-    launcher = RunnerLauncher(
-        nyrkio_user,
-        nyrkio_org,
-        nyrkio_billing_user,
-        queued_gh_event,
-        runs_on.pop(),
-        registration_token=runner_registration_token,
-    )
-    await launcher.launch()
-    return_message = f"Launched an instance of type {labels}"
+
+    if runner_registration_token and nyrkio_org:
+        launcher = RunnerLauncher(
+            nyrkio_user,
+            nyrkio_org,
+            nyrkio_billing_user,
+            queued_gh_event,
+            runs_on,
+            registration_token=runner_registration_token,
+        )
+        launched_runners = await launcher.launch()
+        if launched_runners:
+            return_message = f"Launched an instance of type {labels}"
+            return {
+                "status": "success",
+                "message": return_message,
+                "instances": str(launched_runners),
+            }
+    elif nyrkio_user:
+        # To register a self hosted runner for a repo in a users own namespace,
+        # first of all is a different API call, but worst of all, required Administrator permission to
+        # the repo. (e.g. you could delete the entire repo, and so on...)
+        # It's unthinkable that we would ask *all users* to give such permission to our qute little app...
+        # But we still have one lifeline to try: If the user has created a Personal Access Token (fine grained)
+        # we can use it.
+        store = DBStore()
+        github_pat = await store.get_pat(nyrkio_user)
+        if github_pat:
+            launcher = RunnerLauncher(
+                nyrkio_user,
+                nyrkio_org,
+                nyrkio_billing_user,
+                queued_gh_event,
+                runs_on,
+                github_pat=github_pat,
+            )
+            launched_runners = await launcher.launch()
+            if launched_runners:
+                return_message = f"Launched an instance of type {labels}"
+                return {
+                    "status": "success",
+                    "message": return_message,
+                    "instances": str(launched_runners),
+                }
+        else:
+            s = "runner registration token denied"
+            return {
+                "status": s,
+                "message": f"Although {repo_owner} has scheduled jobs that expect Nyrkio runners, they did not grant the necessary permissions to provide a runner to them.",
+            }
 
     default_message = "Thank you for using Nyrkiö. For Faster Software!"
     return {
-        "status": "success" if return_message else "nothing to do",
-        "message": return_message if return_message else default_message,
+        "status": "nothing to do",
+        "message": default_message,
     }
 
 
@@ -106,15 +150,21 @@ class RunnerLauncher(object):
         nyrkio_org_id,
         nyrkio_billing_user,
         gh_event,
-        instance_type=None,
+        runs_on,
         registration_token=None,
+        github_pat=None,
     ):
+        # Used for orgs
         self.registration_token = registration_token
+        # Used for "user repos" aka personal repos where my username is the repo owner
+        self.github_pat = github_pat
         self.nyrkio_user_id = nyrkio_user_id
         self.nyrkio_org_id = nyrkio_org_id
         self.nyrkio_billing_user = nyrkio_billing_user
         self.gh_event = gh_event
-        self.instance_type = instance_type
+        self.runs_on = runs_on
+        # Note: supported_instance_types() and therefore also runs_on is ordered by preference. We take the first one.
+        self.instance_type = runs_on[0]
         self.config = gh_runner_config(self.instance_type)
         self.tags = self.gh_event_to_aws_tags(self.gh_event)
         logging.info(
@@ -245,6 +295,14 @@ class RunnerLauncher(object):
             {"Key": "nyrkio_org", "Value": str(self.nyrkio_org_id)},
             {"Key": "owner", "Value": str(self.nyrkio_billing_user)},
             {"Key": "billing_user", "Value": str(self.nyrkio_billing_user)},
+            {"Key": "cpus", "Value": str(self.config["cpus"])},
+            {
+                "Key": "nyrkio_price_per_hour",
+                "Value": str(self.config["price_per_hour"]),
+            },
+            {"Key": "ec2_instance_type", "Value": self.config["instance_type"]},
+            {"Key": "nyrkio_instance_type", "Value": self.instance_type},
+            {"Key": "nyrkio_unique_id", "Value": uuid.uuid4()},
         ]
         tags = [
             {"Key": str(t["Key"]), "Value": str(t["Value"])[0:254]}
@@ -488,13 +546,7 @@ class RunnerLauncher(object):
         return instance_id, instance.public_ip_address
 
     async def provision_instance_with_fabric(
-        self,
-        ip_address,
-        ssh_user,
-        ssh_key_file,
-        all_files,
-        repo_owner,
-        registration_token,
+        self, ip_address, ssh_user, ssh_key_file, all_files, repo_owner
     ):
         logging.debug(f"Using Fabric to provision instance {ip_address} ...")
         conn = Connection(
@@ -527,7 +579,18 @@ class RunnerLauncher(object):
         logging.info(result.stdout)
 
         file_name == "/tmp/provisioning.sh"
-        cmd = configsh(self.instance_type, repo_owner, registration_token)
+        if self.registration_token:
+            cmd = configsh(self.instance_type, repo_owner, self.registration_token)
+        elif self.github_pat:
+            repo_name = self.gh_event["repository"]["name"]
+            cmd = configsh_pat(
+                self.instance_type, repo_owner, repo_name, self.github_pat
+            )
+        else:
+            raise ValueError(
+                "Both registration_token and github_pat were False/empty. Can't really do anything."
+            )
+
         # cmd = f"echo '{configsh}{repo_owner} --token {registration_token}' | sudo tee -a '{file_name}'"
         logging.info("About to call home to mother ship...")
         logging.info(cmd)
@@ -540,9 +603,15 @@ class RunnerLauncher(object):
         logging.info(result.stdout)
         return result
 
-    async def launch(self, registration_token=None):
+    async def launch(self, registration_token=None, github_pat=None):
         if registration_token:
             self.registration_token = registration_token
+        if github_pat:
+            self.github_pat = github_pat
+        if self.github_pat and self.registration_token:
+            raise ValueError(
+                "Please provide either a registration_token or github_pat token, not both."
+            )
 
         REGION = self.config.get(
             "region", "eu-central-1"
@@ -571,12 +640,14 @@ class RunnerLauncher(object):
         ec2 = session.client("ec2")
         ec2r = session.resource("ec2")
 
-        if not await self.ensure_runner_group():
-            gh_org = self.gh_event.get("organization", {}).get("login")
-            logging.warning(
-                f"Couldn't find or create a runner group at http://github.com/{gh_org}"
-            )
-            return
+        # is org
+        if self.registration_token:
+            if not await self.ensure_runner_group():
+                gh_org = self.gh_event.get("organization", {}).get("login")
+                logging.warning(
+                    f"Couldn't find or create a runner group at http://github.com/{gh_org}"
+                )
+                return []
 
         all_instances = []
         for i in range(min(self.config["instance_count"], self.config["max_runners"])):
@@ -598,14 +669,16 @@ class RunnerLauncher(object):
                 self.config["spot_price"],
                 i,
             )
+
+            # labels used to register the runner with github
+            labels = ",".join(self.runs_on)
             await self.provision_instance_with_fabric(
                 public_ip,
                 self.config["ssh_user"],
                 self.config["ssh_key_file"],
                 # self.config["local_files"],
-                all_files,
+                render_remote_files(labels=labels),
                 self.gh_event["repository"]["owner"]["login"],
-                self.registration_token,
             )
             all_instances.append((instance_id, public_ip))
         self.all_instances = all_instances
@@ -647,10 +720,12 @@ async def get_github_runner_registration_token(
             "Geting a runner registration token from github mothership succeeded. Now onto deploy some VMs."
         )
         return response.json()["token"]
-    else:
-        logging.info(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-        )
-        raise Exception(
-            f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
-        )
+    # else:
+    #     logging.info(
+    #         f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+    #     )
+    #     # Skip known cases but want alerts for new ones
+    #     if org_name not in ["pedrocarlo"]:
+    #         raise Exception(
+    #             f"Failed to fetch a runner_configuration_token from GitHub for {org_name}. I can't deploy a runner without it."
+    #         )

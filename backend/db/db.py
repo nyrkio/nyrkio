@@ -28,6 +28,7 @@ class User(BeanieBaseUser, Document):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    billing_runners: Optional[Dict[str, str]] = Field(None)
     superuser: Optional[Dict[str, str]] = Field(None)
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
@@ -89,12 +90,14 @@ class UserRead(schemas.BaseUser[PydanticObjectId]):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    billing_runners: Optional[Dict[str, str]] = Field(None)
 
 
 class UserCreate(schemas.BaseUserCreate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    billing_runners: Optional[Dict[str, str]] = Field(None)
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
     is_repo_owner: Optional[bool] = False
@@ -104,6 +107,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
+    billing_runners: Optional[Dict[str, str]] = Field(None)
 
 
 class ConnectionStrategy(ABC):
@@ -577,14 +581,14 @@ class DBStore(object):
             if pr_commit:
                 pull_query["attributes.git_commit"] = pr_commit
 
-            print(pull_query)
+            # print(pull_query)
             # New strategy: Just get the pr first. This could be a graphLookup query but this is easy to follow.
             pr_result = (
                 await test_results.find(pull_query, exclude_projection)
                 .sort("timestamp", -1)
                 .to_list(None)
             )
-            print(pr_result)
+            # print(pr_result)
             if len(pr_result) == 0:
                 return [], []
             pr_result = pr_result[0]
@@ -626,7 +630,7 @@ class DBStore(object):
 
             if pr_commit is not None:
                 results = filter_out_pr_results(results, pr_commit)
-                print(results)
+                # print(results)
         else:
             results = (
                 await test_results.find(
@@ -960,6 +964,7 @@ class DBStore(object):
             c["meta"] = {"last_modified": datetime.now(tz=timezone.utc)}
             internal_configs.append(c)
 
+        print("set_test_config()", {"_id": c["_id"]}, c)
         # Perform an upsert
         for c in internal_configs:
             await test_config.update_one({"_id": c["_id"]}, {"$set": c}, upsert=True)
@@ -1223,7 +1228,7 @@ class DBStore(object):
         if git_commit:
             query["attributes.git_commit"] = git_commit
 
-        print(query)
+        # print(query)
         pipeline = [
             {"$match": query},
             {
@@ -1347,6 +1352,23 @@ class DBStore(object):
                 "git_repo": repo,
             }
         )
+
+    async def get_user_without_any_fastapi_nonsense(self, user_id):
+        # Note that using pydantic models with MongoDB results in the user id quickly becoming a string
+        # We must recreate the MongoDB ObjectId here so queries match what's actually in the database
+        users_collection = self.db.User
+        db_user_id = user_id
+        if not isinstance(user_id, ObjectId):
+            if isinstance(user_id, str):
+                db_user_id = ObjectId(user_id)
+            else:
+                raise ValueError(
+                    f"user_id must be a str or ObjectId ({user_id} is {type(user_id)})"
+                )
+
+        logging.debug(db_user_id)
+        logging.debug(type(db_user_id))
+        return await users_collection.find_one({"_id": db_user_id})
 
     async def list_users(self):
         users_collection = self.db.User
@@ -1584,6 +1606,62 @@ class DBStore(object):
             q, {"$set": {"status": "done", "nyrkio_done": now}}
         )
         print("done", result)
+
+    async def get_sso_config(
+        self, oauth_full_domain=None, oauth_issuer=None, org_domain=None
+    ):
+        coll = self.db.sso
+        q = {}
+        if oauth_full_domain is not None:
+            q["oauth_full_domain"] = oauth_full_domain
+        if oauth_issuer is not None:
+            q["oauth_issuer"] = oauth_issuer
+        if org_domain is not None:
+            q["org_domain"] = org_domain
+        results = await coll.find(q).to_list(None)
+        print(q, results)
+        return results
+
+    async def get_pat(self, user_id):
+        coll = self.db.User
+        u = await coll.find_one({"_id": user_id})
+        print(type(u))
+        if isinstance(u, dict):
+            return u.get("github_pat")
+        return
+
+    async def set_pat(self, user_id, pat):
+        coll = self.db.User
+        await coll.update_one({"_id": user_id}, {"github_pat": {"$set": pat}})
+
+    async def get_latest_runner_report(self):
+        coll = self.db.runner_usage_latest_report
+        res = await coll.find_one({"_id": "latest_usage_report"})
+        if res:
+            return res["key"]
+        return None
+
+    async def set_latest_runner_report(self, key):
+        coll = self.db.runner_usage_latest_report
+        await coll.update_one(
+            {"_id": "latest_usage_report"}, {"$set": {"key": key}}, upsert=True
+        )
+
+    async def add_user_runner_usage(self, user_id, user_runner_usage, report_key=None):
+        coll = self.db.runner_usage
+        await coll.insert_one(
+            {
+                "user_id": user_id,
+                "runner_usage": user_runner_usage,
+                "report": report_key,
+                "nyrkio_datetime": datetime.now(tz=timezone.utc),
+            }
+        )
+
+    async def add_user_runner_usage_raw(self, user_runner_usage):
+        if user_runner_usage:
+            coll = self.db.runner_usage_raw
+            await coll.insert_many(user_runner_usage)
 
 
 # Will be patched by conftest.py if we're running tests

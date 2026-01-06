@@ -1,5 +1,5 @@
 import Carousel from 'react-bootstrap/Carousel';
-import { TursoMini, DremioMini, TigerbeetleMini } from "./UsersPage.jsx";
+import { TursoMini, DremioMini, TigerbeetleMini, KiekerMini } from "./UsersPage.jsx";
 import Pekka from '../static/ScreenshotTwitterPekkaEnberg.png';
 import Joran from '../static/Screenshot_Joran_Dirk_Greef.png';
 import Pierre from '../static/Pierre_lake.jpg';
@@ -63,14 +63,18 @@ function NyrkioCarousel() {
   );
 }
 
+const CarouselUsersList = [
+  "Turso", "Dremio", "Tigerbeetle", "Kieker"
+];
+
 export function MyUserCarousel() {
-    const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
-    return (<UserCarousel currentCarouselCard={currentCarouselCard} setCurrentCarouselCard={setCurrentCarouselCard} />);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  return (<UserCarousel currentIndex={currentIndex} setCurrentIndex={setCurrentIndex}/>);
 }
 
-export function UserCarousel() {
+
+export function UserCarousel({currentIndex, setCurrentIndex}) {
     const [loading, setLoading] =useState(true);
-    const [currentCarouselCard, setCurrentCarouselCard] = useState("Turso");
 
     const setT = () => {
       window.setTimeout(()=>{setLoading(false);next();setT()}, 30000);
@@ -79,62 +83,31 @@ export function UserCarousel() {
     useEffect(()=>{setLoading(false); setT()},[]);
 
     const next = () => {
-//       if(loading) return;
       console.log("next", loading);
-      if (currentCarouselCard == "Turso"){
-        setCurrentCarouselCard("Dremio")
-      }
-      if (currentCarouselCard == "Dremio"){
-        setCurrentCarouselCard("Tigerbeetle")
-      }
-      if (currentCarouselCard == "Tigerbeetle"){
-        setCurrentCarouselCard("Turso")
-      }
-
+      setCurrentIndex((currentIndex+1)%CarouselUsersList.length);
     };
     const prev = () => {
-//       if(loading) return;
       console.log("prev", loading);
-      if (currentCarouselCard == "Turso"){
-        setCurrentCarouselCard("Tigerbeetle")
-      }
-      if (currentCarouselCard == "Tigerbeetle"){
-        setCurrentCarouselCard("Dremio")
-      }
-      if (currentCarouselCard == "Dremio"){
-        setCurrentCarouselCard("Turso")
-      }
+      setCurrentIndex((currentIndex+CarouselUsersList.length-1)%CarouselUsersList.length);
     };
 
 
-  if (currentCarouselCard == "Turso") {
+    const CarouselTagsList = [
+      <TursoMini />, <DremioMini />, <TigerbeetleMini />, <KiekerMini />
+    ];
+    const NextTagsList = [
+      <DremioMini addClassName="carousel-preview"  onClick={next}/>, <TigerbeetleMini addClassName="carousel-preview"  onClick={next}/>, <KiekerMini addClassName="carousel-preview"  onClick={next}/>, <TursoMini addClassName="carousel-preview"  onClick={next}/>
+    ];
+    const PrevTagsList = [
+      <KiekerMini addClassName="carousel-postview"  onClick={prev}/>, <TursoMini addClassName="carousel-postview"  onClick={prev}/>, <DremioMini addClassName="carousel-postview"  onClick={prev}/>, <TigerbeetleMini addClassName="carousel-postview"  onClick={prev}/>
+    ];
     return (
       <div className="row">
-      <TigerbeetleMini addClassName="carousel-postview"  onClick={prev}/>
-      <TursoMini />
-      <DremioMini addClassName="carousel-preview" onClick={next}/>
+      {PrevTagsList[currentIndex] }
+      {CarouselTagsList[currentIndex]}
+      {NextTagsList[currentIndex] }
       </div>
     );
-  }
-  if (currentCarouselCard == "Dremio") {
-    return (
-      <div className="row">
-      <TursoMini addClassName="carousel-postview"  onClick={prev} />
-      <DremioMini />
-      <TigerbeetleMini addClassName="carousel-preview"  onClick={next} />
-      </div>
-    );
-  }
-  if (currentCarouselCard == "Tigerbeetle") {
-    return (
-      <div className="row">
-      <DremioMini addClassName="carousel-postview"  onClick={prev} />
-      <TigerbeetleMini />
-      <TursoMini addClassName="carousel-preview"  onClick={next} />
-      </div>
-    );
-  }
-  return (<></>);
 }
 
 export default NyrkioCarousel;

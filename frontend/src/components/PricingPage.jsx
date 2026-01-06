@@ -70,7 +70,7 @@ export const PricingPage = ({ loggedIn }) => {
     <>
       <div
         className="nyrkio-pricing container py-3"
-        style={{ maxWidth: "960px" }}
+        style={{ maxWidth: "2000px" }}
       >
         <div className="container-fluid justify-content-center text-center w-100">
           <h1>Pricing</h1>
@@ -95,7 +95,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 <button
                   type="button"
-                  className="w-100 btn btn-lg btn-outline-success"
+                  className="w-100 btn btn-lg btn-outline-success p-3"
                 >
                   Sign up for free
                 </button>
@@ -136,7 +136,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-business"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                       onClick={(e) => {
                         if (total <= 0) {
                           alert(
@@ -153,7 +153,7 @@ export const PricingPage = ({ loggedIn }) => {
                 ) : (
                   <button
                     type="button"
-                    className="w-100 btn btn-lg btn-success"
+                    className="w-100 btn btn-lg btn-success p-3"
                   >
                     <a className="btn-link" href="/signup">
                       Sign up
@@ -199,7 +199,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <button
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
-                      className="w-100 btn btn-lg btn-success"
+                      className="w-100 btn btn-lg btn-success p-3"
                     >
                       Get started
                     </button>
@@ -207,7 +207,7 @@ export const PricingPage = ({ loggedIn }) => {
                 ) : (
                   <button
                     type="button"
-                    className="w-100 btn btn-lg btn-success"
+                    className="w-100 btn btn-lg btn-success p-3"
                   >
                     <a className="btn-link" href="/signup">
                       Sign up
@@ -403,7 +403,7 @@ export const PricingPage = ({ loggedIn }) => {
       ) : (
         <button
         type="button"
-        className="w-100 btn btn-lg btn-success"
+        className="w-100 btn btn-lg btn-success p-3"
         >
         <a className="btn-link" href="/signup">
         Sign up
@@ -411,6 +411,108 @@ export const PricingPage = ({ loggedIn }) => {
         </button>
       )}
       </div>
+
+      {loggedIn ? (<>
+        <hr />
+
+      <div
+        className="nyrkio-pricing container py-3"
+      >
+        <div className="container-fluid justify-content-center text-center w-100">
+          <h2>Closed beta for logged in users only...</h2>
+        </div>
+
+        <p>This is for testing only, exact content of each product is still TBD</p>
+        <p>Run your continuous benchmarking on c7a family instances, configured by Nyrkiö for maximal stable and repeatable performance. Pricing is per hour per CPU.</p>
+
+        <div className="nyrkio-plans row row-cols-1 row-cols-lg-3 text-center justify-content-center">
+
+          <div className="col">
+            <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
+              <div className="card-header py-3">
+                <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
+                <span className="text-shoulders">for GitHub</span>
+              </div>
+              <div className="card-body">
+                <p className="nyrkio-annual"></p>
+                <h1 className="card-title pricing-card-title">
+                  0.1 <small className="text-body-secondary fw-light"> eur/hour/cpu</small>
+                </h1>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li></li>
+                  <li>Pay as you go, monthly</li>
+                  <li>First 100 subscribers get <br />50 cpu-hours free</li>
+                  <li>Use coupon <em>RunnerTrial50</em></li>
+                </ul>
+                  <form
+                    action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value="runner_postpaid_10"
+                    />
+                    <button
+                      id="checkout-and-portal-button-runner_postpaid_10"
+                      type="submit"
+                      className="w-100 btn btn-lg btn-success p-3"
+                    >
+                      File your credit card...
+                    </button>
+                  </form>
+              </div>
+            </div>
+          </div>
+          <div className="col">
+            <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
+              <div className="card-header py-3">
+                <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
+                <span class="text-shoulders">Pre-paid</span>
+              </div>
+              <div className="card-body">
+                <p className="nyrkio-annual"></p>
+                <h1 className="card-title pricing-card-title">
+                  9 <small className="text-body-secondary fw-light"> eur</small>
+                </h1>
+                <ul className="list-unstyled mt-3 mb-4">
+                  <li></li>
+                  <li>100 cpu-hours</li>
+                  <li>10% discount when pre-paying</li>
+                </ul>
+                  <form
+                    action="/api/v0/billing/create-checkout-session-prepaid?mode=payment"
+                    method="POST"
+                  >
+                    <input
+                      type="hidden"
+                      name="lookup_key"
+                      value="runner_prepaid_100"
+                    />
+                    <select id="runner_prepaid_100_quantity" name="quantity" defaultValue={1} style={{width: "90%"}}>
+                      <option value="100">1 pack, 100 cpu-hours</option>
+                      <option value="200">2 pack, 200 cpu-hours</option>
+                      <option value="300">3 pack, 300 cpu-hours</option>
+                      <option value="400">4 pack, 400 cpu-hours</option>
+                      <option value="500">5 pack, 500 cpu-hours</option>
+                      <option value="1000">10 pack, 1000 cpu-hours</option>
+                      <option value="-1">For larger quantities, please buy suitable subscription above</option>
+                    </select>
+                    <button
+                      id="checkout-and-portal-button-runner_prepaid_100"
+                      type="submit"
+                      className="w-100 btn btn-lg btn-success p-3"
+                    >
+                      Checkout
+                    </button>
+                  </form>
+              </div>
+            </div>
+          </div>
+          </div>
+          </div>
+          </>):
+          ""}
     </>
   );
 };

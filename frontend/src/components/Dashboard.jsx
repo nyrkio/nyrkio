@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Link, useLocation } from "react-router-dom";
 import { PropTypes } from "prop-types";
+import { GraphNavWidgets } from "./GraphNavWidgets";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTableMain } from "./ChangePointSummaryTableMain";
 import { NoMatch } from "./NoMatch";
@@ -32,6 +33,7 @@ const Loading = ({loading}) => {
   return (<><div className="loading_done"></div></>);
 };
 
+const maxGraphsPerPage=30;
 
 export const TestList = ({
   baseUrls,
@@ -59,6 +61,7 @@ export const TestList = ({
       </li>
     );
   }
+
 
   return shortNames.map((name, index) => {
     const displayName = displayNames[index];
@@ -293,7 +296,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
       setRedraw(Math.random());
     };
 
-    if (subtree.length>0 && subtree.length<30)
+    if (subtree.length>0 && subtree.length<50)
         return(
           <>  <div style={{textAlign: "right"}}>
               <button className="btn btn-nothing text-right mt-5 col-xs-6 col-md-5 col-lg-4 col-xl-3" style={{right: 0}} title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
@@ -337,6 +340,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
                     setSummaries={setSummaries}
                     summaries={summaries}
                     redraw={redraw}
+
                   />)}
               </div>
               </div>
@@ -407,10 +411,10 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
 const ManyResultWithTestname = ({
   testNames,
-                    shortNames,
-                    prefix,
-                    displayNames,
-                    displayData,
+  shortNames,
+  prefix,
+  displayNames,
+  displayData,
   baseUrls,
   breadcrumbName,
   dashboardType,
@@ -443,6 +447,7 @@ const ManyResultWithTestname = ({
     if(total.indexOf(current)==-1)total.push(current);
     return total;
   });
+
   if(!Array.isArray(shortNames)) shortNames=[shortNames];
   return shortNames.map((name, index) => {
     const displayName = displayNames[index];
@@ -637,6 +642,7 @@ export const SingleResultWithTestname = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const numericTimestamp = searchParams.get("timestamp");
   const textTimestamp = parseTimestamp(numericTimestamp);
+  const [firstGraphIndex, setFirstGraphIndex] = useState(0);
   console.debug("Display data");
   console.debug(displayData);
 
@@ -756,7 +762,7 @@ export const SingleResultWithTestname = ({
           <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           <div className="container">
             <div className="row justify-content-center">
-              <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} />
+              <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} redraw={redraw}/>
             </div>
 
             {hideSettings?"":
@@ -770,11 +776,19 @@ export const SingleResultWithTestname = ({
               sendSelectedPr={sendSelectedPr}
               baseUrls={baseUrls}
               breadcrumbName={breadcrumbName}
+              firstGraphIndex={firstGraphIndex}
+              setFirstGraphIndex={setFirstGraphIndex}
+              numGraphs={unique.length}
             />
             }
+            <GraphNavWidgets layout="top" firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
 
             <div className="row">
-              {unique.map((metric) => {
+              {unique.map((metric, index) => {
+                if(index<firstGraphIndex || index > firstGraphIndex+maxGraphsPerPage/2){
+                  return;
+                }
+
                 return (
                   <DrawLineChart
                     changePointData={changePointData}
@@ -782,12 +796,15 @@ export const SingleResultWithTestname = ({
                     testName={testName}
                     timestamps={timestamps}
                     displayData={displayData}
-                    key={testName+"/"+metric.name}
+                    key={testName+"/"+metric.name +"/"+redraw }
                     searchParams={searchParams}
                     graphSize={graphSize}
                   />
                 );
               })}
+            </div>
+            <div className="row">
+            <GraphNavWidgets firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
             </div>
           </div>
     </>

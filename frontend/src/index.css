@@ -1,14 +1,10 @@
 :root {
-  font-family:  Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+
   line-height: 1.5;
-  font-weight: 400;
-  font-optical-sizing: auto;
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
   /*background-color: #242424;*/
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
@@ -40,8 +36,11 @@
 
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
-  --bs-body-font-family: Helvetica, Arial, sans-serif;
-  --bs-body-font-size: 12pt;
+  --bs-body-font-size: 16px;
+  --bs-body-font-family: "Helvetica", "Inter","Arial", "apple-ui", "system-ui", sans;
+  --bs-body-font-style: normal;
+  --bs-body-font-weight: 400;
+  --bs-body-letter-spacing: 0.533px;
   --bs-heading-color: var(--nyrkio-bear-brown);
   --bs-heading-color2: var(--nyrkio-horn-dark-brown);
   --bs-link-color: var(--nyrkio-text);
@@ -73,10 +72,10 @@
 body {
   margin: 0;
   font-family: var(--bs-body-font-family);
-  offfont-size: var(--bs-body-font-size);
+  font-size: var(--bs-body-font-size);
   font-weight: var(--bs-body-font-weight);
-  line-height: var(--bs-body-line-height);
-  letter-spacing: 0.0rem;
+  line-height: 1.5em;
+  letter-spacing: var(--bs-body-letter-spacing);
   color: var(--nyrkio-text);
   text-align: var(--bs-body-text-align);
   background-color: var(--bs-body-bg);
@@ -84,10 +83,46 @@ body {
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
 }
 
+body em {
+  padding-left:2px;
+  padding-right:3px;
+  font-size: 110%;
+}
+
 .row {
   margin-left: 0;
   margin-right: 0;
 }
+
+body.section-dashboards {
+  font-size: 12pt;
+  font-weight: var(--bs-body-font-weight);
+  line-height: 1em;
+  letter-spacing: 0;
+
+  margin-top: 1em;
+  margin-bottom:0em;
+}
+div.card div.card-header,
+body.section-settings div.card div.card-header,
+body.section-dashboards div.card div.card-header {
+  font-family: "Bebas neue", Arial, Inter, Helvetica;
+  color: var(--nyrkio-horn-dark-brown);
+  padding-top:0.5em;
+  padding-bottom: 0.3em;
+  padding-left: 1.5em;
+  text-align: left;
+  line-height: 1.5em;
+  font-size: 14pt;
+}
+
+body.section-dashboards div.card div.card-body,
+body.section-dashboards div.card div.card-body a,
+.section-dashboards a.dropwdown-item {
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
+}
+
 
 div.nyyrikki-banner-right,
 body.nyyrikki-banner-right,
@@ -99,6 +134,8 @@ body.nyyrikki-banner-right.section-about {
   background-size: contain;
   background-opacity: 0.5;
 }
+
+/* .ag-cell, .ag-full-width-row .ag-cell-wrapper.ag-row-group */
 
 body:not(.section-front),
 body.nyyrikki-banner-right-bw,
@@ -160,6 +197,19 @@ body #root div.container-fluid {
   padding-right: 0px;
 }
 
+@media (min-width: 1200px) {
+  .section-about #main-content .container {
+    max-width: none;
+  }
+  .section-about #main-content .container div {
+    max-width: 1140px;
+  }
+  .section-about #main-content .container.section-ecosystem,
+  .section-about #main-content .container div.wide,
+  .section-about #main-content .container .who {
+      max-width: 100%;
+  }
+}
 
 #main-content .nyrkio-title.nyrkio-logo,
 #main-content div.nyrkio-logo,
@@ -177,37 +227,97 @@ body #root div.container-fluid {
   opacity: 0.1;
 }
 
+#main-content div.coming-soon,
+#main-content2 div.coming-soon {
+font-size: 120%;
+text-align: left;
+margin-left: 30%;
+margin-bottom: 10em;
+}
+#main-content2 div.coming-soon img#idautumnRunner:hover {
+   opacity: 0;
+
+}
+
+.frontpage .coming-soon h2,
+.frontpage .coming-soon h1 {
+  font-size: 2em;
+  font-family: "Bebas Neue";
+  font-weight: 100;
+  letter-spacing: .3rem;
+  margin-bottom: 1em;
+}
+
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   max-width:90%;
-  color: var(--nyrkio-tattoo-red);
-  font-size: 3em;
-  letter-spacing: 0.6rem;
-  margin-bottom: 2.5em;
+  font-size: 2em;
+  font-family: "Bebas Neue";
+  font-weight: 100;
+  letter-spacing: 1.3rem;
+  margin-bottom: 5.5em;
+  text-align: center;
+  top: 0.4em;
+  left: 5%;
   position: relative;
-  left: 1em;
-  top: -1.7em;
+  color: var(--bs-heading-color2);
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .git,
 .frontpage .nyrkio-title h1 .git {
-  text-shadow: -5px -5px 3px var(--nyrkio-light-gray);
+  text-shadow: -2px -2px 5px var(--nyrkio-dark-gray);
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .for,
 .frontpage .nyrkio-title h1 .for {
-  text-shadow: 5px -5px 3px var(--nyrkio-light-gray);
+  font-family: "Helvetica";
+  font-size: 16px;
+  letter-spacing: 6px;
+  display: block;
+  text-align: right;
+  padding-right: 20%;
+  margin-top: 16px;
 }
 
 .frontpage .nyrkio-title h5 {
   font-size: 2em;
   letter-spacing: 0.1rem;
 }
-
+@media (max-width: 950px) {
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1,
+  .frontpage .nyrkio-title h1 {
+    font-size: 1em;
+    font-family: "Bebas Neue";
+    font-weight: 100;
+    letter-spacing: 0.3rem;
+    margin-bottom: 9.5em;
+    top: 0.4em;
+  }
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1 .git,
+  .frontpage .nyrkio-title h1 .git {
+    text-shadow: 0px 0px 0px var(--nyrkio-dark-gray);
+  }
+  .nyrkio-logo.nyrkio-title h2,
+  .frontpage .nyrkio-title h2,
+  .nyrkio-logo.nyrkio-title h1 .for,
+  .frontpage .nyrkio-title h1 .for {
+    font-family: "Big Shoulders";
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    display: none;
+    text-align: right;
+    padding-right: 2em;
+    margin-top: 32px;
+  }
+}
 #demo-video {
   width: 960px;
   height: 540px;
@@ -267,31 +377,36 @@ hr {
   border-top: 1px solid;
 }
 
+.row h1,
+.row h2,
+.row h3 {
+  margin-top: 3rem;
+  margin-bottom: 1rem;
+}
 h3,
 .h3,
 h2,
 .h2,
 h1,
 .h1 {
-  margin-top: 3rem;
   margin-bottom: 2rem;
-  font-weight: 400;
+  font-weight: 300;
   line-height: 1.2;
-  letter-spacing: 0.2rem;
+  letter-spacing: ;
   color: var(--bs-heading-color);
-  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
+  font-family: "Bebas neue", "Arial", "Helvetica", sans;
 }
 h1,
 .h1 {
-  letter-spacing: 0.1rem;
+  letter-spacing: 0.4rem;
 }
 h2,
 .h2 {
-  letter-spacing: 0.1rem;
+  letter-spacing: 0.2rem;
 }
 h3,
 .h3 {
-  letter-spacing: 0.02rem;
+  letter-spacing: 0.12rem;
 }
 h5,
 .h5,
@@ -301,9 +416,7 @@ h4,
   margin-bottom: 0.5rem;
   font-weight: 400;
   line-height: 1.2;
-  letter-spacing: 0.01rem;
   color: var(--bs-heading-color2);
-  font-family: "Big Shoulders Text","Bebas Neue", "Arial Black", "Arial", sans;
 }
 h6,
 .h6 {
@@ -311,9 +424,8 @@ h6,
   margin-bottom: 0.5rem;
   font-weight: 400;
   line-height: 1.2;
-  letter-spacing: 0.0rem;
   color: var(--bs-heading-color2);
-  font-family: "Inter", "Arial", sans;
+  font-family: var(--bs-body-font-family);
 }
 h1,
 .h1 {
@@ -332,9 +444,10 @@ h4,
 
 a.dropdown-item,
 a {
-  font-weight: 500;
+  font-weight: 400;
   color: var(--nyrkio-tattoo-red);
   text-decoration: inherit;
+  letter-spacing: 0;
 }
 
 .card a:not(.btn-success) {
@@ -360,8 +473,6 @@ button {
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
@@ -392,6 +503,36 @@ button:focus-visible {
   margin-bottom: 3em;
   color: var(--nyrkio-horn-dark-brown);
 
+
+}
+
+.nyrkio-billing table.stripedata .stripedataCollapse {
+  display: none;
+}
+.nyrkio-billing table.stripedata.stripedataShowAll .stripedataCollapse {
+  display: table-row;
+}
+
+.nyrkio-billing div.cpuhours {
+  width: 100%;
+  margin-top: 6em;
+  margin-bottom: 3em;
+}
+.nyrkio-billing table.stripedata {
+  width: 80%;
+  max-width: 90%;
+  min-width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+}
+.nyrkio-billing table.stripedata   th {
+}
+.nyrkio-billing table.stripedata   th,
+.nyrkio-billing table.stripedata   td {
+  border: none;
+}
+.nyrkio-billing .stripedata {
+    color: var(--nyrkio-horn-dark-brown);
 
 }
 
@@ -439,6 +580,11 @@ button:focus-visible {
   border-bottom: 1px solid var(--nyrkio-light-gray2);
   background-color: transparent;
   margin-bottom: 0.5em;
+  font-size: 11pt;
+  line-height: 1em;
+  font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 200;
+
 }
 .border-top {
   background-color: var(--nyrkio-arrow-brown);
@@ -463,6 +609,12 @@ button:focus-visible {
     color 0.15s ease-in-out,
     background-color 0.15s ease-in-out,
     border-color 0.15s ease-in-out;
+    letter-spacing: 0.3pt;
+    font-size: 12pt;
+    line-height: 1.5em;
+    font-family: "IBM Plex Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+    font-weight: 400;
+
 }
 .navbar-light .navbar-nav .nav-link {
   padding-right: 1em;
@@ -515,6 +667,46 @@ button:focus-visible {
   color: var(--nyrkio-horn-dark-brown);
 }
 
+.sso-login .btn .svgwrapper {
+  text-align: left;
+  height: 1px;
+}
+
+.sso-login .btn-info.btn,
+.sso-login .btn-info{
+  background-color: var(--nyrkio-light-gray);
+  border: 1px solid var(--nyrkio-horn-dark-brown);
+  color: var(--nyrkio-horn-dark-brown);
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  box-shadow: none;
+  height: 3em;
+  max-height: 3em;
+  margin: 10px;
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
+
+}
+.sso-login .btn-secondary{
+    padding-left: 1em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    box-shadow: none;
+    height: 3em;
+    max-height: 3em;
+    margin: 10px;
+}
+
+.sso-login .btn-success,
+.sso-login .btn-nothing {
+  margin: 10px;
+  height: 3em;
+  max-height: 3em;
+}
+
 .btn-success:focus:hover,
 .btn-success:focus,
 .btn-success.btn-primary,
@@ -523,17 +715,32 @@ button:focus-visible {
   background-color: var(--nyrkio-tattoo-red);
   border-color: var(--nyrkio-dark-gray);
   box-shadow: none;
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
 
 .btn-primary {
   background-color: var(--nyrkio-light-gray);
   border-color: var(--nyrkio-dark-gray);
   margin: 10px;
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
+.sso-login .btn-info:hover,
+.btn-info:hover,
 .btn-primary:hover {
   background-color: var(--nyrkio-light-gray4);
   border-color: var(--nyrkio-dark-red);
   margin: 10px;
+}
+.sso-login .btn-info:focus {
+  border-width: 3px;
 }
 
 .btn-secondary:focus,
@@ -544,6 +751,11 @@ button:focus-visible {
   max-height: 2.5em;
   padding-top: 5px;
   box-shadow: none;
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
 .btn-secondary:focus:hover,
 .btn-secondary:hover {
@@ -555,11 +767,16 @@ button:focus-visible {
 .btn-nothing:focus,
 .btn-nothing {
   color: var(--nyrkio-arrow-brown);
-  border-color: none;
+  border-color: #dddddd;
   max-height: 2.5em;
   padding-top: 5px;
   box-shadow: none;
   box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
 }
 #allGraphsButton[aria-expanded=true],
 .btn-nothing:focus:hover,
@@ -567,6 +784,9 @@ button:focus-visible {
   color: var(--nyrkio-bear-brown);
   border-color: var(--nyrkio-dark-gray);
   background-color: none;
+}
+.btn-nothing:active {
+  background-color: var(--nyrkio-dark-gray);
 }
 
 .btn-danger {
@@ -713,14 +933,26 @@ div.card div.card-header {
   background-color: var(--nyrkio-light-gray);
   border-color: 1px solid var(--nyrkio-dark-gray);
   border-radius: 7px;
-  font-size: 105%;
+  font-size: 115%;
+  padding: 0.7em;
 }
+
 #dashboard_settings div.card div.card-header {
   color: var(--bs-heading-color);
   background-color: var(--nyrkio-dark-gray);
   border-color: 1px solid var(--nyrkio-dark-gray);
 }
 
+.graphNavWidgets button {
+color: #212529;
+}
+
+.graphNavWidgets button{
+  width: 100%;
+  position: relative;
+  left: -9px;
+}
+.graphNavWidgets button,
 #dashboard_settings .prWidgets select {
   border: solid 1px var(--nyrkio-dark-gray);
   background-color: var(--nyrkio-light-gray);
@@ -730,11 +962,16 @@ div.card div.card-header {
     background: var(--nyrkio-light-gray);
 }
 
+.graphNavWidgets button.btn-primary:focus,
+.graphNavWidgets button.graph-nav:hover,
+.graphNavWidgets button.graph-nav.btn-primary:active,
 #dashboard_settings .prWidgets select:focus,
 #dashboard_settings .prWidgets select:hover,
 #dashboard_settings .prWidgets select:active {
   border: solid 1px var(--nyrkio-bear-brown);
   box-shadow: none;
+  background-color: var(--nyrkio-light-gray2);
+  color: #212529;
 }
 
 #dashboard_settings .prWidgets select#commitPicker:focus,
@@ -761,9 +998,10 @@ div.card div.card-header {
 }
 
 .summarize-change-points {
-  font-size: 70%;
+  font-size: 85%;
   color: var(--nyrkio-active);
-}
+  font-weight: 100;
+  }
 
 @media (max-width: 799px) {
   .summarize-change-points .summarize-cp-text {
@@ -964,6 +1202,14 @@ div.card div.card-header {
 
 /* Pricing page */
 
+.text-shoulders {
+  font-family: "Big Shoulders";
+  font-size: 16px;
+  letter-spacing: 0.4pt;
+  font-weight: 200;
+  margin-top: 0em;
+}
+
 .nyrkio-pricing .nyrkio-compare-plans {
   margin-top: 2em;
 }
@@ -1041,9 +1287,20 @@ div.card div.card-header {
   padding-top: 0.5em;
 }
 
+body.section-settings #main-content,
+input {
+  letter-spacing: .4pt;
+  font-size: 12pt;
+  line-height: 1.5em;
+  font-family: "Helvetica", "Arial","Inter",-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  font-weight: 400;
+
+}
+
 .form-switch .form-check-input {
   background-color: var(--nyrkio-light-gray);
   border-color: var(--nyrkio-horn-light-brown);
+
 }
 .form-switch .form-check-input:focus {
   border-color: var(--nyrkio-horn-light-brown);
@@ -1378,7 +1635,8 @@ h4.customer-logo-title{
 #main-content2 .nyrkio-user-photo-quote  p q,
 .nyrkio-user-quote p q{
   padding-top: 50%;
-  font-family: cursive;
+  font-family: Times, cursive;
   font-style: italic;
   font-size: 140%;
 }
+

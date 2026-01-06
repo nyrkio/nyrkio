@@ -20,11 +20,6 @@ export const HenrikCard = () => {
           consensus algorithms.
         </p>
         <p>
-          He has worked both in sales and engineering and both as a manager and
-          engineer, giving him a broad experience that is helpful as an
-          entrepreneur gets to do a little bit of everything.
-        </p>
-        <p>
           Henrik worked on the MongoDB performance engineering team in 2015,
           where the E-Divisive algorithm was first used for automating the
           detection of performance regressions, and eventually published as both

@@ -3,6 +3,7 @@ import httpx
 import asyncio
 import os
 
+from datetime import datetime
 from backend.api.changes import _calc_changes
 from backend.db.db import DBStore
 from backend.github.runner import (
@@ -11,6 +12,8 @@ from backend.github.runner import (
     fetch_access_token,
 )
 from backend.github.runner_configs import supported_instance_types
+from backend.aws.s3download import get_latest_runner_usage
+from backend.api.metered import generate_unique_nyrkio_id, report_cpu_hours_consumed
 
 logger = logging.getLogger(__file__)
 
@@ -23,17 +26,57 @@ async def old_background_worker():
 
 
 async def background_worker():
-    # old_done_work = await check_work_queue()
+    for _ in range(15):
+        if not await check_runner_usage():
+            break
 
     done_work = await loop_installations()
     if len(done_work) > 0:
-        logger.info(f"Background worker launched {len(done_work)} github runners.")
+        logger.info(f"Background worker returned with {len(done_work)} messages.")
         for runner in done_work:
-            logger.debug(runner)
+            logger.info(runner)
 
         return len(done_work)
 
     return await precompute_cached_change_points()
+
+
+async def check_runner_usage():
+    logger.info("check_runner_usage() data from s3")
+    store = DBStore()
+    latest_usage_report = await store.get_latest_runner_report()
+    raw_events, latest_usage_report = await get_latest_runner_usage(
+        seen_previously=latest_usage_report
+    )
+    if raw_events:
+        await store.add_user_runner_usage_raw(raw_events)
+    for raw in raw_events:
+        if raw["plan_info"]["type"] == "stripe_meter":
+            unique_key = generate_unique_nyrkio_id(raw)
+
+            slot_start_at = raw["unique_key"]["unique_time_slot"]
+            launched_at = raw["github"].get("user_launched_at")
+            exact_start_at = (
+                max(launched_at, slot_start_at)
+                if launched_at is not None
+                else slot_start_at
+            )
+            exact_start_at = exact_start_at.replace("Z", "+00:00")
+
+            report_cpu_hours_consumed(
+                datetime.fromisoformat(exact_start_at),
+                raw["plan_info"]["stripe_customer_id"],
+                raw["consumption"]["nyrkio_cpu_hours"],
+                unique_key,
+            )
+
+    if latest_usage_report:
+        logger.info(
+            f"We now imported s3 consumption reports up to and including {latest_usage_report}"
+        )
+        await store.set_latest_runner_report(latest_usage_report)
+
+    return len(raw_events)
 
 
 async def loop_installations():
@@ -98,6 +141,18 @@ async def loop_installations():
                 ):
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
+                elif return_status.get("status", "") == "nothing to do":
+                    logger.info(
+                        "Checked all installations for workflow jobs that could need runners. Nobody needed anything. (nothing to do)"
+                    )
+                elif (
+                    return_status.get("status", "")
+                    == "runner registration token denied"
+                ):
+                    logger.info(
+                        f"Did not get a runner registration token from {repo_owner}. Continue to next user."
+                    )
+                    break
                 else:
                     logger.error(return_status)
                     break
