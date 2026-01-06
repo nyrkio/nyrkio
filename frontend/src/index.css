@@ -427,7 +427,7 @@ h6,
   line-height: 1.2;
   letter-spacing: 0.1em;
   color: var(--bs-heading-color2);
-  font-family:"Bebas neue","Arial","Inter",sans;
+  font-family: var(--bs-body-font-family);
 }
 h1,
 .h1 {
