@@ -16,9 +16,13 @@
     "prettier": "prettier . --write",
     "preview": "vite preview",
     "playwright": "./node_modules/playwright/cli.js",
-    "test": "./node_modules/playwright/cli.js test",
-    "test-ui": "./node_modules/playwright/cli.js test --ui",
-    "test-report": "./node_modules/playwright/cli.js show-report"
+    "test": "npx playwright test",
+    "test:unit": "npx playwright test tests/*.spec.ts",
+    "test:integration": "npx playwright test --config=playwright.config.integration.ts",
+    "test-ui": "npx playwright test --ui",
+    "test-ui:integration": "npx playwright test --config=playwright.config.integration.ts --ui",
+    "test-report": "npx playwright show-report",
+    "test-report:integration": "npx playwright show-report test-results/integration-report"
   },
   "dependencies": {
     "ag-grid-react": "^31.0.1",
@@ -41,14 +45,17 @@
     "remark-gfm": "^4.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.56.1",
     "@types/react": "^18.2.37",
     "@types/react-dom": "^18.2.15",
     "@vitejs/plugin-react": "^4.2.0",
+    "bcrypt": "^6.0.0",
     "eslint": "^8.53.0",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.4",
     "git-commit-info": "^2.0.2",
+    "mongodb": "^7.0.0",
     "playwright": "^1.42.1",
     "prettier": "3.2.5",
     "vite": "^5.0.13"
