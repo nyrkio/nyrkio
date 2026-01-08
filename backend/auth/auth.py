@@ -58,8 +58,7 @@ COOKIE_NAME = "auth_cookie"
 
 cookie_transport = CookieTransport(
     cookie_name=COOKIE_NAME,
-    cookie_max_age=(60 * 60 * 24 * 15),
-    cookie_domain="nyrkio.com",
+    cookie_domain=SERVER_NAME,
     cookie_secure=True,
     cookie_samesite="strict",
 )
