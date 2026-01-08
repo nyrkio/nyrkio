@@ -48,14 +48,21 @@ from backend.auth.common import (
 )
 
 
-COOKIE_NAME = "auth_cookie"
-cookie_transport = CookieTransport(cookie_name=COOKIE_NAME)
-
 SECRET = os.environ.get("SECRET_KEY", "fooba")
 SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 
 GITHUB_TOKEN = os.environ.get("GITHUB_TOKEN", None)
 HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
+
+COOKIE_NAME = "auth_cookie"
+
+cookie_transport = CookieTransport(
+    cookie_name=COOKIE_NAME,
+    cookie_max_age=(60 * 60 * 24 * 15),
+    cookie_domain="nyrkio.com",
+    cookie_secure=True,
+    cookie_samesite="strict",
+)
 
 
 sso_secrets = {"onelogin": ONELOGIN_CLIENT_SECRET}
