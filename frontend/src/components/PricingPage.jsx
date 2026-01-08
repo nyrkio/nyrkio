@@ -74,6 +74,21 @@ export const PricingPage = ({ loggedIn }) => {
       toSend[inp.name] = inp.value;
     }
 
+    const response = await fetch(form.action.value, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+    });
+    if (response.status !== 200 && response.status !== 204) {
+      console.error(
+        "Failed to send form " + form
+      );
+    }
+
+    console.log("Setting logged in to false");
+    setLoggedIn(false);
   } ;
 
   return (
