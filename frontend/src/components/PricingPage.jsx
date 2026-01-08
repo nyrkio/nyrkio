@@ -65,7 +65,7 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const toCheckout = (e) => {
+  const toCheckout = async (e) => {
     const button = e.target;
     const form = button.parent;
     const inputs = form.getElementsByTagName("input");
