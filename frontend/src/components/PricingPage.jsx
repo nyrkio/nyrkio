@@ -65,6 +65,16 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
+  const toCheckout = (e) => {
+    const button = e.target;
+    const form = button.parent;
+    const inputs = form.getElementsByTagName("input");
+    const toSend = {};
+    for (var inp of inputs) {
+      toSend[inp.name] = inp.value;
+    }
+
+  } ;
 
   return (
     <>
@@ -143,7 +153,9 @@ export const PricingPage = ({ loggedIn }) => {
                             "Please enter number of employees in the company."
                           );
                           e.preventDefault();
+                          toCheckout(e);
                           return false;
+
                         }
                       }}
                     >
@@ -200,6 +212,7 @@ export const PricingPage = ({ loggedIn }) => {
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
+                      onClick={(e) => {toCheckout(e); e.preventDefault();}}
                     >
                       Get started
                     </button>
