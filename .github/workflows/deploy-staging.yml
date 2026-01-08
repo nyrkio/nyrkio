@@ -86,7 +86,7 @@ jobs:
       - name: docker compose up
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: ${{ github.event.pull_request.head.sha }}
+          IMAGE_TAG: ${{ github.sha }}
           AWS_REGION: eu-north-1
           AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           NYRKIO_ENV_STAGING: ${{ secrets.NYRKIO_ENV_STAGING }}
