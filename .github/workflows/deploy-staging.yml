@@ -1,5 +1,7 @@
 name: Deploy (Staging)
 on:
+  push:
+    branches: [main,not-main]
   pull_request:
 
 jobs:

@@ -1,7 +1,7 @@
 name: Performance Tests
 on:
   push:
-    branches: [main]
+    branches: [main, not-main]
   pull_request:
 
 jobs:
