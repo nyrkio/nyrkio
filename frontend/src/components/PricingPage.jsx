@@ -94,8 +94,8 @@ export const PricingPage = ({ loggedIn }) => {
 
     console.log(response);
     window.document.documentElement.replaceWith(responseHtml);
-    setTimeout({
-      window.location = response.url;
+    setTimeout(() =>{
+      window.location.href = response.url;
 
     },5000);
 
