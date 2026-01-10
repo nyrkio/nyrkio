@@ -455,6 +455,7 @@ export const PricingPage = ({ loggedIn }) => {
                       name="lookup_key"
                       value="runner_postpaid_10"
                     />
+                    <input type="hidden" name="mode" value="subscription" />
                     <button
                       id="checkout-and-portal-button-runner_postpaid_10"
                       type="submit"
