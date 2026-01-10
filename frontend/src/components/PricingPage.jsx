@@ -65,14 +65,10 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const toCheckout = async (e) => {
-    const button = e.target;
-    const form = button.parent;
-    const inputs = form.getElementsByTagName("input");
-    const toSend = {};
-    for (var inp of inputs) {
-      toSend[inp.name] = inp.value;
-    }
+  const postCheckout = async (e) => {
+    e.preventDefault();
+    console.log("postCheckout");
+    console.log(localStorage.getItem("token"));
 
     const response = await fetch(form.action.value, {
       method: "POST",
@@ -80,6 +76,10 @@ export const PricingPage = ({ loggedIn }) => {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
+      body: {
+        mode: mode,
+        lookup_key: lookup_key,
+      }
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
@@ -146,10 +146,11 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Support for teams</li>
                 </ul>
                 {loggedIn ? (
-                  <form
-                    action="/api/v0/billing/create-checkout-session?mode=subscription"
-                    method="POST"
-                  >
+//                   <form
+//                     action="/api/v0/billing/create-checkout-session?mode=subscription"
+//                     method="POST"
+//                   >
+                  <form>
                     <input
                       type="hidden"
                       name="lookup_key"
@@ -163,16 +164,14 @@ export const PricingPage = ({ loggedIn }) => {
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
                       onClick={(e) => {
-                        if (total <= 0) {
-                          alert(
-                            "Please enter number of employees in the company."
-                          );
                           e.preventDefault();
-                          toCheckout(e);
+                          const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
+                          const mode = "subscription";
+                          postCheckout(mode, lookup_key);
                           return false;
 
                         }
-                      }}
+                      }
                     >
                       Get started
                     </button>
@@ -227,7 +226,7 @@ export const PricingPage = ({ loggedIn }) => {
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
-                      onClick={(e) => {toCheckout(e); e.preventDefault();}}
+                      onClick={(e) => {postCheckout(e); e.preventDefault();}}
                     >
                       Get started
                     </button>
