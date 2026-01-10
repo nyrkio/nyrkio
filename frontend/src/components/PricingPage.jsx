@@ -65,8 +65,8 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const postCheckout = async (mode, lookup_key) => {
-    console.log("postCheckout");
+  const startCheckout = async (mode, lookup_key) => {
+    console.log("startCheckout");
     console.log(localStorage.getItem("token"));
 
     const response = await fetch(form.action.value, {
@@ -86,8 +86,7 @@ export const PricingPage = ({ loggedIn }) => {
       );
     }
 
-    console.log("Setting logged in to false");
-    setLoggedIn(false);
+    console.log(response.json());
   } ;
 
   return (
@@ -166,7 +165,7 @@ export const PricingPage = ({ loggedIn }) => {
                           e.preventDefault();
                           const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
                           const mode = "subscription";
-                          postCheckout(mode, lookup_key);
+                          startCheckout(mode, lookup_key);
                           return false;
 
                         }
@@ -225,7 +224,7 @@ export const PricingPage = ({ loggedIn }) => {
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
-                      onClick={(e) => {postCheckout(e); e.preventDefault();}}
+                      onClick={(e) => {startCheckout(e); e.preventDefault();}}
                     >
                       Get started
                     </button>
