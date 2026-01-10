@@ -123,6 +123,8 @@ async def create_checkout_session(
 
     try:
         prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
+        print(prices)
+        print(prices.data)
 
         checkout_session = stripe.checkout.Session.create(
             customer_email=user.email,
@@ -145,7 +147,7 @@ async def create_checkout_session(
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
-            status_code=500, detail="Error creating checkout session {e}"
+            status_code=500, detail=f"Error creating checkout session {e}"
         )
 
 
