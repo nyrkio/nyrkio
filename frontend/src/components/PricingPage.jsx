@@ -93,12 +93,40 @@ export const PricingPage = ({ loggedIn }) => {
     const responseHtml = response.text();
 
     console.log(response);
-    window.document.documentElement.replaceWith(responseHtml);
-    setTimeout(() =>{
-      window.location.href = response.url;
+    //     window.document.documentElement.replaceWith(responseHtml);
+    window.location.href = response.url;
+  } ;
 
-    },5000);
+  const startCheckout2 = async (mode, lookup_key, quantity) => {
+    console.log("startCheckout");
+    console.log(localStorage.getItem("token"));
+    quantity = quantity || 1;
 
+    const data = new URLSearchParams();
+    data.append("quantity", quantity);
+    data.append("lookup_key", lookup_key);
+
+    console.log(data);
+    const response = await fetch(`/api/v0/billing/create-checkout-session-js?mode=${mode}`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: data
+    });
+
+    if (response.status !== 200 && response.status !== 204) {
+      console.error(
+        "Failed to send form " + lookup_key
+      );
+    }
+
+    const responseJson = response.json();
+
+    console.log(response);
+    //     window.document.documentElement.replaceWith(responseHtml);
+    window.location.href = responseJson.stripe_checkout_url;
   } ;
 
   return (
@@ -177,6 +205,22 @@ export const PricingPage = ({ loggedIn }) => {
                           const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
                           const mode = "subscription";
                           startCheckout(mode, lookup_key,1);
+                          return false;
+
+                        }
+                      }
+                    >
+                      Get started
+                    </button>
+                    <button
+                      id="checkout-and-portal-button-business2"
+                      type="submit"
+                      className="w-100 btn btn-lg btn-success p-3"
+                      onClick={(e) => {
+                          e.preventDefault();
+                          const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
+                          const mode = "subscription";
+                          startCheckout2(mode, lookup_key,1);
                           return false;
 
                         }
