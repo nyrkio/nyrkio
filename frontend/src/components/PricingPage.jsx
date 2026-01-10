@@ -69,7 +69,7 @@ export const PricingPage = ({ loggedIn }) => {
     console.log("startCheckout");
     console.log(localStorage.getItem("token"));
 
-    const response = await fetch(form.action.value, {
+    const response = await fetch(`/api/v0/billing/create-checkout-session?mode=${mode}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
