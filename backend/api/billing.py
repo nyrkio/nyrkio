@@ -105,7 +105,7 @@ async def create_checkout_session_prepaid(
 
 
 @billing_router.post("/create-checkout-session-js")
-async def create_checkout_session(
+async def create_checkout_session_js(
     mode: str,
     lookup_key: Annotated[str, Form()],
     quantity: Annotated[int, Form()],
@@ -141,12 +141,17 @@ async def create_checkout_session(
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
         )
-        return JSONResponse({stripe_checkout_url: checkout_session.url}, status_code=200)
+        return JSONResponse(
+            {"stripe_checkout_url": checkout_session.url}, status_code=200
+        )
     except Exception as e:
         logging.error(f"Error creating 2026 JS friendly checkout session: {e}")
         raise HTTPException(
-            status_code=500, detail=f"Error creating 2026 JS friendly checkout session {e}"
+            status_code=500,
+            detail=f"Error creating 2026 JS friendly checkout session {e}",
         )
+
+
 @billing_router.post("/create-checkout-session")
 async def create_checkout_session(
     mode: str,
