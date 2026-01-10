@@ -94,7 +94,13 @@ export const PricingPage = ({ loggedIn }) => {
 
     console.log(response);
     //     window.document.documentElement.replaceWith(responseHtml);
-    window.location.href = response.url;
+    setTimeout(() =>{
+      if(responseJson && responseJson.stripe_checkout_url){
+        window.location.href = response.url;
+
+      }
+
+    },5000);
   } ;
 
   const startCheckout2 = async (mode, lookup_key, quantity) => {
@@ -126,7 +132,13 @@ export const PricingPage = ({ loggedIn }) => {
 
     console.log(response);
     //     window.document.documentElement.replaceWith(responseHtml);
-    window.location.href = responseJson.stripe_checkout_url;
+    setTimeout(() =>{
+      if(responseJson && responseJson.stripe_checkout_url){
+          window.location.href = responseJson.stripe_checkout_url;
+
+      }
+
+    },5000);
   } ;
 
   return (
