@@ -122,7 +122,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 {loggedIn ? (
                   <form
-                    action={`/api/v0/billing/create-checkout-session?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
+                    action={`/api/v0/billing/create-checkout-session-get?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
                     method="GET"
                   >
                     <input
@@ -183,7 +183,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 {loggedIn ? (
                   <form
-                    action="/api/v0/billing/create-checkout-session?mode=subscription"
+                    action="/api/v0/billing/create-checkout-session-get?mode=subscription"
                     method="GET"
                   >
                     <input
