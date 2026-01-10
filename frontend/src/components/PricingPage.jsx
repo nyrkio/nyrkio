@@ -82,7 +82,7 @@ export const PricingPage = ({ loggedIn }) => {
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
-        "Failed to send form " + form
+        "Failed to send form " + lookup_key
       );
     }
 
