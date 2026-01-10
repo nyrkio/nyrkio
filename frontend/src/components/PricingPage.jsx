@@ -148,7 +148,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 {loggedIn ? (
                    <form
-                     action="..."
+                     action="/api/v0/billing/create-checkout-session?mode=subscription"
                      method="POST"
                    >
                     <input
