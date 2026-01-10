@@ -74,7 +74,7 @@ export const PricingPage = ({ loggedIn }) => {
     data.append("quantity", quantity);
     data.append("lookup_key", lookup_key);
 
-    console.log(body);
+    console.log(data);
     const response = await fetch(`/api/v0/billing/create-checkout-session?mode=${mode}`, {
       method: "POST",
       headers: {
