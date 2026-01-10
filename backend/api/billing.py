@@ -147,7 +147,7 @@ async def create_checkout_session(
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
-            status_code=500, detail="Error creating checkout session {e}"
+            status_code=500, detail=f"Error creating checkout session {e}"
         )
 
 
