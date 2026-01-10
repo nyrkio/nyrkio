@@ -150,6 +150,8 @@ async def create_checkout_session_js(
             status_code=500,
             detail=f"Error creating 2026 JS friendly checkout session {e}",
         )
+
+
 @billing_router.post("/create-checkout-session-get")
 async def create_checkout_session_get(
     mode: str,
