@@ -189,9 +189,7 @@ async def create_checkout_session_get(
             success_url=stripe_success_url(),
             cancel_url=stripe_cancel_url(),
         )
-        return JSONResponse(
-            {"stripe_checkout_url": checkout_session.url}, status_code=200
-        )
+        return RedirectResponse(checkout_session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating 2026 JS friendly checkout session: {e}")
         raise HTTPException(

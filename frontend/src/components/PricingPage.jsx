@@ -133,6 +133,7 @@ export const PricingPage = ({ loggedIn }) => {
                       }
                     />
                     <input type="hidden" name="quantity" value="1" />
+                    <input type="hidden" name="mode" value="subscription" />
                     <button
                       id="checkout-and-portal-button-business"
                       type="submit"
@@ -196,6 +197,7 @@ export const PricingPage = ({ loggedIn }) => {
                       }
                     />
                     <input type="hidden" name="quantity" value="1" />
+                    <input type="hidden" name="mode" value="subscription" />
                     <button
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
@@ -391,6 +393,7 @@ export const PricingPage = ({ loggedIn }) => {
         value={"simple_test_yearly"}
         />
         <input type="hidden" name="quantity" value="1" />
+        <input type="hidden" name="mode" value="subscription" />
         <button
         id="checkout-and-portal-button-test"
         type="submit"
