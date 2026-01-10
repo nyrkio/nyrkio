@@ -65,9 +65,10 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const startCheckout = async (mode, lookup_key) => {
+  const startCheckout = async (mode, lookup_key, quantity) => {
     console.log("startCheckout");
     console.log(localStorage.getItem("token"));
+    quantity = quantity || 1;
 
     const response = await fetch(`/api/v0/billing/create-checkout-session?mode=${mode}`, {
       method: "POST",
@@ -75,10 +76,10 @@ export const PricingPage = ({ loggedIn }) => {
         "Content-Type": "application/json",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
-      body: {
-        mode: mode,
+      body: JSON.stringify({
+        quantity: quantity,
         lookup_key: lookup_key,
-      }
+      })
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
@@ -86,7 +87,7 @@ export const PricingPage = ({ loggedIn }) => {
       );
     }
 
-    console.log(response.json());
+    console.log(await response.json());
   } ;
 
   return (
