@@ -65,8 +65,7 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const postCheckout = async (e) => {
-    e.preventDefault();
+  const postCheckout = async (mode, lookup_key) => {
     console.log("postCheckout");
     console.log(localStorage.getItem("token"));
 
