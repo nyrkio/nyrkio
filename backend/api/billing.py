@@ -22,10 +22,10 @@ class BillingInfo(BaseModel):
     quantity: int
 
 
-@billing_router.post("/create-checkout-session-postpaid")
+@billing_router.get("/create-checkout-session-postpaid")
 async def create_checkout_session_postpaid(
     mode: str,
-    lookup_key: Annotated[str, Form()],
+    lookup_key: str,
     user: User = Depends(auth.current_active_user),
 ):
     if mode not in ["subscription"]:
@@ -59,11 +59,11 @@ async def create_checkout_session_postpaid(
         )
 
 
-@billing_router.post("/create-checkout-session-prepaid")
+@billing_router.get("/create-checkout-session-prepaid")
 async def create_checkout_session_prepaid(
     mode: str,
-    lookup_key: Annotated[str, Form()],
-    quantity: Annotated[int, Form()],
+    lookup_key: str,
+    quantity: int,
     user: User = Depends(auth.current_active_user),
 ):
     if mode not in ["payment"]:
@@ -152,7 +152,7 @@ async def create_checkout_session_js(
         )
 
 
-@billing_router.post("/create-checkout-session-get")
+@billing_router.get("/create-checkout-session-get")
 async def create_checkout_session_get(
     mode: str,
     lookup_key: str,
