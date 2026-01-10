@@ -84,10 +84,6 @@ export const SidePanel = ({ loggedIn }) => {
           path="/pricing/*"
           element={<ProductSidePanel loggedIn={loggedIn} />}
         />
-        <Route
-          path="/services"
-          element={<ProductSidePanel loggedIn={loggedIn} />}
-        />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
         <Route
           path="/legend"
@@ -179,9 +175,6 @@ const ProductSidePanel = ({ loggedIn }) => {
       </Link>
       <Link to="/pricing" className="nav-link">
       Pricing
-      </Link>
-      <Link to="/services" className="nav-link">
-      Services
       </Link>
       <Link to="/billing" className="nav-link">
       Billing
