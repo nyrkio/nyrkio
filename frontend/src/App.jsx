@@ -27,7 +27,6 @@ import { LegalPage } from "./components/LegalPage.jsx";
 import { LegendPage } from "./components/LegendPage.jsx";
 import { EcosystemPage } from "./components/EcosystemPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
-import { ServicesPage } from "./components/ServicesPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
 import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
@@ -114,10 +113,6 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       <Route
       path="/pricing"
       element={<PricingPage loggedIn={loggedIn} />}
-      />
-      <Route
-      path="/services"
-      element={<ServicesPage loggedIn={loggedIn} />}
       />
       <Route path="/about" element={<AboutPage />} />
       <Route path="/about/ecosystem" element={<EcosystemPage />} />
