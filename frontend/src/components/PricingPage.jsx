@@ -65,81 +65,6 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
-  const startCheckout = async (mode, lookup_key, quantity) => {
-    console.log("startCheckout");
-    console.log(localStorage.getItem("token"));
-    quantity = quantity || 1;
-
-    const data = new URLSearchParams();
-    data.append("quantity", quantity);
-    data.append("lookup_key", lookup_key);
-
-    console.log(data);
-    const response = await fetch(`/api/v0/billing/create-checkout-session?mode=${mode}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-      body: data
-    });
-
-    if (response.status !== 200 && response.status !== 204) {
-      console.error(
-        "Failed to send form " + lookup_key
-      );
-    }
-
-    const responseHtml = response.text();
-
-    console.log(response);
-    //     window.document.documentElement.replaceWith(responseHtml);
-    setTimeout(() =>{
-      if(responseJson && responseJson.stripe_checkout_url){
-        window.location.href = response.url;
-
-      }
-
-    },5000);
-  } ;
-
-  const startCheckout2 = async (mode, lookup_key, quantity) => {
-    console.log("startCheckout");
-    console.log(localStorage.getItem("token"));
-    quantity = quantity || 1;
-
-    const data = new URLSearchParams();
-    data.append("quantity", quantity);
-    data.append("lookup_key", lookup_key);
-
-    console.log(data);
-    const response = await fetch(`/api/v0/billing/create-checkout-session-js?mode=${mode}`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
-      body: data
-    });
-
-    if (response.status !== 200 && response.status !== 204) {
-      console.error(
-        "Failed to send form " + lookup_key
-      );
-    }
-
-    const responseJson = response.json();
-
-    console.log(response);
-    //     window.document.documentElement.replaceWith(responseHtml);
-    setTimeout(() =>{
-      if(responseJson && responseJson.stripe_checkout_url){
-          window.location.href = responseJson.stripe_checkout_url;
-
-      }
-
-    },5000);
-  } ;
 
   return (
     <>
@@ -196,10 +121,10 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Support for teams</li>
                 </ul>
                 {loggedIn ? (
-                   <form
-                     action="/api/v0/billing/create-checkout-session?mode=subscription"
-                     method="POST"
-                   >
+                  <form
+                    action={`/api/v0/billing/create-checkout-session?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
+                    method="GET"
+                  >
                     <input
                       type="hidden"
                       name="lookup_key"
@@ -213,30 +138,14 @@ export const PricingPage = ({ loggedIn }) => {
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
                       onClick={(e) => {
+                        if (total <= 0) {
+                          alert(
+                            "Please enter number of employees in the company."
+                          );
                           e.preventDefault();
-                          const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
-                          const mode = "subscription";
-                          startCheckout(mode, lookup_key,1);
                           return false;
-
                         }
-                      }
-                    >
-                      Get started
-                    </button>
-                    <button
-                      id="checkout-and-portal-button-business2"
-                      type="submit"
-                      className="w-100 btn btn-lg btn-success p-3"
-                      onClick={(e) => {
-                          e.preventDefault();
-                          const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
-                          const mode = "subscription";
-                          startCheckout2(mode, lookup_key,1);
-                          return false;
-
-                        }
-                      }
+                      }}
                     >
                       Get started
                     </button>
@@ -275,7 +184,7 @@ export const PricingPage = ({ loggedIn }) => {
                 {loggedIn ? (
                   <form
                     action="/api/v0/billing/create-checkout-session?mode=subscription"
-                    method="POST"
+                    method="GET"
                   >
                     <input
                       type="hidden"
@@ -291,7 +200,6 @@ export const PricingPage = ({ loggedIn }) => {
                       id="checkout-and-portal-button-enterprise"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
-                      onClick={(e) => {startCheckout(e); e.preventDefault();}}
                     >
                       Get started
                     </button>
@@ -475,7 +383,7 @@ export const PricingPage = ({ loggedIn }) => {
       {loggedIn ? (
         <form
         action="/api/v0/billing/create-checkout-session?mode=subscription"
-        method="POST"
+        method="GET"
         >
         <input
         type="hidden"
@@ -537,7 +445,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                   <form
                     action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
-                    method="POST"
+                    method="GET"
                   >
                     <input
                       type="hidden"
@@ -584,7 +492,7 @@ const prePaidToBeUsedLater = () => {
                 </ul>
                   <form
                     action="/api/v0/billing/create-checkout-session-prepaid?mode=payment"
-                    method="POST"
+                    method="GET"
                   >
                     <input
                       type="hidden"
