@@ -3,7 +3,7 @@ import os
 from typing_extensions import Annotated
 
 from fastapi import APIRouter, HTTPException, Depends, Form
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, JSONResponse
 from fastapi_users import BaseUserManager, models
 from pydantic import BaseModel
 import stripe
@@ -101,6 +101,54 @@ async def create_checkout_session_prepaid(
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
             status_code=500, detail="Error creating checkout session {e}"
+        )
+
+
+@billing_router.post("/create-checkout-session-js")
+async def create_checkout_session_js(
+    mode: str,
+    lookup_key: Annotated[str, Form()],
+    quantity: Annotated[int, Form()],
+    user: User = Depends(auth.current_active_user),
+):
+    if mode not in ["subscription", "payment", "setup"]:
+        logging.error(f"Invalid checkout mode: {mode}")
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+        )
+
+    if mode == "payment":
+        quantity = quantity if quantity else 1
+
+    try:
+        prices = stripe.Price.list(lookup_keys=[lookup_key], expand=["data.product"])
+
+        checkout_session = stripe.checkout.Session.create(
+            customer_email=user.email,
+            line_items=[
+                {
+                    "price": prices.data[0].id,
+                    "quantity": quantity,
+                    "adjustable_quantity": {
+                        "enabled": True,
+                    },
+                }
+            ],
+            allow_promotion_codes=True,
+            automatic_tax={"enabled": True},
+            mode=mode,
+            success_url=stripe_success_url(),
+            cancel_url=stripe_cancel_url(),
+        )
+        return JSONResponse(
+            {"stripe_checkout_url": checkout_session.url}, status_code=200
+        )
+    except Exception as e:
+        logging.error(f"Error creating 2026 JS friendly checkout session: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Error creating 2026 JS friendly checkout session {e}",
         )
 
 
