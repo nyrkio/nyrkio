@@ -147,11 +147,10 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Support for teams</li>
                 </ul>
                 {loggedIn ? (
-//                   <form
-//                     action="/api/v0/billing/create-checkout-session?mode=subscription"
-//                     method="POST"
-//                   >
-                  <form>
+                   <form
+                     action="..."
+                     method="POST"
+                   >
                     <input
                       type="hidden"
                       name="lookup_key"
@@ -168,7 +167,7 @@ export const PricingPage = ({ loggedIn }) => {
                           e.preventDefault();
                           const lookup_key =                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly";
                           const mode = "subscription";
-                          startCheckout(mode, lookup_key);
+                          startCheckout(mode, lookup_key,1);
                           return false;
 
                         }
