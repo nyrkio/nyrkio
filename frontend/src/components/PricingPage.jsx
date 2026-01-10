@@ -83,13 +83,22 @@ export const PricingPage = ({ loggedIn }) => {
       },
       body: data
     });
+
     if (response.status !== 200 && response.status !== 204) {
       console.error(
         "Failed to send form " + lookup_key
       );
     }
 
-    console.log(await response.json());
+    const responseHtml = response.text();
+
+    console.log(response);
+    window.document.documentElement.replaceWith(responseHtml);
+    setTimeout({
+      window.location = response.url;
+
+    },5000);
+
   } ;
 
   return (
