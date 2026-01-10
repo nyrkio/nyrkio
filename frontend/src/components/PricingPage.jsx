@@ -70,16 +70,18 @@ export const PricingPage = ({ loggedIn }) => {
     console.log(localStorage.getItem("token"));
     quantity = quantity || 1;
 
+    const data = new URLSearchParams();
+    data.append("quantity", quantity);
+    data.append("lookup_key", lookup_key);
+
+    console.log(body);
     const response = await fetch(`/api/v0/billing/create-checkout-session?mode=${mode}`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
+        "Content-Type": "application/x-www-form-urlencoded",
         Authorization: "Bearer " + localStorage.getItem("token"),
       },
-      body: JSON.stringify({
-        quantity: quantity,
-        lookup_key: lookup_key,
-      })
+      body: data
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
