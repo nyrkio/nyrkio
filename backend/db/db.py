@@ -1663,6 +1663,32 @@ class DBStore(object):
             coll = self.db.runner_usage_raw
             await coll.insert_many(user_runner_usage)
 
+    async def add_reported_stripe_id(self, unique_stripe_id):
+        if isinstance(unique_stripe_id, str) and unique_stripe_id != "":
+            unique_stripe_id = [unique_stripe_id]
+        if not isinstance(unique_stripe_id, list):
+            raise ValueError(
+                "The incoming data must be either a nonempty string, or list of strings."
+            )
+        if unique_stripe_id:
+            docs = [{"_id": id_string} for id_string in unique_stripe_id]
+            coll = self.db.runner_usage_reported_to_stripe
+            await coll.insert_many(docs, ordered=False)
+
+    async def check_new_stripe_ids(self, unique_stripe_id):
+        if isinstance(unique_stripe_id, str) and unique_stripe_id != "":
+            unique_stripe_id = [unique_stripe_id]
+        if not isinstance(unique_stripe_id, list):
+            raise ValueError(
+                "The incoming data must be either a nonempty string, or list of strings."
+            )
+        query = {"_id": {"$in": unique_stripe_id}}
+        coll = self.db.runner_usage_reported_to_stripe
+        res = await coll.find_many(query)
+        reported_docs = [doc["_id"] for doc in res]
+        new_docs = [idd for idd in unique_stripe_id if idd not in reported_docs]
+        return new_docs
+
 
 # Will be patched by conftest.py if we're running tests
 _TESTING = False

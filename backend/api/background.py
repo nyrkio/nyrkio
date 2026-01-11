@@ -50,6 +50,8 @@ async def check_runner_usage():
     )
     if raw_events:
         await store.add_user_runner_usage_raw(raw_events)
+
+    sent_ids = []
     for raw in raw_events:
         if raw["plan_info"]["type"] == "stripe_meter":
             unique_key = generate_unique_nyrkio_id(raw)
@@ -63,12 +65,17 @@ async def check_runner_usage():
             )
             exact_start_at = exact_start_at.replace("Z", "+00:00")
 
-            report_cpu_hours_consumed(
-                datetime.fromisoformat(exact_start_at),
-                raw["plan_info"]["stripe_customer_id"],
-                raw["consumption"]["nyrkio_cpu_hours"],
-                unique_key,
-            )
+            checked_ids = await store.check_new_stripe_ids(unique_key)
+            if unique_key in checked_ids:
+                report_cpu_hours_consumed(
+                    datetime.fromisoformat(exact_start_at),
+                    raw["plan_info"]["stripe_customer_id"],
+                    raw["consumption"]["nyrkio_cpu_hours"],
+                    unique_key,
+                )
+                sent_ids.append(unique_key)
+
+    await store.add_reported_stripe_id(sent_ids)
 
     if latest_usage_report:
         logger.info(
