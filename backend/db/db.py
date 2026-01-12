@@ -1684,7 +1684,7 @@ class DBStore(object):
             )
         query = {"_id": {"$in": unique_stripe_id}}
         coll = self.db.runner_usage_reported_to_stripe
-        res = await coll.find(query).to_list()
+        res = await coll.find(query).to_list(None)
         reported_docs = [doc["_id"] for doc in res]
         new_docs = [idd for idd in unique_stripe_id if idd not in reported_docs]
         return new_docs
