@@ -1,5 +1,0 @@
-[submodule "backend/hunter"]
-	path = backend/hunter
-	url = git@github.com:nyrkio/hunter.git
-	update = rebase
-	branch = master
