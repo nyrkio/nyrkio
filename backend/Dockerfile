@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # set work directory
-WORKDIR /usr/src/backend
+WORKDIR /usr/src
 
 ###########
 # BUILDER #
@@ -18,11 +18,13 @@ FROM base as builder
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libpq-dev libc-dev
 
-# lint
-RUN pip install --upgrade pip
-RUN pip install "uv==0.9.2"
 
 COPY . .
+
+WORKDIR /usr/src/backend
+
+RUN pip install --upgrade pip
+RUN pip install "uv==0.9.2"
 RUN uv build
 RUN uv pip install
 
