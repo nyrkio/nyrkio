@@ -21,7 +21,7 @@ RUN apt-get update && \
 
 COPY . .
 
-RUN pip install "uv==0.9.2"
+RUN pip install uv
 RUN uv build
 
 
