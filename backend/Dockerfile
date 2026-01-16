@@ -11,7 +11,9 @@ ENV PYTHONUNBUFFERED 1
 
 
 # pull uv base image
-FROM base as builder
+# FROM base as builder
+
+
 
 RUN apk add --no-cache git
 RUN apk add --no-cache build-base
@@ -19,11 +21,18 @@ RUN apk add --no-cache build-base
 # Copy the project into the image
 COPY . /backend
 
+RUN pwd
+RUN ls
+
 # Disable development dependencies
 ENV UV_NO_DEV=1
 
 # Sync the project into a new environment, asserting the lockfile is up to date
 WORKDIR /backend
+RUN pwd
+RUN ls
+
+
 RUN uv sync --locked
 
 # Presuming there is a `my_app` command provided by the project
