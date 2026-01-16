@@ -1,13 +1,8 @@
-FROM python:3.8-slim AS base
+FROM python:3.13-slim AS base
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
-
-ENV PIP_DEFAULT_TIMEOUT=100 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PIP_NO_CACHE_DIR=1 \
-    POETRY_VERSION=1.7.1
 
 # set work directory
 WORKDIR /usr/src/backend
@@ -25,15 +20,11 @@ RUN apt-get update && \
 
 # lint
 RUN pip install --upgrade pip
-RUN pip install "poetry==$POETRY_VERSION"
-
-RUN python -m venv /venv
+RUN pip install "uv==0.9.2"
 
 COPY . .
-RUN poetry export --no-hashes -f requirements.txt | /venv/bin/pip install -r /dev/stdin
-
-RUN poetry build
-RUN /venv/bin/pip install dist/*.whl
+RUN uv build
+RUN uv pip install
 
 #########
 # FINAL #
