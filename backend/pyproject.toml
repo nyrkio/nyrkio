@@ -33,7 +33,7 @@ dependencies = [
 ]
 
 [tool.hatch.build.targets.wheel]
-      packages = ["/"]
+       packages = ["backend"]
 
 [project.optional-dependencies]
 dev = [

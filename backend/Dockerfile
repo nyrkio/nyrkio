@@ -18,22 +18,29 @@ ENV PYTHONUNBUFFERED 1
 RUN apk add --no-cache git
 RUN apk add --no-cache build-base
 
+RUN pwd
+RUN ls
 # Copy the project into the image
-COPY /backend /backend
+COPY . /backend
+COPY pyproject.toml pyproject.toml
+COPY uv.lock uv.lock
+COPY README.md README.md
 
+RUN uv sync --locked
+RUN uv build backend
+RUN uv pip install -e backend
 RUN pwd
 RUN ls
 
 # Disable development dependencies
 ENV UV_NO_DEV=1
 
-# Sync the project into a new environment, asserting the lockfile is up to date
-WORKDIR /
-RUN pwd
-RUN ls
+# # Sync the project into a new environment, asserting the lockfile is up to date
+# WORKDIR /backend
+# RUN pwd
+# RUN ls
 
 
-RUN uv sync --locked
 
 # Presuming there is a `my_app` command provided by the project
 CMD ["uv", "run", "uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info"]
