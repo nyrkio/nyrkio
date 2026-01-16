@@ -1,6 +1,5 @@
 #!/bin/sh
 #set -e
-. /venv/bin/activate
 
-cd /usr/src
-uv run uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info
+cd /usr/src/backend
+uv run uvicorn api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info
