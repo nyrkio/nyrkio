@@ -4,44 +4,26 @@ FROM astral/uv:python3.13-alpine AS base
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# set work directory
-WORKDIR /usr/src/backend
-
 ###########
 # BUILDER #
 ###########
 
-# pull official base image
+
+
+# pull uv base image
 FROM base as builder
 
-# install system dependencies
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc libpq-dev libc-dev
+RUN apk add --no-cache git
 
+# Copy the project into the image
+COPY . /backend
 
-COPY . .
+# Disable development dependencies
+ENV UV_NO_DEV=1
 
-RUN uv build
+# Sync the project into a new environment, asserting the lockfile is up to date
+WORKDIR /backend
+RUN uv sync --locked
 
-
-#########
-# FINAL #
-#########
-
-FROM base as final
-
-# create the app user
-RUN addgroup --system app && adduser --system --group app
-
-COPY ./entrypoint.sh ./
-
-# Copy GitHub app private key
-COPY ./keys/ /usr/src/backend/keys/
-
-# copy project
-COPY --chown=app:app . ./
-
-# change to the app user
-USER app
-
-CMD ["/usr/src/backend/entrypoint.sh"]
+# Presuming there is a `my_app` command provided by the project
+CMD ["uv", "run", "uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info"]
