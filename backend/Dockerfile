@@ -5,7 +5,7 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 # set work directory
-WORKDIR /usr/src
+WORKDIR /usr/src/backend
 
 ###########
 # BUILDER #
@@ -21,12 +21,9 @@ RUN apt-get update && \
 
 COPY . .
 
-WORKDIR /usr/src/backend
-
-RUN pip install --upgrade pip
 RUN pip install "uv==0.9.2"
 RUN uv build
-RUN uv pip install
+
 
 #########
 # FINAL #
@@ -36,8 +33,6 @@ FROM base as final
 
 # create the app user
 RUN addgroup --system app && adduser --system --group app
-
-COPY --from=builder /venv /venv
 
 COPY ./entrypoint.sh ./
 
