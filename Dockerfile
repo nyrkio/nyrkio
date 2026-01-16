@@ -43,4 +43,4 @@ ENV UV_NO_DEV=1
 # Presuming there is a `my_app` command provided by the project
 # CMD ["uv", "run", "uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info"]
 RUN chmod a+x entrypoint.sh
-CMD ["./entrypoint.sh"]
+CMD ["sh", "/entrypoint.sh"]
