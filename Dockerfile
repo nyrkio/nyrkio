@@ -21,10 +21,16 @@ RUN apk add --no-cache build-base
 RUN pwd
 RUN ls
 # Copy the project into the image
+COPY . entrypoint.sh
 COPY . /backend
+COPY pyproject.toml pyproject.toml
+COPY uv.lock uv.lock
+COPY README.md README.md
 
+# # Sync the project into a new environment, asserting the lockfile is up to date
 RUN uv sync --locked
-RUN uv build
+# No idea if these are necessary or implied by the previous?
+RUN uv build backend
 RUN uv pip install -e backend
 RUN pwd
 RUN ls
@@ -32,12 +38,8 @@ RUN ls
 # Disable development dependencies
 ENV UV_NO_DEV=1
 
-# Sync the project into a new environment, asserting the lockfile is up to date
-WORKDIR /backend
-RUN pwd
-RUN ls
-
 
 
 # Presuming there is a `my_app` command provided by the project
-CMD ["uv", "run", "uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info"]
+# CMD ["uv", "run", "uvicorn backend.api.api:app --proxy-headers --host 0.0.0.0 --port $API_PORT --log-level info"]
+CMD ["./entrypoint.sh"]
