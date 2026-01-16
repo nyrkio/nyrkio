@@ -29,6 +29,7 @@ dependencies = [
     "aiohttp>=3.13.3",
     "pytest-benchmark>=5.2.3",
     "pytest-datadir>=1.8.0",
+    "uvicorn>=0.40.0",
 ]
 
 [tool.hatch.build.targets.wheel]
