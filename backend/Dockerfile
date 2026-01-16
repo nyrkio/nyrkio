@@ -14,6 +14,7 @@ ENV PYTHONUNBUFFERED 1
 FROM base as builder
 
 RUN apk add --no-cache git
+RUN apk add --no-cache build-base
 
 # Copy the project into the image
 COPY . /backend
