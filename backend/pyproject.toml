@@ -18,7 +18,6 @@ dependencies = [
     "motor>=3.6",
     "paramiko>=3.5",
     "pydantic>=2.9",
-    "pymongo>=4.10",
     "pytz>=2024.2",
     "requests>=2.32",
     "sentry-sdk",
