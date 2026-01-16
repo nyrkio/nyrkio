@@ -1,4 +1,4 @@
-FROM python:3.13-slim AS base
+FROM astral/uv:python3.13-alpine AS base
 
 # set environment variables
 ENV PYTHONDONTWRITEBYTECODE 1
@@ -21,7 +21,6 @@ RUN apt-get update && \
 
 COPY . .
 
-RUN pip install uv
 RUN uv build
 
 
