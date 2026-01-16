@@ -26,7 +26,7 @@ source /home/runner/.bashrc
 screen  -dmS nyrkioGhRunner /home/runner/runsh_wrapper.sh
 """
 
-provisioning1 = """#!/bin/bash
+provisioning1 = r"""#!/bin/bash
 
 # MIT licensed
 # (c) Nyrkiö Oy, 2025
@@ -111,7 +111,7 @@ echo vm.max_map_count = 262144 | sudo tee -a /etc/sysctl.d/99-dsi.conf > /dev/nu
 sudo sysctl -w vm.max_map_count=262144
 
 
-echo "/home/runner/_diag/core_files/core.\%\e.%p.%h.%t" |sudo tee -a  /proc/sys/kernel/core_pattern > /dev/null
+echo "/home/runner/_diag/core_files/core.%e.%p.%h.%t" |sudo tee -a  /proc/sys/kernel/core_pattern > /dev/null
 sudo mkdir -p "/home/runner/_diag/core_files"
 sudo chown -R runner:runner /home/runner
 """
