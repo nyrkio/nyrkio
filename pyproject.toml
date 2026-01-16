@@ -1,16 +1,126 @@
+
+# NOTE: /
+
 [project]
-name = "nyrkio"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "Joe Drumgoole",email = "joe@joedrumgoole.com"}
-]
+name = "backend"
+version = "2.0.0"
+description = "Continuous Benchmarking as a Service"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.13"
 dependencies = [
+    "apache-otava",
+    "beanie>=1.25",
+    "boto3>=1.34",
+    "fabric>=3.2",
+    "fastapi>=0.115",
+    "fastapi-users[beanie]>=13.0",
+    "httpx>=0.27",
+    "httpx-oauth>=0.15",
+    "PyJWT>=2.9",
+    "mongomock-motor>=0.0.34",
+    "motor>=3.6",
+    "paramiko>=3.5",
+    "pydantic>=2.9",
+    "pymongo>=4.10",
+    "pytz>=2024.2",
+    "requests>=2.32",
+    "sentry-sdk",
+    "slack-sdk>=3.33",
+    "sortedcontainers>=2.4",
+    "starlette>=0.41",
+    "stripe>=11.0",
+    "typing-extensions>=4.12",
+    "aiohttp>=3.13.3",
+    "pytest-benchmark>=5.2.3",
+    "pytest-datadir>=1.8.0",
+    "uvicorn>=0.40.0",
 ]
 
+# [tool.hatch.build.targets.wheel]
+#       packages = ["/"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "boto3-stubs>=1.34",
+    "types-requests>=2.32",
+    "types-pytz>=2024.2",
+]
 
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = [
+    "backend==2.0.0",
+]
+
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "SIM",    # flake8-simplify
+    "TCH",    # flake8-type-checking
+    "PTH",    # flake8-use-pathlib
+    "RUF",    # ruff-specific rules
+]
+ignore = [
+    "E501",   # line too long (handled by formatter)
+    "B008",   # do not perform function calls in argument defaults (needed for FastAPI Depends)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["backend"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_return_any = true
+warn_unused_ignores = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_configs = true
+plugins = [
+    "pydantic.mypy",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "motor.*",
+    "beanie.*",
+    "mongomock_motor.*",
+    "fabric.*",
+    "slack_sdk.*",
+    "httpx_oauth.*",
+    "fastapi_users.*",
+]
+ignore_missing_imports = true
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.uv.sources]
+apache-otava = { git = "https://github.com/nyrkio/hunter.git", rev = "33544ce27ae4a256c77d6d302b8d248da5fc3072" }
+backend = { workspace = true }
