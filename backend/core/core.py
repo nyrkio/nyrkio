@@ -9,8 +9,8 @@ import httpx
 import logging
 from sortedcontainers import SortedList
 
-from hunter.report import Report, ReportType
-from hunter.series import (
+from otava.report import Report, ReportType
+from otava.series import (
     Series,
     AnalysisOptions,
     AnalyzedSeries,

@@ -17,7 +17,7 @@ from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabas
 from fastapi_users import schemas
 from pydantic import Field
 
-from hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 
 
 class OAuthAccount(BaseOAuthAccount):

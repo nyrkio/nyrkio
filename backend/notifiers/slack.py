@@ -1,7 +1,7 @@
 from slack_sdk.webhook.async_client import AsyncWebhookClient
 from typing import Dict
 from datetime import datetime
-from backend.hunter.hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 from backend.notifiers.abstract_notifier import AbstractNotifier, AbstractNotification
 
 import logging

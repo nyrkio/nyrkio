@@ -3,14 +3,14 @@ from datetime import datetime
 from pprint import pprint
 from typing import Dict, List
 
-from db.db import NULL_DATETIME, MockDBStrategy
+from backend.db.db import NULL_DATETIME, MockDBStrategy
 from starlette.testclient import TestClient
 
 from backend.api.api import app
 from backend.api.changes import _build_result_series
 from backend.api.public import extract_public_test_name
 
-from conftest import AuthenticatedTestClient, SuperuserClient
+from backend.conftest import AuthenticatedTestClient, SuperuserClient
 
 
 def test_results(client):
