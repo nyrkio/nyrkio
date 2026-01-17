@@ -24,8 +24,8 @@ class BillingInfo(BaseModel):
 
 @billing_router.post("/create-checkout-session-postpaid")
 async def create_checkout_session_postpaid(
-    mode: str,
-    lookup_key: str,
+    mode: Annotated[str, Form()],
+    lookup_key: Annotated[str, Form()],
     user: User = Depends(auth.current_active_user),
 ):
     if mode not in ["subscription"]:
@@ -61,9 +61,9 @@ async def create_checkout_session_postpaid(
 
 @billing_router.post("/create-checkout-session-prepaid")
 async def create_checkout_session_prepaid(
-    mode: str,
-    lookup_key: str,
-    quantity: int,
+    mode: Annotated[str, Form()],
+    lookup_key: Annotated[str, Form()],
+    quantity: Annotated[int, Form()],
     user: User = Depends(auth.current_active_user),
 ):
     if mode not in ["payment"]:
