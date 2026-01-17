@@ -130,7 +130,7 @@ export const PricingPage = ({ loggedIn }) => {
                       type="hidden"
                       name="lookup_key"
                       value={
-                        annualDiscount ? "simple_business_yearly" : "simple_business_monthly"
+                        annualDiscount ? "simple_business_yearly_2409" : "simple_business_monthly_251"
                       }
                     />
                     <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
@@ -186,8 +186,8 @@ export const PricingPage = ({ loggedIn }) => {
                       name="lookup_key"
                       value={
                         annualDiscount
-                          ? "simple_enterprise_yearly"
-                          : "simple_enterprise_monthly"
+                          ? "simple_enterprise_yearly_6275"
+                          : "simple_enterprise_monthly_627"
                       }
                     />
                     <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
