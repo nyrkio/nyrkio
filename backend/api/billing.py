@@ -22,7 +22,7 @@ class BillingInfo(BaseModel):
     quantity: int
 
 
-@billing_router.get("/create-checkout-session-postpaid")
+@billing_router.post("/create-checkout-session-postpaid")
 async def create_checkout_session_postpaid(
     mode: str,
     lookup_key: str,
@@ -59,7 +59,7 @@ async def create_checkout_session_postpaid(
         )
 
 
-@billing_router.get("/create-checkout-session-prepaid")
+@billing_router.post("/create-checkout-session-prepaid")
 async def create_checkout_session_prepaid(
     mode: str,
     lookup_key: str,

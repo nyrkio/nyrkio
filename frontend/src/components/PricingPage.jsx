@@ -122,8 +122,8 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 {loggedIn ? (
                   <form
-                    action={`/api/v0/billing/create-checkout-session-get?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
-                    method="GET"
+                    action={`/api/v0/billing/create-checkout-session?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
+                    method="POST"
                   >
                     <input
                       type="hidden"
@@ -132,23 +132,15 @@ export const PricingPage = ({ loggedIn }) => {
                         annualDiscount ? "simple_business_yearly" : "simple_business_monthly"
                       }
                     />
+                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="quantity" value="1" />
                     <input type="hidden" name="mode" value="subscription" />
                     <button
                       id="checkout-and-portal-button-business"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
-                      onClick={(e) => {
-                        if (total <= 0) {
-                          alert(
-                            "Please enter number of employees in the company."
-                          );
-                          e.preventDefault();
-                          return false;
-                        }
-                      }}
                     >
-                      Get started
+                      Subscribe
                     </button>
                   </form>
                 ) : (
@@ -184,7 +176,7 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                 {loggedIn ? (
                   <form
-                    action="/api/v0/billing/create-checkout-session-get?mode=subscription"
+                    action="/api/v0/billing/create-checkout-session?mode=subscription"
                     method="GET"
                   >
                     <input
@@ -196,6 +188,7 @@ export const PricingPage = ({ loggedIn }) => {
                           : "simple_enterprise_monthly"
                       }
                     />
+                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="quantity" value="1" />
                     <input type="hidden" name="mode" value="subscription" />
                     <button
@@ -203,7 +196,7 @@ export const PricingPage = ({ loggedIn }) => {
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
                     >
-                      Get started
+                      Subscribe
                     </button>
                   </form>
                 ) : (
@@ -385,13 +378,14 @@ export const PricingPage = ({ loggedIn }) => {
       {loggedIn ? (
         <form
         action="/api/v0/billing/create-checkout-session?mode=subscription"
-        method="GET"
+        method="POST"
         >
         <input
         type="hidden"
         name="lookup_key"
         value={"simple_test_yearly"}
         />
+        <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
         <input type="hidden" name="quantity" value="1" />
         <input type="hidden" name="mode" value="subscription" />
         <button
@@ -448,20 +442,21 @@ export const PricingPage = ({ loggedIn }) => {
                 </ul>
                   <form
                     action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
-                    method="GET"
+                    method="POST"
                   >
                     <input
                       type="hidden"
                       name="lookup_key"
                       value="runner_postpaid_10"
                     />
+                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="mode" value="subscription" />
                     <button
                       id="checkout-and-portal-button-runner_postpaid_10"
                       type="submit"
                       className="w-100 btn btn-lg btn-success p-3"
                     >
-                      File your credit card...
+                      Subscribe (pay after use)
                     </button>
                   </form>
               </div>
@@ -503,6 +498,7 @@ const prePaidToBeUsedLater = () => {
                       name="lookup_key"
                       value="runner_prepaid_100"
                     />
+                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <select id="runner_prepaid_100_quantity" name="quantity" defaultValue={1} style={{width: "90%"}}>
                       <option value="100">1 pack, 100 cpu-hours</option>
                       <option value="200">2 pack, 200 cpu-hours</option>
