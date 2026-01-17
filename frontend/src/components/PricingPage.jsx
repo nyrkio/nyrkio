@@ -112,6 +112,7 @@ export const PricingPage = ({ loggedIn }) => {
                 <p className="nyrkio-annual">{busYear}</p>
                 <h1 className="card-title pricing-card-title">
                   <BusinessPrice />
+                  <small><span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>1 Git repository</li>
@@ -166,6 +167,7 @@ export const PricingPage = ({ loggedIn }) => {
                 <p className="nyrkio-annual">{entYear}</p>
                 <h1 className="card-title pricing-card-title">
                   <EnterprisePrice />
+                  <small><span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>10 Git repositories</li>
@@ -432,7 +434,8 @@ export const PricingPage = ({ loggedIn }) => {
               </div>
               <div className="card-body">
                 <h1 className="card-title pricing-card-title">
-                  <span style={{letterSpacing: "4px"}}>0</span><span style={{letterSpacing: "-3px"}}>.1</span><span style={{letterSpacing: "12px"}}> </span><small className="text-body-secondary fw-light" style={{letterSpacing: "2px"}}> eur/hour/cpu</small>
+                  <span style={{letterSpacing: "4px"}}>0</span><span style={{letterSpacing: "-3px"}}>.1</span><span style={{letterSpacing: "12px"}}> </span><small className="text-body-secondary fw-light" style={{letterSpacing: "2px"}}> eur/hour/cpu
+                  <span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
                 </h1>
                 <ul className="list-unstyled mt-3 mb-4">
                   <li>Pay as you go, monthly</li>
@@ -447,7 +450,7 @@ export const PricingPage = ({ loggedIn }) => {
                     <input
                       type="hidden"
                       name="lookup_key"
-                      value="runner_postpaid_10"
+                      value="runner_postpaid_13"
                     />
                     <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="mode" value="subscription" />
