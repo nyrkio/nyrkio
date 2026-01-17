@@ -177,7 +177,7 @@ export const PricingPage = ({ loggedIn }) => {
                 {loggedIn ? (
                   <form
                     action="/api/v0/billing/create-checkout-session?mode=subscription"
-                    method="GET"
+                    method="POST"
                   >
                     <input
                       type="hidden"
@@ -491,7 +491,7 @@ const prePaidToBeUsedLater = () => {
                 </ul>
                   <form
                     action="/api/v0/billing/create-checkout-session-prepaid?mode=payment"
-                    method="GET"
+                    method="POST"
                   >
                     <input
                       type="hidden"
