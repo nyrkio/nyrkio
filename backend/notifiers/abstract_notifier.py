@@ -1,7 +1,7 @@
 from typing import Dict, Any
 from datetime import datetime
 from pytz import UTC
-from backend.hunter.hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 from backend.db.db import DBStore
 
 import httpx

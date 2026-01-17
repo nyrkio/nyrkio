@@ -17,7 +17,7 @@ from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabas
 from fastapi_users import schemas
 from pydantic import Field
 
-from hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 
 
 class OAuthAccount(BaseOAuthAccount):
@@ -200,6 +200,7 @@ class MockDBStrategy(ConnectionStrategy):
     ]
 
     async def init_db(self):
+
         # Add test users
         from backend.auth.auth import UserManager
 
@@ -381,7 +382,8 @@ class DBStore(object):
         if self.started:
             raise DBStoreAlreadyInitialized()
 
-        await init_beanie(database=self.db, document_models=[User])
+        # Not sure what beanie devs were thinking here, but can't create indexes on every startup
+        await init_beanie(database=self.db, document_models=[User], skip_indexes=True)
         await self.strategy.init_db()
         self.started = True
 

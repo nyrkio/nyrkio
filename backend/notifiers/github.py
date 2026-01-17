@@ -1,5 +1,5 @@
 from typing import Dict, Union
-from backend.hunter.hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 import logging
 import time
 from datetime import datetime

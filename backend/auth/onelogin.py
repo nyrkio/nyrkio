@@ -2,7 +2,7 @@ import os
 from typing import Optional, List, Any, Tuple, Dict
 
 from httpx_oauth.clients.openid import OpenID
-from httpx_oauth.errors import GetIdEmailError
+from httpx_oauth.exceptions import GetIdEmailError
 
 CLIENT_ID = os.environ.get("ONE_LOGIN_CLIENT_ID", None)
 CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)

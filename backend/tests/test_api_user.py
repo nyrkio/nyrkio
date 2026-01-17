@@ -1,6 +1,6 @@
 import asyncio
 
-from conftest import AuthenticatedTestClient, app
+from backend.conftest import AuthenticatedTestClient, app
 
 from backend.auth import auth
 

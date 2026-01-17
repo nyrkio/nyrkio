@@ -2,7 +2,7 @@ import pytest
 
 from backend.api.api import app
 
-from conftest import GitHubClient
+from backend.conftest import GitHubClient
 
 
 def test_org_results(client):

@@ -1,7 +1,7 @@
 import logging
 from typing import Dict
 
-from hunter.series import AnalyzedSeries
+from otava.series import AnalyzedSeries
 
 from backend.core.core import (
     PerformanceTestResult,
