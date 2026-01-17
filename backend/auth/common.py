@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 from fastapi_users.manager import BaseUserManager, BaseUserDatabase
 from fastapi_users.authentication import (
     AuthenticationBackend,
-#    BearerTransport,
+    #    BearerTransport,
 )
 from fastapi_users.jwt import generate_jwt, decode_jwt
 from backend.auth.bearer_or_body_transport import BearerOrBodyTransport
