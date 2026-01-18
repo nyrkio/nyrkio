@@ -14,7 +14,7 @@ const SubscribeSuccess = ({ sessionId }) => {
 
     if (!response.ok) {
       console.error(
-        "Failed to send session ID: " +
+        "Error: Stripe checkout has succeeded, but request to record this with Nyrkiö failed. " +
           response.status +
           " " +
           response.statusText,
@@ -178,9 +178,14 @@ const UserBillingPage = () => {
     simple_business_yearly: "Nyrkiö Business (Annual)",
     simple_enterprise_monthly: "Nyrkiö Enterprise (Monthly)",
     simple_enterprise_yearly: "Nyrkiö Enterprise (Annual)",
+    simple_business_monthly_251: "Nyrkiö Business (Monthly)",
+    simple_business_yearly_2409: "Nyrkiö Business (Annual)",
+    simple_enterprise_monthly_627: "Nyrkiö Enterprise (Monthly)",
+    simple_enterprise_yearly_6275: "Nyrkiö Enterprise (Annual)",
     simple_test_monthly: "Nyrkiö Test subscriptions (Monthly)",
     simple_test_yearly: "Nyrkiö Test subscriptions (Annual)",
     runner_postpaid_10: "Monthly CpuHours",
+    runner_postpaid_13: "Monthly CpuHours",
     runner_prepaid_10: "Prepaid 100 CpuHours",
   };
 
