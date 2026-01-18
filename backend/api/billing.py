@@ -9,7 +9,7 @@ from pydantic import BaseModel
 import stripe
 
 from backend.auth import auth
-from backend.db.db import User, UserUpdate
+from backend.db.db import User, UserUpdate, DBStore
 from backend.api.metered import query_meter_consumption
 
 billing_router = APIRouter(prefix="/billing")
@@ -266,7 +266,7 @@ async def subscribe_success(
         items = subscription["items"]
         plan = items["data"][0]["price"]["lookup_key"]
         customer_id = session["customer"]
-        billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
+        billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id, "subscription_id": subscription}
         if plan in ["runner_postpaid_10","runner_postpaid_13"]:
             update = UserUpdate(billing_runners=billing)
             user.billing_runners = billing
@@ -279,6 +279,10 @@ async def subscribe_success(
     except Exception as e:
         logging.error(f"Error subscribing user: {e}")
         raise HTTPException(status_code=500, detail="Error subscribing user: {e}")
+    finally:
+        db = DBStore()
+        db.log_json_event(json_event=tem, event_type="stripe_checkout", nyrkio_datetime: datetime.now(tz=timezone.utc))
+
     return {}
 
 
