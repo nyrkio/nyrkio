@@ -371,6 +371,108 @@ async def set_org_config(
 
 
 #
+# Per-organization configuration endpoints
+#
+@org_router.get("/subscriptions")
+async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) -> Dict:
+    store = DBStore()
+    return_list = []
+    user_orgs = get_user_orgs(user)
+    # This could have been a join...
+    for org in user_orgs:
+        paid_by = None
+        config, _ = await store.get_user_config(org["id"])
+        if (
+            config.get("billing") is not None
+            and config.get("billing", {}).get("paid_by") is not None
+        ):
+            paid_by = config["billing"]["paid_by"]
+            if paid_by == user.id:
+                paid_by = True
+            elif paid_by is None or (not paid_by):
+                paid_by = False
+            else:
+                # Not empty and not me, so paid by someone else
+                someone = store.get_user_without_any_fastapi_nonsense(paid_by)
+                if "email" in someone:
+                    paid_by = someone["email"]
+                elif "github_username" in someone:
+                    paid_by = someone["github_username"]
+
+            return_list = {
+                "name": org.get("login", "Org name is missing?"),
+                "paid_by": paid_by,
+            }
+
+    return return_list
+
+
+@org_router.post("/subscriptions/pay_for")
+async def pay_for(
+    plan: str, orgs: List[Dict], user: User = Depends(auth.current_active_user)
+) -> Dict:
+    db = DBStore()
+
+    planmap = {
+        "simple_business_monthly": "sub",
+        "simple_business_yearly": "sub",
+        "simple_enterprise_monthly": "sub",
+        "simple_enterprise_yearly": "sub",
+        "simple_business_monthly_251": "sub",
+        "simple_business_yearly_2409": "sub",
+        "simple_enterprise_monthly_627": "sub",
+        "simple_enterprise_yearly_6275": "sub",
+        "simple_test_monthly": "test",
+        "simple_test_yearly": "test",
+        "runner_postpaid_10": "post",
+        "runner_postpaid_13": "post",
+        "runner_prepaid_10": "pre",
+    }
+    plan2 = planmap[plan]
+    billing_key = "billing"
+    if plan2 == "post":
+        billing_key = "billing_runners"
+
+    incoming_orgs = {(o.name, o.paid_by_me) for o in orgs}
+    user_orgs = get_user_orgs(user)
+    for o in user_orgs:
+        if o["login"] in incoming_orgs.keys():
+            config, _ = db.get_user_config(o["id"])
+            if (
+                billing_key in config
+                and "paid_by" in config[billing_key]
+                and config[billing_key]["paid_by"] != user.id
+            ):
+                raise HTTPException(
+                    status_code=401,
+                    detail=f"You cannot set 'paid_by' for {o['login']} because it is already pid by someone else.",
+                )
+
+    for o in user_orgs:
+        if o["login"] in incoming_orgs.keys():
+            paid_by = None
+            if isinstance(incoming_orgs[o["login"]], bool):
+                if incoming_orgs[o["login"]]:
+                    paid_by = user.id
+                if not incoming_orgs[o["login"]]:
+                    paid_by = None
+
+                db.set_user_config(
+                    o["id"],
+                    {
+                        billing_key: {
+                            "paid_by": paid_by,
+                            "plan": plan,
+                            "customer_id": None,
+                            "session_id": None,
+                        }
+                    },
+                )
+
+    return []
+
+
+#
 # Pull requests
 #
 @org_router.get("/pulls/{repo:path}/{pull_number}/changes/{git_commit}")
