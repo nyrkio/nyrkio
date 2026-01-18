@@ -1,4 +1,3 @@
-import logging
 from typing import Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -381,9 +380,8 @@ async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) 
     user_orgs = get_user_orgs(user)
     # This could have been a join...
     for org in user_orgs:
-        logging.info(org)
         paid_by = None
-        config, _ = await store.get_user_config(org["id"])
+        config, _ = await store.get_user_config(org["organization"]["id"])
         if (
             config.get("billing") is not None
             and config.get("billing", {}).get("paid_by") is not None
