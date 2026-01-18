@@ -143,18 +143,32 @@ const UserBillingPage = () => {
   }
 
   const CpuHoursTable = ({stripedata}) => {
+    let totalHours = 0;
+    let totalEuros = 0;
+    stripedata.map((day) => {
+      totalHours = totalHours + day.aggregated_value;
+      totalEuros = totalEuros + day.aggregated_value / 10;
+    });
     return (<>
       <div className="cpuhours">
       <table id="cpuhoursTable" className="cpuhours stripedata">
       <thead>
-      <tr><th colSpan={6}>Consumption past 30 days</th></tr>
+      <tr>
+         <th>Consumption past 30 days</th>
+         <th style={{textAlign: "right"}}>{Math.round(1000*totalHours)/1000}</th>
+         <th style={{textAlign: "left"}}>Cpu-Hours</th>
+         <th style={{textAlign: "right"}}>=</th>
+         <th style={{textAlign: "right"}}>{Math.round(totalEuros*100)/100}</th>
+         <th style={{textAlign: "left"}}>€ *</th>
+         </tr>
       </thead>
       <tbody>
       <CpuHoursTableData stripedata={stripedata} />
+      <tr><td colSpan={6} style={{textAlign: "right"}}></td></tr>
       </tbody>
       <tfoot>
       <tr><th><a href="#" onClick={(e) => collapseTable(e)}><em>more<big>...</big></em></a></th>
-          <th></th><th></th><th></th><th></th><th></th>
+          <th colSpan={5} style={{textAlign:"right"}}>*) prices without tax</th>
         </tr>
       </tfoot>
       </table>
