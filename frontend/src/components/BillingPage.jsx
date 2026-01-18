@@ -344,8 +344,8 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
             <p className="card-body-text">{planMap[runnerPlan]}</p>
-            <p className="card-body-text">Orgs covered by this subscription:
-            <SelectOrgs /></p>
+            <p className="card-body-text">Orgs covered by this subscription:</p>
+            <SelectOrgs />
             <CpuHoursTable stripedata={meterStatus} />
             <BillingButton plan={planMap[runnerPlan]}/>
           </div>
