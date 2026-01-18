@@ -120,50 +120,68 @@ const UserBillingPage = () => {
     const username = localStorage.getItem("username");
     const [orgs, setOrgs] = useState(["-"]);
 
+    const submitPaidFor = async (ev) => {
+
+      const orgName = ev.target.name;
+      const payFor = ev.target.checked;
+
+      const response3 = await fetch("/api/v0/orgs/subscriptions/pay_for", {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: {
+          plan: TODO,
+          orgs: [{name: ev.target.name, paid_by: ev.target.checked}],
+        }
+      });
+      if (response3.status !== 200) {
+        console.error("Failed to POST org subscription configuration");
+        console.log(response3);
+        return response3;
+      } else console.debug(response3);
+    };
+
     const getOrganizations = async () => {
-      const url = "/api/v0/orgs/";
-      console.debug("GET " + url);
-      const response = await fetch(url, {
+      const response2 = await fetch("/api/v0/orgs/subscriptions", {
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
       });
+      if (response2.status !== 200) {
+        console.error("Failed to GET org subscription configuration");
+        console.log(response2);
+        return response2;
+      } else console.debug(response2);
 
-      if (response.status !== 200) {
-        console.error("Failed to GET User's organizations");
-        console.log(response);
-        return response;
-      } else console.debug(response);
+      const data2 = await response2.json();
+      console.debug(data2);
 
-      const data = await response.json();
-      console.debug(data);
-      if ( Array.isArray(data)  ) {
-        return data;
-      } else {
-        return ["Fetching your organizations failed."];
-      }
+      return data2;
     };
 
     useEffect(() => {
       getOrganizations().then((data) => {
-        console.log(data);
-        if(data.forEach) {
-        var temp = [];
-        data.forEach((d) => {
-          temp.push(d.organization.login);
-        });
-
         setOrgs(
-          temp.map((orgName) => {
-            return (
-            <>
-            <input type="checkbox" name={orgName} checked={true} /> {orgName}  &nbsp; &nbsp;
-            </>
-            );
-          })
+          data.map((org) => {
+            const paid_by_me = org.paid_by === true;
+            if (typeof(org.paid_by) == "boolean") {
+              return (
+                <>
+                <input type="checkbox" name={org.name} checked={paid_by_me} onClick={submitPaidFor}/> {org.name}<br />
+                </>
+              );
+            }
+            else {
+              return (
+                <>
+                 {org.paid_by}: {org.name} <br />
+                </>
+              );
+          }})
         );
-      }});
+      });
     }, []);
 
 
