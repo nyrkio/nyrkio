@@ -371,11 +371,26 @@ async def set_org_config(
     return {}
 
 
-#
-# Per-organization configuration endpoints
-#
+planmap = {
+    "simple_business_monthly": "sub",
+    "simple_business_yearly": "sub",
+    "simple_enterprise_monthly": "sub",
+    "simple_enterprise_yearly": "sub",
+    "simple_business_monthly_251": "sub",
+    "simple_business_yearly_2409": "sub",
+    "simple_enterprise_monthly_627": "sub",
+    "simple_enterprise_yearly_6275": "sub",
+    "simple_test_monthly": "test",
+    "simple_test_yearly": "test",
+    "runner_postpaid_10": "post",
+    "runner_postpaid_13": "post",
+    "runner_prepaid_10": "pre",
+}
+
+
 @org_router.get("/subscriptions")
 async def get_org_subscriptions(
+    plan: str,
     user: User = Depends(auth.current_active_user),
 ) -> List[Dict]:
     store = DBStore()
@@ -387,7 +402,7 @@ async def get_org_subscriptions(
         paid_by = None
         config, _ = await store.get_user_config(org["organization"]["id"])
         billing_key = "billing"
-        if config.get("billing_runners") is not None:
+        if planmap[plan] == "post":
             billing_key = "billing_runners"
 
         if config.get(billing_key) is not None:
@@ -422,21 +437,6 @@ async def pay_for(
 ) -> Dict:
     db = DBStore()
 
-    planmap = {
-        "simple_business_monthly": "sub",
-        "simple_business_yearly": "sub",
-        "simple_enterprise_monthly": "sub",
-        "simple_enterprise_yearly": "sub",
-        "simple_business_monthly_251": "sub",
-        "simple_business_yearly_2409": "sub",
-        "simple_enterprise_monthly_627": "sub",
-        "simple_enterprise_yearly_6275": "sub",
-        "simple_test_monthly": "test",
-        "simple_test_yearly": "test",
-        "runner_postpaid_10": "post",
-        "runner_postpaid_13": "post",
-        "runner_prepaid_10": "pre",
-    }
     plan2 = planmap[plan]
     billing_key = "billing"
     if plan2 == "post":

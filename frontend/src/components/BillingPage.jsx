@@ -142,8 +142,8 @@ const UserBillingPage = () => {
       } else console.debug(response3);
     };
 
-    const getOrganizations = async () => {
-      const response2 = await fetch("/api/v0/orgs/subscriptions", {
+    const getOrganizations = async ({plan}) => {
+      const response2 = await fetch("/api/v0/orgs/subscriptions?plan=" + plan, {
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
@@ -345,7 +345,7 @@ const UserBillingPage = () => {
             <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
             <p className="card-body-text">{planMap[runnerPlan]}</p>
             <p className="card-body-text">Orgs covered by this subscription:</p>
-            <SelectOrgs />
+            <SelectOrgs plan={runnerPlan} />
             <CpuHoursTable stripedata={meterStatus} />
             <BillingButton plan={planMap[runnerPlan]}/>
           </div>
