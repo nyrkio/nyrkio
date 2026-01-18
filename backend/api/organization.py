@@ -386,11 +386,15 @@ async def get_org_subscriptions(
         logging.info(org)
         paid_by = None
         config, _ = await store.get_user_config(org["organization"]["id"])
+        billing_key = "billing"
+        if config.get("billing_runners") is not None:
+            billing_key = "billing_runners"
+
         if (
-            config.get("billing") is not None
-            and config.get("billing", {}).get("paid_by") is not None
+            config.get(billing_key) is not None
+            and config.get(billing_key, {}).get("paid_by") is not None
         ):
-            paid_by = config["billing"]["paid_by"]
+            paid_by = config[billing_key]["paid_by"]
             if paid_by == user.id:
                 paid_by = True
             elif paid_by is None or (not paid_by):
