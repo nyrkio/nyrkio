@@ -408,7 +408,9 @@ async def get_org_subscriptions(
                     paid_by = someone["github_username"]
 
             return_obj = {
-                "name": org.get("login", "Org name is missing?"),
+                "name": org.get("organization", {}).get(
+                    "login", "Org name is missing?"
+                ),
                 "paid_by": paid_by,
             }
             logging.info(return_obj)
