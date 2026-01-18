@@ -113,6 +113,71 @@ const UserBillingPage = () => {
     console.debug(data);
     setMeterStatus(data.data);
   };
+
+
+
+  const SelectOrgs = () => {
+    const username = localStorage.getItem("username");
+    const [orgs, setOrgs] = useState(["-"]);
+
+    const getOrganizations = async () => {
+      const url = "/api/v0/orgs/";
+      console.debug("GET " + url);
+      const response = await fetch(url, {
+        headers: {
+          "Content-type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+      });
+
+      if (response.status !== 200) {
+        console.error("Failed to GET User's organizations");
+        console.log(response);
+        return response;
+      } else console.debug(response);
+
+      const data = await response.json();
+      console.debug(data);
+      if ( Array.isArray(data)  ) {
+        return data;
+      } else {
+        return ["Fetching your organizations failed."];
+      }
+    };
+
+    useEffect(() => {
+      getOrganizations().then((data) => {
+        console.log(data);
+        if(data.forEach) {
+        var temp = [];
+        data.forEach((d) => {
+          temp.push(d.organization.login);
+        });
+
+        setOrgs(
+          temp.map((orgName) => {
+            return (
+            <>
+            <input type="checkbox" name={orgName} checked={true} /> {orgName}  &nbsp; &nbsp;
+            </>
+            );
+          })
+        );
+      }});
+    }, []);
+
+
+    return (
+                <form action="/billing" className="card-body-text" >
+                {orgs}
+                </form>
+    );
+  };
+
+
+
+
+
   const CpuHoursTableData = ({stripedata}) => {
     const initialRows = 3;
     let rownr = 0;
@@ -261,6 +326,8 @@ const UserBillingPage = () => {
           <div className="card-body shadow">
             <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
             <p className="card-body-text">{planMap[runnerPlan]}</p>
+            <p className="card-body-text">Orgs covered by this subscription:
+            <SelectOrgs /></p>
             <CpuHoursTable stripedata={meterStatus} />
             <BillingButton plan={planMap[runnerPlan]}/>
           </div>
