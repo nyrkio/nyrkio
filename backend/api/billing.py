@@ -267,7 +267,7 @@ async def subscribe_success(
         plan = items["data"][0]["price"]["lookup_key"]
         customer_id = session["customer"]
         billing = {"plan": plan, "session_id": session_id, "customer_id": customer_id}
-        if plan in ["runner_postpaid_10"]:
+        if plan in ["runner_postpaid_10","runner_postpaid_13"]:
             update = UserUpdate(billing_runners=billing)
             user.billing_runners = billing
             user = await user_manager.update(update, user, safe=True)
