@@ -374,7 +374,7 @@ async def set_org_config(
 # Per-organization configuration endpoints
 #
 @org_router.get("/subscriptions")
-async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) -> Dict:
+async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) -> List[Dict]:
     store = DBStore()
     return_list = []
     user_orgs = get_user_orgs(user)
