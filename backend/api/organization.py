@@ -1,3 +1,4 @@
+import logging
 from typing import Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException
 
@@ -374,12 +375,15 @@ async def set_org_config(
 # Per-organization configuration endpoints
 #
 @org_router.get("/subscriptions")
-async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) -> List[Dict]:
+async def get_org_subscriptions(
+    user: User = Depends(auth.current_active_user),
+) -> List[Dict]:
     store = DBStore()
     return_list = []
     user_orgs = get_user_orgs(user)
     # This could have been a join...
     for org in user_orgs:
+        logging.info(org)
         paid_by = None
         config, _ = await store.get_user_config(org["organization"]["id"])
         if (
@@ -399,10 +403,12 @@ async def get_org_subscriptions(user: User = Depends(auth.current_active_user)) 
                 elif "github_username" in someone:
                     paid_by = someone["github_username"]
 
-            return_list = {
+            return_obj = {
                 "name": org.get("login", "Org name is missing?"),
                 "paid_by": paid_by,
             }
+            logging.info(return_obj)
+            return_list(return_obj)
 
     return return_list
 
