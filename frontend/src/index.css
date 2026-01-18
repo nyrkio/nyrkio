@@ -499,11 +499,10 @@ button:focus-visible {
   margin-top: 8px;
 }
 .nyrkio-billing .card-body .card-body-text {
-  margin-top: 3em;
-  margin-bottom: 3em;
   color: var(--nyrkio-horn-dark-brown);
-
-
+}
+.nyrkio-billing .card-body .card-body-text form input {
+  color: var(--nyrkio-horn-dark-brown);
 }
 
 .nyrkio-billing table.stripedata .stripedataCollapse {
