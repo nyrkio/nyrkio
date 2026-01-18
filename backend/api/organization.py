@@ -412,7 +412,7 @@ async def get_org_subscriptions(
                 "paid_by": paid_by,
             }
             logging.info(return_obj)
-            return_list(return_obj)
+            return_list.append(return_obj)
 
     return return_list
 
