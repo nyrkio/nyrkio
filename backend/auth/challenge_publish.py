@@ -15,6 +15,7 @@ from typing import Optional, Dict
 import logging
 import uuid
 import os
+import re
 
 import httpx
 from fastapi import HTTPException, APIRouter
@@ -43,6 +44,13 @@ async def get_user_by_github_username(github_username: str):
 
 
 async def create_cph_user(github_username: str, is_repo_owner: bool = False):
+    # Ensure github_username has only a-zA-Z0-9._ characters
+    # In particular, a request from `pull[bot]` would fail as FastAPI doesn't
+    SAFE_CHAR = "#"
+    github_username = "".join(
+        [SAFE_CHAR if re.search("\W", c) else c for c in github_username]
+    )
+
     manager = UserManager(NyrkioUserDatabase())
     user = UserCreate(
         github_username=github_username,
