@@ -339,6 +339,20 @@ async def get_org_config(
 
     store = DBStore()
     config, _ = await store.get_user_config(org["id"])
+    # Need some more generic solution to this but...
+    # Translate MongoDB ObjectId before this goes to JSON
+    if (
+        config.get("billing") is not None
+        and config.get("billing", {}).get("paid_by") is not None
+    ):
+        config["billing"]["paid_by"] = str(config.get("billing", {}).get("paid_by"))
+    if (
+        config.get("billing_runners") is not None
+        and config.get("billing_runners", {}).get("paid_by") is not None
+    ):
+        config["billing_runners"]["paid_by"] = str(
+            config.get("billing_runners", {}).get("paid_by")
+        )
     return config
 
 
