@@ -12,6 +12,8 @@ import stripe
 from backend.auth import auth
 from backend.db.db import User, UserUpdate
 from backend.api.metered import query_meter_consumption
+from backend.api.organization import get_user_orgs, planmap
+from backend.db.db import DBStore
 
 billing_router = APIRouter(prefix="/billing")
 
@@ -239,6 +241,7 @@ async def create_checkout_session(
             cancel_url=stripe_cancel_url(),
         )
         return RedirectResponse(checkout_session.url, status_code=303)
+
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
@@ -258,6 +261,7 @@ async def subscribe_success(
         auth.get_user_manager
     ),
 ):
+    plan = None
     session_id = data.session_id
     try:
         session = stripe.checkout.Session.retrieve(session_id)
@@ -282,6 +286,7 @@ async def subscribe_success(
             update = UserUpdate(billing=billing)
             user.billing = billing
             user = await user_manager.update(update, user, safe=True)
+
     except Exception as e:
         logging.error(f"Error subscribing user: {e}")
         raise HTTPException(status_code=500, detail="Error subscribing user: {e}")
@@ -292,8 +297,49 @@ async def subscribe_success(
     #         event_type="stripe_checkout",
     #         nyrkio_datetime=datetime.now(tz=timezone.utc),
     #     )
+    # Another try, if these fail, we'll make a note but return success at this point
+    try:
+        # Also add all orgs that user is a member of to be covered from this subscription, if they aren't already paid by any other group member.
+        db = DBStore()
+        orgs = get_user_orgs(user)
+        for org in orgs:
+            o = org.get("organization", org)
 
-    return {}
+            config, _ = await db.get_user_config(o["id"])
+
+            billing_key = "billing"
+            if planmap[plan] == "post":
+                billing_key = "billing_runners"
+            billing_obj = config.get(billing_key)
+            if billing_obj is None:
+                billing_obj = {}
+            paid_by = billing_obj.get("paid_by")
+            logging.debug(paid_by, user.id)
+            if paid_by and paid_by != user.id:
+                logging.debug(o["login"] + " is already paid by " + paid_by)
+                continue
+
+            await db.set_user_config(
+                o["id"],
+                {
+                    billing_key: {
+                        "paid_by": paid_by,
+                        "plan": plan,
+                        "customer_id": None,
+                        "session_id": None,
+                    }
+                },
+            )
+    except Exception as e:
+        logging.debug(e)
+        logging.warning(
+            "Failure when trying to add orgs to the new subscription. " + user.id
+        )
+
+    return {
+        "status": "OK",
+        "detail": "Subscription with the plan " + plan + " succeeded.",
+    }
 
 
 def stripe_success_url():
