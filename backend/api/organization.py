@@ -405,28 +405,27 @@ async def get_org_subscriptions(
         if planmap[plan] == "post":
             billing_key = "billing_runners"
 
-        if config.get(billing_key) is not None:
-            paid_by = config.get(billing_key, {}).get("paid_by")
-            if paid_by == user.id:
-                paid_by = True
-            elif paid_by is None or (not paid_by):
-                paid_by = False
-            else:
-                # Not empty and not me, so paid by someone else
-                someone = store.get_user_without_any_fastapi_nonsense(paid_by)
-                if "email" in someone:
-                    paid_by = someone["email"]
-                elif "github_username" in someone:
-                    paid_by = someone["github_username"]
+        paid_by = config.get(billing_key, {}).get("paid_by")
+        if paid_by == user.id:
+            paid_by = True
+        elif paid_by is None or (not paid_by):
+            paid_by = False
+        else:
+            # Not empty and not me, so paid by someone else
+            someone = store.get_user_without_any_fastapi_nonsense(paid_by)
+            if "email" in someone:
+                paid_by = someone["email"]
+            elif "github_username" in someone:
+                paid_by = someone["github_username"]
 
-            return_obj = {
-                "name": org.get("organization", {}).get(
-                    "login", "Org name is missing?"
-                ),
-                "paid_by": paid_by,
-            }
-            logging.info(return_obj)
-            return_list.append(return_obj)
+        return_obj = {
+            "name": org.get("organization", {}).get(
+                "login", "Org name is missing?"
+            ),
+            "paid_by": paid_by,
+        }
+        logging.info(return_obj)
+        return_list.append(return_obj)
 
     return return_list
 
