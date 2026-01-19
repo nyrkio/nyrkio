@@ -1,5 +1,6 @@
 import logging
-from typing import Dict, List, Union, Annotated, Form
+from typing import Dict, List, Union, Form
+from typing_extensions import Annotated
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.config import TestConfigList
