@@ -501,9 +501,6 @@ button:focus-visible {
 .nyrkio-billing .card-body .card-body-text {
   color: var(--nyrkio-horn-dark-brown);
 }
-.nyrkio-billing .card-body .card-body-text form input {
-  color: var(--nyrkio-horn-dark-brown);
-}
 
 .nyrkio-billing table.stripedata .stripedataCollapse {
   display: none;

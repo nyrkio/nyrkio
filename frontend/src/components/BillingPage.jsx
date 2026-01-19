@@ -170,7 +170,7 @@ const UserBillingPage = () => {
             if (typeof(org.paid_by) == "boolean") {
               return (
                 <li key={org.name}>
-                <input type="checkbox" name={org.name} checked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
+                <input type="checkbox" className="form-check-input" name={org.name} checked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
                 </li>
               );
             }
