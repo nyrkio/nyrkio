@@ -463,11 +463,13 @@ async def pay_for(
             if (
                 billing_key in config
                 and "paid_by" in config[billing_key]
+                and not isinstance(config[billing_key]["paid_by"], bool)
+                and config[billing_key]["paid_by"] is not None
                 and config[billing_key]["paid_by"] != user.id
             ):
                 raise HTTPException(
                     status_code=401,
-                    detail=f"You cannot set 'paid_by' for {o['login']} because it is already pid by someone else.",
+                    detail=f"You cannot set 'paid_by' for {o['organization']['login']} because it is already paid by someone else.",
                 )
 
     for o in user_orgs:
