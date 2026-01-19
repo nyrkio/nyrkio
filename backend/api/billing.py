@@ -275,7 +275,7 @@ async def subscribe_success(
             "plan": plan,
             "session_id": session_id,
             "customer_id": customer_id,
-            "subscription_id": subscription,
+            "subscription_id": session.subscription,
         }
         if plan in ["runner_postpaid_10", "runner_postpaid_13"]:
             update = UserUpdate(billing_runners=billing)
