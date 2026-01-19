@@ -141,6 +141,7 @@ const UserBillingPage = () => {
         console.log(response3);
         return response3;
       } else console.debug(response3);
+
     };
 
     const getOrganizations = async (plan) => {
@@ -170,7 +171,7 @@ const UserBillingPage = () => {
             if (typeof(org.paid_by) == "boolean") {
               return (
                 <li key={org.name}>
-                <input type="checkbox" className="form-check-input" name={org.name} checked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
+                <input type="checkbox" className="form-check-input" name={org.name} defaultChecked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
                 </li>
               );
             }
