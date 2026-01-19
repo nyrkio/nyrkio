@@ -455,7 +455,10 @@ async def pay_for(
     incoming_orgs = {(o.name, o.paid_by) for o in orgs}
     user_orgs = get_user_orgs(user)
     for o in user_orgs:
-        if o["login"] in incoming_orgs.keys():
+        if (
+            "organization" in o
+            and o["organization"].get("login") in incoming_orgs.keys()
+        ):
             config, _ = db.get_user_config(o["id"])
             if (
                 billing_key in config
