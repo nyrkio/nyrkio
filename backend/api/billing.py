@@ -262,7 +262,7 @@ async def subscribe_success(
     ),
 ):
     plan = None
-    session_id = data.session_id
+    session_id = data["session_id"]
     try:
         session = stripe.checkout.Session.retrieve(session_id)
         subscription = stripe.Subscription.retrieve(session.subscription)
