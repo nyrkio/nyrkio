@@ -21,10 +21,14 @@ class OAuth2BearerOrBody(OAuth2PasswordBearer):
         # But we allow json since we work with json anyway
 
         if request.method in ("POST", "PUT", "PATCH"):
-            form = await request.form()
-            token = form.get("access_token")
-            if token:
-                return token
+            if (
+                request.headers.get("content-type")
+                == "application/x-www-form-urlencoded"
+            ):
+                form = await request.form()
+                token = form.get("access_token")
+                if token:
+                    return token
 
         # Try Authorization: Bearer header
         authorization = request.headers.get("Authorization")
