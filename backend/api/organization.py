@@ -432,7 +432,7 @@ async def get_org_subscriptions(
 
 @org_router.post("/subscriptions/pay_for")
 async def pay_for(
-    plan: str, orgs: List[Dict], user: User = Depends(auth.current_active_user)
+    plan: Annotated[str, Form()], orgs: Annotated[List[Dict], Form()], user: User = Depends(auth.current_active_user)
 ) -> Dict:
     db = DBStore()
 
