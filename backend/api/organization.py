@@ -1,5 +1,5 @@
 import logging
-from typing import Dict, List, Union
+from typing import Dict, List, Union, Annotated, Form
 from fastapi import APIRouter, Depends, HTTPException
 
 from backend.api.config import TestConfigList
@@ -419,9 +419,7 @@ async def get_org_subscriptions(
                 paid_by = someone["github_username"]
 
         return_obj = {
-            "name": org.get("organization", {}).get(
-                "login", "Org name is missing?"
-            ),
+            "name": org.get("organization", {}).get("login", "Org name is missing?"),
             "paid_by": paid_by,
         }
         logging.info(return_obj)
@@ -432,7 +430,9 @@ async def get_org_subscriptions(
 
 @org_router.post("/subscriptions/pay_for")
 async def pay_for(
-    plan: Annotated[str, Form()], orgs: Annotated[List[Dict], Form()], user: User = Depends(auth.current_active_user)
+    plan: Annotated[str, Form()],
+    orgs: Annotated[List[Dict], Form()],
+    user: User = Depends(auth.current_active_user),
 ) -> Dict:
     db = DBStore()
 
