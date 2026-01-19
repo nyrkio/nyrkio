@@ -1,7 +1,7 @@
 import logging
 from typing import Dict, List, Union
-from typing_extensions import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Form
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from backend.api.config import TestConfigList
 from backend.api.model import TestResults
@@ -429,20 +429,30 @@ async def get_org_subscriptions(
     return return_list
 
 
+class OrgToPayFor(BaseModel):
+    name: str
+    paid_by: Union[bool, str]
+
+
+class SubscriptionsToPayFor(BaseModel):
+    plan: str
+    orgs: List[OrgToPayFor]
+
+
 @org_router.post("/subscriptions/pay_for")
 async def pay_for(
-    plan: Annotated[str, Form()],
-    orgs: Annotated[List[Dict], Form()],
+    data: SubscriptionsToPayFor,
     user: User = Depends(auth.current_active_user),
 ) -> Dict:
     db = DBStore()
-
+    plan = data.plan
+    orgs = data.orgs
     plan2 = planmap[plan]
     billing_key = "billing"
     if plan2 == "post":
         billing_key = "billing_runners"
 
-    incoming_orgs = {(o.name, o.paid_by_me) for o in orgs}
+    incoming_orgs = {(o.name, o.paid_by) for o in orgs}
     user_orgs = get_user_orgs(user)
     for o in user_orgs:
         if o["login"] in incoming_orgs.keys():

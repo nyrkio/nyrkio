@@ -116,7 +116,7 @@ const UserBillingPage = () => {
 
 
 
-  const SelectOrgs = () => {
+  const SelectOrgs = ({plan}) => {
     const username = localStorage.getItem("username");
     const [orgs, setOrgs] = useState(["-"]);
 
@@ -125,15 +125,16 @@ const UserBillingPage = () => {
       const orgName = ev.target.name;
       const payFor = ev.target.checked;
 
-      const response3 = await fetch("/api/v0/orgs/subscriptions/pay_for", {
+      const response3 = await fetch("/api/v0/orgs/subscriptions/pay_for?plan="+plan, {
+        method: "POST",
         headers: {
           "Content-type": "application/json",
           Authorization: "Bearer " + localStorage.getItem("token"),
         },
-        body: {
-          plan: TODO,
+        body: JSON.stringify({
+          plan: plan,
           orgs: [{name: ev.target.name, paid_by: ev.target.checked}],
-        }
+        })
       });
       if (response3.status !== 200) {
         console.error("Failed to POST org subscription configuration");
@@ -142,7 +143,7 @@ const UserBillingPage = () => {
       } else console.debug(response3);
     };
 
-    const getOrganizations = async ({plan}) => {
+    const getOrganizations = async (plan) => {
       const response2 = await fetch("/api/v0/orgs/subscriptions?plan=" + plan, {
         headers: {
           "Content-type": "application/json",
@@ -162,22 +163,22 @@ const UserBillingPage = () => {
     };
 
     useEffect(() => {
-      getOrganizations().then((data) => {
+      getOrganizations(plan).then((data) => {
         setOrgs(
           data.map((org) => {
             const paid_by_me = org.paid_by === true;
             if (typeof(org.paid_by) == "boolean") {
               return (
-                <>
-                <input type="checkbox" name={org.name} checked={paid_by_me} onClick={submitPaidFor}/> {org.name}<br />
-                </>
+                <li key={org.name}>
+                <input type="checkbox" name={org.name} checked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
+                </li>
               );
             }
             else {
               return (
-                <>
-                 {org.paid_by}: {org.name} <br />
-                </>
+                <li key={org.name}>
+                {org.paid_by}: {org.name} <br />
+                </li>
               );
           }})
         );
@@ -187,7 +188,9 @@ const UserBillingPage = () => {
 
     return (
                 <form action="/billing" className="card-body-text" >
+                <ul style={{listStyleType:"none"}}>
                 {orgs}
+                </ul>
                 </form>
     );
   };
