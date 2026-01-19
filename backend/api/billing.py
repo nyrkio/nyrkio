@@ -249,13 +249,13 @@ async def create_checkout_session(
         )
 
 
-class SubscriptionData(BaseModel):
-    session_id: str
+# class SubscriptionData(BaseModel):
+#     session_id: str
 
 
 @billing_router.post("/subscribe")
 async def subscribe_success(
-    data: SubscriptionData,
+    data: dict,
     user: User = Depends(auth.current_active_user),
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(
         auth.get_user_manager
