@@ -452,7 +452,7 @@ async def pay_for(
     if plan2 == "post":
         billing_key = "billing_runners"
 
-    incoming_orgs = {(o.name, o.paid_by) for o in orgs}
+    incoming_orgs = {o.name: o.paid_by for o in orgs}
     user_orgs = get_user_orgs(user)
     for o in user_orgs:
         if (
