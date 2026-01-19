@@ -459,7 +459,7 @@ async def pay_for(
             "organization" in o
             and o["organization"].get("login") in incoming_orgs.keys()
         ):
-            config, _ = db.get_user_config(o["organization"]["id"])
+            config, _ = await db.get_user_config(o["organization"]["id"])
             if (
                 billing_key in config
                 and "paid_by" in config[billing_key]
@@ -482,7 +482,7 @@ async def pay_for(
                 if not incoming_orgs[o["organization"]["login"]]:
                     paid_by = None
 
-                db.set_user_config(
+                await db.set_user_config(
                     o["organization"]["id"],
                     {
                         billing_key: {
