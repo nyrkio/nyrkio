@@ -494,7 +494,7 @@ async def pay_for(
                     },
                 )
 
-    return []
+    return {"status": "ok", "detail": f"Successfully set {orgs} to be paid by {plan}"}
 
 
 #
