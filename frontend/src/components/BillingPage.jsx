@@ -170,16 +170,16 @@ const UserBillingPage = () => {
             const paid_by_me = org.paid_by === true;
             if (typeof(org.paid_by) == "boolean") {
               return (
-                <li key={org.name}>
-                <input type="checkbox" className="form-check-input" name={org.name} defaultChecked={paid_by_me} onChange={submitPaidFor}/> {org.name}<br />
-                </li>
+                <span key={org.name}>
+                <input type="checkbox" className="form-check-input" name={org.name} defaultChecked={paid_by_me} onChange={submitPaidFor}/> {org.name} &nbsp;&nbsp;&nbsp;
+                </span>
               );
             }
             else {
               return (
-                <li key={org.name}>
-                {org.paid_by}: {org.name} <br />
-                </li>
+                <span key={org.name}>
+                {org.paid_by}: {org.name} &nbsp;&nbsp;&nbsp;
+                </span>
               );
           }})
         );
@@ -188,11 +188,8 @@ const UserBillingPage = () => {
 
 
     return (
-                <form action="/billing" className="card-body-text" >
-                <ul style={{listStyleType:"none"}}>
-                {orgs}
-                </ul>
-                </form>
+                <>{orgs}</>
+
     );
   };
 
@@ -200,7 +197,8 @@ const UserBillingPage = () => {
 
 
 
-  const CpuHoursTableData = ({stripedata}) => {
+  const CpuHoursTableData = ({stripedata, plan}) => {
+    const pt = planType[plan];
     const initialRows = 3;
     let rownr = 0;
     return stripedata.map(day =>
@@ -208,9 +206,13 @@ const UserBillingPage = () => {
       <td>{new Date(day.start_time*1000).toDateString()}</td>
       <td style={{textAlign: "right"}}>{Math.round(1000*day.aggregated_value)/1000}</td>
       <td style={{textAlign: "left"}}>Cpu-Hours,</td>
+      { pt=="post"? (
+      <>
       <td style={{textAlign: "right", width:"1em"}}> =</td>
       <td style={{textAlign: "right", width:"3em"}}>{Math.round(day.aggregated_value*10)/100} </td>
       <td style={{textAlign: "left", width:"3em"}}>€</td>
+      </>
+      ):""}
       </tr>
            );
   };
@@ -229,33 +231,56 @@ const UserBillingPage = () => {
     toggleVisibility = !toggleVisibility;
   }
 
-  const CpuHoursTable = ({stripedata}) => {
+  const CpuHoursTable = ({stripedata, plan}) => {
     let totalHours = 0;
     let totalEuros = 0;
     stripedata.map((day) => {
       totalHours = totalHours + day.aggregated_value;
       totalEuros = totalEuros + day.aggregated_value / 10;
     });
+
+    const pt = planType[plan];
+
     return (<>
       <div className="cpuhours">
       <table id="cpuhoursTable" className="cpuhours stripedata">
       <thead>
+      { (pt!="post")? (
+        <tr>
+         <th>Included in {planType[plan]} plan: </th>
+         <th style={{textAlign: "right"}}>TODO</th>
+         <th style={{textAlign: "left"}}>Cpu-Hours</th>
+           <>
+           <th style={{textAlign: "right"}}></th>
+           <th style={{textAlign: "right"}}></th>
+           <th style={{textAlign: "left"}}></th>
+         </>
+         </tr>
+      ):""}
       <tr>
          <th>Consumption past 30 days</th>
          <th style={{textAlign: "right"}}>{Math.round(1000*totalHours)/1000}</th>
          <th style={{textAlign: "left"}}>Cpu-Hours</th>
-         <th style={{textAlign: "right"}}>=</th>
-         <th style={{textAlign: "right"}}>{Math.round(totalEuros*100)/100}</th>
-         <th style={{textAlign: "left"}}>€ *</th>
+         { (pt=="post")? (
+           <>
+           <th style={{textAlign: "right"}}>=</th>
+           <th style={{textAlign: "right"}}>{Math.round(totalEuros*100)/100}</th>
+           <th style={{textAlign: "left"}}>€ *</th>
+         </>
+         ):""}
          </tr>
       </thead>
       <tbody>
-      <CpuHoursTableData stripedata={stripedata} />
+      <CpuHoursTableData stripedata={stripedata} plan={plan}/>
       <tr><td colSpan={6} style={{textAlign: "right"}}></td></tr>
       </tbody>
       <tfoot>
       <tr><th><a href="#" onClick={(e) => collapseTable(e)}><em>more<big>...</big></em></a></th>
-          <th colSpan={5} style={{textAlign:"right"}}>*) prices without tax</th>
+      { (pt=="post")? (
+        <>
+        <th colSpan={5} style={{textAlign:"right"}}>*) prices without tax</th>
+        </>
+         ):""}
         </tr>
       </tfoot>
       </table>
@@ -288,6 +313,22 @@ const UserBillingPage = () => {
     runner_postpaid_10: "Monthly CpuHours",
     runner_postpaid_13: "Monthly CpuHours",
     runner_prepaid_10: "Prepaid 100 CpuHours",
+  };
+  const planType = {
+    free: "Free",
+    simple_business_monthly: "monthly",
+    simple_business_yearly: "yearly",
+    simple_enterprise_monthly: "monthly",
+    simple_enterprise_yearly: "yearly",
+    simple_business_monthly_251: "monthly",
+    simple_business_yearly_2409: "yearly",
+    simple_enterprise_monthly_627: "monthly",
+    simple_enterprise_yearly_6275: "yearly",
+    simple_test_monthly: "monthly",
+    simple_test_yearly: "yearly",
+    runner_postpaid_10: "post",
+    runner_postpaid_13: "post",
+    runner_prepaid_10: "pre",
   };
 
   const onClick = async () => {
@@ -341,22 +382,6 @@ const UserBillingPage = () => {
           <p>Manage your subscription here.</p>
         </div>
       </div>
-      {runnerPlan?(
-      <>
-      <div className="row p-5">
-        <div className="card nyrkio-billing">
-          <div className="card-body shadow">
-            <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
-            <p className="card-body-text">{planMap[runnerPlan]}</p>
-            <p className="card-body-text">Orgs covered by this subscription:</p>
-            <SelectOrgs plan={runnerPlan} />
-            <CpuHoursTable stripedata={meterStatus} />
-            <BillingButton plan={planMap[runnerPlan]}/>
-          </div>
-        </div>
-      </div>
-      </>
-       ):""}
       {!runnerPlan || billingPlan != "free"?(
       <>
       <div className="row p-5">
@@ -365,15 +390,35 @@ const UserBillingPage = () => {
             <h3 className="card-title">Current plan</h3>
             <p className="card-body-text">{planMap[billingPlan]}</p>
 
+            <p className="card-body-text">Covered by this subscription: &nbsp;&nbsp;&nbsp;
+            <SelectOrgs plan={billingPlan} />
+            </p>
+            <CpuHoursTable stripedata={meterStatus} plan={billingPlan}/>
             <BillingButton plan={planMap[billingPlan]}/>
           </div>
         </div>
       </div>
       </>
        ):""}
+
+
+      {runnerPlan?(
+      <>
       <div className="row p-5">
-      <p>Want to upgrade your subscription, or need professional services? Check out all Nyrkiö <a href="/pricing">products</a> and <a href="/services">services</a>.</p>
+        <div className="card nyrkio-billing">
+          <div className="card-body shadow">
+            <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
+            <p className="card-body-text">{planMap[runnerPlan]}</p>
+            <p className="card-body-text">Covered by this subscription: &nbsp;&nbsp;&nbsp;
+            <SelectOrgs plan={runnerPlan} />
+            </p>
+            <CpuHoursTable stripedata={meterStatus} plan={runnerPlan} />
+            <BillingButton plan={planMap[runnerPlan]}/>
+          </div>
+        </div>
       </div>
+      </>
+       ):""}
     </div>
   );
 };

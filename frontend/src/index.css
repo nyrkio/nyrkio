@@ -663,6 +663,9 @@ button:focus-visible {
   color: var(--nyrkio-horn-dark-brown);
 }
 
+.passreset p {
+  color: var(--nyrkio-bear-brown);
+}
 .sso-login .btn .svgwrapper {
   text-align: left;
   height: 1px;
@@ -1291,6 +1294,22 @@ input {
   font-family: "Helvetica", "Arial","Inter",-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
   font-weight: 400;
 
+}
+
+input.form-control {
+  border-color: var(--nyrkio-arrow-brown);
+  color: var(--nyrkio-horn-dark-brown);
+}
+input.form-control::placeholder {
+  color: var(--nyrkio-light-gray);
+}
+
+.form-control input:focus,
+.form-control:focus {
+  color: var(--nyrkio-bear-brown);
+  border-color: var(--nyrkio-horn-dark-brown);
+  box-shadow: 0 0 0.3rem 0.4rem rgba(150, 80, 10, 0.2);
+  background-color: var(--var-nyrkio-light-gray3)
 }
 
 .form-switch .form-check-input {

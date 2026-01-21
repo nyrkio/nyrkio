@@ -161,6 +161,9 @@ export const SignUpPage = () => {
               <div className="form-text text-justify" >
                   Already have an acccount? <a href="/login">Log in here</a>
               </div>
+              <div className="form-text text-justify" >
+                  Have an account but forgot the password? <a href="/forgot-password">Reset password here.</a>
+              </div>
             </div>
           </div>
         </div>
