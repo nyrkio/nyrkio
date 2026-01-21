@@ -19,8 +19,6 @@ async def send_email(email: str, token: str, subject: str, msg: str):
     """
     Send an email to a user with a verification token.
     """
-    return 
-
     with httpx.Client() as client:
         url = "https://api.postmarkapp.com/email"
         response = client.post(
