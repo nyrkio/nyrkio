@@ -16,6 +16,7 @@ def test_add_and_get_user_config(client):
             "since_days": 14,
         }
     }
+
     response = client.post("/api/v0/user/config", json=config)
     assert response.status_code == 200
 
@@ -43,6 +44,55 @@ def test_add_and_get_user_config(client):
             "since_days": 14,
             "slack": True,
         },
+        "billing": None,
+        "billing_runners": None,
+    }
+
+
+def test_bwcompat_user_config(client):
+    """Ensure that we can store and retrieve user configuration"""
+    client.login()
+    config = {
+        "notifiers": {
+            "slack": True,
+            "github": False,
+            "since_days": 14,
+        }
+    }
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    json = response.json()
+    print(json)
+    assert json == {
+        "notifiers": {
+            "slack": True,
+            "github": False,
+            "since_days": 14,
+            "github_pr": None,
+        },
+        "billing": None,
+        "billing_runners": None,
+    }
+
+    config = {"core": {"max_pvalue": 0.00001, "min_magnitude": 0.5}}
+    response = client.post("/api/v0/user/config", json=config)
+    assert response.status_code == 200
+
+    response = client.get("/api/v0/user/config")
+    assert response.status_code == 200
+    json = response.json()
+    print(json)
+    assert json == {
+        "notifiers": {
+            "slack": True,
+            "github": False,
+            "since_days": 14,
+            "github_pr": None,
+        },
+        "core": {"min_magnitude": 0.5, "max_pvalue": 0.00001},
         "billing": None,
         "billing_runners": None,
     }
