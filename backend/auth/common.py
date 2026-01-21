@@ -44,7 +44,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     ):
         print(f"User {user.id} has forgot their password. Reset token: {token}")
         reset_url = f"{SERVER_NAME}/forgot-password?token={token}"
-        msg = read_template_file("forgot-email.html", reset_url=reset_url)
+        msg = read_template_file("forgot-password.html", reset_url=reset_url)
         await send_email(user.email, token, "nyrkio:com", msg)
 
     async def on_after_request_verify(
