@@ -269,8 +269,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
                 Login
               </button>
             </div>
-            <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user accout here</a>.</em></p>
-          </form>
+            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/signup">Reset your password here.</a>.</em></p>
+            <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user account here</a>.</em></p>
+            </form>
 
         <div className="row">
           <ErrorMessage className="mb-5"/>
