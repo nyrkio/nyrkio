@@ -69,7 +69,7 @@ const MainAdminDashboard = ({ results }) => {
   return (
     <>
       <div className="container col-10">
-        <h1>Admin Dashboard</h1>
+      <h1>Admin Dashboard</h1>
         <div>
           <div className="card">
             <div className="card-header">Impersonate user:</div>
