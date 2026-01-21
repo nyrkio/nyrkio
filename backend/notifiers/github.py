@@ -155,10 +155,9 @@ async def fetch_access_token(
         },
     )
     if response.status_code != 201:
-        logging.error(
-            f"Failed to fetch access token: {response.status_code}"
-        )
+        logging.error(f"Failed to fetch access token: {response.status_code}")
         from pprint import pprint
+
         pprint(response)
         return None
 
