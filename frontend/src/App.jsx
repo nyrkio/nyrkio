@@ -28,6 +28,7 @@ import { LegendPage } from "./components/LegendPage.jsx";
 import { EcosystemPage } from "./components/EcosystemPage.jsx";
 import { PricingPage } from "./components/PricingPage.jsx";
 import { SignUpPage } from "./components/SignUp.jsx";
+import { ForgotPassword } from "./components/ForgotPassword.jsx";
 import { Footer } from "./components/Footer.jsx";
 import ScrollToTop from "./components/ScrollToTop.jsx";
 import { UserSettings } from "./components/UserSettings.jsx";
@@ -121,6 +122,10 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       <Route
       path="/signup"
       element={<SignUpPage setLoggedIn={setLoggedIn} />}
+      />
+      <Route
+      path="/forgot-password"
+      element={<ForgotPassword />}
       />
       <Route path="/public/*"
       element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
