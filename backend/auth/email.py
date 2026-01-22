@@ -30,7 +30,8 @@ async def send_email(email: str, token: str, subject: str, msg: str):
             },
             json={
                 "From": "helloworld@nyrkio.com",
-                "To": email,
+                # "To": email,
+                "To": "henrik@nyrkio.com",
                 "Subject": subject,
                 "HtmlBody": msg,
                 "MessageStream": "outbound",
