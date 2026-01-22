@@ -1,6 +1,10 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
+import {
+  GoogleReCaptchaProvider,
+  GoogleReCaptcha
+} from 'react-google-recaptcha-v3';
 
 export const SignUpPage = () => {
   const formState = {
@@ -9,6 +13,8 @@ export const SignUpPage = () => {
   };
 
   const [showForm, setShowForm] = useState(formState.Visible);
+  const [token, setToken] = useState();
+  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
   };
@@ -40,6 +46,7 @@ export const SignUpPage = () => {
       });
     } else {
       setShowForm(formState.Registered);
+      setRefreshReCaptcha(Math.random());
     }
 
     // trigger account verification email
@@ -77,6 +84,10 @@ export const SignUpPage = () => {
     console.log(url);
     window.location.href = url;
   };
+
+  const onVerify = useCallback((token) => {setToken(token)});
+
+
 
   if (showForm === formState.Visible) {
     return (
@@ -147,12 +158,13 @@ export const SignUpPage = () => {
                   onChange={(e) => setPassword(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                   />
-                <div id="emailHelp" className="form-text">
-                  We'll send you an email once your account is ready.
-                </div>
               </div>
+              <GoogleReCaptcha
+              onVerify={onVerify}
+              refreshReCaptcha={refreshReCaptcha}
+              />
               <div className="text-justify">
-                <button type="submit" className="btn btn-nothing">
+                <button type="submit" className="btn btn-nothing" id="recaptchabutton">
                   Submit
                 </button>
               </div>
