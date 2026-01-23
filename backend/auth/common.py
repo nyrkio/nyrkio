@@ -81,6 +81,28 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(user_create.model_dump())
         return await super().create(user_create, *args, **kwargs)
 
+    async def create_cph(
+        self,
+        user_create: schemas.UC,
+        safe: bool = False,
+        request: Optional[Request] = None,
+        *args,
+        **kwargs,
+    ) -> models.UP:
+        logging.info(f"Create new CPH user {user_create.github_username}")
+        if user_create.oauth_accounts:
+            logging.warning(user_create)
+            raise Exception(
+                "Someone tried to POST oauth credentials through the wrong door"
+            )
+
+        user_create.billing = None
+        user_create.billing_runners = None
+        user_create.slack = None
+        logging.info(user_create)
+        logging.info(user_create.model_dump())
+        return await super().create(user_create, *args, **kwargs)
+
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         logging.info(f"New User {user.id} {user.email} registered.")
         store = DBStore()
