@@ -62,7 +62,7 @@ async def create_cph_user(github_username: str, is_repo_owner: bool = False):
         is_repo_owner=is_repo_owner,
     )
 
-    return await manager.create(user)
+    return await manager.create_cph(user)
 
 
 class ChallengePublishSession(BaseModel):
