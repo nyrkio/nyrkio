@@ -47,14 +47,14 @@ async def create_cph_user(github_username: str, is_repo_owner: bool = False):
     # Ensure github_username has only a-zA-Z0-9._ characters
     # In particular, a request from `pull[bot]` would fail as FastAPI doesn't
     SAFE_CHAR = "#"
-    github_username = "".join(
+    fake_username = "".join(
         [SAFE_CHAR if re.search("\W", c) else c for c in github_username]
     )
 
     manager = UserManager(NyrkioUserDatabase())
     user = UserCreate(
         github_username=github_username,
-        email=f"{github_username}@ChallengeResponseHandshake.github.nyrkio.com",
+        email=f"{fake_username}@ChallengeResponseHandshake.github.nyrkio.com",
         password=str(uuid.uuid4()),
         is_active=True,
         is_verified=True,
