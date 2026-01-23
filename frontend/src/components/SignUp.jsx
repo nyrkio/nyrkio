@@ -18,6 +18,7 @@ export const SignUpPage = () => {
   const { executeRecaptcha } = useGoogleReCaptcha();
 
 
+  const nop = () =>{return true;};
 
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
@@ -79,14 +80,19 @@ export const SignUpPage = () => {
       setShowForm(formState.Registered);
     }
 
+    const t = await executeRecaptcha('signupform');
+    if (t) {
+      setToken(t);
+    }
+    else {
+      console.warn("recaptcha didn't return token");
+    }
+
     // trigger account verification email
-//     const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/json",
-//       },
-//       body: JSON.stringify({ email: email }),
-//     });
+    const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+      method: "POST",
+      body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
+    });
   };
 
   /*
@@ -169,7 +175,7 @@ export const SignUpPage = () => {
           */}
           <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
             <p><em>Nyrkiö unplugged (no GitHub):</em></p>
-            <form onSubmit={e => signUpSubmit(e)}>
+            <form onSubmit={e => nop()}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
                   Email address
@@ -195,7 +201,7 @@ export const SignUpPage = () => {
               <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
 
               <div className="text-justify">
-                <button type="submit" className="btn btn-nothing mt-4" id="recaptchabutton" onClick={signUpSubmit}>
+                <button type="submit" className="btn btn-success mt-4" id="recaptchabutton" onClick={signUpSubmit}>
                   Submit
                 </button>
               </div>
