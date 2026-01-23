@@ -689,6 +689,7 @@ button:focus-visible {
   font-weight: 400;
 
 }
+
 .sso-login .btn-secondary{
     padding-left: 1em;
     padding-top: 0.5em;
@@ -699,6 +700,9 @@ button:focus-visible {
     margin: 10px;
 }
 
+.btn-help {
+
+}
 .sso-login .btn-success,
 .sso-login .btn-nothing {
   margin: 10px;

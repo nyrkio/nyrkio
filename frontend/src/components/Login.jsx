@@ -153,6 +153,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     posthog.capture("login", { property: username });
     window.location.href = "/";
   }
+  const nop = () => {true}
 
   return (
     <div className="container">
@@ -269,10 +270,19 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
                 Login
               </button>
             </div>
-            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/signup">Reset your password here.</a>.</em></p>
-            <p style={{"color":"#999999"}}><em>Use your email and password to <a href="/signup">create a new user account here</a>.</em></p>
             </form>
+            <div className="mt-1 mb-1 row">
+            <form className="row mt-1 sso-login text-center" onSubmit={nop}>
+            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/signup">Reset your password here.</a>.</em></p>
+            <hr />
 
+            <div className="text-center mb-4 mt-3 xs-10">
+              <a href="/signup"><button type="button" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-12" style={{minWidth:"12em"}}>
+                Create Nyrkiö account
+              </button></a>
+              </div>
+              </form>
+        </div>
         <div className="row">
           <ErrorMessage className="mb-5"/>
         </div>
