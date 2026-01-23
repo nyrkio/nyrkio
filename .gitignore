@@ -20,3 +20,6 @@
 
 # Process tracking
 .backend.pid
+
+
+nginx.conf.test
