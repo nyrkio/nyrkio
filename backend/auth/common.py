@@ -65,7 +65,6 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         if not await verify_recaptcha(g_recaptcha_response, remoteip):
             raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
         else:
-            self._already_checked_recaptcha = g_recaptcha_response
 
         if user_create.oauth_accounts:
             logging.warning(user_create)
@@ -136,13 +135,12 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
         data = await request.json()
         g_recaptcha_response = data.get("g-recaptcha-response")
-        if self._already_checked_recaptcha != g_recaptcha_response:
-            remoteip = request.client.host
-            if g_recaptcha_response is not None:
-                if not await verify_recaptcha(g_recaptcha_response, remoteip):
-                    raise HTTPException(
-                        status_code=400, detail="Blocked by ReCaptcha .."
-                    )
+        remoteip = request.client.host
+        if g_recaptcha_response is not None:
+            if not await verify_recaptcha(g_recaptcha_response, remoteip):
+                raise HTTPException(
+                    status_code=400, detail="Blocked by ReCaptcha .."
+                )
 
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
