@@ -70,7 +70,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         return await super().create(user_create, *args, **kwargs)
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        logging.info(f"User {user.id} has registered.")
+        logging.info(f"New User {user.id} {user.email} registered.")
         store = DBStore()
         await store.add_default_data(user)
 
@@ -86,7 +86,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         self, user: User, token: str, request: Optional[Request] = None
     ):
         logging.info(
-            f"Verification requested for user {user.id}. Verification token: {token}"
+            f"Verification requested for user {user.id} {user.email}. Verification token: {token}"
         )
         # Note this is unauthenticated web form. Before sending email, protect yourself.
         # No seriously, postmark will close the account immediately if you don't
