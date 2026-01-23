@@ -50,7 +50,6 @@ export const SignUpPage = () => {
       return null;
     }
     else if(showForm == formState.Registered){
-      if(t){
         // trigger account verification email
         const verificationData = await fetch("/api/v0/auth/request-verify-token", {
           method: "POST",
@@ -67,8 +66,7 @@ export const SignUpPage = () => {
       else {
         alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
       }
-    }
-  }, [executeRecaptcha]);
+    }, [executeRecaptcha]);
 
 
   useEffect(() =>{
