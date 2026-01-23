@@ -52,14 +52,14 @@ export const SignUpPage = () => {
       return null;
     }
     else if(tryMe == formState.Registered){
-        const t = await executeRecaptcha('signupform');
+        // const t = await executeRecaptcha('signupform');
         // trigger account verification email
         const verificationData = await fetch("/api/v0/auth/request-verify-token", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({ email: email }),
+          body: JSON.stringify({ "email": email }),
         });
         if(verificationData.status <300){
           setShowForm(formState.Sent);
