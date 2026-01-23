@@ -24,10 +24,11 @@ export const SignUpPage = () => {
 
   const signUpSubmit = async (e) => {
     e.preventDefault();
+    console.log(e);
     let credentialsData = new URLSearchParams();
     credentialsData.append("email", email);
     credentialsData.append("password", password);
-
+    credentialsData.append("g-recaptcha-response", grecaptcha.getResponse());
     const creds = {
       email,
       password,
