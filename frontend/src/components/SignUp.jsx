@@ -11,10 +11,12 @@ export const SignUpPage = () => {
   const formState = {
     Visible: "Visible",
     Registered: "Registered",
+    Sent: "Sent email",
   };
 
   const [showForm, setShowForm] = useState(formState.Visible);
   const [token, setToken] = useState();
+  const [refreshRec, setRefreshRec] = useState(1);
   const { executeRecaptcha } = useGoogleReCaptcha();
 
 
@@ -28,29 +30,50 @@ export const SignUpPage = () => {
   const [password, setPassword] = useState();
 
   const handleReCaptchaVerify = useCallback(async () => {
-    if (!executeRecaptcha) {
-      console.log('Execute recaptcha not yet available');
-      return;
-    }
-    else {
-      console.log("Executing recaptcha now...    ")
-    }
+    if(showForm == formState.Visible){
+      if (!executeRecaptcha) {
+        console.log('Execute recaptcha not yet available');
+        return;
+      }
+      else {
+        console.log("Executing recaptcha now...    ")
+      }
 
-    const t = await executeRecaptcha('signupform');
-    if (t) {
-      setToken(t);
-      return t;
+      const t = await executeRecaptcha('signupform');
+      if (t) {
+        setToken(t);
+        return t;
+      }
+      else {
+        console.warn("recaptcha didn't return token");
+      }
+      return null;
     }
-    else {
-      console.warn("recaptcha didn't return token");
+    else if(showForm == formState.Registered){
+      if(t){
+        // trigger account verification email
+        const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email,   "g-recaptcha-response":t }),
+        });
+        if(verificationData.status <300){
+          setShowForm(formState.Sent);
+          console.log("email sent");
+        }
+      }
+      else {
+        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+      }
     }
-    return null;
   }, [executeRecaptcha]);
 
 
   useEffect(() =>{
     handleReCaptchaVerify();
-  }, [handleReCaptchaVerify]);
+  }, [handleReCaptchaVerify, refreshRec]);
 
   const signUpSubmit = async (e) => {
     e.preventDefault();
@@ -79,25 +102,12 @@ export const SignUpPage = () => {
       });
       return false;
     } else {
+
+//       await executeRecaptcha('signupform');
+//       const t = await handleReCaptchaVerify();
         setShowForm(formState.Registered);
-
-      await executeRecaptcha('signupform');
-      const t = await handleReCaptchaVerify();
-
-      if(t){
-          // trigger account verification email
-          const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ email: email,   "g-recaptcha-response":t }),
-          });
-
-      }
-      else {
-        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
-      }
+        console.log("User created");
+        setRefreshRec(Math.random());
     }
   };
 
@@ -234,8 +244,23 @@ export const SignUpPage = () => {
         </div>
       </div>
     );
-  } else {
+  } else if(showForm == formState.Registered){
     posthog.capture("user_signed_up", { signup_type: "email" });
+    return (
+      <div className="container">
+        <div className="row mt-5 justify-content-center">
+          <div className="col-md-6">
+            <h3>Thank you for registering!</h3>
+            <p>
+            Your Nyrkiö account is now created, but before you can login, we want to verify your email address.
+            I'm trying to send you an email now....
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  } else if(showForm == formState.Sent){
+    posthog.capture("user_verification_requested", { signup_type: "email" });
     return (
       <div className="container">
         <div className="row mt-5 justify-content-center">
