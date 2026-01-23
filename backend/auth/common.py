@@ -136,6 +136,8 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
     if remoteip:
         data[remoteip] = remoteip
 
+    logging.info(data)
+
     client = httpx.AsyncClient()
     response = await client.post(
         url,
