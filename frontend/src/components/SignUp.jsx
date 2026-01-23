@@ -14,7 +14,6 @@ export const SignUpPage = () => {
 
   const [showForm, setShowForm] = useState(formState.Visible);
   const [token, setToken] = useState();
-  const [refreshReCaptcha, setRefreshReCaptcha] = useState(false);
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
   };
@@ -47,7 +46,6 @@ export const SignUpPage = () => {
       });
     } else {
       setShowForm(formState.Registered);
-      setRefreshReCaptcha(Math.random());
     }
 
     // trigger account verification email
@@ -168,7 +166,6 @@ export const SignUpPage = () => {
 
               <GoogleReCaptcha
               onVerify={onVerify}
-              refreshReCaptcha={refreshReCaptcha}
               />
               </div>
               <div className="text-justify">
