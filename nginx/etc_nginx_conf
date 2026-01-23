@@ -1,0 +1,18 @@
+# Depending on the docker base image, it will first have something like
+pid /dev/null;
+error_log /dev/null;
+
+events {
+        worker_connections 768;
+        # multi_accept on;
+}
+
+# Then comes the http section
+http {
+    access_log /dev/null;
+
+    # And we're already in it:
+    # include /etc/nginx/conf.d/*.conf;
+    include ./nginx.conf.test;
+
+}

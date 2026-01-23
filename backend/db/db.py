@@ -95,9 +95,15 @@ class UserRead(schemas.BaseUser[PydanticObjectId]):
 
 class UserCreate(schemas.BaseUserCreate):
     oauth_accounts: Optional[List[OAuthAccount]] = Field(default_factory=list)
-    slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
-    billing: Optional[Dict[str, str]] = Field(None)
-    billing_runners: Optional[Dict[str, str]] = Field(None)
+    slack: Optional[Dict[str, Any]] = Field(
+        default_factory=dict
+    )  # Filtered out in backend.common.UserManager.create
+    billing: Optional[Dict[str, str]] = Field(
+        None
+    )  # Filtered out in backend.common.UserManager.create
+    billing_runners: Optional[Dict[str, str]] = Field(
+        None
+    )  # Filtered out in backend.common.UserManager.create
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
     is_repo_owner: Optional[bool] = False

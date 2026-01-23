@@ -191,7 +191,9 @@ def test_user_config_billing_plan(client):
     assert response.status_code == 200
 
     json = response.json()
+    print(json)
     assert "billing" in json
+    assert json["billing"] is not None
     assert json["billing"]["plan"] == billing["plan"]
 
     # It should not be possible to set the billing plan via the /config endpoint

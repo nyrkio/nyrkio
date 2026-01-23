@@ -1,6 +1,10 @@
+import httpx
+import logging
+
 from fastapi import APIRouter, Depends, Request
 
 # from fastapi_users import BaseUserManager, BaseUserDatabase
+from fastapi_users import models, schemas
 from fastapi_users.manager import BaseUserManager, BaseUserDatabase
 from fastapi_users.authentication import (
     AuthenticationBackend,
@@ -18,12 +22,14 @@ import os
 
 from backend.db.db import User, DBStore, get_user_db
 
-
 auth_router = APIRouter(prefix="/auth")
 
 
 SECRET = os.environ.get("SECRET_KEY", "fooba")
 SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
+GOOGLE_RECAPTCHA_SECRETKEY = os.environ.get("GOOGLE_RECAPTCHA_SECRETKEY")
+# The sitekey is just for the frontend to do its api request
+# GOOGLE_RECAPTCHA_SITEKEY = os.environ.get("GOOGLE_RECAPTCHA_SITEKEY")
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
@@ -34,15 +40,44 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     reset_password_token_secret = SECRET
     verification_token_secret = SECRET
 
+    # Prevent creating users with a billing plan.
+    # TODO: is check what's the deal with oauth and others when they come this far
+    async def create(
+        self,
+        user_create: schemas.UC,
+        safe: bool = False,
+        request: Optional[Request] = None,
+        *args,
+        **kwargs,
+    ) -> models.UP:
+        if os.environ.get("NYRKIO_TESTING", False):
+            return await super().create(user_create, *args, **kwargs)
+
+        if user_create.oauth_accounts:
+            logging.warning(user_create)
+            raise Exception(
+                "Someone tried to POST oauth credentials through the wrong door"
+            )
+
+        user_create.billing = None
+        user_create.billing_runners = None
+        user_create.slack = None
+        logging.info(
+            "Creating new user with billing, billing_runners and slack blocked even if the generated api would make you believe anyone can just set those..."
+        )
+        logging.info(user_create)
+        logging.info(user_create.model_dump())
+        return await super().create(user_create, *args, **kwargs)
+
     async def on_after_register(self, user: User, request: Optional[Request] = None):
-        print(f"User {user.id} has registered.")
+        logging.info(f"User {user.id} has registered.")
         store = DBStore()
         await store.add_default_data(user)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(f"User {user.id} has forgot their password. Reset token: {token}")
+        logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
         reset_url = f"{SERVER_NAME}/forgot-password?token={token}"
         msg = read_template_file("forgot-password.html", reset_url=reset_url)
         await send_email(user.email, token, "nyrkio:com", msg)
@@ -50,13 +85,55 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        print(f"Verification requested for user {user.id}. Verification token: {token}")
+        logging.info(
+            f"Verification requested for user {user.id}. Verification token: {token}"
+        )
+        # Note this is unauthenticated web form. Before sending email, protect yourself.
+        # No seriously, postmark will close the account immediately if you don't
+        if request is None:
+            raise ValueError(
+                "Can't send verification email if stupid framework doesn't share the request so I can get the recaptcha fields."
+            )
+        g_recaptcha_response = request.form("g-recaptcha-response")
+        remoteip = request.client.host
+        verify_recaptcha(g_recaptcha_response, remoteip)
+
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
         await send_email(user.email, token, "Verify your email", msg)
 
     async def get_by_github_username(self, github_username: str):
         return await self.user_db.get_by_github_username(github_username)
+
+
+# Copied from google-recaptcha which is a Flask app, turns out...
+# request.form['g-recaptcha-response']
+async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = None):
+    url = "https://www.google.com/recaptcha/api/siteverify"
+
+    data = {
+        "secret": GOOGLE_RECAPTCHA_SECRETKEY,
+        "response": g_recaptcha_response,
+    }
+    if remoteip:
+        data[remoteip]
+
+    client = httpx.AsyncClient()
+    response = await client.post(
+        url,
+        headers={
+            "Accept": "application/json",
+            "Content-Type": "application/json",
+        },
+        json=data,
+    )
+    if response.status_code != 200:
+        logging.error(
+            "Google ReCaptcha backend returned HTTP status " + response.status_code
+        )
+        return False
+
+    return response.json().get("success", False)
 
 
 class CphJWTStrategy(JWTStrategy):

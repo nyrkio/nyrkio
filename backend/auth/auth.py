@@ -87,7 +87,8 @@ superuser_backend = AuthenticationBackend(
 
 
 fastapi_users = FastAPIUsers[User, uuid.UUID](
-    get_user_manager, [superuser_backend, cookie_backend]
+    get_user_manager,
+    [superuser_backend, cookie_backend],
 )
 
 # Github requires this to be the exact same string, so no use trying to switch between
