@@ -155,8 +155,8 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
         "secret": GOOGLE_RECAPTCHA_SECRETKEY,
         "response": g_recaptcha_response,
     }
-    if remoteip:
-        data["remoteip"] = remoteip
+    # if remoteip:
+    #     data["remoteip"] = remoteip
 
     logging.info(data)
 
