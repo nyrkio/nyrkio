@@ -76,28 +76,28 @@ export const SignUpPage = () => {
     if (data.status !== 200) {
       await data.json().then((body) => {
         alert(body["detail"]);
-        return false;
       });
+      return false;
     } else {
-      setShowForm(formState.Registered);
-    }
+        setShowForm(formState.Registered);
 
-    await executeRecaptcha('signupform');
-    const t = await handleReCaptchaVerify();
+      //await executeRecaptcha('signupform');
+      const t = await handleReCaptchaVerify();
 
-    if(t){
-        // trigger account verification email
-        const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
-        });
+      if(t){
+          // trigger account verification email
+          const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
+          });
 
-    }
-    else {
-      alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+      }
+      else {
+        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+      }
     }
   };
 
