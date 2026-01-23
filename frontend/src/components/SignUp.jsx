@@ -244,6 +244,7 @@ export const SignUpPage = () => {
     );
   } else if(showForm == formState.Registered){
     posthog.capture("user_signed_up", { signup_type: "email" });
+    handleReCaptchaVerify();
     return (
       <div className="container">
         <div className="row mt-5 justify-content-center">
