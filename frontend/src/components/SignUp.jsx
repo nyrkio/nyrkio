@@ -113,7 +113,7 @@ export const SignUpPage = () => {
         setShowForm(formState.Registered);
         console.log("User created");
         //setRefreshRec(Math.random());
-        handleReCaptchaVerify(formState.Registered);
+        await handleReCaptchaVerify(formState.Registered);
     }
   };
 
