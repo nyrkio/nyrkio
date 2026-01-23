@@ -81,7 +81,7 @@ export const SignUpPage = () => {
     } else {
         setShowForm(formState.Registered);
 
-      //await executeRecaptcha('signupform');
+      await executeRecaptcha('signupform');
       const t = await handleReCaptchaVerify();
 
       if(t){
