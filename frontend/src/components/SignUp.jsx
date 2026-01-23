@@ -28,7 +28,7 @@ export const SignUpPage = () => {
     let credentialsData = new URLSearchParams();
     credentialsData.append("email", email);
     credentialsData.append("password", password);
-    credentialsData.append("g-recaptcha-response", grecaptcha.getResponse());
+    credentialsData.append("g-recaptcha-response", "");
     const creds = {
       email,
       password,
