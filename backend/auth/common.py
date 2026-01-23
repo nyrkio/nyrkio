@@ -129,33 +129,14 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         )
         # Note this is unauthenticated web form. Before sending email, protect yourself.
         # No seriously, postmark will close the account immediately if you don't
-        if not self._already_checked_recaptcha:
-            if request is None:
-                raise ValueError(
-                    "Can't send verification email if stupid framework doesn't share the request so I can get the recaptcha fields."
-                )
+        if request is None:
+            raise ValueError(
+                "Can't send verification email if stupid framework doesn't share the request so I can get the recaptcha fields."
+            )
 
-            data = await request.json()
-            g_recaptcha_response = data.get("g-recaptcha-response")
-            if self._already_checked_recaptcha != g_recaptcha_response:
-                remoteip = request.client.host
-                if g_recaptcha_response is not None:
-                    if not await verify_recaptcha(g_recaptcha_response, remoteip):
-                        raise HTTPException(
-                            status_code=400, detail="Blocked by ReCaptcha .."
-                        )
-
-            verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
-            msg = read_template_file("verify-email.html", verify_url=verify_url)
-            await send_email(user.email, token, "Verify your email", msg)
-            return {
-                "status": "ok",
-                "detail": "Sent email to given address, please click on the link",
-            }
-
-        if request:
-            data = await request.json()
-            g_recaptcha_response = data.get("g-recaptcha-response")
+        data = await request.json()
+        g_recaptcha_response = data.get("g-recaptcha-response")
+        if self._already_checked_recaptcha != g_recaptcha_response:
             remoteip = request.client.host
             if g_recaptcha_response is not None:
                 if not await verify_recaptcha(g_recaptcha_response, remoteip):
@@ -163,15 +144,13 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
                         status_code=400, detail="Blocked by ReCaptcha .."
                     )
 
-            verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
-            msg = read_template_file("verify-email.html", verify_url=verify_url)
-            await send_email(user.email, token, "Verify your email", msg)
-            return {
-                "status": "ok",
-                "detail": "Sent email to given address, please click on the link",
-            }
-
-        raise HTTPException(status_code=400, detail="Blocked by ReCaptcha ...")
+        verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
+        msg = read_template_file("verify-email.html", verify_url=verify_url)
+        await send_email(user.email, token, "Verify your email", msg)
+        return {
+            "status": "ok",
+            "detail": "Sent email to given address, please click on the link",
+        }
 
     async def get_by_github_username(self, github_username: str):
         return await self.user_db.get_by_github_username(github_username)
