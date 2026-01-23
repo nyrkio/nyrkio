@@ -136,8 +136,9 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
             "Google ReCaptcha backend returned HTTP status " + response.status_code
         )
         return False
-
-    return response.json().get("success", False)
+    res = response.json()
+    logging.info(res)
+    return res.get("success", False)
 
 
 class CphJWTStrategy(JWTStrategy):
