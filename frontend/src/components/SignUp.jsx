@@ -243,7 +243,7 @@ export const SignUpPage = () => {
       </div>
     );
   }
-  if(showForm == formState.Registered){
+  if(showForm == formState.Registered && refreshRec != 0){
     posthog.capture("user_signed_up", { signup_type: "email" });
     handleReCaptchaVerify();
     return (
