@@ -94,7 +94,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             raise ValueError(
                 "Can't send verification email if stupid framework doesn't share the request so I can get the recaptcha fields."
             )
-        g_recaptcha_response = request.form("g-recaptcha-response")
+        g_recaptcha_response = request.body().get("g-recaptcha-response")
         remoteip = request.client.host
         verify_recaptcha(g_recaptcha_response, remoteip)
 
