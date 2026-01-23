@@ -167,7 +167,7 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
             "Accept": "application/json",
             "Content-Type": "application/x-www-form-urlencode",
         },
-        body=data,
+        data=data,
     )
     if response.status_code != 200:
         logging.error(
