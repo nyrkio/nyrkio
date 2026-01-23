@@ -29,8 +29,10 @@ export const SignUpPage = () => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
-  const handleReCaptchaVerify = useCallback(async () => {
-    if(showForm == formState.Visible){
+  const handleReCaptchaVerify = useCallback(async (nextFormState) => {
+    let tryMe = nextFormState || showForm;
+
+    if(tryMe == formState.Visible){
       if (!executeRecaptcha) {
         console.log('Execute recaptcha not yet available');
         return;
@@ -49,7 +51,7 @@ export const SignUpPage = () => {
       }
       return null;
     }
-    else if(showForm == formState.Registered){
+    else if(tryMe == formState.Registered){
         // trigger account verification email
         const verificationData = await fetch("/api/v0/auth/request-verify-token", {
           method: "POST",
@@ -105,7 +107,8 @@ export const SignUpPage = () => {
 //       const t = await handleReCaptchaVerify();
         setShowForm(formState.Registered);
         console.log("User created");
-        setRefreshRec(Math.random());
+        //setRefreshRec(Math.random());
+        handleReCaptchaVerify(formState.Registered);
     }
   };
 
@@ -243,7 +246,7 @@ export const SignUpPage = () => {
       </div>
     );
   }
-  if(showForm == formState.Registered){
+  if(showForm == formState.Registered ){
     posthog.capture("user_signed_up", { signup_type: "email" });
     handleReCaptchaVerify();
     return (
