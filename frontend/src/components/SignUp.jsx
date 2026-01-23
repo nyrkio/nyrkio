@@ -70,9 +70,10 @@ export const SignUpPage = () => {
       },
       body: JSON.stringify(jdata),
     });
-    if (data.status === 400) {
+    if (data.status !== 200) {
       await data.json().then((body) => {
         alert(body["detail"]);
+        return false;
       });
     } else {
       setShowForm(formState.Registered);
