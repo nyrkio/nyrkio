@@ -97,11 +97,14 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         data = await request.json()
         g_recaptcha_response = data.get("g-recaptcha-response")
         remoteip = request.client.host
-        await verify_recaptcha(g_recaptcha_response, remoteip)
+        if await verify_recaptcha(g_recaptcha_response, remoteip):
 
-        verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
-        msg = read_template_file("verify-email.html", verify_url=verify_url)
-        await send_email(user.email, token, "Verify your email", msg)
+            verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
+            msg = read_template_file("verify-email.html", verify_url=verify_url)
+            await send_email(user.email, token, "Verify your email", msg)
+            return {"status": "ok", "detail": "Sent email to given address, please click on the link"}
+
+        raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
 
     async def get_by_github_username(self, github_username: str):
         return await self.user_db.get_by_github_username(github_username)
