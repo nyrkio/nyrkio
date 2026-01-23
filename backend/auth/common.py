@@ -129,7 +129,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         )
         # Note this is unauthenticated web form. Before sending email, protect yourself.
         # No seriously, postmark will close the account immediately if you don't
-        if request is None:
+        if request is None and not self._already_checked_recaptcha:
             raise ValueError(
                 "Can't send verification email if stupid framework doesn't share the request so I can get the recaptcha fields."
             )
