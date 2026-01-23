@@ -242,7 +242,8 @@ export const SignUpPage = () => {
         </div>
       </div>
     );
-  } else if(showForm == formState.Registered){
+  }
+  if(showForm == formState.Registered){
     posthog.capture("user_signed_up", { signup_type: "email" });
     handleReCaptchaVerify();
     return (
@@ -253,6 +254,9 @@ export const SignUpPage = () => {
             <p>
             Your Nyrkiö account is now created, but before you can login, we want to verify your email address.
             I'm trying to send you an email now....
+            <br />
+            <br />
+            You can also just email us at helloworld@nyrkio.com
             </p>
           </div>
         </div>
