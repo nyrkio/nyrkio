@@ -91,7 +91,7 @@ export const SignUpPage = () => {
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
+            body: JSON.stringify({ email: email,   "g-recaptcha-response":t }),
           });
 
       }
