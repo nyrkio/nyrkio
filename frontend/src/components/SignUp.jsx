@@ -29,7 +29,7 @@ export const SignUpPage = () => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
-  const handleReCaptchaVerify = useCallback(async (nextFormState) => {
+  const handleReCaptchaVerify = useCallback(async (nextFormState, email) => {
     let tryMe = nextFormState || showForm;
 
     if(tryMe == formState.Visible){
@@ -113,7 +113,7 @@ export const SignUpPage = () => {
         setShowForm(formState.Registered);
         console.log("User created");
         //setRefreshRec(Math.random());
-        await handleReCaptchaVerify(formState.Registered);
+        await handleReCaptchaVerify(formState.Registered, email);
     }
   };
 
