@@ -80,13 +80,13 @@ export const SignUpPage = () => {
     }
 
     // trigger account verification email
-    const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: email }),
-    });
+//     const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/json",
+//       },
+//       body: JSON.stringify({ email: email }),
+//     });
   };
 
   /*
