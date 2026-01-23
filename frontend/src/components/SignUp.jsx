@@ -165,7 +165,6 @@ export const SignUpPage = () => {
               <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
 
               <GoogleReCaptcha
-              onVerify={onVerify}
               />
               </div>
               <div className="text-justify">
