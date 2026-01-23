@@ -141,6 +141,10 @@ export const UserMenu = ({ setLoggedIn }) => {
         </Dropdown.Item>
         <Dropdown.Divider />
 
+        <Dropdown.Item href="/forgot-password">
+          <span className="bi bi-filetype-sh"></span> Change Password
+        </Dropdown.Item>
+
         <Dropdown.Item onClick={handleLogoutClick}>
           <span className="bi bi-box-arrow-right"></span> Log Out
         </Dropdown.Item>
