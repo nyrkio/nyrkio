@@ -64,6 +64,8 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         remoteip = request.client.host
         if not await verify_recaptcha(g_recaptcha_response, remoteip):
             raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
+        else:
+            self._already_checked_recaptcha = g_recaptcha_response
 
         if user_create.oauth_accounts:
             logging.warning(user_create)
@@ -108,6 +110,9 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         store = DBStore()
         await store.add_default_data(user)
 
+        if not user.is_verified:
+            self.request_verify(user, request)
+
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ):
@@ -130,17 +135,25 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             )
         data = await request.json()
         g_recaptcha_response = data.get("g-recaptcha-response")
-        remoteip = request.client.host
-        if await verify_recaptcha(g_recaptcha_response, remoteip):
-            verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
-            msg = read_template_file("verify-email.html", verify_url=verify_url)
-            await send_email(user.email, token, "Verify your email", msg)
-            return {
-                "status": "ok",
-                "detail": "Sent email to given address, please click on the link",
-            }
+        if (
+            not self._already_checked_recaptcha
+            and self._already_checked_recaptcha == g_recaptcha_response
+        ):
+            remoteip = request.client.host
+            if g_recaptcha_response is not None and not await verify_recaptcha(
+                g_recaptcha_response, remoteip
+            ):
+                raise HTTPException(status_code=400, detail="Blocked by ReCaptcha ..")
 
-        raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
+        verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
+        msg = read_template_file("verify-email.html", verify_url=verify_url)
+        await send_email(user.email, token, "Verify your email", msg)
+        return {
+            "status": "ok",
+            "detail": "Sent email to given address, please click on the link",
+        }
+
+        raise HTTPException(status_code=400, detail="Blocked by ReCaptcha ...")
 
     async def get_by_github_username(self, github_username: str):
         return await self.user_db.get_by_github_username(github_username)
