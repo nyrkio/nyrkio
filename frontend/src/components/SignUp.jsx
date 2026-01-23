@@ -39,10 +39,12 @@ export const SignUpPage = () => {
     const t = await executeRecaptcha('signupform');
     if (t) {
       setToken(t);
+      return t;
     }
     else {
       console.warn("recaptcha didn't return token");
     }
+    return null;
   }, [executeRecaptcha]);
 
 
@@ -80,22 +82,23 @@ export const SignUpPage = () => {
       setShowForm(formState.Registered);
     }
 
-    const t = await executeRecaptcha('signupform');
-    if (t) {
-      setToken(t);
+    await executeRecaptcha('signupform');
+    const t = await handleReCaptchaVerify();
+
+    if(t){
+        // trigger account verification email
+        const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
+        });
+
     }
     else {
-      console.warn("recaptcha didn't return token");
+      alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
     }
-
-    // trigger account verification email
-    const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: email,   "g-recaptcha-response":token }),
-    });
   };
 
   /*
