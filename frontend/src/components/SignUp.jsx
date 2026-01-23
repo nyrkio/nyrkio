@@ -27,7 +27,7 @@ export const SignUpPage = () => {
     let credentialsData = new URLSearchParams();
     credentialsData.append("email", email);
     credentialsData.append("password", password);
-    credentialsData.append("g-recaptcha-response", "");
+    credentialsData.append("g-recaptcha-response", grecaptcha.getResponse());
     const creds = {
       email,
       password,
@@ -164,13 +164,11 @@ export const SignUpPage = () => {
               </div>
               <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
 
-              <GoogleReCaptcha
-              />
-              </div>
               <div className="text-justify">
                 <button type="submit" className="btn btn-nothing" id="recaptchabutton">
                   Submit
                 </button>
+              </div>
               </div>
             </form>
             <div className="row pt-3">

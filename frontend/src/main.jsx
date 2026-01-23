@@ -4,9 +4,12 @@ import App from "./App.jsx";
 import "./index.css";
 import posthog from "posthog-js";
 
+/*
 posthog.init("phc_pj5OcqAS68hS0aIO0a3lqodk6lRekPEsz3VMdz6o7Z1", {
   api_host: "https://eu.posthog.com",
 });
+
+*/
 
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
