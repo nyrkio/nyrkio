@@ -73,9 +73,9 @@ export const SignUpPage = () => {
       },
       body: JSON.stringify(jdata),
     });
-    if (data.status !== 200) {
+    if (data.status > 299) {
       await data.json().then((body) => {
-        alert(body["detail"]);
+        alert("Creating your Nyrkiö account failed. " + data.status);
       });
       return false;
     } else {
