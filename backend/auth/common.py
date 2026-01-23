@@ -163,10 +163,6 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
     client = httpx.AsyncClient()
     response = await client.post(
         url,
-        headers={
-            "Accept": "application/json",
-            "Content-Type": "application/x-www-form-urlencode",
-        },
         data=data,
     )
     if response.status_code != 200:
