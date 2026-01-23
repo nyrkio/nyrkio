@@ -62,10 +62,10 @@ export const SignUpPage = () => {
           setShowForm(formState.Sent);
           console.log("email sent");
         }
-      }
-      else {
-        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
-      }
+        else {
+          alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+        }
+    }
     }, [executeRecaptcha]);
 
 
