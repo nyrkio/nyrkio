@@ -97,7 +97,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         data = await request.json()
         g_recaptcha_response = data.get("g-recaptcha-response")
         remoteip = request.client.host
-        verify_recaptcha(g_recaptcha_response, remoteip)
+        await verify_recaptcha(g_recaptcha_response, remoteip)
 
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
