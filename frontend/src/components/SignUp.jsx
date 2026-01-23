@@ -138,7 +138,7 @@ export const SignUpPage = () => {
 
 
 
-  if (showForm === formState.Visible) {
+  if (showForm === formState.Visible || showForm == formState.Registered) {
     return (
       <div id="signup" className="container">
         <div className="row">
