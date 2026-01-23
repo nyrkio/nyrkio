@@ -110,8 +110,8 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         store = DBStore()
         await store.add_default_data(user)
 
-        if not user.is_verified:
-            await self.request_verify(user, request)
+        # if not user.is_verified:
+        #     await self.request_verify(user, request)
 
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None

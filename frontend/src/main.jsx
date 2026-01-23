@@ -26,7 +26,7 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     element: "recaptchabutton",
     parameters: {
       badge: 'inline', // optional, default undefined
-      theme: 'red', // optional, default undefined
+      theme: 'light', // optional, default undefined
     }
   }}
   >
