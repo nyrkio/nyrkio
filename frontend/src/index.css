@@ -700,9 +700,10 @@ button:focus-visible {
     margin: 10px;
 }
 
-.btn-help {
-
+#recaptcha-wrapper * {
+  align:center;
 }
+
 .sso-login .btn-success,
 .sso-login .btn-nothing {
   margin: 10px;

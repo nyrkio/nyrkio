@@ -113,7 +113,11 @@ export const SignUpPage = () => {
             </svg>{" "}
               Install Nyrkiö GitHub app &nbsp;
             </button>
-          </div>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            <p>&nbsp;</p>
+            </div>
 
           {/*
           <div className="text-center mt-5 col-lg-4  "  style={{"paddingLeft": "1em"}}>
@@ -159,10 +163,13 @@ export const SignUpPage = () => {
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                   />
               </div>
+              <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
+
               <GoogleReCaptcha
               onVerify={onVerify}
               refreshReCaptcha={refreshReCaptcha}
               />
+              </div>
               <div className="text-justify">
                 <button type="submit" className="btn btn-nothing" id="recaptchabutton">
                   Submit
@@ -180,6 +187,7 @@ export const SignUpPage = () => {
           </div>
         </div>
         <div className="row">
+        <hr />
           <div className="text-justify col-lg-4">
             <p><sup>*)</sup>GitHub will ask to grant Nyrkiö the following permissions:</p>
             <img src={gh_permissions_img} alt="Github permissions dialog" width="100%"/>
