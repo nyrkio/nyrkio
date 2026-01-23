@@ -202,7 +202,7 @@ export const FrontPage = ({loggedIn}) => {
           <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
           </a>
 
-          <p>Coming soon: &nbsp;&nbsp;<big><strong class="nyrkio-accent">Nyrkiö runners</strong></big></p>
+          <p>Coming soon: &nbsp;&nbsp;<big><strong className="nyrkio-accent">Nyrkiö runners</strong></big></p>
           <p>Continuous Benchmarking with nanosecond precision!</p>
           <p>Be among the first to hear about it: </p>
           <p><a href="https://nyrkio.activehosted.com/f/5">Sign up for our upcoming product news mailing list ...</a></p>

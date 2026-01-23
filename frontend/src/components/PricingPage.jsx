@@ -480,7 +480,7 @@ const prePaidToBeUsedLater = () => {
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
                 <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
-                <span class="text-shoulders">Pre-paid</span>
+                <span className="text-shoulders">Pre-paid</span>
               </div>
               <div className="card-body">
                 <p className="nyrkio-annual"></p>

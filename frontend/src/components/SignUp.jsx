@@ -1,9 +1,10 @@
-import { useState, useCallback } from "react";
+import { useState, useEffect,useCallback } from "react";
+
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
 import {
   GoogleReCaptchaProvider,
-  GoogleReCaptcha
+  useGoogleReCaptcha
 } from 'react-google-recaptcha-v3';
 
 export const SignUpPage = () => {
@@ -14,6 +15,10 @@ export const SignUpPage = () => {
 
   const [showForm, setShowForm] = useState(formState.Visible);
   const [token, setToken] = useState();
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
+
+
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
   };
@@ -21,24 +26,49 @@ export const SignUpPage = () => {
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
 
+  const handleReCaptchaVerify = useCallback(async () => {
+    if (!executeRecaptcha) {
+      console.log('Execute recaptcha not yet available');
+      return;
+    }
+    else {
+      console.log("Executing recaptcha now...    ")
+    }
+
+    const t = await executeRecaptcha('signupform');
+    if (t) {
+      setToken(t);
+    }
+    else {
+      console.warn("recaptcha didn't return token");
+    }
+  }, [executeRecaptcha]);
+
+
+  useEffect(() =>{
+    handleReCaptchaVerify();
+  }, [handleReCaptchaVerify]);
+
   const signUpSubmit = async (e) => {
     e.preventDefault();
     console.log(e);
-    let credentialsData = new URLSearchParams();
-    credentialsData.append("email", email);
-    credentialsData.append("password", password);
-    credentialsData.append("g-recaptcha-response", grecaptcha.getResponse());
-    const creds = {
-      email,
-      password,
-    };
-
+    let newUserData = new URLSearchParams();
+    newUserData.append("email", email);
+    newUserData.append("password", password);
+    newUserData.append("g-recaptcha-response", token);
+    console.log(newUserData);
+    const jdata ={
+      "email":email,
+      "password":password,
+      "g-recaptcha-response":token,
+    }
+    console.log(jdata);
     const data = await fetch("/api/v0/auth/register", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(creds),
+      body: JSON.stringify(jdata),
     });
     if (data.status === 400) {
       await data.json().then((body) => {
@@ -84,7 +114,6 @@ export const SignUpPage = () => {
     window.location.href = url;
   };
 
-  const onVerify = useCallback((token) => {setToken(token)});
 
 
 
@@ -139,7 +168,7 @@ export const SignUpPage = () => {
           */}
           <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
             <p><em>Nyrkiö unplugged (no GitHub):</em></p>
-            <form onSubmit={signUpSubmit}>
+            <form onSubmit={e => signUpSubmit(e)}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
                   Email address
@@ -148,7 +177,7 @@ export const SignUpPage = () => {
                   type="email"
                   className="form-control w-50"
                   id="emailInput"
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                 />
                 <label htmlFor="passwordInput" className="form-label">
@@ -158,14 +187,14 @@ export const SignUpPage = () => {
                   type="password"
                   className="form-control w-50"
                   id="passwordInput"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                   />
               </div>
               <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
 
               <div className="text-justify">
-                <button type="submit" className="btn btn-nothing" id="recaptchabutton">
+                <button type="submit" className="btn btn-nothing mt-4" id="recaptchabutton" onClick={signUpSubmit}>
                   Submit
                 </button>
               </div>
