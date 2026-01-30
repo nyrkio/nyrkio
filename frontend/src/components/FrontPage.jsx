@@ -90,30 +90,31 @@ export const DemoVideo = () => {
 
 export const Fosdem = () => {
   return (
-    <div id="fosdembanner" className="row" style={{marginBottom: "25em"}}>
-    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "sticky", top: "0px", float: "top",
+    <div id="fosdembanner" className="row">
+    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "absolute", zIndex:-1,
     }}/>
 
     <div id="fosdemtext"
     style={{zIndex:2, color: "#ffff00",
-      fontSize: "200%", fontWeight: "300", lineHeight: "1.5em",
-      position: "absolute",
+      fontSize: "150%", fontWeight: "300", lineHeight: "1.5em",
+      position: "relative",
     }}>
     <h2 style={{color: "#dc3d06", fontSize:"400%", fontWeight: "800"}}>Hello Fosdem!</h2>
     <div style={{ backgroundColor: "#999999cc", padding: "50px", width: "66%", borderRadius: "120px", marginLeft: "17%"}}>
     <p>Nyrkiö is at Fosdem</p><p> Here is the Nyrkiö bingo card for the weekend</p>
     <hr />
-    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a>:</p>
+    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a></p>
     <p>Continuous Performance Engineering HowTo</p>
     <hr />
     <img src={stickers} alt="stickers" style={{width: "33%", float: "right"}}/>
     <p>&nbsp;</p>
     <p>Find Henrik, <br /> he has stickers</p>
     <hr />
-    <p>Sign up for our new Nyrkiö Runner for GitHub Service (below)</p>
+    <p>Try our new service: Nyrkiö Runner for GitHub</p>
+    <p>Continuous Benchmarking with nánosecond precision!</p>
     <p>No free tier, but you can afford 10 c/hour!</p>
 
-    <p>We're trying to get 100 GitHub installations during this weekend. This would get us into the GitHub marketplace!</p>
+    <p>We're trying to get 100 GitHub installations during this weekend. <br />This gets us into the GitHub marketplace!</p>
     </div>
     </div>
     <div clear="both"></div>
