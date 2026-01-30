@@ -29,7 +29,8 @@
   --nyrkio-dark-green2: #114411;
   --nyrkio-dark-green3: #004400;
 
-  --nyrkio-text: #344767;
+  --nyrkio-text: var(--nyrko-bear-brown);
+  --nyrkio-text-old: #344767;
   --nyrkio-text-light: #6c757d;
   --nyrkio-border: var(--nyrkio-horn-dark-brown);
   --nyrkio-active: var(--nyrkio-dark-gray);
@@ -266,6 +267,12 @@ margin-bottom: 10em;
 
 }
 
+.gray-bg {
+  background-color: #999999;
+  padding: 4px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
 .frontpage .coming-soon h2,
 .frontpage .coming-soon h1 {
   font-size: 2em;
