@@ -6,8 +6,8 @@ import commit from "../static/commit.png";
 import { Logo } from "./Logo";
 import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
-import AutumnRunner from "../static/AutumnRunner.jpg";
-import AutumnRunnerYoutube from "../static/AutumnRunnerYoutube.jpg";
+import fosdembar from "../static/9174011399_3d91025136_c.jpg";
+import stickers from "../static/stickers.png";
 
 const FeatureHighlight = () => {
   return (
@@ -76,15 +76,48 @@ const LearnMore = () => {
 export const DemoVideo = () => {
   return (
     <iframe
-      id="demo-video"
-      style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
-      src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
-      title="YouTube video player"
-      frameBorder="0"
-      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-      referrerPolicy="strict-origin-when-cross-origin"
-      allowFullScreen
+    id="demo-video"
+    style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
+    src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
+    title="YouTube video player"
+    frameBorder="0"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+    referrerPolicy="strict-origin-when-cross-origin"
+    allowFullScreen
     ></iframe>
+  );
+};
+
+export const Fosdem = () => {
+  return (
+    <div id="fosdembanner" className="row" style={{marginBottom: "25em"}}>
+    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "sticky", top: "0px", float: "top",
+    }}/>
+
+    <div id="fosdemtext"
+    style={{zIndex:2, color: "#ffff00",
+      fontSize: "200%", fontWeight: "300", lineHeight: "1.5em",
+      position: "absolute",
+    }}>
+    <h2 style={{color: "#dc3d06", fontSize:"400%", fontWeight: "800"}}>Hello Fosdem!</h2>
+    <div style={{ backgroundColor: "#999999cc", padding: "50px", width: "66%", borderRadius: "120px", marginLeft: "17%"}}>
+    <p>Nyrkiö is at Fosdem</p><p> Here is the Nyrkiö bingo card for the weekend</p>
+    <hr />
+    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a>:</p>
+    <p>Continuous Performance Engineering HowTo</p>
+    <hr />
+    <img src={stickers} alt="stickers" style={{width: "33%", float: "right"}}/>
+    <p>&nbsp;</p>
+    <p>Find Henrik, <br /> he has stickers</p>
+    <hr />
+    <p>Sign up for our new Nyrkiö Runner for GitHub Service (below)</p>
+    <p>No free tier, but you can afford 10 c/hour!</p>
+
+    <p>We're trying to get 100 GitHub installations during this weekend. This would get us into the GitHub marketplace!</p>
+    </div>
+    </div>
+    <div clear="both"></div>
+    </div>
   );
 };
 
@@ -196,22 +229,10 @@ export const FrontPage = ({loggedIn}) => {
 
       <div className="frontpage container-fluid text-center w-100">
 
-          <div className="coming-soon">
-          <a href="https://www.youtube.com/shorts/auZY4_PljWw" target="youtube">
-          <img id="idautumnRunnerYoutube" src={AutumnRunnerYoutube} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%", marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
-          <img id="idautumnRunner" src={AutumnRunner} alt="Woman running, red sneakers, autumn leaves" style={{"width": "20%", maxWidth:"13em", borderRadius: "15px", boxShadow:"5px 5px 9px #99999999", border: "4px solid #a9988355", position: "absolute", left: "2%",  marginRight: "2%", marginLeft: "5%", marginBottom: "15em", }} />
-          </a>
 
-          <p>Coming soon: &nbsp;&nbsp;<big><strong className="nyrkio-accent">Nyrkiö runners</strong></big></p>
-          <p>Continuous Benchmarking with nanosecond precision!</p>
-          <p>Be among the first to hear about it: </p>
-          <p><a href="https://nyrkio.activehosted.com/f/5">Sign up for our upcoming product news mailing list ...</a></p>
 
-          </div>
-
+          <Fosdem />
           <div className="padding-block-sm " style={{clear:"both"}}></div>
-
-
           <FeatureBanner1 />
 
           <div className="padding-block-sm "></div>

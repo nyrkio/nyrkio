@@ -339,7 +339,7 @@ export const LoginButton = ({ loggedIn, setLoggedIn }) => {
     <>
       <Link
         to="/login"
-        className="btn btn-success"
+        className="btn btn-success loginbutton"
         loggedin={loggedIn}
         setloggedin={setLoggedIn}
       >

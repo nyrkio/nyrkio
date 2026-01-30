@@ -46,6 +46,13 @@ export const LogoSlogan = () => {
     </div>
   );
 };
+export const Slogan = () => {
+  return (
+    <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default">
+    <h1><span className="git">Continuous Benchmarking</span><span className="for"> as a Service</span></h1>
+    </div>
+  );
+};
 export const LogoBrownSlogan = () => {
   return (
     <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default">
@@ -72,3 +79,10 @@ export const LogoSloganNarrow = () => {
   );
 };
 
+export const SloganNarrow = () => {
+  return (
+    <div className="container-fluid text-center nyrkio-title nyrkio-logo nyrkio-logo-default col-sm-12 col-md-10">
+    <h1>Continuous Benchmarking</h1>
+    </div>
+  );
+};

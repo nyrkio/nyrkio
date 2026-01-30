@@ -37,7 +37,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
-import { LogoSlogan, LogoSloganNarrow } from "./components/Logo";
+import { Slogan, LogoSloganNarrow } from "./components/Logo";
 
 const Nothing = () => {
   return <></>;
@@ -87,8 +87,8 @@ function MainApp({ loggedIn, setLoggedIn }) {
         </div>
         <div className="col-sm-12 container-fluid" id="main-content2">
           <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <><LogoSlogan /><FrontPage loggedIn={loggedIn}/></>} />
-            <Route path="/frontpage" element={<><LogoSlogan /><FrontPage loggedIn={loggedIn}/></>} />
+            <Route path="/" element={loggedIn ? <Nothing /> : <><Slogan /><FrontPage loggedIn={loggedIn}/></>} />
+            <Route path="/frontpage" element={<><Slogan /><FrontPage loggedIn={loggedIn}/></>} />
             <Route path="*" element={<Nothing />} />
           </Routes>
         </div>
