@@ -8,7 +8,7 @@ export default defineConfig({
   publicDir: "public",
   server: {
     proxy: {
-      // "/p/": {target: "http://51.20.96.129/"},
+      "/p/": {target: "http://nyrkio.com/"},
       "/api": {
         target: "https://nyrkio.com",
         //target: "https://staging.nyrkio.com",
