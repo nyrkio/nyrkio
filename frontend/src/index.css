@@ -280,7 +280,7 @@ margin-bottom: 10em;
 .nyrkio-logo.nyrkio-title h1,
 .frontpage .nyrkio-title h1 {
   max-width:90%;
-  font-size: 2em;
+  font-size: 2.5em;
   font-family: "Bebas Neue";
   font-weight: 100;
   letter-spacing: 1.3rem;
@@ -295,7 +295,7 @@ margin-bottom: 10em;
 .frontpage .nyrkio-title h2,
 .nyrkio-logo.nyrkio-title h1 .git,
 .frontpage .nyrkio-title h1 .git {
-  text-shadow: -2px -2px 5px var(--nyrkio-dark-gray);
+  text-shadow: -2px 2px 1px var(--nyrkio-light-gray);
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
@@ -319,7 +319,7 @@ margin-bottom: 10em;
   .frontpage .nyrkio-title h2,
   .nyrkio-logo.nyrkio-title h1,
   .frontpage .nyrkio-title h1 {
-    font-size: 1em;
+    font-size: 2em;
     font-family: "Bebas Neue";
     font-weight: 100;
     letter-spacing: 0.3rem;
