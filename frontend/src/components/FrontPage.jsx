@@ -8,6 +8,11 @@ import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
 import fosdembar from "../static/9174011399_3d91025136_c.jpg";
 import stickers from "../static/stickers.png";
+import runnerimg from "../static/RunnerBackgroundCloserFrame3.png";
+import GHA from "../static/Nyrkio_GHA.png";
+import prgreen from "../static/NyrkioPrReportGreen.png";
+import pr from "../static/NyrkioPrReport.png";
+
 
 const FeatureHighlight = () => {
   return (
@@ -86,34 +91,37 @@ export const DemoVideo = () => {
     allowFullScreen
     ></iframe>
   );
-};
+} ;
 
 export const Fosdem = () => {
   return (
-    <div id="fosdembanner" className="row" style={{marginBottom: "25em"}}>
-    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "sticky", top: "0px", float: "top",
+    <div id="fosdembanner" className="row">
+    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "absolute", zIndex:-1,
     }}/>
 
     <div id="fosdemtext"
     style={{zIndex:2, color: "#ffff00",
-      fontSize: "200%", fontWeight: "300", lineHeight: "1.5em",
-      position: "absolute",
+      fontSize: "150%", fontWeight: "300", lineHeight: "1.5em",
+      position: "relative",
     }}>
     <h2 style={{color: "#dc3d06", fontSize:"400%", fontWeight: "800"}}>Hello Fosdem!</h2>
     <div style={{ backgroundColor: "#999999cc", padding: "50px", width: "66%", borderRadius: "120px", marginLeft: "17%"}}>
     <p>Nyrkiö is at Fosdem</p><p> Here is the Nyrkiö bingo card for the weekend</p>
     <hr />
-    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a>:</p>
+    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a></p>
     <p>Continuous Performance Engineering HowTo</p>
     <hr />
     <img src={stickers} alt="stickers" style={{width: "33%", float: "right"}}/>
     <p>&nbsp;</p>
     <p>Find Henrik, <br /> he has stickers</p>
-    <hr />
-    <p>Sign up for our new Nyrkiö Runner for GitHub Service (below)</p>
+    <br clear="all" />
+    <hr clear="both"/>
+    <p>Try our new service: Nyrkiö Runner for GitHub</p>
+    <p>Continuous Benchmarking with nanosecond precision!</p>
     <p>No free tier, but you can afford 10 c/hour!</p>
 
-    <p>We're trying to get 100 GitHub installations during this weekend. This would get us into the GitHub marketplace!</p>
+    <p>We're trying to get 100 GitHub installations during this weekend. <br />This gets us into the GitHub marketplace!</p>
+    <hr />
     </div>
     </div>
     <div clear="both"></div>
@@ -124,6 +132,7 @@ export const Fosdem = () => {
 const FeatureBanner1 = () => {
   return (
     <>
+    <div style={{backgroundColor: "white", height: "100px"}}>&nbsp;</div>
     <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
     <div className="row justify-content-center">
         <h2>Continuous Benchmarking with Confidence</h2>
@@ -162,38 +171,45 @@ const FeatureBanner1 = () => {
   );
 };
 
+const Mission = () => {
+    return (
+      <>
+      <h3>Nyrkiö creates tools for Continuous Benchmarking so you don't have to</h3>
+      <div className="bg-nyrkio-light-gray mt-5 mb-5 p-5" style={{width: "100%"}}>
+      <img src={runnerimg} style={{maxWidth: "80%", height: "400px", width: "700px",
+        float: "left", margin: "80px", borderRadius:"50px"
+      }}/>
+
+      <h1>Nyrkiö Runner for GitHub</h1>
+      <p>Do you struggle with noisy benchmark results? It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many. At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our pilot customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
+
+      <p>You can now do that too, in 3 easy steps:</p>
+      <p><a href="https://github.com/apps/nyrkio/installations/new">Install Nyrkiö in your GitHub org.</a></p>
+      <p><small>Although we support it, we do <strong>Not</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö.)</small></p>
+
+      <p>Next: <a href="/pricing">Head over to our pricing page</a>, and select one of the subscription levels. The first one is consumption based, you only pay for how many minutes you used the servers.</p>
+      <h4>Choose a runner</h4>
+      <p>Lastly: Replace the <span className="gray-bg">runs-on: ubuntu-latest</span> with <span className="gray-bg">runs-on: nyrkio_4</span> </p>
+      <p>(The number is number of CPUs. Each CPU costs 10 cent/hour plus VAT)</p>
+      <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the noise range in your benchmark resuults decrease by an order of magnitude!</p>
+      </div>
+      <div className="p-5 mt-5 mb-5" style={{fontSize: "150%"}}>
+      <img src={GHA} /><br />
+      <h1>@nyrkio/change-detection</h1>
+        <p>Add our GitHub action after your benchmarks. Nyrkiö will find performance regressions, and improvements, with a high degree of accuracy.</p>
+        <p>You can choose between making the benchmark a gate for your pull requests, or just let Nyrkiö add a comment with a summary of results.</p>
+        <img src={pr} className="mt-5" style={{maxWidth: "700px", position: "relative", left: "-50px"}}/><br />
+        <img src={prgreen} className="mt-5"  style={{maxWidth: "700px", position: "relative", right: "50px"}}/>
+        <hr />
+        <p>Psst... We have matching red and green stickers. Find us at Fosdem!</p>
+        </div>
+      </>
+    );
+};
+
 const FeatureBanner2 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
-      <div className="row text-end justify-content-center pt-5">
-        <div className="col-md-4 col-sm-12 align-self-center">
-          <div className="row text-center">
-            <h2>Integrate with your CI/CD</h2>
-          </div>
-          <div className="row text-start">
-            <p>
-              Integrate Nyrkiö with your CI/CD pipeline to ensure that
-              performance changes are caught before they reach production.
-            </p>
-            <p>
-              It doesn't matter whether you've got end to end tests or
-              microbenchmarks. Track metrics as you develop and get notified as
-              soon as a change is detected.
-            </p>
-          </div>
-        </div>
-        <div className="col-md-5 col-sm-12">
-          <img
-            style={{
-              width: "100%",
-              border: "#efefeb 10px solid",
-              borderRadius: "5px",
-            }}
-            src={cicd}
-            alt="GitHub commit"
-          />
-        </div>
-      </div>
       <div className="row text-center justify-content-center py-5">
         <div className="col-md-5 col-sm-12 align-items-center">
           <img
@@ -233,7 +249,8 @@ export const FrontPage = ({loggedIn}) => {
 
           <Fosdem />
           <div className="padding-block-sm " style={{clear:"both"}}></div>
-          <FeatureBanner1 />
+          <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
+          <Mission />
 
           <div className="padding-block-sm "></div>
           {loggedIn? "" :
@@ -268,6 +285,7 @@ export const FrontPage = ({loggedIn}) => {
 
           <div className="padding-block "></div>
 
+          <FeatureBanner1 />
           <FeatureBanner2 />
           <LearnMore />
         </div>
