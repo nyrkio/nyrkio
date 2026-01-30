@@ -641,7 +641,12 @@ button:focus-visible {
 }
 .navbar-light .navbar-nav .nav-link {
   padding-right: 1em;
-  padding-top: 1em;
+  padding-top: 0;
+  color: var(--nyrkio-horn-dark-brown);
+}
+
+.navbar-light .navbar-nav .nav-link:hover {
+  color: var(--nyrkio-active);
 }
 
 
@@ -653,19 +658,13 @@ button:focus-visible {
   padding-bottom: 0.3em;
 }
 
-.navbar-light .navbar-nav .nav-link {
-  color: var(--nyrkio-horn-dark-brown);
-}
-
-.navbar-light .navbar-nav .nav-link:hover {
-  color: var(--nyrkio-active);
-}
 
 .navbar-top .nyrkio-logo-img {
   max-width: 7.5em;
   max-height: 2em;
   position: relative;
-  bottom: -0.1em;
+  bottom: -7px;
+  margin-right: 30px;
 
 }
 
@@ -677,6 +676,13 @@ button:focus-visible {
   top: -0.8em;
 }
 .navbar-top .nyrkio-logo:hover {
+}
+
+#dropdownwrapper,
+.navbar-top .loginbutton {
+  position: absolute;
+  top: 5px;
+  right: 13px;
 }
 
 .navbar-left .navbar-nav a.nyrkio-logo-nav-link,

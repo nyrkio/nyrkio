@@ -117,7 +117,7 @@ export const UserMenu = ({ setLoggedIn }) => {
   };
 
   return (
-    <Dropdown>
+    <Dropdown id="dropdownwrapper">
       <Dropdown.Toggle variant="success" id="dropdown-basic">
         <span className="bi bi-gear-fill"> {username}</span>
       </Dropdown.Toggle>
