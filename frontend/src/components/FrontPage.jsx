@@ -114,9 +114,10 @@ export const Fosdem = () => {
     <img src={stickers} alt="stickers" style={{width: "33%", float: "right"}}/>
     <p>&nbsp;</p>
     <p>Find Henrik, <br /> he has stickers</p>
-    <hr />
+    <br clear="all" />
+    <hr clear="both"/>
     <p>Try our new service: Nyrkiö Runner for GitHub</p>
-    <p>Continuous Benchmarking with nánosecond precision!</p>
+    <p>Continuous Benchmarking with nanosecond precision!</p>
     <p>No free tier, but you can afford 10 c/hour!</p>
 
     <p>We're trying to get 100 GitHub installations during this weekend. <br />This gets us into the GitHub marketplace!</p>
@@ -209,35 +210,6 @@ const Mission = () => {
 const FeatureBanner2 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
-      <div className="row text-end justify-content-center pt-5">
-        <div className="col-md-4 col-sm-12 align-self-center">
-          <div className="row text-center">
-            <h2>Integrate with your CI/CD</h2>
-          </div>
-          <div className="row text-start">
-            <p>
-              Integrate Nyrkiö with your CI/CD pipeline to ensure that
-              performance changes are caught before they reach production.
-            </p>
-            <p>
-              It doesn't matter whether you've got end to end tests or
-              microbenchmarks. Track metrics as you develop and get notified as
-              soon as a change is detected.
-            </p>
-          </div>
-        </div>
-        <div className="col-md-5 col-sm-12">
-          <img
-            style={{
-              width: "100%",
-              border: "#efefeb 10px solid",
-              borderRadius: "5px",
-            }}
-            src={cicd}
-            alt="GitHub commit"
-          />
-        </div>
-      </div>
       <div className="row text-center justify-content-center py-5">
         <div className="col-md-5 col-sm-12 align-items-center">
           <img
