@@ -97,6 +97,7 @@ export const PricingPage = ({ loggedIn }) => {
                   <li>Tuned for <em>stable performance</em></li>
                   <li>Change Detection & Graphs included</li>
                 </ul>
+                {loggedIn ? (
                   <form
                     action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
                     method="POST"
@@ -116,11 +117,19 @@ export const PricingPage = ({ loggedIn }) => {
                       Subscribe (pay after use)
                     </button>
                   </form>
-              </div>
+                ) : (
+                  <button
+                  type="button"
+                  className="w-100 btn btn-lg btn-success p-3"
+                  >
+                  <a className="btn-link" href="/signup">
+                  Sign up
+                  </a>
+                  </button>
+                )}
+                </div>
             </div>
           </div>
-
-
 
 
 
