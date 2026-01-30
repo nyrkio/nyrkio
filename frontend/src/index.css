@@ -157,27 +157,54 @@ img.nyyrikki-original-art {
 
 body .footer,
 body.section-about .footer {
-  background-image: url(/src/static/Sayhteella.jpg);
+  background-image: url(https://nyrkio.com/p/NyyrikkiRunner/RunnerBackground6-1920x1348.jpg);
   background-repeat: no-repeat;
-  background-attachment: scroll;
-  background-position: top left;
-  background-size: cover;
+  background-attachment: fixed;
+  background-position: bottom right;
+  background-size: clip;
   background-color: transparent;
 }
 
-body .footer  {
+#footerwrapper {
+  padding-bottom: 200px;
+  height: 100%;
+}
+
+body .footer {
   width: 100vw;
-  padding-bottom: 300px;
+  padding-bottom: 400px;
+  height: 1200px;
 }
 body .footer ul,
 body .footer div {
-  color: var(--nyrkio-light-gray5);
-  width: 66%;
-  margin-left: 3em;
+  color: var(--nyrkio-bear-brown);
+  font-size: 1.1em;
+  line-height: 1.5em;
+  font-weight: 900;
+  text-align: justify;
+
+}
+body .footer ul {
+  top: 900px;
+  display: flex;
+  justify-content: flex-end;
+  padding-right: 90px;
+  margin-bottom: 50px;
+}
+body .footer ul li {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+body footer{
+    float: right;
+    padding-right: 50px;
+    bottom: 0px;
+    width: 600px;
+    max-width: 60%;
 }
 body .footer a {
-  color: var(--nyrkio-light-gray4);
-  font-weight: bold;
+  color: var(--nyrkio-tattoo-red);
+  font-weight: 900;
   text-decoration: underline;
 }
 
@@ -1425,7 +1452,9 @@ div.card.people-card .card-header img {
 }
 
 .footer .footer-legal {
-  font-size: small;
+  font-size: 75%;
+  font-weight: 300;
+  opacity: 0.8;
 }
 
 #nyrkio-settings-userinfo label {
