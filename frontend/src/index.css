@@ -934,6 +934,11 @@ table.pricing-table td {
   font-size: 130%;
 }
 
+.bg-nyrkio-real-gray {
+  color: var(--nyrkio-bear-brown);
+  background-color: rgba(153, 153, 153, 0.8);
+}
+
 .bg-nyrkio-light-gray {
   color: var(--nyrkio-bear-brown);
   background-color: var(--nyrkio-light-gray);
