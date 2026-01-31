@@ -936,7 +936,7 @@ table.pricing-table td {
 
 .bg-nyrkio-real-gray {
   color: var(--nyrkio-bear-brown);
-  background-color: #aaaaaa;;
+  background-color: rgba(153, 153, 153, 0.8);
 }
 
 .bg-nyrkio-light-gray {

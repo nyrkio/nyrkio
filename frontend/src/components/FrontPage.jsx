@@ -174,13 +174,13 @@ const Mission = () => {
       <h3>So you don't have to</h3>
       <div className="row bg-nyrkio-real-gray mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
 
-      <div className="col-xs-6 col-lg-4">
-      <img src={runnerimg} style={{maxHeight: "400px", maxWidth: "700px", marginBottom: "2em"
+      <div className="col-xs-6 col-xl-4">
+      <img src={runnerimg} style={{maxHeight: "400px", maxWidth: "700px", width: "95%", aspectRation: "1/1", marginBottom: "2em"
       }}/>
       </div>
-      <div className="col-xs-0 col-lg-1">
+      <div className="col-xs-0 col-xl-1 p-5">
       </div>
-      <div className="col-xs-6 col-lg-6">
+      <div className="col-xs-6 col-xl-6">
       <h4>Nyrkiö Runner for GitHub</h4>
       <p>Do you struggle with noisy benchmark results? It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many. At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our pilot customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
 
