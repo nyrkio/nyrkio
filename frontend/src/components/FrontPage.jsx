@@ -169,19 +169,23 @@ const FeatureBanner1 = () => {
 const Mission = () => {
     return (
       <>
-      <h3>Nyrkiö creates tools for Continuous Benchmarking. So you don't have to!</h3>
-      <div className="row bg-nyrkio-light-gray mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
+      <h3>Nyrkiö creates tools for Continuous Benchmarking</h3>
 
-      <div className="col-xs-6">
-      <img src={runnerimg} style={{maxWidth: "80%", height: "400px", width: "700px",
-        float: "left", margin: "80px", borderRadius:"50px"
+      <h3>So you don't have to</h3>
+      <div className="row bg-nyrkio-real-gray mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
+
+      <div className="col-xs-6 col-lg-4">
+      <img src={runnerimg} style={{maxHeight: "400px", maxWidth: "700px", marginBottom: "2em"
       }}/>
       </div>
-      <div className="col-xs-6">
+      <div className="col-xs-0 col-lg-1">
+      </div>
+      <div className="col-xs-6 col-lg-6">
       <h4>Nyrkiö Runner for GitHub</h4>
       <p>Do you struggle with noisy benchmark results? It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many. At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our pilot customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
 
       <p>You can now do that too, in 3 easy steps:</p>
+      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       <p><a href="https://github.com/apps/nyrkio/installations/new">Install Nyrkiö in your GitHub org.</a></p>
       <p>Although we support it, we do <strong>Not</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö.</p>
 
@@ -274,7 +278,6 @@ export const FrontPage = ({loggedIn}) => {
           <div className="padding-block-sm " style={{clear:"both"}}></div>
           <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
           <Mission />
-          <FeatureBanner1 />
 
           <div className="padding-block-sm "></div>
           {loggedIn? "" :
@@ -308,8 +311,7 @@ export const FrontPage = ({loggedIn}) => {
           <SampleData />
 
           <div className="padding-block "></div>
-
-          <FeatureBanner2 />
+          <FeatureBanner1 />
           <LearnMore />
         </div>
     </>
