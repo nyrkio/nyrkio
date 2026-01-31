@@ -312,7 +312,6 @@ export const FrontPage = ({loggedIn}) => {
 
           <div className="padding-block "></div>
           <FeatureBanner1 />
-          <LearnMore />
         </div>
     </>
   );
