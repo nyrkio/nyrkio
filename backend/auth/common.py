@@ -16,13 +16,24 @@ from backend.auth.bearer_or_body_transport import BearerOrBodyTransport
 from typing import Optional
 from beanie import PydanticObjectId
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
-from backend.auth.email import send_email, read_template_file
+
+# from backend.auth.email import send_email, read_template_file
+from backend.auth.email import read_template_file
 from fastapi_users.authentication import JWTStrategy
 import os
 
 from backend.db.db import User, DBStore, get_user_db
 
 auth_router = APIRouter(prefix="/auth")
+
+
+async def send_email(email: str, token: str, subject: str, msg: str):
+    """
+    Short circuit email sending, this just logs.
+    """
+    logging.info(
+        f"Email sending is disabled but would have sent: {email} {token} {subject} {msg}"
+    )
 
 
 SECRET = os.environ.get("SECRET_KEY", "fooba")
