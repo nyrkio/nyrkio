@@ -43,6 +43,23 @@ npm run dev
 To run the full stack on your own, use the `docker-compose.dev.yml` file which will start services
 for the proxy (`nginx`), the frontend (`React`Single-page app) and the backend (`FastAPI` app).
 
+Alternatively, you can run the backend and frontend separately using the management scripts:
+
+```console
+# Start backend (foreground mode with logs to stdout)
+python3 etc/nyrkio_backend.py start
+
+# Start backend as daemon (background)
+python3 etc/nyrkio_backend.py start --daemon
+
+# Check status / stop daemon
+python3 etc/nyrkio_backend.py status
+python3 etc/nyrkio_backend.py stop
+
+# Start frontend (connects to local backend by default)
+python3 etc/nyrkio_frontend.py start --mode local
+```
+
 
 ```console
 PACMAN=apt
