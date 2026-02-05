@@ -128,7 +128,12 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
         reset_url = f"{SERVER_NAME}/forgot-password?token={token}"
         msg = read_template_file("forgot-password.html", reset_url=reset_url)
-        await send_email(user.email, token, "nyrkio:com", msg)
+        # await send_email(user.email, token, "nyrkio:com", msg)
+
+        return {
+            "status": "wait",
+            "detail": "Forgot password function is currently subject to manual review and approval. This can take up to 48 hours. Thank you for your patience."
+        }
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
@@ -152,10 +157,14 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
-        await send_email(user.email, token, "Verify your email", msg)
+        # await send_email(user.email, token, "Verify your email", msg)
+        # return {
+        #     "status": "ok",
+        #     "detail": "Sent email to given address, please click on the link",
+        # }
         return {
-            "status": "ok",
-            "detail": "Sent email to given address, please click on the link",
+            "status": "wait",
+            "detail": "Email based registrations are currently subject to manual review and approval. This can take up to 48 hours. Thank you for your patience."
         }
 
     async def get_by_github_username(self, github_username: str):
