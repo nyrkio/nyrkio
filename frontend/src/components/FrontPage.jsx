@@ -88,42 +88,6 @@ export const DemoVideo = () => {
     ></iframe>
   );
 } ;
-
-export const Fosdem = () => {
-  return (
-    <div id="fosdembanner" className="row">
-    <img src={fosdembar} alt="Lot's of people drinking beer, Fosdem 2013. " style={{      position: "absolute", zIndex:-1,
-    }}/>
-
-    <div id="fosdemtext"
-    style={{zIndex:2, color: "#ffff00",
-      fontSize: "150%", fontWeight: "300", lineHeight: "1.5em",
-      position: "relative",
-    }}>
-    <h2 style={{color: "#dc3d06", fontSize:"400%", fontWeight: "800"}}>Hello Fosdem!</h2>
-    <div style={{ backgroundColor: "#999999cc", padding: "50px", width: "66%", borderRadius: "120px", marginLeft: "17%"}}>
-    <p>Nyrkiö is at Fosdem</p><p> Here is the Nyrkiö bingo card for the weekend</p>
-    <hr />
-    <p><a href="https://fosdem.org/2026/schedule/event/YNB7KR-continuous-perf-engineering/">Sunday, at 13:50 (Room H.1301)</a>, <a href="https://live.fosdem.org/watch/h1301">Video stream</a></p>
-    <p>Continuous Performance Engineering HowTo</p>
-    <hr />
-    <img src={stickers} alt="stickers" style={{width: "33%", float: "right"}}/>
-    <p>&nbsp;</p>
-    <p>Find Henrik, <br /> he has stickers</p>
-    <hr />
-    <p>Try our new service: Nyrkiö Runner for GitHub</p>
-    <p>Continuous Benchmarking with nánosecond precision!</p>
-    <p>No free tier, but you can afford 10 c/hour!</p>
-
-    <p>We're trying to get 100 GitHub installations during this weekend. <br />This gets us into the GitHub marketplace!</p>
-    <hr />
-    </div>
-    </div>
-    <div clear="both"></div>
-    </div>
-  );
-};
-
 const FeatureBanner1 = () => {
   return (
     <>
@@ -169,10 +133,7 @@ const FeatureBanner1 = () => {
 const Mission = () => {
     return (
       <>
-      <h3>Nyrkiö creates tools for Continuous Benchmarking</h3>
-
-      <h3>So you don't have to</h3>
-      <div className="row bg-nyrkio-real-gray mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
+      <div className="row mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
 
       <div className="col-xs-6 col-xl-4">
       <img src={runnerimg} style={{maxHeight: "400px", maxWidth: "700px", width: "95%", aspectRation: "1/1", marginBottom: "2em"
@@ -274,9 +235,6 @@ export const FrontPage = ({loggedIn}) => {
 
 
 
-          <Fosdem />
-          <div className="padding-block-sm " style={{clear:"both"}}></div>
-          <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
           <Mission />
 
           <div className="padding-block-sm "></div>
