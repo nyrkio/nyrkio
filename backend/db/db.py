@@ -107,6 +107,10 @@ class UserCreate(schemas.BaseUserCreate):
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
     is_repo_owner: Optional[bool] = False
+    # Change the default: Verify your email first, then you're active
+    is_active: Optional[bool] = False
+    captcha_score: Optional[float] = None
+    catcha_provider: Optional[str] = None
 
 
 class UserUpdate(schemas.BaseUserUpdate):

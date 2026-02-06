@@ -17,8 +17,9 @@ from typing import Optional
 from beanie import PydanticObjectId
 from fastapi_users.db import BeanieUserDatabase, ObjectIDIDMixin
 
-# from backend.auth.email import send_email, read_template_file
-from backend.auth.email import read_template_file
+from backend.auth.email import send_email, read_template_file
+
+# from backend.auth.email import read_template_file
 from fastapi_users.authentication import JWTStrategy
 import os
 
@@ -27,13 +28,13 @@ from backend.db.db import User, DBStore, get_user_db
 auth_router = APIRouter(prefix="/auth")
 
 
-async def send_email(email: str, token: str, subject: str, msg: str):
-    """
-    Short circuit email sending, this just logs.
-    """
-    logging.info(
-        f"Email sending is disabled but would have sent: {email} {token} {subject} {msg}"
-    )
+# async def send_email(email: str, token: str, subject: str, msg: str):
+#     """
+#     Short circuit email sending, this just logs.
+#     """
+#     logging.info(
+#         f"Email sending is disabled but would have sent: {email} {token} {subject} {msg}"
+#     )
 
 
 SECRET = os.environ.get("SECRET_KEY", "fooba")
@@ -73,8 +74,14 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         data = await request.json()
         g_recaptcha_response = data.get("g-recaptcha-response")
         remoteip = request.client.host
-        if not await verify_recaptcha(g_recaptcha_response, remoteip):
+        captcha_ok, captcha_details = await verify_recaptcha(
+            g_recaptcha_response, remoteip
+        )
+        if not captcha_ok:
             raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
+
+        user_create.captcha_score = captcha_details.get("score", -1.0)
+        user_create.captcha_provider = "Google reCaptcha v3"
 
         if user_create.oauth_accounts:
             logging.warning(user_create)
@@ -128,12 +135,9 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
         reset_url = f"{SERVER_NAME}/forgot-password?token={token}"
         msg = read_template_file("forgot-password.html", reset_url=reset_url)
-        # await send_email(user.email, token, "nyrkio:com", msg)
-
-        return {
-            "status": "wait",
-            "detail": "Forgot password function is currently subject to manual review and approval. This can take up to 48 hours. Thank you for your patience."
-        }
+        await send_email(
+            user.email, token, "Request to reset password. (nyrkio.com)", msg
+        )
 
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
@@ -152,19 +156,20 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         g_recaptcha_response = data.get("g-recaptcha-response")
         remoteip = request.client.host
         if g_recaptcha_response is not None:
-            if not await verify_recaptcha(g_recaptcha_response, remoteip):
+            captcha_ok, captcha_details = await verify_recaptcha(
+                g_recaptcha_response, remoteip
+            )
+            if not captcha_ok:
                 raise HTTPException(status_code=400, detail="Blocked by ReCaptcha ..")
 
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)
-        # await send_email(user.email, token, "Verify your email", msg)
-        # return {
-        #     "status": "ok",
-        #     "detail": "Sent email to given address, please click on the link",
-        # }
+        await send_email(
+            user.email, token, "Verify your email (nyrkio.com new user creation)", msg
+        )
         return {
-            "status": "wait",
-            "detail": "Email based registrations are currently subject to manual review and approval. This can take up to 48 hours. Thank you for your patience."
+            "status": "ok",
+            "detail": "Sent email to given address, please click on the link",
         }
 
     async def get_by_github_username(self, github_username: str):
@@ -173,7 +178,9 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
 # Copied from google-recaptcha which is a Flask app, turns out...
 # request.form['g-recaptcha-response']
-async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = None):
+async def verify_recaptcha(
+    g_recaptcha_response: str, remoteip: Optional[str] = None, require_min_score=0.4
+):
     url = "https://www.google.com/recaptcha/api/siteverify"
 
     data = {
@@ -197,7 +204,12 @@ async def verify_recaptcha(g_recaptcha_response: str, remoteip: Optional[str] = 
         return False
     res = response.json()
     logging.info(res)
-    return res.get("success", False)
+    is_success = res.get("success", False)
+    is_above_min_score = True
+    if require_min_score is not None and require_min_score:
+        is_above_min_score = float(res.get("score", -1.0)) >= require_min_score
+
+    return is_success and is_above_min_score
 
 
 class CphJWTStrategy(JWTStrategy):
