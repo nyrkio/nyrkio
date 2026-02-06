@@ -76,8 +76,9 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         remoteip = request.client.host
         realip = request.headers.get("x-real-ip")
         forwardedip = request.headers.get(" X-Forwarded-For")
-        logging(f"Remote ip for attempted new user registration is {remoteip} {realip} {forwardedip}")
-
+        logging(
+            f"Remote ip for attempted new user registration is {remoteip} {realip} {forwardedip}"
+        )
 
         captcha_ok, captcha_details = await verify_recaptcha(
             g_recaptcha_response, remoteip
