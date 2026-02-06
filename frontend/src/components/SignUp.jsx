@@ -196,7 +196,7 @@ export const SignUpPage = () => {
           </div>
           */}
           <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
-            <p><em>Nyrkiö unplugged (no GitHub):</em></p>
+            <p><em>Create account without GitHub integration:</em></p>
             <form onSubmit={e => nop()}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
@@ -227,9 +227,11 @@ export const SignUpPage = () => {
                   Submit
                 </button>
               </div>
+              <div id="recaptchadiv" className="mt-5"></div>
               </div>
             </form>
             <div className="row pt-3">
+              <hr />
               <div className="form-text text-justify" >
                   Already have an acccount? <a href="/login">Log in here</a>
               </div>
