@@ -60,8 +60,6 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
           <Link
             to="/signup"
             className="btn btn-nothing signupbutton"
-            loggedin={loggedIn}
-            setloggedin={setLoggedIn}
           >
             Create account
           </Link>
