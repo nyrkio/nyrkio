@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import { LogOut, LoginButton } from "./Login.jsx";
 import { UserMenu } from "./UserMenu.jsx";
 import { SmallLogo } from "./Logo";
@@ -55,7 +56,17 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
         {loggedIn ? (
             <UserMenu setLoggedIn={setLoggedIn} />
         ) : (
+          <div className="loginmenu">
+          <Link
+            to="/signup"
+            className="btn btn-nothing signupbutton"
+            loggedin={loggedIn}
+            setloggedin={setLoggedIn}
+          >
+            Create account
+          </Link>
           <LoginButton />
+          </div>
         )}
         <div className=" nyrkio-login-controls">
         <ImpersonateControls />
