@@ -76,7 +76,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         remoteip = request.client.host
         realip = request.headers.get("x-real-ip")
         forwardedip = request.headers.get(" X-Forwarded-For")
-        logging(
+        logging.info(
             f"Remote ip for attempted new user registration is {remoteip} {realip} {forwardedip}"
         )
 
