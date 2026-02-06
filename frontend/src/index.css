@@ -686,10 +686,15 @@ button:focus-visible {
 }
 
 #dropdownwrapper,
-.navbar-top .loginbutton {
+.navbar-top .loginmenu {
   position: absolute;
   top: 5px;
   right: 13px;
+}
+
+.navbar-top .signupbutton {
+  margin-right: 7px;
+  padding: 7px;
 }
 
 .navbar-left .navbar-nav a.nyrkio-logo-nav-link,

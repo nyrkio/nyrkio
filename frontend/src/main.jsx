@@ -23,10 +23,10 @@ ReactDOM.createRoot(document.getElementById("root")).render(
     nonce: undefined // optional, default undefined
   }}
   container={{ // optional to render inside custom element
-    element: "recaptchabutton",
+    element: "recaptchadiv",
     parameters: {
       badge: 'inline', // optional, default undefined
-      theme: 'light', // optional, default undefined
+      // theme: 'light', // optional, default undefined
     }
   }}
   >
