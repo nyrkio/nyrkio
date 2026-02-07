@@ -94,7 +94,7 @@ const FeatureBanner1 = () => {
   return (
     <>
     <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
-    <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
+    <div className="container-fluid p-5 text-center">
     <div className="row justify-content-center">
         <h2>Change Point Detection</h2>
         <div className="col-xl-5 col-lg-6 col-sm-12 text-start align-text-bottom align-self-center">
@@ -172,9 +172,7 @@ const Mission = () => {
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
-      <h3><a href="/pricing">2. Head over to our pricing page</a></h3>
-
-      <p>...and select one of the subscription levels.</p>
+      <h3><a href="/pricing">2. Select a subscription level</a></h3>
 
       <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
 
