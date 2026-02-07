@@ -8,7 +8,9 @@ import { MyUserCarousel } from "./Carousel";
 import { useEffect, useState } from "react";
 import fosdembar from "../static/9174011399_3d91025136_c.jpg";
 import stickers from "../static/stickers.png";
-import runnerimg from "../static/RunnerBackgroundCloserFrame3.webp";
+import select1before from "../static/runner/turso_select1_ghrunner.png";
+import select1after from "../static/runner/turso_select1_nyrkiorunner.png";
+import { Slogan, LogoSloganNarrow } from "./Logo";
 
 const FeatureHighlight = () => {
   return (
@@ -94,16 +96,18 @@ const FeatureBanner1 = () => {
     <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
     <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
     <div className="row justify-content-center">
-        <h2>Continuous Benchmarking with Confidence</h2>
+        <h2>Change Point Detection</h2>
         <div className="col-xl-5 col-lg-6 col-sm-12 text-start align-text-bottom align-self-center">
           <p>
             Even the smallest performance changes can have a big impact on your
             users. And if you allow them to compound, your performance risks facing death by a thousand paper cuts...
-            But small 1-5% performance regressions are hard to spot in testing, especially when shifting left to do automatedd testing.
+            </p>
+            <p>
+            Small 1-5% performance regressions are hard to spot in testing, especially when shifting left to do automatedd testing.
             when the random variation in your benchmarking results is often bigger than that.
           </p>
           <p>
-            Nyrkiö uses <strong>Change Point Detection</strong> to identify every change
+            Nyrkiö uses a state of the art <strong>Change Point Detection</strong> algorithm to identify every change
             in your performance data.
             Our change point detection algorithm is designed to work with noisy performance
             data which means you can catch every performance regression, however small or large.
@@ -133,33 +137,63 @@ const FeatureBanner1 = () => {
 const Mission = () => {
     return (
       <>
-      <div className="row mt-5 mb-5 p-5" style={{width: "100%", lineHeight:"170%"}}>
+      <div className="row w-100 p-2">
 
-      <div className="col-xs-6 col-xl-4">
-      <img src={runnerimg} style={{maxHeight: "400px", maxWidth: "700px", width: "95%", aspectRation: "1/1", marginBottom: "2em"
-      }}/>
+      <div className="col-xs-6 nyrkio-runner-title">
+      <h3 className="">New:</h3>
+      <h1 className="">Nyrkiö Runner for GitHub</h1>
       </div>
-      <div className="col-xs-0 col-xl-1 p-5">
+
       </div>
-      <div className="col-xs-6 col-xl-6">
-      <h4>Nyrkiö Runner for GitHub</h4>
-      <p>Do you struggle with noisy benchmark results? It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many. At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our pilot customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
+      <div className="row w-100 p-2">
 
-      <p>You can now do that too, in 3 easy steps:</p>
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
-      <p><a href="https://github.com/apps/nyrkio/installations/new">Install Nyrkiö in your GitHub org.</a></p>
-      <p>Although we support it, we do <strong>Not</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö.</p>
+      <div className="col-xs-12 col-xl-6 text-justify">
+      <p>Do you struggle with noisy benchmark results?</p>
+      <p>It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many.</p>
+      <p>At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
+      </div>
 
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
-
-      <p>Next: <a href="/pricing">Head over to our pricing page</a>, and select one of the subscription levels. The first one is consumption based, you only pay for how many minutes you used the servers.</p>
+      <div className="col-xs-12 col-xl-6 text-justify">
+      <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "90%", aspectRatio: "1/1"}}/>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
+      </div>
 
-      <h4>Choose a runner</h4>
+      <div className="col-xs-12 col-xl-6 text-justify">
+
+      <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org</a></h3>
+      <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
+
+      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
+
+      </div>
+
+      <div className="col-xs-12 col-xl-6 text-justify">
+      </div>
+
+      <div className="col-xs-12 col-xl-6 text-justify">
+      <h3><a href="/pricing">2. Head over to our pricing page</a></h3>
+
+      <p>...and select one of the subscription levels.</p>
+
+      <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
+
+      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}} />
+
+      </div>
+
+      <div className="col-xs-12 col-xl-6 text-justify">
+      </div>
+
+      <div className="col-xs-12 col-xl-6 text-justify">
+      <h3 className="nyrkio-accent">3. Choose a runner</h3>
       <p>Lastly: Replace the <span className="gray-bg">runs-on: ubuntu-latest</span> with <span className="gray-bg">runs-on: nyrkio_4</span> </p>
-      <p>(The number is number of CPUs. Each CPU costs 10 cent/hour plus VAT)</p>
-      <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the noise range in your benchmark results decrease by an order of magnitude!</p>
+      <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
+      </div>
+      <div className="col-xs-12 col-xl-6 text-justify">
+      <img src={select1after} alt="Less noisy graph from Nyrkio dashboard, using Nyrkio runners" title="Turso SELECT 1 benchmark. Variation within 9 ns, noise range = 5%" style={{maxWidth: "90%", aspectRatio: "1/1"}}/>
+
+      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
       </div>
       </>
@@ -232,6 +266,20 @@ export const FrontPage = ({loggedIn}) => {
     <>
 
       <div className="frontpage container-fluid text-center w-100">
+      <img src="/p/NyyrikkiRunner/RunnerBackground-1920-banner2.jpg" style={{
+        width: "100%", aspectRation: "1/1", marginBottom: "2em",
+        position: "relative", top: "0px", left: "0px", right: "0px"
+
+      }}/>
+      <Slogan />
+
+      {loggedIn? "" :
+        (<button className="btn btn-success" style={{position: "relative", top:"-100px", boxShadow: "5px 5px 3px #aaaaaaaa"}}>
+        <a className="btn-link" href="/signup">
+        Create account &amp; get started
+        </a>
+        </button>
+        )}
 
 
 
@@ -257,6 +305,7 @@ export const FrontPage = ({loggedIn}) => {
           <div className="padding-block-sm "></div>
           <p style={{fontSize: "120%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
 
+          <FeatureBanner1 />
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
           <div className="row">
@@ -269,7 +318,6 @@ export const FrontPage = ({loggedIn}) => {
           <SampleData />
 
           <div className="padding-block "></div>
-          <FeatureBanner1 />
         </div>
     </>
   );
