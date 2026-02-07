@@ -334,14 +334,12 @@ export const LogOut = ({ setLoggedIn }) => {
   );
 };
 
-export const LoginButton = ({ loggedIn, setLoggedIn }) => {
+export const LoginButton = () => {
   return (
     <>
       <Link
         to="/login"
         className="btn btn-success loginbutton"
-        loggedin={loggedIn}
-        setloggedin={setLoggedIn}
       >
         Log In
       </Link>

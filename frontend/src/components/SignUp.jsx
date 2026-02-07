@@ -7,8 +7,34 @@ import {
   useGoogleReCaptcha
 } from 'react-google-recaptcha-v3';
 
+
 export const SignUpPage = () => {
-  const formState = {
+
+  return (
+    <GoogleReCaptchaProvider
+    reCaptchaKey="6LehQ1IsAAAAACQWFomHKj-zBF_cMG91fWzk4nlh"
+    scriptProps={{
+      async: true, // optional, default to false,
+      defer: false, // optional, default to false
+      appendTo: 'head', // optional, default to "head", can be "head" or "body",
+      nonce: undefined // optional, default undefined
+    }}
+    container={{ // optional to render inside custom element
+      element: "recaptchadiv",
+      parameters: {
+        badge: 'inline', // optional, default undefined
+        // theme: 'light', // optional, default undefined
+      }
+    }}
+    >
+    <SignUpPage2 />
+    </GoogleReCaptchaProvider>
+  );
+
+};
+
+export const SignUpPage2 = () => {
+    const formState = {
     Visible: "Visible",
     Registered: "Registered",
     Sent: "Sent email",
@@ -62,7 +88,7 @@ export const SignUpPage = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-          },
+         },
           body: JSON.stringify(jdata),
         });
         if(verificationData.status <300){
@@ -196,7 +222,7 @@ export const SignUpPage = () => {
           </div>
           */}
           <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
-            <p><em>Create account without GitHub integration:</em></p>
+          <p><em>Create account without GitHub integration:</em></p>
             <form onSubmit={e => nop()}>
               <div className="mb-3">
                 <label htmlFor="emailInput" className="form-label">
