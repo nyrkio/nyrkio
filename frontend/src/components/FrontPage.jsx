@@ -312,7 +312,7 @@ export const FrontPage = ({loggedIn}) => {
       <Slogan />
 
       {loggedIn? "" :
-        (<button className="btn btn-success" style={{position: "relative", top:"-100px", boxShadow: "5px 5px 3px #aaaaaaaa"}}>
+        (<button className="btn btn-success" style={{position: "relative", top:"-200px", boxShadow: "5px 5px 3px #aaaaaaaa"}}>
         <a className="btn-link" href="/signup">
         Create account &amp; get started
         </a>
