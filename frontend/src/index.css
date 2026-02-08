@@ -229,6 +229,16 @@ body #root div.container-fluid {
   padding-right: 0px;
 }
 
+#main-content2 li {
+  margin-top: 2em;
+  margin-bottom: 2em;
+}
+
+li {
+  margin-top: 1em;
+  margin-bottom: 1em;
+}
+
 @media (min-width: 1200px) {
   .section-about #main-content .container {
     max-width: none;
@@ -276,7 +286,7 @@ margin-bottom: 10em;
 }
 
 .gray-bg {
-  background-color: #cccccc;
+  background-color: #e5e5e7;
   padding: 4px;
   padding-left: 10px;
   padding-right: 10px;
@@ -968,6 +978,11 @@ table.pricing-table td {
 .bg-nyrkio-real-gray {
   color: var(--nyrkio-bear-brown);
   background-color: rgba(153, 153, 153, 0.8);
+}
+
+.bg-nyrkio-silver {
+  color: var(--nyrkio-bear-brown);
+  background-color: #e5e5e7;
 }
 
 .bg-nyrkio-light-gray {
