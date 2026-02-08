@@ -8,8 +8,8 @@ export default defineConfig({
   publicDir: "public",
   server: {
     proxy: {
-      // "/p/": {target: "http://localhost/"},
-      "/p/": {target: "http://nyrkio.com/"},
+      "/p/": {target: "http://localhost/"},
+      // "/p/": {target: "http://nyrkio.com/"},
       "/api": {
         target: "https://nyrkio.com",
         //target: "https://staging.nyrkio.com",

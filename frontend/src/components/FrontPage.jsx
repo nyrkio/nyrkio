@@ -11,6 +11,7 @@ import stickers from "../static/stickers.png";
 import select1before from "../static/runner/turso_select1_ghrunner.png";
 import select1after from "../static/runner/turso_select1_nyrkiorunner.png";
 import { Slogan, LogoSloganNarrow } from "./Logo";
+import { CpuHours } from "./PricingPage";
 
 const FeatureHighlight = () => {
   return (
@@ -133,7 +134,7 @@ const FeatureBanner1 = () => {
   );
 };
 
-const Mission = () => {
+const Mission = ({loggedIn}) => {
     return (
       <>
       <div className="row w-100 p-2">
@@ -160,7 +161,7 @@ const Mission = () => {
 
       <div className="col-xs-12 col-xl-6 text-justify">
 
-      <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org >></a></h3>
+      <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org &gt;&gt;</a></h3>
       <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
@@ -168,21 +169,32 @@ const Mission = () => {
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
+      <br />
+      <br />
+      <br />
+      <a href="https://github.com/apps/nyrkio/installations/new">&gt; &gt; &gt; <img src="/p/NyyrikkiRunner/RunnerCat-nobg-400x500.png" /></a>
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
-      <h3><a href="/pricing">2. Select a subscription level >></a></h3>
+      <h3><a href="/pricing">2. Select a subscription level &gt;&gt;</a></h3>
 
       <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
 
+
+      </div>
+
+      <div className="col-xs-0 col-md-3 col-lg-4 col-xl-2">
+      </div>
+      <div className="col-xs-6 col-sm-6 col-md-6  col-lg-4 col-xl-3 text-center justify-content-center nyrkio-plans">
+      <CpuHours loggedIn={loggedIn} short={true} />
+      <p style={{position: "relative", right: "-5%", top: "-3em"}}><a href="/pricing">Other...</a></p>
+      </div>
+      <div className="col-xs-0 col-md-3 col-lg-4 col-xl-1">
+
+      </div>
+
+      <div className="col-xs-12 col-xl-6 text-justify">
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}} />
-
-      </div>
-
-      <div className="col-xs-12 col-xl-6 text-justify">
-      </div>
-
-      <div className="col-xs-12 col-xl-6 text-justify">
       <h3 className="nyrkio-accent">3. Choose a runner</h3>
       <p>Lastly: Replace the <span className="gray-bg">runs-on: ubuntu-latest</span> with <span className="gray-bg">runs-on: nyrkio_4</span> </p>
       <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
@@ -212,7 +224,7 @@ const OneTwoThree = () => {
     <p>We provide 4 tools, you can use one or all of them:</p>
     <ol>
     <li><a href="https://github.com/nyrkio/change-detection"><tt>nyrkio/change-detection</tt> GitHub action</a>:<br /> understands the output of the most common benchmark frameworks. It parses your benchmark results, and sends them to nyrkio.com for analysis.</li>
-    <li><span className="nyrkio-accent">Nyrkiö Change Detection Service</span>:<br /> Finds performance regressions in your history of continuous benchmarking results. We use a new, state of the art signal processing algorithm that has a low rate of false positives, even in the face of noisy data. Nyrkiö Change Detection Service can also create a GitHub issue or send you a Slack when a regression is found.</li>
+    <li><a href="/docs/getting-started">Nyrkiö Change Detection Service</a>:<br /> Finds performance regressions in your history of continuous benchmarking results. We use a new, state of the art signal processing algorithm that has a low rate of false positives, even in the face of noisy data. Nyrkiö Change Detection Service can also create a GitHub issue or send you a Slack when a regression is found.</li>
     <li><span className="nyrkio-accent">Nyrkiö Runners for GitHub</span>:<br />
     Our GitHub 3rd party runners are configured not for maximum performance but for stable, repeatable performance. Typically you will see a 10x reduction in environmental noise, when compared to the default GitHub runner.</li>
     <li><a href="https://nyrkio.com/docs/git-perf-plugin">git-perf plugin</a><br /> integrates your continuous benchmarking history with <tt>git status</tt>, <tt>git log</tt> and <tt>git blame</tt>.</li>
@@ -307,7 +319,7 @@ export const FrontPage = ({loggedIn}) => {
 
 
 
-          <Mission />
+          <Mission loggedIn={loggedIn}/>
           <OneTwoThree />
 
           <div className="padding-block-sm "></div>

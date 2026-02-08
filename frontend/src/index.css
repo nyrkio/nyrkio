@@ -234,10 +234,6 @@ body #root div.container-fluid {
   margin-bottom: 2em;
 }
 
-li {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
 
 @media (min-width: 1200px) {
   .section-about #main-content .container {
@@ -1321,10 +1317,11 @@ color: #212529;
 .nyrkio-pricing .pricing-table .nyrkio-right small {
   font-style: italic;
 }
-.nyrkio-pricing .nyrkio-plans .col .card {
-  min-height: 25em;
-}
 
+.nyrkio-pricing .nyrkio-plans .col .card {
+    min-height: 25em;
+}
+.card h1.pricing-card-title small.fw-light,
 .nyrkio-pricing .nyrkio-plans .col .card small {
   font-size: 40%;
   font-weight: light;
@@ -1342,11 +1339,26 @@ color: #212529;
   left: 10%;
 }
 
+.nyrkio-pricing .nyrkio-plans .card button,
 .nyrkio-pricing .nyrkio-plans .col .card button {
   position: absolute;
   bottom: 0px;
   left: 0px;
 }
+.card h1.pricing-card-title,
+.nyrkio-pricing .nyrkio-plans h1 {
+  margin-top: 0.5em;
+}
+
+.nyrkio-plans div.card-body {
+  padding: 0px;
+}
+#main-content2 .nyrkio-plans {
+  margin-bottom: 3em;
+  opacity: 0.8;
+}
+
+
 
 .nyrkio-pricing .calculator #company_name {
   width: 15em;
