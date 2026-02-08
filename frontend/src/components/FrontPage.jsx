@@ -154,14 +154,14 @@ const Mission = () => {
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
-      <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "90%", aspectRatio: "1/1"}}/>
+      <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "100%"}}/>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
 
-      <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org</a></h3>
+      <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org >></a></h3>
       <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
@@ -172,7 +172,7 @@ const Mission = () => {
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
-      <h3><a href="/pricing">2. Select a subscription level</a></h3>
+      <h3><a href="/pricing">2. Select a subscription level >></a></h3>
 
       <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
 
@@ -189,7 +189,7 @@ const Mission = () => {
       <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
       </div>
       <div className="col-xs-12 col-xl-6 text-justify">
-      <img src={select1after} alt="Less noisy graph from Nyrkio dashboard, using Nyrkio runners" title="Turso SELECT 1 benchmark. Variation within 9 ns, noise range = 5%" style={{maxWidth: "90%", aspectRatio: "1/1"}}/>
+      <img src={select1after} alt="Less noisy graph from Nyrkio dashboard, using Nyrkio runners" title="Turso SELECT 1 benchmark. Variation within 9 ns, noise range = 5%" style={{maxWidth: "100%"}}/>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
@@ -265,7 +265,7 @@ export const FrontPage = ({loggedIn}) => {
 
       <div className="frontpage container-fluid text-center w-100">
       <img src="/p/NyyrikkiRunner/RunnerBackground-1920-banner2.jpg" style={{
-        width: "100%", aspectRation: "1/1", marginBottom: "2em",
+        width: "100%", marginBottom: "2em",
         position: "relative", top: "0px", left: "0px", right: "0px"
 
       }}/>
