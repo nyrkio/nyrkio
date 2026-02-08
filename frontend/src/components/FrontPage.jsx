@@ -93,7 +93,6 @@ export const DemoVideo = () => {
 const FeatureBanner1 = () => {
   return (
     <>
-    <div style={{backgroundColor: "white", height: "300px"}}>&nbsp;</div>
     <div className="container-fluid p-5 text-center">
     <div className="row justify-content-center">
         <h2>Change Point Detection</h2>
@@ -198,6 +197,33 @@ const Mission = () => {
     );
 };
 
+
+const OneTwoThree = () => {
+  return (
+    <>
+    <div className="row w-100 p-5 bg-nyrkio-silver">
+
+    <div className="col-xs-12 col-md-6 col-xl-4">
+    <h1 className="">What is Nyrkiö, really?</h1>
+    </div>
+    <div className="col-xs-12 col-md-6 col-xl-8 text-justify">
+    <p>Nyrkiö provides tools and server configurations that you can use in your <span className="nyrkio-accent">Continuous Benchmarking workflows.</span></p>
+
+    <p>We provide 4 tools, you can use one or all of them:</p>
+    <ol>
+    <li><a href="https://github.com/nyrkio/change-detection"><tt>nyrkio/change-detection</tt> GitHub action</a>:<br /> understands the output of the most common benchmark frameworks. It parses your benchmark results, and sends them to nyrkio.com for analysis.</li>
+    <li><span className="nyrkio-accent">Nyrkiö Change Detection Service</span>:<br /> Finds performance regressions in your history of continuous benchmarking results. We use a new, state of the art signal processing algorithm that has a low rate of false positives, even in the face of noisy data. Nyrkiö Change Detection Service can also create a GitHub issue or send you a Slack when a regression is found.</li>
+    <li><span className="nyrkio-accent">Nyrkiö Runners for GitHub</span>:<br />
+    Our GitHub 3rd party runners are configured not for maximum performance but for stable, repeatable performance. Typically you will see a 10x reduction in environmental noise, when compared to the default GitHub runner.</li>
+    <li><a href="https://nyrkio.com/docs/git-perf-plugin">git-perf plugin</a><br /> integrates your continuous benchmarking history with <tt>git status</tt>, <tt>git log</tt> and <tt>git blame</tt>.</li>
+    </ol>
+    </div>
+    </div>
+    </>
+  );
+};
+
+
 const FeatureBanner2 = () => {
   return (
     <div className="container-fluid p-5 text-center bg-nyrkio-light-gray">
@@ -282,6 +308,7 @@ export const FrontPage = ({loggedIn}) => {
 
 
           <Mission />
+          <OneTwoThree />
 
           <div className="padding-block-sm "></div>
           {loggedIn? "" :
@@ -303,7 +330,6 @@ export const FrontPage = ({loggedIn}) => {
           <div className="padding-block-sm "></div>
           <p style={{fontSize: "120%"}}>Want more? <a href="/about/ecosystem">Read about how Netflix, Red Hat and Confluent</a> use <strong>change point detection</strong> to stay on top of performance.</p>
 
-          <FeatureBanner1 />
           <div className="padding-block-sm "></div>
           <div className="padding-block-sm "></div>
           <div className="row">
@@ -314,9 +340,10 @@ export const FrontPage = ({loggedIn}) => {
           </div>
           </div>
           <SampleData />
-
           <div className="padding-block "></div>
-        </div>
+          <hr />
+          <FeatureBanner1 />
+          </div>
     </>
   );
 };
