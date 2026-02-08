@@ -307,7 +307,7 @@ margin-bottom: 10em;
   letter-spacing: 0.9rem;
   margin-bottom: 3em;
   text-align: center;
-  top: 0.4em;
+  top: 0.0em;
   left: 5%;
   position: relative;
   color: var(--bs-heading-color2);
@@ -636,6 +636,10 @@ button:focus-visible {
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+
+.section-front .navbar-top {
+    background-color: #dfedef88;
 }
 
 .navbar-top {
