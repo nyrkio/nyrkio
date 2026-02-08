@@ -147,28 +147,34 @@ const Mission = ({loggedIn}) => {
       </div>
       <div className="row w-100 p-2">
 
-      <div className="col-xs-12 col-xl-6 text-justify">
+      <div className="col-xs-12 col-xl-5 text-justify">
       <p>Do you struggle with noisy benchmark results?</p>
       <p>It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many.</p>
       <p>At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
       </div>
 
-      <div className="col-xs-12 col-xl-6 text-justify">
+      <div className="col-xs-12 col-xl-2 text-justify">
+      </div>
+
+      <div className="col-xs-12 col-xl-5 text-justify">
       <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "100%"}}/>
 
       <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
 
-      <div className="col-xs-12 col-xl-6 text-justify">
+      <div className="col-xs-12 col-xl-5 text-justify">
 
       <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org &gt;&gt;</a></h3>
       <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
 
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
 
       </div>
 
-      <div className="col-xs-12 col-xl-6 text-center p-5 ">
+      <div className="col-xs-12 col-xl-2 text-justify">
+      </div>
+
+
+      <div className="col-xs-12 col-xl-5 text-center p-5 ">
       <br />
       <br />
       <br />
@@ -176,8 +182,9 @@ const Mission = ({loggedIn}) => {
       <img style={{width: "120px"}} src="/p/NyyrikkiRunner/RunnerCat-nobg-400x500.png" />
       </a>
       </div>
+      <div className="padding-block-sm "></div>
 
-      <div className="col-xs-12 col-xl-6 text-justify">
+      <div className="col-xs-12 col-xl-5 text-justify">
       <h3><a href="/pricing">2. Select a subscription level &gt;&gt;</a></h3>
 
       <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
@@ -195,16 +202,19 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
-      <div className="col-xs-12 col-xl-6 text-justify">
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}} />
+      <div className="padding-block-sm "></div>
+      <div className="col-xs-12 col-xl-5 text-justify">
       <h3 className="nyrkio-accent">3. Choose a runner</h3>
       <p>Lastly: Replace the <span className="gray-bg">runs-on: ubuntu-latest</span> with <span className="gray-bg">runs-on: nyrkio_4</span> </p>
       <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
       </div>
-      <div className="col-xs-12 col-xl-6 text-justify">
+
+      <div className="col-xs-12 col-xl-2 text-justify">
+      </div>
+
+      <div className="col-xs-12 col-xl-5 text-justify">
       <img src={select1after} alt="Less noisy graph from Nyrkio dashboard, using Nyrkio runners" title="Turso SELECT 1 benchmark. Variation within 9 ns, noise range = 5%" style={{maxWidth: "100%"}}/>
 
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
       </div>
       </>
@@ -322,7 +332,10 @@ export const FrontPage = ({loggedIn}) => {
 
 
           <Mission loggedIn={loggedIn}/>
+          <div className="padding-block-sm "></div>
+          <div className="padding-block-sm "></div>
           <OneTwoThree />
+          <div className="padding-block-sm "></div>
 
           <div className="padding-block-sm "></div>
           {loggedIn? "" :
@@ -334,7 +347,8 @@ export const FrontPage = ({loggedIn}) => {
             )}
             <div className="padding-block-sm "></div>
 
-          <div className="user-carousel">
+            <div className="padding-block-sm "></div>
+            <div className="user-carousel">
           <h1>What our users say</h1>
           <MyUserCarousel />
           </div>
