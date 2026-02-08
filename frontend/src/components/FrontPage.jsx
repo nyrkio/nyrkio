@@ -168,11 +168,13 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
-      <div className="col-xs-12 col-xl-6 text-justify">
+      <div className="col-xs-12 col-xl-6 text-center p-5 ">
       <br />
       <br />
       <br />
-      <a href="https://github.com/apps/nyrkio/installations/new">&gt; &gt; &gt; <img src="/p/NyyrikkiRunner/RunnerCat-nobg-400x500.png" /></a>
+      <a href="https://github.com/apps/nyrkio/installations/new">github.com &gt; &gt; &gt;
+      <img style={{width: "120px"}} src="/p/NyyrikkiRunner/RunnerCat-nobg-400x500.png" />
+      </a>
       </div>
 
       <div className="col-xs-12 col-xl-6 text-justify">
