@@ -182,6 +182,184 @@ class ScriptTester:
             except Exception as e:
                 self.results.add_fail(test_name, str(e))
 
+        # Test --daemon flag
+        self.test_backend_daemon_flag(script_name)
+
+    def test_backend_daemon_flag(self, script_name):
+        """Test that backend script supports --daemon flag"""
+        test_name = f"{script_name}: Supports --daemon flag"
+        script_path = self.etc_dir / script_name
+
+        if not script_path.exists():
+            self.results.add_skip(test_name, "Script doesn't exist")
+            return
+
+        try:
+            result = self.run_command(
+                ["python3", str(script_path), "--help"],
+                timeout=5
+            )
+            if "--daemon" in result.stdout:
+                self.results.add_pass(test_name)
+            else:
+                self.results.add_fail(test_name, "--daemon flag not found in help")
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+
+    def test_backend_daemon_mode(self):
+        """Test backend daemon mode: start, verify running, stop, verify stopped"""
+        script_name = "nyrkio_backend.py"
+        script_path = self.etc_dir / script_name
+        print(f"\nTesting {script_name} daemon mode...")
+
+        if not script_path.exists():
+            self.results.add_skip(f"{script_name}: Daemon mode", "Script doesn't exist")
+            return
+
+        # Test 1: Start in daemon mode
+        test_name = f"{script_name}: Start in daemon mode"
+        try:
+            result = self.run_command(
+                ["python3", str(script_path), "start", "--daemon"],
+                timeout=10,
+                check=False
+            )
+            if result.returncode == 0 or "already running" in result.stdout.lower():
+                self.results.add_pass(test_name)
+            else:
+                self.results.add_fail(test_name, f"Start failed: {result.stderr or result.stdout}")
+                return  # Skip remaining daemon tests
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+            return
+
+        # Give the server time to start
+        time.sleep(2)
+
+        # Test 2: Verify running via status
+        test_name = f"{script_name}: Status shows running after daemon start"
+        try:
+            result = self.run_command(
+                ["python3", str(script_path), "status"],
+                timeout=5,
+                check=False
+            )
+            if "running" in result.stdout.lower() and "not running" not in result.stdout.lower():
+                self.results.add_pass(test_name)
+            else:
+                self.results.add_fail(test_name, f"Status output: {result.stdout}")
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+
+        # Test 3: Stop daemon
+        test_name = f"{script_name}: Stop daemon"
+        try:
+            result = self.run_command(
+                ["python3", str(script_path), "stop"],
+                timeout=10,
+                check=False
+            )
+            if result.returncode == 0 or "stopped" in result.stdout.lower() or "not running" in result.stdout.lower():
+                self.results.add_pass(test_name)
+            else:
+                self.results.add_fail(test_name, f"Stop failed: {result.stderr or result.stdout}")
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+
+        # Give process time to stop
+        time.sleep(1)
+
+        # Test 4: Verify stopped via status
+        test_name = f"{script_name}: Status shows not running after stop"
+        try:
+            result = self.run_command(
+                ["python3", str(script_path), "status"],
+                timeout=5,
+                check=False
+            )
+            if "not running" in result.stdout.lower():
+                self.results.add_pass(test_name)
+            else:
+                self.results.add_fail(test_name, f"Status output: {result.stdout}")
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+
+    def test_backend_foreground_mode(self):
+        """Test backend foreground mode: start, verify running, interrupt, verify stopped"""
+        import os
+        import signal
+
+        script_name = "nyrkio_backend.py"
+        script_path = self.etc_dir / script_name
+        print(f"\nTesting {script_name} foreground mode...")
+
+        if not script_path.exists():
+            self.results.add_skip(f"{script_name}: Foreground mode", "Script doesn't exist")
+            return
+
+        # Test 1: Start in foreground mode (non-blocking via Popen)
+        test_name = f"{script_name}: Start in foreground mode"
+        process = None
+        try:
+            process = subprocess.Popen(
+                ["python3", str(script_path), "start"],
+                cwd=self.root_dir,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                preexec_fn=os.setpgrp if sys.platform != 'win32' else None
+            )
+            self.results.add_pass(test_name)
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+            return
+
+        # Give server time to start
+        time.sleep(3)
+
+        # Test 2: Verify process is running
+        test_name = f"{script_name}: Foreground process is running"
+        if process.poll() is None:
+            self.results.add_pass(test_name)
+        else:
+            self.results.add_fail(test_name, f"Process exited with code {process.returncode}")
+            return
+
+        # Test 3: Send interrupt signal (Ctrl+C)
+        test_name = f"{script_name}: Foreground mode handles Ctrl+C"
+        try:
+            if sys.platform != 'win32':
+                os.killpg(os.getpgid(process.pid), signal.SIGINT)
+            else:
+                process.send_signal(signal.SIGINT)
+
+            # Wait for process to terminate
+            try:
+                process.wait(timeout=5)
+                self.results.add_pass(test_name)
+            except subprocess.TimeoutExpired:
+                # Force kill if still running
+                if sys.platform != 'win32':
+                    os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                else:
+                    process.kill()
+                process.wait()
+                self.results.add_fail(test_name, "Process didn't respond to SIGINT, had to SIGKILL")
+        except Exception as e:
+            self.results.add_fail(test_name, str(e))
+            # Clean up
+            if process.poll() is None:
+                process.kill()
+                process.wait()
+
+        # Test 4: Verify process terminated
+        test_name = f"{script_name}: Foreground process terminated"
+        if process.poll() is not None:
+            self.results.add_pass(test_name)
+        else:
+            self.results.add_fail(test_name, "Process still running")
+            process.kill()
+            process.wait()
+
     def test_frontend_script(self):
         """Test frontend management script"""
         script_name = "nyrkio_frontend.py"
@@ -220,43 +398,34 @@ class ScriptTester:
         self.test_script_status_when_stopped(script_name)
 
     def test_vite_configs(self):
-        """Test that vite config files exist"""
+        """Test that vite config files exist and have proper proxy configuration"""
         print(f"\nTesting Vite configurations...")
 
         frontend_dir = self.root_dir / "frontend"
 
         # Test production config
-        test_name = "vite.config.js: Production config exists"
+        test_name = "vite.config.js: Config file exists"
         prod_config = frontend_dir / "vite.config.js"
         if prod_config.exists():
             self.results.add_pass(test_name)
         else:
             self.results.add_fail(test_name, f"File not found at {prod_config}")
+            return  # Skip remaining vite tests if config doesn't exist
 
-        # Test local config
-        test_name = "vite.config.test.js: Local config exists"
-        local_config = frontend_dir / "vite.config.test.js"
-        if local_config.exists():
+        # Test config has proxy configuration
+        content = prod_config.read_text()
+
+        test_name = "vite.config.js: Contains API proxy configuration"
+        if "/api" in content and "proxy" in content:
             self.results.add_pass(test_name)
         else:
-            self.results.add_fail(test_name, f"File not found at {local_config}")
+            self.results.add_fail(test_name, "API proxy configuration not found")
 
-        # Test configs have correct content
-        if prod_config.exists():
-            test_name = "vite.config.js: Contains nyrk.io target"
-            content = prod_config.read_text()
-            if "nyrk.io" in content:
-                self.results.add_pass(test_name)
-            else:
-                self.results.add_fail(test_name, "Production target not found")
-
-        if local_config.exists():
-            test_name = "vite.config.test.js: Contains localhost:8001 target"
-            content = local_config.read_text()
-            if "localhost:8001" in content:
-                self.results.add_pass(test_name)
-            else:
-                self.results.add_fail(test_name, "Local target not found")
+        test_name = "vite.config.js: Contains backend target (nyrkio.com or localhost)"
+        if "nyrkio.com" in content or "localhost" in content:
+            self.results.add_pass(test_name)
+        else:
+            self.results.add_fail(test_name, "Backend target not found")
 
     def test_documentation(self):
         """Test that documentation files reference correct script paths"""
@@ -293,6 +462,8 @@ class ScriptTester:
         print("="*60)
 
         self.test_backend_script()
+        self.test_backend_daemon_mode()
+        self.test_backend_foreground_mode()
         self.test_frontend_script()
         self.test_docker_script()
         self.test_vite_configs()

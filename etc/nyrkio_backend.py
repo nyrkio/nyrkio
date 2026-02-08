@@ -12,7 +12,8 @@ from pathlib import Path
 
 def load_env_vars():
     """Load environment variables from .env.backend"""
-    env_file = Path(__file__).parent / ".env.backend"
+    project_root = Path(__file__).parent.parent
+    env_file = project_root / ".env.backend"
     env_vars = os.environ.copy()
 
     if env_file.exists():
@@ -54,8 +55,11 @@ def check_uvicorn():
     """Check if uvicorn is available and return the command to use"""
     import shutil
 
+    # Project root is parent of etc/ directory
+    project_root = Path(__file__).parent.parent
+
     # First check if we're in a Poetry environment
-    backend_dir = Path(__file__).parent / "backend"
+    backend_dir = project_root / "backend"
     if (backend_dir / "pyproject.toml").exists() and shutil.which("poetry"):
         # Check if poetry environment has uvicorn installed
         try:
@@ -66,14 +70,14 @@ def check_uvicorn():
                 timeout=5
             )
             if result.returncode == 0:
-                return ["poetry", "run", "uvicorn"], backend_dir
+                return ["poetry", "-C", str(backend_dir), "run", "uvicorn"], project_root
         except:
             pass
 
     # Check if uvicorn is in system Python
     if shutil.which("uvicorn"):
-        # Need to add parent directory to PYTHONPATH for imports to work
-        return ["uvicorn"], Path(__file__).parent
+        # Need to run from project root for imports to work
+        return ["uvicorn"], project_root
 
     # Check if python -m uvicorn works
     try:
@@ -83,15 +87,19 @@ def check_uvicorn():
             timeout=5
         )
         if result.returncode == 0:
-            return ["python3", "-m", "uvicorn"], Path(__file__).parent
+            return ["python3", "-m", "uvicorn"], project_root
     except:
         pass
 
     return None, None
 
 
-def start_backend():
-    """Start the backend server"""
+def start_backend(daemon=False):
+    """Start the backend server
+
+    Args:
+        daemon: If True, run in background (daemon mode). If False, run in foreground.
+    """
     running, pid = is_backend_running()
 
     if running:
@@ -113,12 +121,12 @@ def start_backend():
     env_vars = load_env_vars()
     api_port = env_vars.get('API_PORT', '8001')
 
-    # Add parent directory to PYTHONPATH if using system uvicorn
-    if uvicorn_cmd[0] != "poetry":
-        parent_dir = str(Path(__file__).parent.absolute())
-        env_vars['PYTHONPATH'] = parent_dir + os.pathsep + env_vars.get('PYTHONPATH', '')
+    # Add project root to PYTHONPATH so backend module can be found
+    project_root = str(Path(__file__).parent.parent.absolute())
+    env_vars['PYTHONPATH'] = project_root + os.pathsep + env_vars.get('PYTHONPATH', '')
 
-    print(f"Starting Nyrkiö backend on port {api_port}...")
+    mode_str = "daemon" if daemon else "foreground"
+    print(f"Starting Nyrkiö backend on port {api_port} ({mode_str} mode)...")
     print(f"Using: {' '.join(uvicorn_cmd)}")
     print(f"API will be available at: http://localhost:{api_port}")
     print(f"OpenAPI docs at: http://localhost:{api_port}/docs")
@@ -132,24 +140,38 @@ def start_backend():
         "--reload"
     ]
 
-    # Start uvicorn in background
-    process = subprocess.Popen(
-        cmd,
-        cwd=working_dir,
-        env=env_vars,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        preexec_fn=os.setpgrp if sys.platform != 'win32' else None
-    )
+    if daemon:
+        # Start uvicorn in background (daemon mode)
+        # Redirect output to /dev/null to avoid blocking on full pipe buffer
+        devnull = open(os.devnull, 'w')
+        process = subprocess.Popen(
+            cmd,
+            cwd=working_dir,
+            env=env_vars,
+            stdout=devnull,
+            stderr=devnull,
+            preexec_fn=os.setpgrp if sys.platform != 'win32' else None
+        )
 
-    # Save PID
-    pid_file = get_pid_file()
-    with open(pid_file, 'w') as f:
-        f.write(str(process.pid))
+        # Save PID
+        pid_file = get_pid_file()
+        with open(pid_file, 'w') as f:
+            f.write(str(process.pid))
 
-    print(f"Backend started with PID: {process.pid}")
-    print(f"To stop: python3 etc/nyrkio_backend.py stop")
-    print(f"To view logs: tail -f backend/uvicorn.log (if configured)")
+        print(f"Backend started with PID: {process.pid}")
+        print(f"To stop: python3 etc/nyrkio_backend.py stop")
+    else:
+        # Run in foreground with logs to stdout/stderr
+        print("Press Ctrl+C to stop the server")
+        print()
+        try:
+            process = subprocess.run(
+                cmd,
+                cwd=working_dir,
+                env=env_vars
+            )
+        except KeyboardInterrupt:
+            print("\nBackend stopped by user")
 
 
 def stop_backend():
@@ -215,7 +237,21 @@ def status_backend():
 def main():
     parser = argparse.ArgumentParser(
         description="Start and stop the Nyrkiö backend server",
-        formatter_class=argparse.RawDescriptionHelpFormatter
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  # Start in foreground (logs to stdout/stderr)
+  python3 etc/nyrkio_backend.py start
+
+  # Start as daemon (background)
+  python3 etc/nyrkio_backend.py start --daemon
+
+  # Stop daemon
+  python3 etc/nyrkio_backend.py stop
+
+  # Check status
+  python3 etc/nyrkio_backend.py status
+        """
     )
 
     parser.add_argument(
@@ -224,16 +260,22 @@ def main():
         help='Command to execute'
     )
 
+    parser.add_argument(
+        '--daemon', '-d',
+        action='store_true',
+        help='Run in background (daemon mode). Default is foreground with logs to stdout/stderr.'
+    )
+
     args = parser.parse_args()
 
     if args.command == 'start':
-        start_backend()
+        start_backend(daemon=args.daemon)
     elif args.command == 'stop':
         stop_backend()
     elif args.command == 'restart':
         stop_backend()
         time.sleep(1)
-        start_backend()
+        start_backend(daemon=args.daemon)
     elif args.command == 'status':
         status_backend()
 
