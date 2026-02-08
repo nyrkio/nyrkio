@@ -196,7 +196,7 @@ const Mission = ({loggedIn}) => {
       </div>
       <div className="col-xs-6 col-sm-6 col-md-6  col-lg-4 col-xl-3 text-center justify-content-center nyrkio-plans">
       <CpuHours loggedIn={loggedIn} short={true} />
-      <p style={{position: "relative", right: "-5%", top: "-3em"}}><a href="/pricing">Other...</a></p>
+      <p style={{position: "relative", right: "-55%", top: "-3em"}}><a href="/pricing">Other...</a></p>
       </div>
       <div className="col-xs-0 col-md-3 col-lg-4 col-xl-1">
 
