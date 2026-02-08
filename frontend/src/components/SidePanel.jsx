@@ -126,7 +126,7 @@ const FrontPageSidePanel = ({ loggedIn }) => {
 };
 
 const DashSidePanel = ({ loggedIn }) => {
-  document.body.classList.add("section-front");
+  document.body.classList.add("section-dash");
   if (loggedIn) {
     return (
       <>
