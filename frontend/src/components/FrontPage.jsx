@@ -306,7 +306,7 @@ export const FrontPage = ({loggedIn}) => {
       <div className="frontpage container-fluid text-center w-100">
       <img src="/p/NyyrikkiRunner/RunnerBackground-1920-banner2.jpg" style={{
         width: "100%", marginBottom: "2em",
-        position: "relative", top: "0px", left: "0px", right: "0px"
+        position: "relative", top: "-100px", left: "0px", right: "0px"
 
       }}/>
       <Slogan />
