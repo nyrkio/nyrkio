@@ -230,11 +230,13 @@ body #root div.container-fluid {
 }
 
 
-#main-content li {
-  margin-top: 1em;
-  margin-bottom: 1em;
+.section-product #main-content li {
   margin-left: 5em;
   padding-left: 1.5em;
+}
+.section-product #main-content div.row ol li {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 #main-content2 li {
@@ -1332,7 +1334,12 @@ color: #212529;
 }
 
 .nyrkio-pricing .nyrkio-plans .col .card {
-    min-height: 25em;
+  min-height: 25em;
+}
+.section-product #main-content .nyrkio-pricing .card li {
+  margin-left: 0;
+  padding-left: 0;
+  text-align: left;
 }
 .card h1.pricing-card-title small.fw-light,
 .nyrkio-pricing .nyrkio-plans .col .card small {

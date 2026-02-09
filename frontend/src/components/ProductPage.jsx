@@ -4,6 +4,7 @@ import nyrkio_pr from "../static/NyrkioPrReport.png";
 import { LogoBrown } from "./Logo";
 import { SampleData } from "./SampleData";
 import { GetStartedButton } from "./FrontPage";
+import { CpuHours } from "./PricingPage";
 
 
 
@@ -60,6 +61,19 @@ export const ProductPage = () => {
         <li>Iteratively, as needed, tune your infrastructure, your product, and benchmark tool to minimize environmental noise.
         For best results, Nyrkio offers a 3rd party GitHub runner to run your continuous benchmarks on. We configure these runners NOT for maximum performance, but rather for maximal <span className="nyrkio-accent">stability and repeatability</span>. Using Nyrkiö Runner for GitHub, users typically see a 10x reduction in environmental noise and the [min, max] range of noise below 10 nanoseconds, sometime within 1 nanoseconds!
         </li>
+        </ol>
+
+        </div>
+        <div className="row p-2 col-md-12 text-center nyrkio-pricing">
+          <div className="col-xs-3 col-lg-4">
+          </div>
+          <div className="col-xs-6 col-lg-4">
+          <CpuHours />
+          </div>
+          </div>
+        <div className="row p-2 col-md-10">
+
+        <ol start="3">
         <li>The <a href="https://github.com/nyrkio/change-detection?tab=readme-ov-file">nyrkio/change-detection</a> GitHub action knows how to parse the output of the most common benchmarking tools and sends it to nyrkio.com for analysis.</li>
         <li>Nyrkiö <a href="/docs/getting-started">Change Point Detection</a> is the state of the art method for finding regressions (or improvements!)                                                    in noisy benchmarkin results. Our founder is one of the inventors of the method and first in the world to successfully use a change point detection algorithm as part of Continuous Benchmarking, and the first to <a href="https://arxiv.org/abs/2003.00584">publish the results</a> and <a href="https://otava.apache.org">the source code</a>. </li>
         <li>
