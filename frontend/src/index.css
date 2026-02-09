@@ -38,7 +38,7 @@
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
   --bs-body-font-size: 16px;
-  --bs-body-font-family: "Helvetica", "Inter","Arial", "apple-ui", "system-ui", sans;
+  --bs-body-font-family: "Helvetica", "Arial", "apple-ui", "system-ui", sans;
   --bs-body-font-style: normal;
   --bs-body-font-weight: 400;
   --bs-body-letter-spacing: 0.533px;
@@ -227,6 +227,14 @@ body #root div.container-fluid {
   margin-right: 5px;
   padding-left: 0px;
   padding-right: 0px;
+}
+
+
+#main-content li {
+  margin-top: 1em;
+  margin-bottom: 1em;
+  margin-left: 5em;
+  padding-left: 1.5em;
 }
 
 #main-content2 li {

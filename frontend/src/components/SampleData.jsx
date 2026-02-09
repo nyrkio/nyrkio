@@ -107,7 +107,7 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
 
   return (
     <div className="row">
-    <div className="container-fluid text-center col-sm-10 col-md-8 col-lg-8 col-xl-8 nyrkio-public-sample  p-3 ">
+    <div className="container-fluid text-center col-sm-12 col-md-12 col-lg-8 col-xl-8 nyrkio-public-sample  p-3 ">
     <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
         <p><CustomerLogo customerName={customerName} customerUrl={customerUrl} customerLogo={customerLogo} /></p>
       <div className="row justify-content-center text-center pt-5">
