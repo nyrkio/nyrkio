@@ -166,7 +166,7 @@ body.section-about .footer {
   background-repeat: no-repeat;
   background-attachment: fixed;
   background-position: bottom right;
-  background-size: clip;
+  background-size: cover;
   background-color: transparent;
 }
 
