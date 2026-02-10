@@ -65,10 +65,11 @@ export const ProductPage = () => {
 
         </div>
         <div className="row p-2 col-md-12 text-center nyrkio-pricing">
-          <div className="col-xs-3 col-lg-4">
+          <div className="col-xs-3 col-xl-4">
           </div>
-          <div className="col-xs-6 col-lg-4">
+          <div className="col-xs-6 col-xl-4">
           <CpuHours />
+  (See <a href="/pricing">Pricing page for all subscription alternatives</a>)
           </div>
           </div>
         <div className="row p-2 col-md-10">
@@ -93,24 +94,24 @@ export const ProductPage = () => {
 
 
         </div>
+        <div className="padding-block "></div>
         <div className="row p-2 col-md-10">
           <div className="col-xs-3 col-lg-4">
           </div>
           <div className="col-xs-6 col-lg-4">
             <GetStartedButton />
           </div>
-          </div>
-        <div className="row p-2 col-md-12">
+        </div>
 
+      <div className="padding-block "></div>
 
-      <h2>See it for yourself</h2>
       <div className="row">
       <div className="container-fluid text-center col-sm-12 col-md-12 col-lg-8 col-xl-8 nyrkio-public-sample-title  p-3 ">
 
+      <h2>See it for yourself</h2>
       <p>
       <br/>
       You can browse <em>real, live</em> benchmark results from other Nyrkiö users. <br />The red dots are Change Points reported by Nyrkiö.</p>
-      </div>
       </div>
       <SampleData />
       </div>

@@ -527,8 +527,6 @@ a {
   letter-spacing: 0;
 }
 
-.card a:not(.btn-success) {
-}
 @media (prefers-color-scheme: light) {
   a:hover {
     color: var(--nyrkio-active);
@@ -1336,8 +1334,11 @@ color: #212529;
 .nyrkio-pricing .nyrkio-plans .col .card {
   min-height: 25em;
 }
+.section-product #main-content .nyrkio-pricing .card .card-body {
+  padding:0;
+}
 .section-product #main-content .nyrkio-pricing .card li {
-  margin-left: 0;
+  margin-left: 1em;
   padding-left: 0;
   text-align: left;
 }
