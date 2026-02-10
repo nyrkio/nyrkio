@@ -80,7 +80,9 @@ export const ProductPage = () => {
         <li>
         Nyrkiö can greate GitHub tickets, or comment on Pull Requests automatically. The ticket is automatically assigned to the commit author.
         <br />
-        <img src={nyrkio_pr} alt="PR report with regressions reported, red N logo" style={{height:"300px", width: "700px", borderRadius: "20px", marginBottom: "2.5em", position: "relative", left: "-3.5em", overflow: "clip"}}/>
+        <div style={{width: "90%", maxWidth: "90%", overflow: "hidden"}}>
+        <img src={nyrkio_pr} alt="PR report with regressions reported, red N logo" style={{height:"300px", width: "700px", borderRadius: "20px", marginBottom: "2.5em", position: "relative", left: "-3.5em"}}/>
+        </div>
         </li>
         </ol>
 
