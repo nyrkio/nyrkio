@@ -126,8 +126,8 @@ Open a pull request against `main`. PRs run linters and tests automatically.
 [nyrkio-getting-started]: https://nyrkio.com/docs/getting-started
 [getting-started-gha]: https://nyrkio.com/docs/change-detection
 [getting-started-http]: https://nyrkio.com/docs/getting-started-http
-[nyrkio-logo]: https://nyrkio.com/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-300.png
-[nyrkio-footer-graph]: https://nyrkio.com/assets/footer-white-graphic-8R7Ap4-5.png
+[nyrkio-logo]: https://nyrkio.com/p/logo/full/new/NyrkioLogo_BlackRed-300.png
+[nyrkio-footer-graph]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/tigerbeetle-change-points-2.png
 [runner-before]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_ghrunner.png
 [runner-after]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_nyrkiorunner.png
 [github-action]: https://github.com/nyrkio/change-detection
