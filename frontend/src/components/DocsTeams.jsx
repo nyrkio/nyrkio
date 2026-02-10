@@ -36,8 +36,8 @@ const Teams = () => {
         <p><span className="protip">Pro tip:</span> Many settings in Nyrkiö are global for a given user. So you are forced
         to use the same p-value and minimum threshold everywhhere. Each Org actually has its own settings. Sometimes
         you may want to use an Org for some test results just to enable a different configuration for that set of results.</p>
-´
-´        <h2>Using Nyrkiö with GitHub Orgs</h2>
+
+        <h2>Using Nyrkiö with GitHub Orgs</h2>
 
         <p>To enable orgs support in Nyrkiö, start by going to <Link to="https://github.com/apps/nyrkio/installations/new">GitHub apps installation</Link>
         page. Select the org or repo.</p>

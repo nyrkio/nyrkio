@@ -8,7 +8,7 @@ export const UsersPage = () => {
     <Kieker />
     <hr />
     <div className="row">
-    <p>Want more? Read about how Netflix, Confluent, RedHat, MongoDB, DataStax and Tarantool use Change Point Detection in their Continuous Performance Engineering workflows over at <a href="/about/ecosystem">our Open Source Ecosystem page</a>.</p>
+    <p>Want more? Read about how Netflix, Confluent, RedHat, MongoDB, DataStax and Tarantool use Change Point Detection in their Continuous Benchmarking workflows over at <a href="/about/ecosystem">our Open Source Ecosystem page</a>.</p>
     </div>
     </div>
     </>)

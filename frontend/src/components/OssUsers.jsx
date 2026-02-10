@@ -6,7 +6,7 @@ export const MongoDB = () => {
     <div className={cols} style={style}>
     <h4>MongoDB</h4>
     <p>The MongoDB performance team is the home of this idea, and the core math that is the <em>E-Divisive Means</em> algorithm was implemented there.</p>
-    <p>After almost a decade in production use, the shift to <em>Continuous Performance Engineering</em> has unlocked a culture where responsibility for performance benchmarks and fixing regressions has been delegated down to individual feature teams. Nowadays MongoDB automatically analyzes over a million data points per build, produceed by their automated performance testing framework. This is only possible thanks to finding an algorithm that allows for automatic processing of results with a low false positive rate.</p>
+    <p>After almost a decade in production use, the shift to <em>Continuous Benchmarking</em> has unlocked a culture where responsibility for performance benchmarks and fixing regressions has been delegated down to individual feature teams. Nowadays MongoDB automatically analyzes over a million data points per build, produceed by their automated performance testing framework. This is only possible thanks to finding an algorithm that allows for automatic processing of results with a low false positive rate.</p>
 
     <p>Read more...</p>
 
@@ -45,7 +45,7 @@ export const Datastax = () => {
     return (<>
     <div className={cols} style={style}>
     <h4>Datastax</h4>
-    <p>Datastax, just like MongoDB, had taken the step to automate a suite of performance tests, aka <em>Continuous Performance Engineering</em>. The results of nightly builds would be stored in a Grafana / Prometheus database and dashboard, and a human engineer would look at the dashboards every now and then. When MongoDB published their paper on using Change Point Detection to analyze such results, Datastax engineers were eager to automate also the analysis part of the work.</p>
+    <p>Datastax, just like MongoDB, had taken the step to automate a suite of performance tests, aka <em>Continuous Benchmarking</em>. The results of nightly builds would be stored in a Grafana / Prometheus database and dashboard, and a human engineer would look at the dashboards every now and then. When MongoDB published their paper on using Change Point Detection to analyze such results, Datastax engineers were eager to automate also the analysis part of the work.</p>
     <p>Datastax built upon the E-Divisive algorithm open sourced by MongoDB, and made major additions. Datastax also published their work in the same conference as MongoDB had done, and open sourced their additions as MongoDB had done. This transformed what was essentially a math or signal processing library, to a fully functional command-line tool, that can read and output CSV files, and several database sources, such as Postgresql.</p>
 
     <p>Read more...</p>

@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import introDoc from "../docs/intro.md";
-import introDocAction from "../docs/intro-action.md";
 import img1 from "../static/getting-started-login-button.png";
 import img2 from "../static/getting-started-login.png";
 import img3 from "../static/getting-started-UserSettings.png";
 import img4 from "../static/getting-started-API-key.png";
-import gh_permissions_img from "../static/github_permissions.png";
 
 export const DocsCurl = () => {
   const [content, setContent] = useState("");
@@ -20,15 +17,22 @@ export const DocsCurl = () => {
       .then((text) => {
         setContent(text);
       });
-  });
-
+  }, []);
 
   return (
     <>
       <div className="row mt-4 m-2 p-0 col-lg-10">
-        <h1>Using Nyrkiö with curl HTTP requests</h1>
-        <p>If you don't use GitHub or <a href="/docs/getting-started">GitHub actions for Continuous Integration</a>,
-           below is a tutorial using generic HTTP requests with <code>curl</code>:</p>
+        <h1>Using the Nyrkio HTTP API</h1>
+        <p>
+          For CI systems other than GitHub Actions, or for custom integrations,
+          you can use the Nyrkio REST API directly. This tutorial shows how to
+          upload benchmark results using <code>curl</code>.
+        </p>
+        <p>
+          For GitHub users, see the{" "}
+          <a href="/docs/getting-started">Getting started guide</a> for the
+          easier approach using Nyrkio Runners and the change-detection action.
+        </p>
         <FirstHalfCurl />
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
@@ -55,93 +59,33 @@ export const DocsCurl = () => {
   );
 };
 
-const FirstHalf = () => {
-  return (
-    <>
-      <div>
-        <h1 id="getting-started-github-action"> Getting started in 3 easy steps</h1>
-
-        <p>
-          The easiest way to use Nyrkiö Change Detection on GitHub is to add the <a
-          href="https://github.com/marketplace/actions/nyrkio-change-detection"><code>nyrkio/change-detection@v2</code></a> GitHub
-          action to your workflows.
-        </p>
-        <p>
-          Alternatively, you can use the HTTP API directly. <a href="#curl">See
-          below for a generic <code>curl</code> example</a>.
-        </p>
-
-        <h2> 1. Install the Nyrkiö app on GitHub</h2>
-
-        <p><a href="https://github.com/apps/nyrkio/installations/new">Click here to install
-          Nyrkiö on GitHub.</a>
-        </p>
-        <p>GitHub will ask to grant Nyrkiö the following permissions:</p>
-            <img src={gh_permissions_img} alt="Github permissions dialog" />
-            <p>You can choose to not grant any one of those permissions. Nyrkiö will
-            continue to work without the particular feature.
-        </p>
-
-        <p>
-          When you are done with the GitHub permissions and installation screens, you are redirected
-          back to nyrkio.com. You should be logged in to your new Nyrkiö user account now.</p>
-
-        <h2> 2. Create a JWT token</h2>
-        <p>
-          We use JWT to access the Nyrkiö API. Click again on the red button on
-          your top right. If you are logged in you can now select <strong>User
-          Settings</strong>.
-        </p>
-
-        <img src={img3} />
-        <p>
-          Create a new API key and make sure to copy paste it and save it
-          somewhere.
-        </p>
-
-        <img src={img4} />
-
-        <p>Now head to <code>https://github.com/<strong>USER_OR_ORG</strong>/<strong>PROJECT</strong>/settings/secrets/actions</code>&nbsp;.
-           Store the token you just created either as a <em>Environment secret</em> or <em>Repository secret</em>. We'll use the
-           variable name <code>NYRKIO_JWT_TOKEN</code> for it below.
-        </p>
-
-      </div>
-    </>
-  );
-};
-
 const FirstHalfCurl = () => {
   return (
     <>
       <div>
-        <h2 id="getting-started-curl"> 1.Create a user account</h2>
+        <h2 id="getting-started-curl">1. Create a user account</h2>
 
         <p>Click on the Login button in the top right corner:</p>
 
-        <img src={img1} />
+        <img src={img1} alt="Login button" />
 
         <p>
           Choose between GitHub OAuth or traditional username + password logins.
         </p>
 
-        <img src={img2} />
+        <img src={img2} alt="Login options" />
 
-        <h2> 2. Create a JWT token</h2>
+        <h2>2. Create a JWT token</h2>
 
         <p>
-          We use JWT to access the Nyrkiö API. Click again on the red button on
-          your top right. If you are logged in you can now select _User
-          Settings_.
+          We use JWT to access the Nyrkio API. Click on the user menu (top
+          right) and select <strong>User Settings</strong>.
         </p>
 
-        <img src={img3} />
-        <p>
-          Create a new API key and make sure to copy paste it and save it
-          somewhere.
-        </p>
+        <img src={img3} alt="User settings menu" />
+        <p>Create a new API key and save it somewhere secure.</p>
 
-        <img src={img4} />
+        <img src={img4} alt="API key creation" />
       </div>
     </>
   );

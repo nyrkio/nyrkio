@@ -1,13 +1,10 @@
-## 3. Upload performance test results from GitHub workflows
+### Upload benchmark results to Nyrkio
 
-Now comes the main bit -- uploading performance test results.
+Add the `nyrkio/change-detection@v2` action after your benchmark step.
 
-By far the easiest way to do this is our `nyrkio/change-detection@v2` GitHub action.
+If you use common frameworks (pytest-benchmark, benchmark.js, Google Benchmark, Catch2, Go testing, JMH...) the action parses their output automatically.
 
-If you use any of the common benchmark frameworks (pytest-benchark, benchmark.js, Google and Catch2 C++ benchmark frameworks...)
-then you just pipe their output to the `change-detection` action and it will take care of the rest!
-
-Then add the following YAML after the actual benchmark:
+Example workflow:
 
 ```markdown
     name: Minimal Benchmark+Nyrkiö setup

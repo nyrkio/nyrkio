@@ -23,3 +23,6 @@
 
 
 nginx.conf.test
+
+# Claude Code
+.claude/settings.local.json

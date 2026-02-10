@@ -1,53 +1,96 @@
 # [![nyrkio-logo]][product]
 
-Nyrkiö is an open source platform for change detection in a *Continuous Performance Engineering*
-workflow.
+Nyrkio provides tools for *Continuous Benchmarking* on GitHub.
 
-- Submit results using a [REST API][nyrkio-getting-started] or [GitHub Action][github-action]
-- Uses state of the art change point detection algorithm to find performance regressions and improvements in noisy data.
-  Nyrkiö can find even small regressions down to 0.5% - 1%.
-- Integrates with GitHub to identify the git commit that caused a change in performance
+(This repository runs [nyrkio.com][dotcom].)
 
-## Using Nyrkiö Change Detection
+## Nyrkio Runners
 
-This software runs [nyrkio.com][dotcom]. Some links to get you started:
+**New in v2:** GitHub runners configured for stable, repeatable benchmark results.
 
-[Getting Started with Nyrkiö in 3 easy steps][nyrkio-getting-started]
+Standard GitHub runners cause benchmark noise of 20-50%. There are several 3rd party runners
+available that promise better performance or price-performance, but they often have even more
+problems with noisy benchmark results. (They do offer better price-performance! But that is
+not what you need for good continuous benchmarking results...)
 
-[Read more about how it works and who else is using it][product]
+**Nyrkio runners are tuned for stability and repeatable benchmark results.**
+
+- No hyperthreading (each vCPU is a full physical core)
+- Disabled frequency scaling and turbo boost
+- No NUMA (single memory domain)
+- Optimized kernel parameters
+
+Typically you can expect a 10x noise reduction. 
+Some pilot customers achieved a min-max range of **noise less than 1 ns!**
+
+| Standard GitHub Runner | Nyrkio Runner |
+|------------------------|---------------|
+| ![before][runner-before] | ![after][runner-after] |
+| Noise range: ~75% | Noise range: ~5% |
+
+
+## Getting Started with Nyrkiö Runners
+
+1. [Install Nyrkio on GitHub](https://github.com/apps/nyrkio/installations/new)
+2. [Select a subscription](https://nyrkio.com/pricing)
+3. Change `runs-on:` to a Nyrkio runner label
+
+```yaml
+# Replace runs-on: ubuntu-latest with:
+runs-on: nyrkio_4   # 4-CPU Nyrkio runner
+```
+
+Available sizes: `nyrkio_2`, `nyrkio_4`, `nyrkio_8`, `nyrkio_16`, `nyrkio_32`, `nyrkio_64`, `nyrkio_96`
+
+[Full getting started guide][nyrkio-getting-started]
+
+
+## Change Point Detection
+
+- Submit benchmark results using [nyrkio/change-detection GitHub Action][getting-started-gha] or just the plain [REST API][getting-started-http] 
+- State of the art algorithm finds regressions and improvements in noisy data (down to 0.5%)
+- Integrates with GitHub to identify the commit that caused a performance change
+- Notifications via GitHub issues or Slack
 
 ![nyrkio-footer-graph]
 
+
 ## Developers
 
-### Apache Otava (incubating)
+### Credits
 
-Nyrkiö is a web service around the 8 year old, battle tested [Apache Otava (incubating)][otava]
-command line tool. Otava was created and open sourced by the performance teams at MongoDB (2017) and
-Datastax (2020). It is used by technology companies large and small, such as Netflix, Dremio, Hazelcast...
+**Change point detection** is powered by [Apache Otava (incubating)][otava], an 8-year-old battle-tested
+method, created and open sourced by the performance teams at MongoDB (2017) and DataStax (2020).
+Used by Netflix, Dremio, Hazelcast, and others.
 
-### Nyrkiö (.com)
+**The GitHub Action** ([nyrkio/change-detection][github-action]) is based on
+[benchmark-action/github-action-benchmark][benchmark-action], which provides framework parsing
+for pytest-benchmark, Google Benchmark, Catch2, Go testing, JMH, and more.
 
-Also the web service itself is open source.
+### Running locally
 
-The frontend is implemented using React and the backend is built on top of FastAPI and Pydantic.
-
-If you want to hack on the frontend you can run `npm` directly from inside of the `frontend` directory.
-The configuration file `vite.config.js` can be pointing to the real nyrkio.com backend API.
+The frontend is React, the backend is FastAPI with MongoDB.
 
 ```console
+# Frontend development (uses nyrkio.com backend)
+cd frontend
 npm install
 npm run dev
 ```
 
-To run the full stack on your own, use the `docker-compose.dev.yml` file which will start services
-for the proxy (`nginx`), the frontend (`React`Single-page app) and the backend (`FastAPI` app).
-
+Full stack with Docker:
 
 ```console
 PACMAN=apt
 #PACMAN=yum
 #PACMAN=brew
+sudo $PACMAN install docker.io docker-compose-v2
+sudo usermod -a -G docker $USER
+newgrp docker
+
+
+
+
 
 git clone git@github.com:nyrkio/nyrkio.git
 cd nyrkio
@@ -60,38 +103,35 @@ DB_NAME=nyrkiodb
 POSTMARK_API_KEY=
 GITHUB_CLIENT_SECRET=
 SECRET_KEY=
-
-#HUNTER_CONFIG=
-#GRAFANA_USER=
-#GRAFANA_PASSWORD=
 END
 
 export IMAGE_TAG=$(git rev-parse HEAD)
-
-sudo $PACMAN install docker.io docker-compose-v2
-sudo usermod -a -G docker $USER
-newgrp docker
-
-
 docker compose -f docker-compose.dev.yml up --build
 ```
 
-### Contributing Changes
+### Contributing
 
-Please open a pull request with your changes against the `main` branch. PRs allow us to run linters and tests against your modifications.
+Open a pull request against `main`. PRs run linters and tests automatically.
 
 ## References
 
 - [The Use of Change Point Detection to Identify Software Performance Regressions in a Continuous Integration System](https://arxiv.org/pdf/2003.00584)
 - [Hunter: Using Change Point Detection to Hunt for Performance](https://arxiv.org/pdf/2301.03034.pdf)
+- [Automated system performance testing at MongoDB](https://dl.acm.org/doi/10.1145/3395032.3395323)
+- [Overview of 8 years of developing Apache Otava](https://blog.nyrkio.com/2025/05/08/welcome-apache-otava-incubating-project/)
 
 
 [product]: https://nyrkio.com/product
 [dotcom]: https://nyrkio.com
 [nyrkio-getting-started]: https://nyrkio.com/docs/getting-started
-[nyrkio-logo]: https://nyrkio.com/p/logo/full/Brown/NyrkioLogo_Final_Full_Brown-200px.png
-[nyrkio-footer-graph]: https://nyrkio.com/assets/footer-white-graphic-8R7Ap4-5.png
+[getting-started-gha]: https://nyrkio.com/docs/change-detection
+[getting-started-http]: https://nyrkio.com/docs/getting-started-http
+[nyrkio-logo]: https://nyrkio.com/p/logo/full/new/NyrkioLogo_BlackRed-300.png
+[nyrkio-footer-graph]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/tigerbeetle-change-points-2.png
+[runner-before]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_ghrunner.png
+[runner-after]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_nyrkiorunner.png
 [github-action]: https://github.com/nyrkio/change-detection
+[benchmark-action]: https://github.com/benchmark-action/github-action-benchmark
 [otava]: https://otava.apache.org
 
 ## License
@@ -103,15 +143,3 @@ https://www.apache.org/licenses/LICENSE-2.0
 
 Apache and Apache Otava are trademarks of the Apache Software Foundation
 Nyrkiö and Nyrkiö Change Detection are trademarks of Nyrkiö Oy
-
-
-
-
-
-
-
-
-
-
-
-

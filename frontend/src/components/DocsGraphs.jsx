@@ -44,7 +44,7 @@ const Graphs = () => {
            including the User Interface. You can
            fork and run your own version of the frontend directly against the official nyrkio.com backend.</p>
 
-´        <h2>Navigating the Graphs</h2>
+        <h2>Navigating the Graphs</h2>
 
         <p>Click on the top left Nyrkiö logo to get to the starting page. Here you will see a listing of the benchmark
            results that were successfully uploaded. For example, if you followed the <Link to="/docs/getting-started">Getting
