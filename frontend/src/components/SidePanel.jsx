@@ -193,13 +193,13 @@ const DocsSidePanel = ({ loggedIn }) => {
   return (
     <>
       <Link to="/docs/getting-started" className="nav-link">
-        Getting started
+        Nyrkio Runners
       </Link>
-      <Link to="/docs/getting-started" className="nav-link nav-level2">
-        GitHub action
+      <Link to="/docs/change-detection" className="nav-link">
+        Change Detection
       </Link>
-      <Link to="/docs/getting-started-http" className="nav-link nav-level2">
-        Generic HTTP / curl
+      <Link to="/docs/getting-started-http" className="nav-link">
+        HTTP API
       </Link>
 
       <Link to="/docs/working-with-graphs" className="nav-link">

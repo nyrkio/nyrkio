@@ -20,6 +20,7 @@ import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
 import { DocsGitPerfPlugin } from "./components/DocsGitPerfPlugin.jsx";
 import { DocsTeams } from "./components/DocsTeams.jsx";
+import { DocsChangeDetection } from "./components/DocsChangeDetection.jsx";
 import { ProductPage } from "./components/ProductPage.jsx";
 import { UsersPage } from "./components/UsersPage.jsx";
 import { AboutPage } from "./components/AboutPage.jsx";
@@ -141,6 +142,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       element={<Dashboard loggedIn={loggedIn} embed={embed} path="/result/"/>}
       />
       <Route path="/docs/getting-started" element={<Docs />} />
+      <Route path="/docs/change-detection" element={<DocsChangeDetection />} />
       <Route path="/docs/getting-started-http" element={<DocsCurl />} />
       <Route path="/docs/working-with-graphs" element={<DocsGraphs />} />
       <Route path="/docs/git-perf-plugin" element={<DocsGitPerfPlugin />} />

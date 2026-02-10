@@ -17,7 +17,7 @@ const FeatureHighlight = () => {
   return (
     <>
     <div className="text-center">
-      <h2>Continuous Performance Engineering</h2>
+      <h2>Continuous Benchmarking</h2>
     </div>
     <div className="row row-cols-lg-3 row-cols-1 frontpage-triplet text-center m-5">
       <div className="col">
