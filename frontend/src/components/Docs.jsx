@@ -104,8 +104,10 @@ const SetupSteps = () => {
 
       <p>
         <strong>Note:</strong> For 3rd party runners, we recommend creating a
-        separate GitHub org for your benchmarks rather than using your personal
-        account, as runner setup requires admin rights.
+        separate GitHub org for the repositories you want to use Nyrkiö with.
+        For repositories in your personal namespace, using 3rd party test runners
+        requires admin rights to the repo, while github orgs have a separate permission
+        for this functionality.
       </p>
 
       <h2>2. Select a subscription</h2>

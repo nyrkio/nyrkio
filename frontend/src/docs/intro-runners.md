@@ -47,7 +47,7 @@ Typical result: **10x or greater reduction in benchmark noise**. Some pilot cust
 
 After your workflow runs, check your results at [nyrkio.com](https://nyrkio.com). Click the Nyrkio logo (top left) to see your uploaded benchmarks.
 
-For public examples, see: [TigerBeetle benchmarks](https://nyrkio.com/public/https%3A%2F%2Fgithub.com%2Ftigerbeetle%2Ftigerbeetle/main/devhub)
+For public examples, see [publicly shared benchmarks](https://nyrkio.com/public) from TigerBeetle, Turso Database, and Uno-DB.
 
 ## Next steps
 

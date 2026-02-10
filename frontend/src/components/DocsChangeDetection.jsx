@@ -61,7 +61,7 @@ const Intro = () => {
       <p>
         Nyrkio Change Detection automatically finds performance regressions and
         improvements in your benchmark history. When a change is detected,
-        Nyrkio can notify you via Slack, email, or GitHub issue.
+        Nyrkio can notify you via a GitHub issue or Slack message.
       </p>
 
       <p>
