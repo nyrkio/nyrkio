@@ -19,7 +19,7 @@ export const AboutPage = () => {
             in many software development projects Performance Engineering is the last hold out for the
             old ways of software development: While all other aspects of the build and testing processes
             have long since been fully democraticed and automated into <em>Continuous Integration</em> and
-            <em>Continuous Deployment</em> pipelines, performance engineering remains the domain of specialized
+            <em>Continuous Deployment</em> and <em>DevOps</em> pipelines, performance engineering remains the domain of specialized
             teams of performance experts. These teams often use custom in-house tooling for their work,
             with a low level of automation.</p>
             <p>

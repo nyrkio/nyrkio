@@ -321,14 +321,7 @@ export const FrontPage = ({loggedIn}) => {
       }}/>
       <Slogan />
 
-      {loggedIn? "" :
-        (<button className="btn btn-success" style={{position: "relative", top:"-200px", boxShadow: "5px 5px 3px #aaaaaaaa"}}>
-        <a className="btn-link" href="/signup">
-        Create account &amp; get started
-        </a>
-        </button>
-        )}
-
+      <GetStartedButtonUp />
 
 
           <Mission loggedIn={loggedIn}/>
@@ -338,14 +331,11 @@ export const FrontPage = ({loggedIn}) => {
           <div className="padding-block-sm "></div>
 
           <div className="padding-block-sm "></div>
-          {loggedIn? "" :
-            (<button className="btn btn-success">
-            <a className="btn-link" href="/signup">
-            Create account &amp; get started
-            </a>
-            </button>
-            )}
-            <div className="padding-block-sm "></div>
+          <GetStartedButton />
+
+
+
+          <div className="padding-block-sm "></div>
 
             <div className="padding-block-sm "></div>
             <div className="user-carousel">
@@ -375,3 +365,32 @@ export const FrontPage = ({loggedIn}) => {
     </>
   );
 };
+
+export const GetStartedButton = ({loggedIn}) => {
+  if (loggedIn){
+    return "";
+  }
+
+  return (<button className="btn btn-success" style={{boxShadow: "5px 5px 3px #aaaaaaaa"}}>
+  <a className="btn-link" href="/signup">
+  Create account &amp; get started
+  </a>
+  </button>
+  )
+};
+
+
+const GetStartedButtonUp = ({loggedIn}) => {
+  if (loggedIn){
+    return "";
+  }
+
+  return (<button className="btn btn-success" style={{position: "relative", top:"-200px", boxShadow: "5px 5px 3px #aaaaaaaa"}}>
+  <a className="btn-link" href="/signup">
+  Create account &amp; get started
+  </a>
+  </button>
+  )
+};
+
+

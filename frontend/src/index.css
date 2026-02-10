@@ -38,7 +38,7 @@
   --bs-body-color: #67748e;
   --bs-body-bg: #ffffff;
   --bs-body-font-size: 16px;
-  --bs-body-font-family: "Helvetica", "Inter","Arial", "apple-ui", "system-ui", sans;
+  --bs-body-font-family: "Helvetica", "Arial", "apple-ui", "system-ui", sans;
   --bs-body-font-style: normal;
   --bs-body-font-weight: 400;
   --bs-body-letter-spacing: 0.533px;
@@ -227,6 +227,16 @@ body #root div.container-fluid {
   margin-right: 5px;
   padding-left: 0px;
   padding-right: 0px;
+}
+
+
+.section-product #main-content li {
+  margin-left: 5em;
+  padding-left: 1.5em;
+}
+.section-product #main-content div.row ol li {
+  margin-top: 1em;
+  margin-bottom: 1em;
 }
 
 #main-content2 li {
@@ -517,8 +527,6 @@ a {
   letter-spacing: 0;
 }
 
-.card a:not(.btn-success) {
-}
 @media (prefers-color-scheme: light) {
   a:hover {
     color: var(--nyrkio-active);
@@ -1324,7 +1332,15 @@ color: #212529;
 }
 
 .nyrkio-pricing .nyrkio-plans .col .card {
-    min-height: 25em;
+  min-height: 25em;
+}
+.section-product #main-content .nyrkio-pricing .card .card-body {
+  padding:0;
+}
+.section-product #main-content .nyrkio-pricing .card li {
+  margin-left: 1em;
+  padding-left: 0;
+  text-align: left;
 }
 .card h1.pricing-card-title small.fw-light,
 .nyrkio-pricing .nyrkio-plans .col .card small {
