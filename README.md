@@ -104,7 +104,7 @@ Open a pull request against `main`. PRs run linters and tests automatically.
 [product]: https://nyrkio.com/product
 [dotcom]: https://nyrkio.com
 [nyrkio-getting-started]: https://nyrkio.com/docs/getting-started
-[nyrkio-logo]: https://nyrkio.com/p/logo/full/Brown/NyrkioLogo_Final_Full_Brown-200px.png
+[nyrkio-logo]: https://nyrkio.com/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-300.png
 [nyrkio-footer-graph]: https://nyrkio.com/assets/footer-white-graphic-8R7Ap4-5.png
 [runner-before]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_ghrunner.png
 [runner-after]: https://raw.githubusercontent.com/nyrkio/nyrkio/main/frontend/src/static/runner/turso_select1_nyrkiorunner.png
