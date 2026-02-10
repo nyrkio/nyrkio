@@ -65,9 +65,9 @@ export const ProductPage = () => {
 
         </div>
         <div className="row p-2 col-md-12 text-center nyrkio-pricing">
-          <div className="col-xs-3 col-xl-4">
+          <div className="col-xs-3 col-sm-2">
           </div>
-          <div className="col-xs-6 col-xl-4">
+          <div className="col-xs-6 col-sm-6  col-xl-5">
           <CpuHours />
   (See <a href="/pricing">Pricing page for all subscription alternatives</a>)
           </div>
@@ -80,7 +80,7 @@ export const ProductPage = () => {
         <li>
         Nyrkiö can greate GitHub tickets, or comment on Pull Requests automatically. The ticket is automatically assigned to the commit author.
         <br />
-        <img src={nyrkio_pr} alt="PR report with regressions reported, red N logo" style={{height:"300px", width: "700px", borderRadius: "20px", marginBottom: "2.5em", position: "relative", left: "-3.5em"}}/>
+        <img src={nyrkio_pr} alt="PR report with regressions reported, red N logo" style={{height:"300px", width: "700px", borderRadius: "20px", marginBottom: "2.5em", position: "relative", left: "-3.5em", overflow: "clip"}}/>
         </li>
         </ol>
 
