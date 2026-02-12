@@ -104,8 +104,8 @@ jobs:
             echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> $GITHUB_ENV
             echo "SSH_AGENT_PID=SSH_AGENT_PID" >> $GITHUB_ENV
           fi
-          echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
-          # ssh-keyscan nyrkio.com >> $HOME/.ssh/known_hosts
+          # echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+          ssh-keyscan nyrkio.com >> $HOME/.ssh/known_hosts
 
           echo "$SSH_PRIVATE_KEY" | ssh-add -
 
