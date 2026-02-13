@@ -112,10 +112,10 @@ const TokenSetup = () => {
 
 const Credits = () => {
   return (
-    <div className="mt-5 pt-4 border-top">
+    <div className="mt-5 pt-4">
       <h3>Credits</h3>
       <p>
-        The <code>nyrkio/change-detection</code> GitHub Action is based on{" "}
+        The <tt><strong>nyrkio/change-detection</strong></tt> GitHub Action is based on{" "}
         <a href="https://github.com/benchmark-action/github-action-benchmark">
           benchmark-action/github-action-benchmark
         </a>
