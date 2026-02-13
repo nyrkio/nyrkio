@@ -111,7 +111,6 @@ export const SidePanel = ({ loggedIn }) => {
 };
 
 const FrontPageSidePanel = ({ loggedIn }) => {
-  document.body.classList.add("section-front");
   if (loggedIn) {
     return (
       <>
