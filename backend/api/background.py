@@ -96,7 +96,8 @@ async def loop_installations():
 
         # github doesn't like us polling this all the time (will ask for webhook permission when we release officially)
         # so for now just short circuit here unless this is a known user/customer
-        if not github_user in ["henrikingo", "penberg", "nyrkio", "unodb-dev", "laurynas-biveinis"]:
+        if not github_user in ["henrikingo", "penberg", "turso", "nyrkio", "unodb-dev", "laurynas-biveinis"]:
+            logger.info(f"{github_user} is not in the list of subscribers for Runner service. Skipping.")
             continue
 
 
