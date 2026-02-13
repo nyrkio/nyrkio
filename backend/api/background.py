@@ -92,6 +92,14 @@ async def loop_installations():
     statuses = []  # To return
     for inst in installations:
         installation_id = inst["installation"]["id"]
+        github_user = inst["installation"]["account"]["login"]
+
+        # github doesn't like us polling this all the time (will ask for webhook permission when we release officially)
+        # so for now just short circuit here unless this is a known user/customer
+        if not github_user in ["henrikingo", "penberg", "nyrkio", "unodb-dev", "laurynas-biveinis"]:
+            continue
+
+
         # client_id = inst["installation"]["client_id"]
         app_access_token = await fetch_access_token(installation_id=installation_id)
         repo_list = await refresh_repo_list(app_access_token)
