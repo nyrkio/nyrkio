@@ -21,6 +21,99 @@ from backend.db.db import DBStore
 
 logger = logging.getLogger(__file__)
 
+# Monthly CPU-hour quotas by plan type
+PLAN_QUOTAS = {
+    "simple_business": 1600,
+    "simple_enterprise": 4000,
+    "simple_test": 4000,
+}
+
+
+async def check_runner_entitlement(nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user):
+    """
+    Verify that a user/org has an active runner subscription and is within their monthly quota.
+    Raises HTTPException 403 if no subscription, 429 if over quota.
+    """
+    store = DBStore()
+
+    billing_entity_id = nyrkio_billing_user
+    plan = None
+    billing_runners = None
+
+    # Resolve the paying user and their plan
+    if nyrkio_org_id and nyrkio_org_id == nyrkio_billing_user:
+        # Org is the billing entity — look up org config for paid_by
+        config, _ = await store.get_user_config(nyrkio_org_id)
+        billing_runners = config.get("billing_runners") or config.get("billing")
+        if billing_runners:
+            paid_by = billing_runners.get("paid_by")
+            if paid_by:
+                user_doc = await store.get_user_without_any_fastapi_nonsense(paid_by)
+                if user_doc:
+                    plan = user_doc.get("billing_runners") or user_doc.get("billing")
+            else:
+                plan = billing_runners
+        if not plan:
+            # Try the org config itself as the plan source
+            plan = billing_runners
+    else:
+        # User is the billing entity
+        user_doc = await store.get_user_without_any_fastapi_nonsense(billing_entity_id)
+        if user_doc:
+            plan = user_doc.get("billing_runners") or user_doc.get("billing")
+
+    if not plan or "plan" not in plan:
+        raise HTTPException(
+            status_code=403,
+            detail=f"No active runner subscription found for billing entity {billing_entity_id}. "
+            "Please subscribe at https://nyrkio.com/docs/getting-started",
+        )
+
+    plan_name = plan["plan"]
+
+    # Determine monthly quota
+    quota = None
+    for prefix, hours in PLAN_QUOTAS.items():
+        if plan_name.startswith(prefix):
+            quota = hours
+            break
+
+    if quota is None and plan_name.startswith("runner_postpaid"):
+        quota = plan.get("monthly_limit", 5000)
+
+    if quota is None:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Plan '{plan_name}' does not include runner access.",
+        )
+
+    # Check current month usage with extrapolation
+    raw_total = await store.get_monthly_runner_cpu_hours(str(billing_entity_id))
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    days_elapsed = now.day
+    # AWS billing data is typically a day behind
+    days_with_data = max(days_elapsed - 1, 0)
+
+    if days_with_data > 0 and raw_total > 0:
+        estimated_total = raw_total * days_elapsed / days_with_data
+    else:
+        estimated_total = raw_total
+
+    if estimated_total >= quota:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Monthly runner quota exceeded for billing entity {billing_entity_id}. "
+            f"Used ~{estimated_total:.1f} of {quota} CPU-hours (plan: {plan_name}). "
+            f"Upgrade your plan or wait until next month.",
+        )
+
+    logger.info(
+        f"Runner entitlement OK: {billing_entity_id} plan={plan_name} "
+        f"usage={raw_total:.1f}/{quota}h (estimated={estimated_total:.1f}h)"
+    )
+    return plan
+
 
 async def check_work_queue():
     store = DBStore()
@@ -78,13 +171,15 @@ async def workflow_job_event(queued_gh_event):
             nyrkio_org = nyrkio_org["organization"]["id"]
     nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
 
-    # FIXME: Add a check for quota
     if (not nyrkio_user) and (not nyrkio_org):
         logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
         raise HTTPException(
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
+
+    # Verify subscription and quota before launching any runners
+    await check_runner_entitlement(nyrkio_user, nyrkio_org, nyrkio_billing_user)
 
     if runner_registration_token and nyrkio_org:
         launcher = RunnerLauncher(
