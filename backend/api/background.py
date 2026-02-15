@@ -9,8 +9,10 @@ from backend.db.db import DBStore
 from backend.github.runner import (
     workflow_job_event,
     check_work_queue,
+    check_runner_entitlement,
     fetch_access_token,
 )
+from fastapi import HTTPException
 from backend.github.runner_configs import supported_instance_types
 from backend.aws.s3download import get_latest_runner_usage
 from backend.api.metered import generate_unique_nyrkio_id, report_cpu_hours_consumed
@@ -94,12 +96,30 @@ async def loop_installations():
         installation_id = inst["installation"]["id"]
         github_user = inst["installation"]["account"]["login"]
 
-        # github doesn't like us polling this all the time (will ask for webhook permission when we release officially)
-        # so for now just short circuit here unless this is a known user/customer
-        if not github_user in ["henrikingo", "penberg", "tursodatabase", "nyrkio", "unodb-dev", "laurynas-biveinis"]:
-            logger.info(f"{github_user} is not in the list of subscribers for Runner service. Skipping.")
+        # Check subscription dynamically instead of hardcoded whitelist.
+        # This prevents unnecessary GitHub API polling for non-subscribers.
+        # (Background polling is temporary, to be replaced by webhook, but will
+        # remain as an infrequently-run backstop.)
+        try:
+            nyrkio_user = await store.get_user_by_github_username(github_user)
+            nyrkio_org = await store.get_org_by_github_org(github_user, github_user)
+            nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
+            nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
+            nyrkio_billing_user = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
+            if not nyrkio_billing_user:
+                logger.info(f"{github_user} not found in Nyrkio. Skipping.")
+                continue
+            await check_runner_entitlement(
+                nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user
+            )
+        except HTTPException as e:
+            logger.info(f"{github_user}: {e.detail} Skipping.")
             continue
-
+        except Exception as e:
+            logger.warning(
+                f"Error checking entitlement for {github_user}: {e}. Skipping."
+            )
+            continue
 
         # client_id = inst["installation"]["client_id"]
         app_access_token = await fetch_access_token(installation_id=installation_id)

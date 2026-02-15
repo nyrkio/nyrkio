@@ -1644,6 +1644,43 @@ class DBStore(object):
         coll = self.db.User
         await coll.update_one({"_id": user_id}, {"github_pat": {"$set": pat}})
 
+    async def get_monthly_runner_cpu_hours(self, plan: str, billable_user_id: str):
+        """
+        Get total CPU-hours consumed this calendar month for a given billable user/org.
+        Queries runner_usage_raw aggregated by user.billable_nyrkio_user_id.
+        """
+        now = datetime.now(tz=timezone.utc)
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_start_iso = month_start.isoformat()
+
+        coll = self.db.runner_usage_raw
+        pipeline = [
+            {
+                "$match": {
+                    "user.billable_nyrkio_user_id": str(billable_user_id),
+                    "plan_info.plan": str(plan),
+                    "unique_key.unique_time_slot": {"$gte": month_start_iso},
+                }
+            },
+            {
+                "$group": {
+                    "_id": None,
+                    "total_cpu_hours": {"$sum": "$consumption.nyrkio_cpu_hours"},
+                    "max_timestamp": {"$max": "$unique_key.unique_time_slot"},
+                }
+            },
+        ]
+        results = await coll.aggregate(pipeline).to_list(None)
+        if not results:
+            return 0.0, now
+
+        cpuh = results[0]["total_cpu_hours"]
+        t = results[0]["max_timestamp"]
+        t = t.split("Z-")[0]  # TODO: python 3.11 supports Z
+        t = datetime.fromisoformat(t)
+
+        return cpuh, t
+
     async def get_latest_runner_report(self):
         coll = self.db.runner_usage_latest_report
         res = await coll.find_one({"_id": "latest_usage_report"})

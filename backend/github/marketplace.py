@@ -1,5 +1,6 @@
 import asyncio
 from backend.db.db import DBStore
+from backend.github.runner import check_runner_entitlement
 from backend.github.runner_configs import supported_instance_types
 from backend.api.background import (
     check_queued_workflow_jobs,
@@ -77,13 +78,23 @@ async def _github_events(gh_event: Dict):
             if nyrkio_org is not None:
                 nyrkio_org = nyrkio_org["organization"]["id"]
 
-        # FIXME: Add a check for quota
         if (not nyrkio_user) and (not nyrkio_org):
             logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
             raise HTTPException(
                 status_code=401,
                 detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
             )
+
+        nyrkio_user_or_org_id = nyrkio_org if nyrkio_org else nyrkio_user
+        # Early rejection: check subscription and quota before queuing work.
+        # This also prevents unnecessary GitHub API polling for non-subscribers.
+        remaining_quota, subscription, billable_user = await check_runner_entitlement(
+            nyrkio_user_or_org_id
+        )
+        _ = subscription
+        _ = billable_user
+
+        logger.info(f"Runner entitlement OK: {billable_user} has {remaining_quota}h ")
 
         run_id = gh_event["workflow_job"]["run_id"]
         job_name = gh_event["workflow_job"]["name"]

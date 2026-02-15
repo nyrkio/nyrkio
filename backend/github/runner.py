@@ -19,7 +19,112 @@ from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 from backend.db.db import DBStore
 
+from backend.api.organization import planmap
+
 logger = logging.getLogger(__file__)
+
+
+async def check_runner_entitlement(nyrkio_user_or_org_id):
+    """
+    Verify that a user/org has an active runner subscription and is within their monthly quota.
+    Raises HTTPException 403 if no subscription, 429 if over quota.
+    """
+    store = DBStore()
+
+    subscription = None
+    paid_by = None
+    billable_user = None
+    remaining_quota = 0
+
+    if isinstance(nyrkio_user_or_org_id, int):
+        # Org is the billing entity — look up org config for paid_by
+        org_config, _ = await store.get_user_config(nyrkio_user_or_org_id)
+        if org_config:
+            if org_config.get("billing") is not None:
+                paid_by = org_config.get("paid_by")
+                remaining_quota, subsciption = check_runner_remaining_quota(paid_by)
+            if remaining_quota <= 0 and org_config.billing_runners is not None:
+                paid_by = org_config.get("paid_by")
+                remaining_quota, subscription = check_runner_remaining_quota(paid_by)
+
+    else:
+        # User
+        paid_by = str(nyrkio_user_or_org_id)
+
+    if paid_by:
+        billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
+
+        if billable_user:
+            if billable_user.billing is not None:
+                remaining_quota, subsciption = check_runner_remaining_quota(
+                    billable_user.billing
+                )
+            if remaining_quota <= 0 and billable_user.billing_runners is not None:
+                remaining_quota, subscription = check_runner_remaining_quota(
+                    billable_user.billing_runners
+                )
+
+    if remaining_quota < 0.0:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Plan '{nyrkio_user_or_org_id}'/'{subscription}' does not include runner access.",
+        )
+
+    return remaining_quota, subscription, billable_user
+
+
+def monthly_quota(subscription):
+    plan = subscription["plan"]
+    if planmap[plan] == "postpaid":
+        return subscription.get("monthly_limit", 5000)
+    if "business" in plan:
+        return 1600
+    if "enterprise" in plan:
+        return 4000
+    if plan == "simple_test_yearly":
+        return 4000
+
+    return None
+
+
+async def check_runner_remaining_quota(subscription, billable_user):
+    quota = monthly_quota(subscription)
+    if quota is None:
+        return None, None
+
+    total_consumption = await get_estimated_consumption(subscription, billable_user)
+
+    if total_consumption >= quota:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Monthly runner quota exceeded for billing entity {billable_user}. "
+            f"Used ~{total_consumption:.1f} of {quota} CPU-hours (plan: {subscription['plan']}). "
+            f"Upgrade your plan or wait until next month.",
+        )
+
+    return quota - total_consumption, subscription
+
+
+async def get_estimated_consumption(subscription, billable_user):
+    store = DBStore()
+    # TODO: Get also time of latest data
+    # Check current month usage with extrapolation
+    raw_total, latest_timestamp = await store.get_monthly_runner_cpu_hours(
+        subscription["plan"], str(billable_user.id)
+    )
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    extrapolate_time = now - latest_timestamp
+    sec_in_month = ((now.day * 24 + now.hour) * 60 + now.minute) + now.seconds
+
+    if extrapolate_time > 0 and raw_total > 0:
+        estimated_total = (
+            raw_total * (extrapolate_time.seconds + sec_in_month) / sec_in_month
+        )
+    else:
+        estimated_total = raw_total
+
+    return estimated_total
 
 
 async def check_work_queue():
@@ -78,13 +183,15 @@ async def workflow_job_event(queued_gh_event):
             nyrkio_org = nyrkio_org["organization"]["id"]
     nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
 
-    # FIXME: Add a check for quota
     if (not nyrkio_user) and (not nyrkio_org):
         logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
         raise HTTPException(
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
+
+    # Verify subscription and quota before launching any runners
+    await check_runner_entitlement(nyrkio_user, nyrkio_org, nyrkio_billing_user)
 
     if runner_registration_token and nyrkio_org:
         launcher = RunnerLauncher(
