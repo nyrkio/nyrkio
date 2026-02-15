@@ -204,7 +204,9 @@ async def workflow_job_event(queued_gh_event):
 
     if not nyrkio_user_or_org_id:
         logger.warning(
-            f"User {repo_owner} not found in Nyrkio. ({nyrkio_user_or_org_id})"
+            logger.info(
+                f"{repo_owner} Does not have a Nyrkio subscription. Skip polling for runners."
+            )
         )
         raise HTTPException(
             status_code=401,
