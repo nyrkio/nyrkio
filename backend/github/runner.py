@@ -19,100 +19,112 @@ from backend.notifiers.github import fetch_access_token
 from backend.github.runner_configs import supported_instance_types
 from backend.db.db import DBStore
 
+from backend.api.organization import planmap
+
 logger = logging.getLogger(__file__)
 
-# Monthly CPU-hour quotas by plan type
-PLAN_QUOTAS = {
-    "simple_business": 1600,
-    "simple_enterprise": 4000,
-    "simple_test": 4000,
-}
 
-
-async def check_runner_entitlement(nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user):
+async def check_runner_entitlement(nyrkio_user_or_org_id):
     """
     Verify that a user/org has an active runner subscription and is within their monthly quota.
     Raises HTTPException 403 if no subscription, 429 if over quota.
     """
     store = DBStore()
 
-    billing_entity_id = nyrkio_billing_user
-    plan = None
-    billing_runners = None
+    subscription = None
+    paid_by = None
+    billable_user = None
+    remaining_quota = 0
 
-    # Resolve the paying user and their plan
-    if nyrkio_org_id and nyrkio_org_id == nyrkio_billing_user:
+    if isinstance(nyrkio_user_or_org_id, int):
         # Org is the billing entity — look up org config for paid_by
-        config, _ = await store.get_user_config(nyrkio_org_id)
-        billing_runners = config.get("billing_runners") or config.get("billing")
-        if billing_runners:
-            paid_by = billing_runners.get("paid_by")
-            if paid_by:
-                user_doc = await store.get_user_without_any_fastapi_nonsense(paid_by)
-                if user_doc:
-                    plan = user_doc.get("billing_runners") or user_doc.get("billing")
-            else:
-                plan = billing_runners
-        if not plan:
-            # Try the org config itself as the plan source
-            plan = billing_runners
-    else:
-        # User is the billing entity
-        user_doc = await store.get_user_without_any_fastapi_nonsense(billing_entity_id)
-        if user_doc:
-            plan = user_doc.get("billing_runners") or user_doc.get("billing")
+        org_config, _ = await store.get_user_config(nyrkio_user_or_org_id)
+        if org_config:
+            if org_config.get("billing") is not None:
+                paid_by = org_config.get("paid_by")
+                remaining_quota, subsciption = check_runner_remaining_quota(paid_by)
+            if remaining_quota <= 0 and org_config.billing_runners is not None:
+                paid_by = org_config.get("paid_by")
+                remaining_quota, subscription = check_runner_remaining_quota(paid_by)
 
-    if not plan or "plan" not in plan:
+    else:
+        # User
+        paid_by = str(nyrkio_user_or_org_id)
+
+    if paid_by:
+        billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
+
+        if billable_user:
+            if billable_user.billing is not None:
+                remaining_quota, subsciption = check_runner_remaining_quota(
+                    billable_user.billing
+                )
+            if remaining_quota <= 0 and billable_user.billing_runners is not None:
+                remaining_quota, subscription = check_runner_remaining_quota(
+                    billable_user.billing_runners
+                )
+
+    if remaining_quota < 0.0:
         raise HTTPException(
             status_code=403,
-            detail=f"No active runner subscription found for billing entity {billing_entity_id}. "
-            "Please subscribe at https://nyrkio.com/docs/getting-started",
+            detail=f"Plan '{nyrkio_user_or_org_id}'/'{subscription}' does not include runner access.",
         )
 
-    plan_name = plan["plan"]
+    return remaining_quota, subscription, billable_user
 
-    # Determine monthly quota
-    quota = None
-    for prefix, hours in PLAN_QUOTAS.items():
-        if plan_name.startswith(prefix):
-            quota = hours
-            break
 
-    if quota is None and plan_name.startswith("runner_postpaid"):
-        quota = plan.get("monthly_limit", 5000)
+def monthly_quota(subscription):
+    plan = subscription["plan"]
+    if planmap[plan] == "postpaid":
+        return subscription.get("monthly_limit", 5000)
+    if "business" in plan:
+        return 1600
+    if "enterprise" in plan:
+        return 4000
+    if plan == "simple_test_yearly":
+        return 4000
 
+    return None
+
+
+async def check_runner_remaining_quota(subscription, billable_user):
+    quota = monthly_quota(subscription)
     if quota is None:
-        raise HTTPException(
-            status_code=403,
-            detail=f"Plan '{plan_name}' does not include runner access.",
-        )
+        return None, None
 
-    # Check current month usage with extrapolation
-    raw_total = await store.get_monthly_runner_cpu_hours(str(billing_entity_id))
+    total_consumption = await get_estimated_consumption(subscription, billable_user)
 
-    now = datetime.datetime.now(datetime.timezone.utc)
-    days_elapsed = now.day
-    # AWS billing data is typically a day behind
-    days_with_data = max(days_elapsed - 1, 0)
-
-    if days_with_data > 0 and raw_total > 0:
-        estimated_total = raw_total * days_elapsed / days_with_data
-    else:
-        estimated_total = raw_total
-
-    if estimated_total >= quota:
+    if total_consumption >= quota:
         raise HTTPException(
             status_code=429,
-            detail=f"Monthly runner quota exceeded for billing entity {billing_entity_id}. "
-            f"Used ~{estimated_total:.1f} of {quota} CPU-hours (plan: {plan_name}). "
+            detail=f"Monthly runner quota exceeded for billing entity {billable_user}. "
+            f"Used ~{total_consumption:.1f} of {quota} CPU-hours (plan: {subscription['plan']}). "
             f"Upgrade your plan or wait until next month.",
         )
 
-    logger.info(
-        f"Runner entitlement OK: {billing_entity_id} plan={plan_name} "
-        f"usage={raw_total:.1f}/{quota}h (estimated={estimated_total:.1f}h)"
+    return quota - total_consumption, subscription
+
+
+async def get_estimated_consumption(subscription, billable_user):
+    store = DBStore()
+    # TODO: Get also time of latest data
+    # Check current month usage with extrapolation
+    raw_total, latest_timestamp = await store.get_monthly_runner_cpu_hours(
+        subscription["plan"], str(billable_user.id)
     )
-    return plan
+
+    now = datetime.datetime.now(datetime.timezone.utc)
+    extrapolate_time = now - latest_timestamp
+    sec_in_month = ((now.day * 24 + now.hour) * 60 + now.minute) + now.seconds
+
+    if extrapolate_time > 0 and raw_total > 0:
+        estimated_total = (
+            raw_total * (extrapolate_time.seconds + sec_in_month) / sec_in_month
+        )
+    else:
+        estimated_total = raw_total
+
+    return estimated_total
 
 
 async def check_work_queue():

@@ -109,12 +109,16 @@ async def loop_installations():
             if not nyrkio_billing_user:
                 logger.info(f"{github_user} not found in Nyrkio. Skipping.")
                 continue
-            await check_runner_entitlement(nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user)
+            await check_runner_entitlement(
+                nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user
+            )
         except HTTPException as e:
             logger.info(f"{github_user}: {e.detail} Skipping.")
             continue
         except Exception as e:
-            logger.warning(f"Error checking entitlement for {github_user}: {e}. Skipping.")
+            logger.warning(
+                f"Error checking entitlement for {github_user}: {e}. Skipping."
+            )
             continue
 
         # client_id = inst["installation"]["client_id"]
