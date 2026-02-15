@@ -197,7 +197,7 @@ const DocsSidePanel = ({ loggedIn }) => {
       <Link to="/docs/change-detection" className="nav-link">
         Change Detection
       </Link>
-      <Link to="/docs/getting-started-http" className="nav-link">
+      <Link to="/docs/getting-started-http" className="nav-link" style={{paddingLeft: "2em", paddingTop: "0px"}}>
         HTTP API
       </Link>
 
