@@ -396,7 +396,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
               />
               <div className="card">
                 <div className="card-body create-new-test">
-                  <Link to="/docs/getting-started" className="btn btn-success col-xs-6 col-md-5 col-lg-4 col-xl-3">
+                  <Link to="/docs/change-detection" className="btn btn-success col-xs-6 col-md-5 col-lg-4 col-xl-3">
                     <span className="bi bi-plus-square-fill">
                       &nbsp;&nbsp; Add test results
                     </span>
