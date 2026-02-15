@@ -42,7 +42,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
         if org_config:
             if org_config.get("billing") is not None:
                 paid_by = org_config.get("paid_by")
-                remaining_quota, subsciption = check_runner_remaining_quota(paid_by)
+                remaining_quota, subscription = check_runner_remaining_quota(paid_by)
             if remaining_quota <= 0 and org_config.get("billing_runners") is not None:
                 paid_by = org_config.get("paid_by")
                 remaining_quota, subscription = check_runner_remaining_quota(paid_by)
@@ -56,7 +56,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
 
         if billable_user:
             if billable_user.get("billing") is not None:
-                remaining_quota, subsciption = check_runner_remaining_quota(
+                remaining_quota, subscription = check_runner_remaining_quota(
                     billable_user.get("billing")
                 )
             if (
@@ -67,10 +67,16 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
                     billable_user.get("billing_runners")
                 )
 
-    if remaining_quota < 0.0:
+    if not subscription:
         raise HTTPException(
             status_code=403,
-            detail=f"Plan '{nyrkio_user_or_org_id}'/'{subscription}' does not include runner access.",
+            detail=f"Did not find an active subscription for {nyrkio_user_or_org_id}: {subscription}",
+        )
+
+    if remaining_quota < 0.1:
+        raise HTTPException(
+            status_code=429,
+            detail=f"Subscription '{nyrkio_user_or_org_id}  {subscription}' has consumed its monthly quota. Please add funds at https://nyrkio.com/billing or wait for next month.",
         )
 
     return remaining_quota, subscription, billable_user
@@ -90,22 +96,31 @@ def monthly_quota(subscription):
     return None
 
 
-async def check_runner_remaining_quota(subscription, billable_user):
-    quota = monthly_quota(subscription)
-    if quota is None:
-        return None, None
+async def check_runner_remaining_quota(billable_user):
+    total_quota = 0.0
+    total_consumption = 0.0
+    active_subscription = None
+    for subscription in [
+        billable_user.get("billing"),
+        billable_user.get("billing_runners"),
+    ]:
+        if subscription is None:
+            continue
 
-    total_consumption = await get_estimated_consumption(subscription, billable_user)
+        quota = monthly_quota(subscription)
+        if quota is None:
+            continue
 
-    if total_consumption >= quota:
-        raise HTTPException(
-            status_code=429,
-            detail=f"Monthly runner quota exceeded for billing entity {billable_user}. "
-            f"Used ~{total_consumption:.1f} of {quota} CPU-hours (plan: {subscription['plan']}). "
-            f"Upgrade your plan or wait until next month.",
+        total_quota += quota
+        total_consumption += await get_estimated_consumption(
+            subscription, billable_user
         )
 
-    return quota - total_consumption, subscription
+        if total_quota - total_consumption > 0.0:
+            active_subscription = subscription
+            break
+
+    return total_quota - total_consumption, active_subscription
 
 
 async def get_estimated_consumption(subscription, billable_user):
