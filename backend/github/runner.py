@@ -43,7 +43,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
             if org_config.get("billing") is not None:
                 paid_by = org_config.get("paid_by")
                 remaining_quota, subsciption = check_runner_remaining_quota(paid_by)
-            if remaining_quota <= 0 and org_config.billing_runners is not None:
+            if remaining_quota <= 0 and org_config.get("billing_runners") is not None:
                 paid_by = org_config.get("paid_by")
                 remaining_quota, subscription = check_runner_remaining_quota(paid_by)
 
@@ -55,13 +55,13 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
         billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
 
         if billable_user:
-            if billable_user.billing is not None:
+            if billable_user.get("billing") is not None:
                 remaining_quota, subsciption = check_runner_remaining_quota(
-                    billable_user.billing
+                    billable_user.get("billing")
                 )
-            if remaining_quota <= 0 and billable_user.billing_runners is not None:
+            if remaining_quota <= 0 and billable_user.get("billing_runners") is not None:
                 remaining_quota, subscription = check_runner_remaining_quota(
-                    billable_user.billing_runners
+                    billable_user.get("billing_runners")
                 )
 
     if remaining_quota < 0.0:
@@ -167,21 +167,22 @@ async def workflow_job_event(queued_gh_event):
             "message": str(e),
         }
 
+    nyrkio_user_id = None
+    nyrkio_org_id = None
     # repo_owner is either the user or an org
     nyrkio_user = await store.get_user_by_github_username(repo_owner)
-    nyrkio_org = None
     if nyrkio_user is not None:
-        nyrkio_user = nyrkio_user.id
+        nyrkio_user_id = nyrkio_user.id
     else:
         nyrkio_user = await store.get_user_by_github_username(sender)
         if nyrkio_user is not None:
-            nyrkio_user = nyrkio_user.id
+            nyrkio_user_id = nyrkio_user.id
 
     if org_name:
         nyrkio_org = await store.get_org_by_github_org(org_name, sender)
         if nyrkio_org is not None:
-            nyrkio_org = nyrkio_org["organization"]["id"]
-    nyrkio_user_or_org_id = nyrkio_org if nyrkio_org else nyrkio_user
+            nyrkio_org_id = nyrkio_org["organization"]["id"]
+    nyrkio_user_or_org_id = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
 
     if not nyrkio_user_or_org_id:
         logger.warning(
