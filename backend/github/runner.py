@@ -59,7 +59,10 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
                 remaining_quota, subsciption = check_runner_remaining_quota(
                     billable_user.get("billing")
                 )
-            if remaining_quota <= 0 and billable_user.get("billing_runners") is not None:
+            if (
+                remaining_quota <= 0
+                and billable_user.get("billing_runners") is not None
+            ):
                 remaining_quota, subscription = check_runner_remaining_quota(
                     billable_user.get("billing_runners")
                 )
