@@ -181,17 +181,25 @@ async def workflow_job_event(queued_gh_event):
         nyrkio_org = await store.get_org_by_github_org(org_name, sender)
         if nyrkio_org is not None:
             nyrkio_org = nyrkio_org["organization"]["id"]
-    nyrkio_billing_user = nyrkio_org if nyrkio_org else nyrkio_user
+    nyrkio_user_or_org_id = nyrkio_org if nyrkio_org else nyrkio_user
 
-    if (not nyrkio_user) and (not nyrkio_org):
-        logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
+    if not nyrkio_user_or_org_id:
+        logger.warning(
+            f"User {repo_owner} not found in Nyrkio. ({nyrkio_user_or_org_id})"
+        )
         raise HTTPException(
             status_code=401,
             detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
         )
 
     # Verify subscription and quota before launching any runners
-    await check_runner_entitlement(nyrkio_user, nyrkio_org, nyrkio_billing_user)
+    remaining_quota, subscription, nyrkio_billing_user = await check_runner_entitlement(
+        nyrkio_user_or_org_id
+    )
+    _ = subscription
+    _ = nyrkio_billing_user
+
+    logger.info(f"Runner entitlement OK: {nyrkio_billing_user} has {remaining_quota}h ")
 
     if runner_registration_token and nyrkio_org:
         launcher = RunnerLauncher(
