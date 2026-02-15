@@ -110,7 +110,9 @@ async def loop_installations():
             nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
             nyrkio_user_or_org_id = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
             if not nyrkio_user_or_org_id:
-                logger.info(f"{github_user} not found in Nyrkio. Skipping.")
+                logger.info(
+                    f"{github_user} Does not have a Nyrkio subscription. Skip polling for runners."
+                )
                 continue
             # Early rejection: check subscription and quota before queuing work.
             # This also prevents unnecessary GitHub API polling for non-subscribers.

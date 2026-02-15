@@ -79,7 +79,9 @@ async def _github_events(gh_event: Dict):
                 nyrkio_org = nyrkio_org["organization"]["id"]
 
         if (not nyrkio_user) and (not nyrkio_org):
-            logger.warning(f"User {repo_owner} not found in Nyrkio. ({nyrkio_user})")
+            logger.info(
+                f"{repo_owner} Does not have a Nyrkio subscription. Skip polling for runners."
+            )
             raise HTTPException(
                 status_code=401,
                 detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
