@@ -100,18 +100,27 @@ async def loop_installations():
         # This prevents unnecessary GitHub API polling for non-subscribers.
         # (Background polling is temporary, to be replaced by webhook, but will
         # remain as an infrequently-run backstop.)
+        remaining_quota = None
+        subscription = None
+        billable_user = None
         try:
             nyrkio_user = await store.get_user_by_github_username(github_user)
             nyrkio_org = await store.get_org_by_github_org(github_user, github_user)
             nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
             nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
-            nyrkio_billing_user = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
-            if not nyrkio_billing_user:
+            nyrkio_user_or_org_id = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
+            if not nyrkio_user_or_org_id:
                 logger.info(f"{github_user} not found in Nyrkio. Skipping.")
                 continue
-            await check_runner_entitlement(
-                nyrkio_user_id, nyrkio_org_id, nyrkio_billing_user
-            )
+            # Early rejection: check subscription and quota before queuing work.
+            # This also prevents unnecessary GitHub API polling for non-subscribers.
+            (
+                remaining_quota,
+                subscription,
+                billable_user,
+            ) = await check_runner_entitlement(nyrkio_user_or_org_id)
+            _ = subscription
+            _ = billable_user
         except HTTPException as e:
             logger.info(f"{github_user}: {e.detail} Skipping.")
             continue
