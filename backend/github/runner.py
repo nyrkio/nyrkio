@@ -144,7 +144,7 @@ async def get_estimated_consumption(subscription, billable_user):
 
     now = datetime.datetime.now(datetime.timezone.utc)
     extrapolate_time = now - latest_timestamp
-    sec_in_month = ((now.day * 24 + now.hour) * 60 + now.minute) + now.seconds
+    sec_in_month = ((now.day * 24 + now.hour) * 60 + now.minute) + now.second
 
     if extrapolate_time > 0 and raw_total > 0:
         estimated_total = (
