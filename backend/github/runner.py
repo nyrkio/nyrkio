@@ -51,7 +51,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
 
                 if billable_user and billable_user.get("billing") is not None:
                     remaining_quota, subscription = await check_runner_remaining_quota(
-                        billable_user, subscription
+                        billable_user, billable_user.get("billing")
                     )
                     print("check_runner_entitlement 4")
 
@@ -64,7 +64,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
                 if billable_user and billable_user.get("billing_runners") is not None:
                     print("check_runner_entitlement 6")
                     remaining_quota, subscription = await check_runner_remaining_quota(
-                        billable_user, subscription
+                        billable_user, billable_user.get("billing_runners")
                     )
 
     else:
