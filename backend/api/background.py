@@ -104,14 +104,17 @@ async def loop_installations():
         subscription = None
         billable_user = None
         try:
-            nyrkio_user = await store.get_user_by_github_username(github_user)
-            nyrkio_org = await store.get_org_by_github_org(github_user, github_user)
-            nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
+            # TODO: Just check for pat directly
+            # nyrkio_user = await store.get_user_by_github_username(github_user)
+            nyrkio_org = await store.get_org_by_github_org(github_user)
+            # nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
             nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
-            nyrkio_user_or_org_id = nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
+            nyrkio_user_or_org_id = (
+                nyrkio_org_id  # if nyrkio_org_id else nyrkio_user_id
+            )
             if not nyrkio_user_or_org_id:
                 logger.info(
-                    f"{github_user} Does not have a Nyrkio subscription. Skip polling for runners."
+                    f"{github_user}/{nyrkio_user_or_org_id} is not an org in nyrkio. Skip polling for runners."
                 )
                 continue
             # Early rejection: check subscription and quota before queuing work.

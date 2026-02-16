@@ -41,12 +41,12 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
         org_config, _ = await store.get_user_config(nyrkio_user_or_org_id)
         if org_config:
             if org_config.get("billing") is not None:
-                paid_by = org_config.get("paid_by")
+                paid_by = org_config["billing"].get("paid_by")
                 remaining_quota, subscription = await check_runner_remaining_quota(
                     paid_by
                 )
             if remaining_quota <= 0 and org_config.get("billing_runners") is not None:
-                paid_by = org_config.get("paid_by")
+                paid_by = org_config["billing_runners"].get("paid_by")
                 remaining_quota, subscription = await check_runner_remaining_quota(
                     paid_by
                 )
