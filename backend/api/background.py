@@ -96,9 +96,44 @@ async def loop_installations():
         installation_id = inst["installation"]["id"]
         github_user = inst["installation"]["account"]["login"]
 
+        # Check subscription dynamically instead of hardcoded whitelist.
+        # This prevents unnecessary GitHub API polling for non-subscribers.
+        # (Background polling is temporary, to be replaced by webhook, but will
+        # remain as an infrequently-run backstop.)
         remaining_quota = None
         subscription = None
         billable_user = None
+        try:
+            # TODO: Just check for pat directly
+            # nyrkio_user = await store.get_user_by_github_username(github_user)
+            nyrkio_org = await store.get_org_by_github_org(github_user)
+            # nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
+            nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
+            nyrkio_user_or_org_id = (
+                nyrkio_org_id  # if nyrkio_org_id else nyrkio_user_id
+            )
+            if not nyrkio_user_or_org_id:
+                logger.info(
+                    f"{github_user}/{nyrkio_user_or_org_id} is not an org in nyrkio. Skip polling for runners."
+                )
+                continue
+            # Early rejection: check subscription and quota before queuing work.
+            # This also prevents unnecessary GitHub API polling for non-subscribers.
+            (
+                remaining_quota,
+                subscription,
+                billable_user,
+            ) = await check_runner_entitlement(nyrkio_user_or_org_id)
+            _ = subscription
+            _ = billable_user
+        except HTTPException as e:
+            logger.info(f"{github_user}: {e.detail} Skipping.")
+            continue
+        except Exception as e:
+            logger.warning(
+                f"Error checking entitlement for {github_user}: {e}. Skipping."
+            )
+            continue
 
         # client_id = inst["installation"]["client_id"]
         app_access_token = await fetch_access_token(installation_id=installation_id)
@@ -108,42 +143,6 @@ async def loop_installations():
             full_name = repo["full_name"]
             # repo_name = repo["name"]
             repo_owner = full_name.split("/")[0]
-
-            # Check subscription first.
-            # This prevents unnecessary GitHub API polling for non-subscribers.
-            # (Background polling is temporary, to be replaced by webhook, but will
-            # remain as an infrequently-run backstop.)
-            try:
-                nyrkio_user = await store.get_user_by_github_username(github_user)
-                nyrkio_org = await store.get_org_by_github_org(repo_owner, github_user)
-                nyrkio_user_id = nyrkio_user.id if nyrkio_user else None
-                nyrkio_org_id = nyrkio_org["organization"]["id"] if nyrkio_org else None
-                nyrkio_user_or_org_id = (
-                    nyrkio_org_id if nyrkio_org_id else nyrkio_user_id
-                )
-                if not nyrkio_user_or_org_id:
-                    logger.info(
-                        f"{repo_owner}/{github_user}/{nyrkio_org_id}/{nyrkio_user_id} Does not have a Nyrkio subscription. Skip polling for runners."
-                    )
-                    continue
-                # Early rejection: check subscription and quota before queuing work.
-                # This also prevents unnecessary GitHub API polling for non-subscribers.
-                (
-                    remaining_quota,
-                    subscription,
-                    billable_user,
-                ) = await check_runner_entitlement(nyrkio_user_or_org_id)
-                _ = subscription
-                _ = billable_user
-            except HTTPException as e:
-                logger.info(f"{github_user}: {e.detail} Skipping.")
-                continue
-            except Exception as e:
-                logger.warning(
-                    f"Error checking entitlement for {github_user}: {e}. Skipping."
-                )
-                continue
-
             queued_jobs = await check_queued_workflow_jobs(
                 full_name, app_access_token=app_access_token
             )
