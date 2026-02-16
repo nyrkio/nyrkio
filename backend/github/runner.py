@@ -116,17 +116,14 @@ def monthly_quota(subscription):
     return None
 
 
-async def check_runner_remaining_quota(billable_user: dict, subscription):
-    if isinstance(subscription, dict):
-        subscription = [subscription]
+async def check_runner_remaining_quota(billable_user: dict, subscriptions):
+    if isinstance(subscriptions, dict):
+        subscriptions = [subscriptions]
 
     total_quota = 0.0
     total_consumption = 0.0
     active_subscription = None
-    for subscription in [
-        billable_user.get("billing"),
-        billable_user.get("billing_runners"),
-    ]:
+    for subscription in subscriptions:
         if subscription is None:
             continue
 
