@@ -139,7 +139,7 @@ async def get_estimated_consumption(subscription, billable_user):
     # TODO: Get also time of latest data
     # Check current month usage with extrapolation
     raw_total, latest_timestamp = await store.get_monthly_runner_cpu_hours(
-        subscription["plan"], str(billable_user.id)
+        subscription["plan"], str(billable_user["id"])
     )
 
     now = datetime.datetime.now(datetime.timezone.utc)
