@@ -104,7 +104,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
 
 def monthly_quota(subscription):
     plan = subscription["plan"]
-    if planmap[plan] == "postpaid":
+    if planmap[plan] == "post":
         return subscription.get("monthly_limit", 5000)
     if "business" in plan:
         return 1600
