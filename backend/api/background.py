@@ -131,7 +131,7 @@ async def loop_installations():
             continue
         except Exception as e:
             logger.warning(
-                f"Error checking entitlement for {github_user}: {e}. Skipping."
+                f"Error checking entitlement for {github_user}: {type(e)} = {e}. Skipping."
             )
             continue
 
