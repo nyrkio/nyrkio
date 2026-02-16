@@ -36,25 +36,33 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
     billable_user = None
     remaining_quota = 0
 
+    print("check_runner_entitlement 1")
     if isinstance(nyrkio_user_or_org_id, int):
         # Org is the billing entity — look up org config for paid_by
         org_config, _ = await store.get_user_config(nyrkio_user_or_org_id)
         if org_config:
+            print("check_runner_entitlement 2")
             if org_config.get("billing") is not None:
                 paid_by = org_config["billing"].get("paid_by")
                 billable_user = await store.get_user_without_any_fastapi_nonsense(
                     paid_by
                 )
+                print("check_runner_entitlement 3")
+
                 if billable_user and billable_user.get("billing") is not None:
                     remaining_quota, subscription = await check_runner_remaining_quota(
                         billable_user, subscription
                     )
+                    print("check_runner_entitlement 4")
+
             if remaining_quota <= 0 and org_config.get("billing_runners") is not None:
+                print("check_runner_entitlement 5")
                 paid_by = org_config["billing_runners"].get("paid_by")
                 billable_user = await store.get_user_without_any_fastapi_nonsense(
                     paid_by
                 )
                 if billable_user and billable_user.get("billing_runners") is not None:
+                    print("check_runner_entitlement 6")
                     remaining_quota, subscription = await check_runner_remaining_quota(
                         billable_user, subscription
                     )
@@ -62,10 +70,13 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
     else:
         # User
         paid_by = str(nyrkio_user_or_org_id)
+        print("check_runner_entitlement 6")
 
     if paid_by and not subscription:
+        print("check_runner_entitlement 7")
         billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
         if billable_user:
+            print("check_runner_entitlement 8")
             subscription = [
                 billable_user.get("billing"),
                 billable_user.get("billing_runners"),
@@ -86,6 +97,7 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
             status_code=429,
             detail=f"Subscription '{nyrkio_user_or_org_id}  {subscription}' has consumed its monthly quota. Please add funds at https://nyrkio.com/billing or wait for next month.",
         )
+    print("check_runner_entitlement X")
 
     return remaining_quota, subscription, billable_user
 
