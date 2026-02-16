@@ -1103,7 +1103,7 @@ color: #212529;
 
 .summarize-change-points {
   font-size: 85%;
-  color: var(--nyrkio-active);
+  color: var(--nyrkio-light-gray);
   font-weight: 100;
   }
 
