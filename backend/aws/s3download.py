@@ -1,3 +1,4 @@
+import ast
 import csv
 import io
 import json
@@ -248,6 +249,13 @@ async def get_user_info(billable_user_id):
     org_id = None
 
     # fix: On 2026-02-16 we used entire User object as the AWS tag. If this is the full object, then we just want the user_id
+    if isinstance(billable_user_id, str) and billable_user_id.startswith(
+        "{'_id': ObjectId('"
+    ):
+        obj = ast.literal_eval(billable_user_id)
+        if isinstance(obj, dict()) and "_id" in obj:
+            billable_user_id = obj["_id"]
+
     if isinstance(billable_user_id, dict):
         if "_id" in billable_user_id:
             billable_user_id = billable_user_id["_id"]
