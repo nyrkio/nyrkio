@@ -72,19 +72,19 @@ async def check_runner_entitlement(nyrkio_user_or_org_id):
         paid_by = str(nyrkio_user_or_org_id)
         print("check_runner_entitlement 6")
 
-    if paid_by and not subscription:
-        print("check_runner_entitlement 7")
-        billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
-        if billable_user:
-            print("check_runner_entitlement 8")
-            subscription = [
-                billable_user.get("billing"),
-                billable_user.get("billing_runners"),
-            ]
-
-            remaining_quota, subscription = await check_runner_remaining_quota(
-                billable_user, subscription
-            )
+    # if paid_by and not subscription:
+    #     print("check_runner_entitlement 7")
+    #     billable_user = await store.get_user_without_any_fastapi_nonsense(paid_by)
+    #     if billable_user:
+    #         print("check_runner_entitlement 8")
+    #         subscription = [
+    #             billable_user.get("billing"),
+    #             billable_user.get("billing_runners"),
+    #         ]
+    #
+    #         remaining_quota, subscription = await check_runner_remaining_quota(
+    #             billable_user, subscription
+    #         )
 
     if not subscription:
         raise HTTPException(
@@ -231,7 +231,7 @@ async def workflow_job_event(queued_gh_event):
         )
         raise HTTPException(
             status_code=401,
-            detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user})",
+            detail="None of {org_name}/{repo_owner}/{sender} were found in Nyrkio. ({nyrkio_org}/{nyrkio_user_id})",
         )
 
     # Verify subscription and quota before launching any runners
@@ -243,10 +243,10 @@ async def workflow_job_event(queued_gh_event):
 
     logger.info(f"Runner entitlement OK: {nyrkio_billing_user} has {remaining_quota}h ")
 
-    if runner_registration_token and nyrkio_org:
+    if runner_registration_token and nyrkio_org_id:
         launcher = RunnerLauncher(
-            nyrkio_user,
-            nyrkio_org,
+            nyrkio_user_id,
+            nyrkio_org_id,
             nyrkio_billing_user,
             queued_gh_event,
             runs_on,
@@ -260,7 +260,7 @@ async def workflow_job_event(queued_gh_event):
                 "message": return_message,
                 "instances": str(launched_runners),
             }
-    elif nyrkio_user:
+    elif nyrkio_user_id:
         # To register a self hosted runner for a repo in a users own namespace,
         # first of all is a different API call, but worst of all, required Administrator permission to
         # the repo. (e.g. you could delete the entire repo, and so on...)
@@ -271,8 +271,8 @@ async def workflow_job_event(queued_gh_event):
         github_pat = await store.get_pat(nyrkio_user)
         if github_pat:
             launcher = RunnerLauncher(
-                nyrkio_user,
-                nyrkio_org,
+                nyrkio_user_id,
+                nyrkio_org_id,
                 nyrkio_billing_user,
                 queued_gh_event,
                 runs_on,
