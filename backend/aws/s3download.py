@@ -198,7 +198,7 @@ async def get_latest_runner_usage(seen_previously=None):
                         "aws_cost": float(values["pricing_public_on_demand_cost"]),
                         "vcpu": float(meta["product"].get("vcpu", 0)),
                     },
-                    # Link back to github workflow, and other meta data
+                    # Link back to githubbillable_user_id workflow, and other meta data
                     "github": {
                         "github_event_id": meta["resource_tags"].get(
                             "user_github_event_id"
@@ -246,6 +246,12 @@ async def get_user_info(billable_user_id):
     db = DBStore()
     db_user_id = None
     org_id = None
+
+    # fix: On 2026-02-16 we used entire User object as the AWS tag. If this is the full object, then we just want the user_id
+    if isinstance(billable_user_id, dict):
+        if "_id" in billable_user_id:
+            billable_user_id = billable_user_id["_id"]
+
     # user or org
     if len(billable_user_id) > 20:
         db_user_id = (
