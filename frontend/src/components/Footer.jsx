@@ -1,4 +1,4 @@
-import ToS from "../static/doc/Terms Of Service 1.0.pdf";
+import ToS from "../static/doc/Nyrkio Terms of Service v2 - 2026-02-19.pdf";
 import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import { Link } from "react-router-dom";
 import footerUpperCrust from "../static/footer-white-graphic.png";
