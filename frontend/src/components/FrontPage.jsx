@@ -137,15 +137,15 @@ const FeatureBanner1 = () => {
 const Mission = ({loggedIn}) => {
     return (
       <>
-      <div className="row w-100 p-2">
+      <div className="row w-100 p-2 frontPageSlideUp">
 
-      <div className="col-xs-6 nyrkio-runner-title">
-      <h3 className="">New:</h3>
-      <h1 className="">Nyrkiö Runner for GitHub</h1>
+      <div className="col-xs-12 nyrkio-runner-title">
+      <h3 className="m-1">New:</h3>
+      <h1 className="m-1">Nyrkiö Runner for GitHub</h1>
       </div>
 
       </div>
-      <div className="row w-100 p-2">
+      <div className="row w-100 p-2 frontPageSlideUp">
 
       <div className="col-xs-12 col-xl-5 text-justify">
       <p>Do you struggle with noisy benchmark results?</p>
@@ -170,16 +170,18 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
-      <div className="col-xs-12 col-xl-2 text-justify">
+      <div className="col-xs-12 col-xl-1 text-justify">
       </div>
 
 
-      <div className="col-xs-12 col-xl-5 text-center p-5 ">
+      <div className="col-xs-12 col-xl-5 p-5 text-left">
       <br />
       <br />
+      <a href="https://github.com/apps/nyrkio/installations/new">
+      <img style={{width: "300px", marginRight: "40px"}} src="/p/NyyrikkiRunner/squirrel5.webp" />
       <br />
-      <a href="https://github.com/apps/nyrkio/installations/new">github.com &gt; &gt; &gt;
-      <img style={{width: "120px"}} src="/p/NyyrikkiRunner/RunnerCat-nobg-400x500.png" />
+      <br />
+      github.com &gt; &gt; &gt;
       </a>
       </div>
       <div className="padding-block-sm "></div>
@@ -315,7 +317,7 @@ export const FrontPage = ({loggedIn}) => {
     <>
 
       <div className="frontpage container-fluid text-center w-100">
-      <img src="/p/NyyrikkiRunner/RunnerBackground-1920-banner2.jpg" style={{
+      <img src="/p/NyyrikkiRunner/RunnerSquirrelBackground-ytbanner6-2880.jpg" style={{
         width: "100%", marginBottom: "2em",
         position: "relative", top: "-100px", left: "0px", right: "0px"
 

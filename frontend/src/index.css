@@ -162,10 +162,10 @@ img.nyyrikki-original-art {
 
 body .footer,
 body.section-about .footer {
-  background-image: url(https://nyrkio.com/p/NyyrikkiRunner/RunnerBackground6-1920x1348.jpg);
+  background-image: url(/p/NyyrikkiRunner/RunnerSquirrelBackground.jpg);
   background-repeat: no-repeat;
   background-attachment: fixed;
-  background-position: bottom right;
+  background-position: bottom left;
   background-size: cover;
   background-color: transparent;
 }
@@ -192,20 +192,27 @@ body .footer div {
 body .footer ul {
   top: 900px;
   display: flex;
-  justify-content: flex-end;
-  padding-right: 90px;
+  justify-content: flex-start;
+  padding-left: 90px;
   margin-bottom: 50px;
 }
 body .footer ul li {
   padding-left: 10px;
-  padding-right: 10px;
+  padding-right: 5%;
 }
 body footer{
-    float: right;
-    padding-right: 50px;
+    float: left;
+    position: relative;
+    left: 50px;
+    padding-left: 10px;
+    padding-top: 50px;
+    padding-bottom: 50px;
+    padding-right: 10px;
+    border-radius: 25px;
     bottom: 0px;
     width: 600px;
     max-width: 60%;
+    background-color: #ffffff99;
 }
 body .footer a {
   color: var(--nyrkio-tattoo-red);
@@ -347,6 +354,11 @@ margin-bottom: 10em;
 .frontpage .nyrkio-title h5 {
   font-size: 2em;
   letter-spacing: 0.1rem;
+}
+
+.frontpage .frontPageSlideUp {
+  position: relative;
+  top: -150px;
 }
 
 .frontpage .nyrkio-runner-title {
