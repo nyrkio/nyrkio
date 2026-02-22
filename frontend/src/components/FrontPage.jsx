@@ -315,6 +315,7 @@ const FeatureBanner2 = () => {
 
 export const FrontPage = ({loggedIn}) => {
   document.body.classList.add("section-front");
+  document.body.classList.remove("section-dashboard");
   return (
     <>
 
