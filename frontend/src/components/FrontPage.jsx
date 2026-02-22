@@ -159,8 +159,8 @@ const Mission = ({loggedIn}) => {
       <div className="col-xs-12 col-xl-5 text-justify">
       <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "100%"}}/>
 
-      <hr style={{width:"20%", marginLeft:"40%", marginRight:"40%", marginTop: "2em", marginBottom: "2em"}}/>
       </div>
+      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
 
       <div className="col-xs-12 col-xl-5 text-justify">
 
@@ -184,6 +184,7 @@ const Mission = ({loggedIn}) => {
       github.com &gt; &gt; &gt;
       </a>
       </div>
+      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
       <div className="padding-block-sm "></div>
 
       <div className="col-xs-12 col-xl-5 text-justify">
@@ -204,6 +205,7 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
+      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
       <div className="padding-block-sm "></div>
       <div className="col-xs-12 col-xl-5 text-justify">
       <h3 className="nyrkio-accent">3. Choose a runner</h3>
