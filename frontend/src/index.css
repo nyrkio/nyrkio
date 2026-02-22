@@ -329,7 +329,7 @@ margin-bottom: 10em;
   position: relative;
   color: var(--bs-heading-color2);
   text-shadow: -2px 2px 3px #d1f1a899;
-  z-index: 11
+  z-index: 9;
 }
 .nyrkio-logo.nyrkio-title h2,
 .frontpage .nyrkio-title h2,
