@@ -168,7 +168,7 @@ const Mission = ({loggedIn}) => {
       <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
 
       <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org &gt;&gt;</a></h3>
-      <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
+      <p>Currently self hosted runners are supported only for repositories that belong to an org. We are working on a solution to also support repos in your personal namespace without needing excessive permissions to do so.</p>
 
 
       </div>
@@ -195,7 +195,7 @@ const Mission = ({loggedIn}) => {
       <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <h3><a href="/pricing">2. Select a subscription level &gt;&gt;</a></h3>
 
-      <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
+      <p>With consumption based subscription, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
 
 
       </div>
