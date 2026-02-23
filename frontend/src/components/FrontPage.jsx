@@ -139,30 +139,33 @@ const Mission = ({loggedIn}) => {
       <>
       <div className="row w-100 p-2 frontPageSlideUp">
 
-      <div className="col-xs-12 nyrkio-runner-title">
+      <div className="col-xs-0 col-xl-1"></div>
+      <div className="col-xs-12 col-xl-10 nyrkio-runner-title">
       <h3 className="m-1">New:</h3>
       <h1 className="m-1">Nyrkiö Runner for GitHub</h1>
       </div>
+      <div className="col-xs-0 col-xl-1"></div>
 
       </div>
       <div className="row w-100 p-2 frontPageSlideUp">
 
-      <div className="col-xs-12 col-xl-5 text-justify">
+      <div className="col-xs-0 col-xl-1"></div>
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <p>Do you struggle with noisy benchmark results?</p>
       <p>It's hard to spot real regressions if your noise range is 50%, yet this is a common situation for many.</p>
       <p>At Nyrkiö we have a decade of experience how to tune a server for maximum stability and repeatability. Our customers are achieving benchmark results that stay within 1 nanosecond from build to build!</p>
       </div>
 
-      <div className="col-xs-12 col-xl-2 text-justify">
-      </div>
-
-      <div className="col-xs-12 col-xl-5 text-justify">
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <img src={select1before} alt="A noisy graph from Nyrkio dashboard" title="Turso SELECT 1 benchmark. Spikes are up to 100 ns, noise range = 40%" style={{maxWidth: "100%"}}/>
 
       </div>
-      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
+      </div>
+      <div className="row w-100 p-2 frontPageSlideUp">
 
-      <div className="col-xs-12 col-xl-5 text-justify">
+      <div className="col-xs-0 col-xl-1 text-justify">
+      </div>
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
 
       <h3><a href="https://github.com/apps/nyrkio/installations/new">1. Install Nyrkiö in your GitHub org &gt;&gt;</a></h3>
       <p>Although we support it, we do <strong>NOT</strong> recommend using any 3rd party runners on repositories in your personal GitHub "org", because that requires assigning admin rights to Nyrkiö. Create a separate org and move or clone your repository there.</p>
@@ -170,11 +173,9 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
-      <div className="col-xs-12 col-xl-1 text-justify">
-      </div>
 
 
-      <div className="col-xs-12 col-xl-5 p-5 text-left">
+      <div className="col-xs-12 col-lg-6 col-xl-4 p-5 text-left">
       <br />
       <br />
       <a href="https://github.com/apps/nyrkio/installations/new">
@@ -184,10 +185,14 @@ const Mission = ({loggedIn}) => {
       github.com &gt; &gt; &gt;
       </a>
       </div>
-      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
+      </div>
+      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}} className="frontPageSlideUp"/>
+      <div className="row w-100 p-2 frontPageSlideUp">
       <div className="padding-block-sm "></div>
 
-      <div className="col-xs-12 col-xl-5 text-justify">
+      <div className="col-xs-0 col-xl-1 text-justify">
+      </div>
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <h3><a href="/pricing">2. Select a subscription level &gt;&gt;</a></h3>
 
       <p>The first one is consumption based, you only pay for how many minutes you used the servers. Typically less than 10 € / month.</p>
@@ -195,28 +200,30 @@ const Mission = ({loggedIn}) => {
 
       </div>
 
-      <div className="col-xs-0 col-md-3 col-lg-4 col-xl-2">
+      <div className="col-xs-0 col-md-3 col-lg-1 col-xl-1">
       </div>
-      <div className="col-xs-6 col-sm-6 col-md-6  col-lg-4 col-xl-3 text-center justify-content-center nyrkio-plans">
+      <div className="col-xs-12 col-sm-6 col-md-6  col-lg-4 col-xl-3 text-center justify-content-center nyrkio-plans">
       <CpuHours loggedIn={loggedIn} short={true} />
       <p style={{position: "relative", right: "-55%", top: "-3em"}}><a href="/pricing">Other...</a></p>
       </div>
-      <div className="col-xs-0 col-md-3 col-lg-4 col-xl-1">
+      <div className="col-xs-0 col-md-3 col-lg-1 col-xl-1">
 
       </div>
 
-      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}}/>
+      </div>
+      <hr style={{width:"42%", marginLeft:"24%", marginRight:"24%", marginTop: "2em", marginBottom: "2em"}} className="frontPageSlideUp"/>
+      <div className="row w-100 p-2 frontPageSlideUp">
       <div className="padding-block-sm "></div>
-      <div className="col-xs-12 col-xl-5 text-justify">
+
+      <div className="col-xs-12 col-xl-1 text-justify">
+      </div>
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <h3 className="nyrkio-accent">3. Choose a runner</h3>
       <p>Lastly: Replace the <span className="gray-bg">runs-on: ubuntu-latest</span> with <span className="gray-bg">runs-on: nyrkio_4</span> </p>
       <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
       </div>
 
-      <div className="col-xs-12 col-xl-2 text-justify">
-      </div>
-
-      <div className="col-xs-12 col-xl-5 text-justify">
+      <div className="col-xs-12 col-lg-6 col-xl-5 text-justify">
       <img src={select1after} alt="Less noisy graph from Nyrkio dashboard, using Nyrkio runners" title="Turso SELECT 1 benchmark. Variation within 9 ns, noise range = 5%" style={{maxWidth: "100%"}}/>
 
       </div>
