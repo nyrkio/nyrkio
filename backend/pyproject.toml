@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "nyrkio"
-version = "0.1.0"
+version = "2.0.0"
 description = "A performance change detection service"
 authors = ["Matt Fleming <matt@nyrkio.com>", "Henrik Ingo <henrik@nyrkio.com>"]
 packages = [
