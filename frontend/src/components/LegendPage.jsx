@@ -73,6 +73,26 @@ export const LegendPage = () => {
             </p>
           </div>
 
+          <div>
+          <br />
+          <br />
+          <br />
+          <br />
+          <br />
+          </div>
+          <div className="row mt-4 my-sm-4 text-center ">
+            <center>
+              <img
+                src="https://nyrkio.com/p/NyyrikkiRunner/RunnerSquirrelBackground-800x600-vignette.webp"
+                className="rounded-3 shadow-blur nyyrikki-original-art"
+              />
+            </center>
+            <p>
+              <small>In 2025 we commissioned more Nyyrikki art from Ebba Ingo. Her watercolor art depicts a more joyous spirit and color scheme.</small>
+            </p>
+          </div>
+
+
           <div className="row col-xl-10 mt-4">
             <h3>The spirit of hunters</h3>
             <p>
