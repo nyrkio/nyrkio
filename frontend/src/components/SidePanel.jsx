@@ -175,9 +175,13 @@ const ProductSidePanel = ({ loggedIn }) => {
       <Link to="/pricing" className="nav-link">
       Pricing
       </Link>
-      <Link to="/billing" className="nav-link">
-      Billing
-      </Link>
+      {loggedIn ?
+        <Link to="/billing" className="nav-link">
+        Billing
+        </Link>
+        :
+        ""
+      }
       <Link to="/public" className="nav-link">
         Public Dashboards
         <br /> from other users
