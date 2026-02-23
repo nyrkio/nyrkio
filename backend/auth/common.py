@@ -215,7 +215,7 @@ async def verify_recaptcha(
     if require_min_score is not None and require_min_score:
         is_above_min_score = float(res.get("score", -1.0)) >= require_min_score
 
-    return is_success and is_above_min_score
+    return is_success and is_above_min_score, res
 
 
 class CphJWTStrategy(JWTStrategy):
