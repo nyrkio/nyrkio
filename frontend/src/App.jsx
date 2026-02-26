@@ -39,6 +39,8 @@ import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
 
+import { DebugLayout } from "./components/DebugLayout";
+
 const Nothing = () => {
   return <></>;
 };
@@ -93,6 +95,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
           </Routes>
         </div>
         <ScrollToTop />
+        <DebugLayout />
         <Footer />
       </div>
     </>
