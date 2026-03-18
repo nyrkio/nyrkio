@@ -221,7 +221,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
         from backend.api.api import app
 
         app.include_router(
-            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{oauth_issuer}"
+            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{sso_domain}"
         )
 
 
