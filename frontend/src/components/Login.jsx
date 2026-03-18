@@ -153,6 +153,21 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     posthog.capture("login", { property: username });
     window.location.href = "/";
   }
+
+  const urlparams = new URLSearchParams(window.location.search);
+  const sso_domain = urlparams.get("sso_domain");
+  let sso_domain_default = "";
+  if (sso_domain != null) {
+    const sso_domain_parts = sso_domain.split(".");
+    if (sso_domain_parts.length == 3 && sso_domain_parts[1] == "onelogin" && sso_domain_parts[2]=="com"){
+      sso_domain_default = sso_domain_parts[0];
+    }
+    if (sso_domain_parts.length == 1 && sso_domain.length > 0) {
+      sso_domain_default = sso_domain_parts[0];
+    }
+  }
+  console.log(sso_domain_default);
+
   const nop = () => {true}
 
   return (
@@ -195,6 +210,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       <div className="text-right mb-4 mt-3 sso-login col-md-4 col-sm-6 col-xs-8" style={{maxWidth:"60%"}} >
       <input
         type="text"
+        defaultValue={sso_domain_default}
         placeholder="your domain"
         className="form-control mb-2"
         style={{"display": "inline", "textAlign": "right"}}
