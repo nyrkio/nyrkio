@@ -3,7 +3,6 @@ from typing import Optional, List, Any, Tuple, Dict
 from httpx_oauth.clients.openid import OpenID
 from httpx_oauth.errors import GetIdEmailError
 
-ONELOGIN_REDIRECT_URI = "https://staging.nyrkio.com/api/v0/auth/onelogin/mycallback"
 ONELOGIN_OIDC_HOST = "openid-connect.onelogin.com"
 
 BASE_SCOPES = ["openid", "profile", "groups"]

@@ -171,12 +171,10 @@ async def start_sso_login(
     oauth_config = oauth_config[0]
 
     await _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
-    oauth_full_domain = oauth_config["oauth_full_domain"]
     return {"next_url": f"/api/v0/auth/sso/{oauth_full_domain}/authorize"}
 
 
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
-    oauth_full_domain = oauth_config["oauth_full_domain"]
     oauth_client_id = oauth_config["secrets"]["client_id"]
     oauth_client_secret = oauth_config["secrets"]["client_secret"]
     redirect_url = (
@@ -189,6 +187,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
             oauth_client_secret,
             sso_domain=oauth_full_domain,
             scopes=oauth_config["scopes"],
+            name=oauth_full_domain,
         )
         print(sso_oauth)
         sso_oauth2_authorize_callback = OAuth2AuthorizeCallback(
@@ -378,7 +377,7 @@ async def _sso_mycallback_handler(
 
     try:
         user = await user_manager.oauth_callback(
-            "onelogin",
+            oauth_full_domain,
             token["access_token"],
             account_id,
             account_email,
@@ -403,7 +402,7 @@ async def _sso_mycallback_handler(
     userinfo = await sso_oauth.get_userinfo(token["access_token"])
 
     for oauth_acct in user.oauth_accounts:
-        if oauth_acct.oauth_name != "onelogin":
+        if oauth_acct.oauth_name != oauth_full_domain:
             print("skip", oauth_acct)
             continue
         if oauth_acct.account_email != account_email:
