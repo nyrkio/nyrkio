@@ -1,12 +1,8 @@
-import os
 from typing import Optional, List, Any, Tuple, Dict
 
 from httpx_oauth.clients.openid import OpenID
 from httpx_oauth.errors import GetIdEmailError
 
-CLIENT_ID = os.environ.get("ONE_LOGIN_CLIENT_ID", None)
-CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)
-ONELOGIN_REDIRECT_URI = "https://staging.nyrkio.com/api/v0/auth/onelogin/mycallback"
 ONELOGIN_OIDC_HOST = "openid-connect.onelogin.com"
 
 BASE_SCOPES = ["openid", "profile", "groups"]
@@ -17,6 +13,8 @@ class OneLoginOAuth2(OpenID):
 
     def __init__(
         self,
+        client_id: str,
+        client_secret: str,
         sso_domain: str,
         scopes: Optional[List[str]] = BASE_SCOPES,
         name: str = "onelogin",
@@ -32,8 +30,10 @@ class OneLoginOAuth2(OpenID):
         self.userinfo = None  # None means we didn't even try to get it yet.
 
         super().__init__(
-            CLIENT_ID,
-            CLIENT_SECRET,
+            # CLIENT_ID,
+            # CLIENT_SECRET,
+            client_id,
+            client_secret,
             f"https://{sso_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
             base_scopes=scopes,

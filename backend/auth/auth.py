@@ -34,7 +34,6 @@ from backend.db.db import (
 )
 from backend.auth.github import github_oauth
 from backend.auth.onelogin import (
-    CLIENT_SECRET as ONELOGIN_CLIENT_SECRET,
     OneLoginOAuth2,
 )
 from backend.auth.superuser import SuperuserStrategy
@@ -63,8 +62,6 @@ cookie_transport = CookieTransport(
     cookie_samesite="strict",
 )
 
-
-sso_secrets = {"onelogin": ONELOGIN_CLIENT_SECRET}
 
 cookie_backend = AuthenticationBackend(
     name="cookie",
@@ -174,31 +171,34 @@ async def start_sso_login(
     oauth_config = oauth_config[0]
 
     await _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
-    oauth_issuer = oauth_config["oauth_issuer"]
-    return {"next_url": f"/api/v0/auth/sso/{oauth_issuer}/authorize"}
+    return {"next_url": f"/api/v0/auth/sso/{oauth_full_domain}/authorize"}
 
 
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
-    oauth_issuer = oauth_config["oauth_issuer"]
-    redirect_url = (
-        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
-    )
+    oauth_client_id = oauth_config["secrets"]["client_id"]
+    oauth_client_secret = oauth_config["secrets"]["client_secret"]
+    redirect_url = f"https://nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
     print(sso_oauth2_authorize_callbacks)
-    if oauth_issuer not in sso_oauth2_authorize_callbacks:
+    if oauth_full_domain not in sso_oauth2_authorize_callbacks:
         sso_oauth = OneLoginOAuth2(
+            oauth_client_id,
+            oauth_client_secret,
             sso_domain=oauth_full_domain,
             scopes=oauth_config["scopes"],
+            name=oauth_full_domain,
         )
         print(sso_oauth)
         sso_oauth2_authorize_callback = OAuth2AuthorizeCallback(
             sso_oauth,
             redirect_url=redirect_url,
         )
-        sso_oauth2_authorize_callbacks[oauth_issuer] = sso_oauth2_authorize_callback
+        sso_oauth2_authorize_callbacks[oauth_full_domain] = (
+            sso_oauth2_authorize_callback
+        )
         sso_router = fastapi_users.get_oauth_router(
             sso_oauth,
             jwt_backend,
-            sso_secrets[oauth_issuer],
+            oauth_client_secret,
             redirect_url=redirect_url,
         )
 
@@ -219,7 +219,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
         from backend.api.api import app
 
         app.include_router(
-            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{oauth_issuer}"
+            sso_router, tags=["auth"], prefix="/api/v0/auth/sso/{sso_domain}"
         )
 
 
@@ -375,7 +375,7 @@ async def _sso_mycallback_handler(
 
     try:
         user = await user_manager.oauth_callback(
-            "onelogin",
+            oauth_full_domain,
             token["access_token"],
             account_id,
             account_email,
@@ -400,7 +400,7 @@ async def _sso_mycallback_handler(
     userinfo = await sso_oauth.get_userinfo(token["access_token"])
 
     for oauth_acct in user.oauth_accounts:
-        if oauth_acct.oauth_name != "onelogin":
+        if oauth_acct.oauth_name != oauth_full_domain:
             print("skip", oauth_acct)
             continue
         if oauth_acct.account_email != account_email:
