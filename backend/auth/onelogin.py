@@ -17,6 +17,8 @@ class OneLoginOAuth2(OpenID):
 
     def __init__(
         self,
+        client_id: str,
+        client_secret: str,
         sso_domain: str,
         scopes: Optional[List[str]] = BASE_SCOPES,
         name: str = "onelogin",
@@ -32,8 +34,10 @@ class OneLoginOAuth2(OpenID):
         self.userinfo = None  # None means we didn't even try to get it yet.
 
         super().__init__(
-            CLIENT_ID,
-            CLIENT_SECRET,
+            # CLIENT_ID,
+            # CLIENT_SECRET,
+            client_id,
+            client_secret,
             f"https://{sso_domain}/oidc/2/.well-known/openid-configuration",
             name=name,
             base_scopes=scopes,

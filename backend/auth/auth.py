@@ -34,7 +34,6 @@ from backend.db.db import (
 )
 from backend.auth.github import github_oauth
 from backend.auth.onelogin import (
-    CLIENT_SECRET as ONELOGIN_CLIENT_SECRET,
     OneLoginOAuth2,
 )
 from backend.auth.superuser import SuperuserStrategy
@@ -63,8 +62,6 @@ cookie_transport = CookieTransport(
     cookie_samesite="strict",
 )
 
-
-sso_secrets = {"onelogin": ONELOGIN_CLIENT_SECRET}
 
 cookie_backend = AuthenticationBackend(
     name="cookie",
@@ -180,12 +177,16 @@ async def start_sso_login(
 
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
     oauth_issuer = oauth_config["oauth_issuer"]
+    oauth_client_id = oauth_config["secrets"]["client_id"]
+    oauth_client_secret = oauth_config["secrets"]["client_secret"]
     redirect_url = (
         f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
     )
     print(sso_oauth2_authorize_callbacks)
     if oauth_issuer not in sso_oauth2_authorize_callbacks:
         sso_oauth = OneLoginOAuth2(
+            oauth_client_id,
+            oauth_client_secret,
             sso_domain=oauth_full_domain,
             scopes=oauth_config["scopes"],
         )
@@ -198,7 +199,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
         sso_router = fastapi_users.get_oauth_router(
             sso_oauth,
             jwt_backend,
-            sso_secrets[oauth_issuer],
+            oauth_client_secret,
             redirect_url=redirect_url,
         )
 
