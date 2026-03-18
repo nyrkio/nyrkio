@@ -177,9 +177,7 @@ async def start_sso_login(
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
     oauth_client_id = oauth_config["secrets"]["client_id"]
     oauth_client_secret = oauth_config["secrets"]["client_secret"]
-    redirect_url = (
-        f"https://nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
-    )
+    redirect_url = f"https://nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
     print(sso_oauth2_authorize_callbacks)
     if oauth_full_domain not in sso_oauth2_authorize_callbacks:
         sso_oauth = OneLoginOAuth2(
