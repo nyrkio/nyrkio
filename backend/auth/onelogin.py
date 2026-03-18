@@ -1,11 +1,8 @@
-import os
 from typing import Optional, List, Any, Tuple, Dict
 
 from httpx_oauth.clients.openid import OpenID
 from httpx_oauth.errors import GetIdEmailError
 
-CLIENT_ID = os.environ.get("ONE_LOGIN_CLIENT_ID", None)
-CLIENT_SECRET = os.environ.get("ONE_LOGIN_CLIENT_SECRET", None)
 ONELOGIN_REDIRECT_URI = "https://staging.nyrkio.com/api/v0/auth/onelogin/mycallback"
 ONELOGIN_OIDC_HOST = "openid-connect.onelogin.com"
 

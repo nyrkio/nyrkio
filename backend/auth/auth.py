@@ -171,19 +171,19 @@ async def start_sso_login(
     oauth_config = oauth_config[0]
 
     await _dynamic_sso_callback_setup(oauth_full_domain, oauth_config)
-    oauth_issuer = oauth_config["oauth_issuer"]
-    return {"next_url": f"/api/v0/auth/sso/{oauth_issuer}/authorize"}
+    oauth_full_domain = oauth_config["oauth_full_domain"]
+    return {"next_url": f"/api/v0/auth/sso/{oauth_full_domain}/authorize"}
 
 
 async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
-    oauth_issuer = oauth_config["oauth_issuer"]
+    oauth_full_domain = oauth_config["oauth_full_domain"]
     oauth_client_id = oauth_config["secrets"]["client_id"]
     oauth_client_secret = oauth_config["secrets"]["client_secret"]
     redirect_url = (
-        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_issuer}/mycallback"
+        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
     )
     print(sso_oauth2_authorize_callbacks)
-    if oauth_issuer not in sso_oauth2_authorize_callbacks:
+    if oauth_full_domain not in sso_oauth2_authorize_callbacks:
         sso_oauth = OneLoginOAuth2(
             oauth_client_id,
             oauth_client_secret,
@@ -195,7 +195,9 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
             sso_oauth,
             redirect_url=redirect_url,
         )
-        sso_oauth2_authorize_callbacks[oauth_issuer] = sso_oauth2_authorize_callback
+        sso_oauth2_authorize_callbacks[oauth_full_domain] = (
+            sso_oauth2_authorize_callback
+        )
         sso_router = fastapi_users.get_oauth_router(
             sso_oauth,
             jwt_backend,
