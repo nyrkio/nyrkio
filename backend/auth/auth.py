@@ -178,7 +178,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
     oauth_client_id = oauth_config["secrets"]["client_id"]
     oauth_client_secret = oauth_config["secrets"]["client_secret"]
     redirect_url = (
-        f"https://staging.nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
+        f"https://nyrkio.com/api/v0/auth/sso/{oauth_full_domain}/mycallback"
     )
     print(sso_oauth2_authorize_callbacks)
     if oauth_full_domain not in sso_oauth2_authorize_callbacks:
