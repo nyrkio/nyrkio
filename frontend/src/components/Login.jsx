@@ -122,7 +122,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     window.location.href = "/";
   }
 
-  const redirectUri="https://staging.nyrkio.com/login";
+  const redirectUri="https://nyrkio.com/login";
   const ssoSubmit = async (e) => {
     e.preventDefault();
     console.log("SSO submit");
