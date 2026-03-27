@@ -166,9 +166,21 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       sso_domain_default = sso_domain_parts[0];
     }
   }
-  console.log(sso_domain_default);
 
   const nop = () => {true}
+
+  console.log(sso_domain_default);
+  const ssoAutoSubmit = () => {
+    if (sso_domain && sso_domain_default) {
+      const submitButton = document.getElementById("");
+      const e = {};
+      e.preventDefault = nop;
+      console.log("autoSubmit")
+      ssoSubmitButton.click();
+    }
+  };
+  window.addEventListener("load", ssoAutoSubmit);
+
 
   return (
     <div className="container">
@@ -225,7 +237,8 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
         <div className="row ">
         <div className="text-center mb-4 mt-3 sso-login xs-10">
-        <button className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-10" onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
+        <button id="ssoSubmitButton" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-10"
+        onLoad={ssoAutoSubmit} onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
           <div className="svgwrapper">
           <svg
           xmlns="http://www.w3.org/2000/svg"
