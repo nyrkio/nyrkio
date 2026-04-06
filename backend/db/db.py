@@ -1542,6 +1542,8 @@ class DBStore(object):
                         if org["organization"]["login"] == github_org:
                             orgs[org["organization"]["id"]] = org
 
+            print("get_org_by_github_org 6")
+            print(orgs)
             if len(list(orgs.keys())) == 1:
                 return list(orgs.values())[0]
             else:
