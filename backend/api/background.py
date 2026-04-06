@@ -2,6 +2,7 @@ import logging
 import httpx
 import asyncio
 import os
+import traceback
 
 from datetime import datetime
 from backend.api.changes import _calc_changes
@@ -133,6 +134,8 @@ async def loop_installations():
             logger.warning(
                 f"Error checking entitlement for {github_user}: {type(e)} = {e}. Skipping."
             )
+            error_msg = traceback.format_exc()
+            print(error_msg)
             continue
 
         # client_id = inst["installation"]["client_id"]
