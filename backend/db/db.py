@@ -702,6 +702,9 @@ class DBStore(object):
                     logging.error(f"No user found for id {result['_id']}")
                     continue
 
+                if "email" not in user:
+                    continue
+
                 email = user["email"]
                 user_results[email] = result["test_names"]
             return user_results
