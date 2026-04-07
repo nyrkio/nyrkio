@@ -34,7 +34,7 @@ LOCAL_FILES = {
 # This does two things: re-enable ssh because the base image turned it off
 # Before we do anything else, schedule a shutdown to happen 60 odd minutes in the future.
 # This is handy when it can be trusted to just work without any cron or message passing needed.
-USER_DATA = "#!/bin/bash\nsudo systemctl enable ssh\nsudo systemctl start ssh\nsudo shutdown +62\n"
+USER_DATA = "#!/bin/bash\nsudo systemctl enable ssh\nsudo systemctl start ssh\nsudo shutdown +182\n"
 
 INSTANCE_TYPE_NAME = "nyrkio_perf_server_2cpu_ubuntu2404"
 
