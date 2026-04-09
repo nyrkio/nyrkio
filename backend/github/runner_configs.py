@@ -90,7 +90,7 @@ instance_types = OrderedDict(
             "instance_type": "c7a.4xlarge",
             "price_per_hour": {"EUR": 3.2},
             "cpus": 16,
-            "disk": 256,
+            "ebs_size": 256,
         },
         "nyrkio_perf_server_32cpu_ubuntu2404": {
             "instance_type": "c7a.8xlarge",
