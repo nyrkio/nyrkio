@@ -86,6 +86,12 @@ instance_types = OrderedDict(
             "price_per_hour": {"EUR": 1.6},
             "cpus": 16,
         },
+        "nyrkio_16cpu_w_256GB_disk_ubuntu2404": {
+            "instance_type": "c7a.4xlarge",
+            "price_per_hour": {"EUR": 3.2},
+            "cpus": 16,
+            "disk": 256,
+        },
         "nyrkio_perf_server_32cpu_ubuntu2404": {
             "instance_type": "c7a.8xlarge",
             "price_per_hour": {"EUR": 3.2},
@@ -123,7 +129,7 @@ aliases = OrderedDict(
         "nyrkio_perf_server_8": "nyrkio_perf_server_8cpu_ubuntu2404",
         "nyrkio_8": "nyrkio_perf_server_8cpu_ubuntu2404",
         "nyrkio_perf_server_16": "nyrkio_perf_server_16cpu_ubuntu2404",
-        "nyrkio_16": "nyrkio_perf_server_16cpu_ubuntu2404",
+        "nyrkio_16_256GB": "nyrkio_16cpu_w_256GB_disk_ubuntu2404",
         "nyrkio_perf_server_32": "nyrkio_perf_server_32cpu_ubuntu2404",
         "nyrkio_32": "nyrkio_perf_server_32cpu_ubuntu2404",
         "nyrkio_perf_server_64": "nyrkio_perf_server_64cpu_ubuntu2404",
