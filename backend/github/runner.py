@@ -636,7 +636,7 @@ class RunnerLauncher(object):
 
             bdm = {}
             bdm["Ebs"] = ebs
-            bdm["Devicename"] = "/dev/sda1"
+            bdm["DeviceName"] = "/dev/sda1"
 
             response = ec2.run_instances(
                 ImageId=ami_id,
