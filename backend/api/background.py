@@ -142,6 +142,11 @@ async def loop_installations():
         app_access_token = await fetch_access_token(installation_id=installation_id)
         repo_list = await refresh_repo_list(app_access_token)
         # for repo in inst["repositories"]:
+
+        # Prevent launching infinite servers when github is not draining the queue
+        # e.g, matrix-sequential
+        last_seen_id = None
+
         for repo in repo_list["repositories"]:
             full_name = repo["full_name"]
             # repo_name = repo["name"]
@@ -170,6 +175,11 @@ async def loop_installations():
                         break
 
                 job = queued_jobs.pop()
+
+                if last_seen_id is not None and job.get("id") == last_seen_id:
+                    break
+
+                last_seen_id = job.get("id")
 
                 # Create a fakr workflow_job event, just like the ones github sends to the webhook
                 fake_event = {
