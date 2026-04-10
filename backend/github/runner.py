@@ -629,12 +629,12 @@ class RunnerLauncher(object):
         if True:
             logging.info("Now launching regular on-demand instance...")
 
-            dev_sda1 = boto3.ec2.blockdevicemapping.BlockDeviceType()
-            dev_sda1.size = ebs_size
-            dev_sda1.iops = ebs_iops
-            dev_sda1.delete_on_termination = True
+            dev_sda1 = {}
+            dev_sda1["size"] = ebs_size
+            dev_sda1["iops"] = ebs_iops
+            dev_sda1["delete_on_termination"] = True
 
-            bdm = boto3.ec2.blockdevicemapping.BlockDeviceMapping()
+            bdm = {}
             bdm["/dev/sda1"] = dev_sda1
 
             response = ec2.run_instances(
@@ -645,7 +645,7 @@ class RunnerLauncher(object):
                 # PrivateIpAddress=private_ip,
                 # SecurityGroupIds=[sg_id],
                 # SubnetId=subnet_id,
-                BlockDeviceMappings=bdm,
+                BlockDeviceMappings=[bdm],
                 NetworkInterfaces=[
                     {
                         "DeviceIndex": 0,
