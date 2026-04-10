@@ -629,13 +629,10 @@ class RunnerLauncher(object):
         if True:
             logging.info("Now launching regular on-demand instance...")
 
-            dev_sda1 = {}
-            dev_sda1["VolumeSize"] = ebs_size
-            dev_sda1["Iops"] = ebs_iops
-            dev_sda1["DeleteOnTermination"] = True
-
             ebs = {}
-            ebs["/dev/sda1"] = dev_sda1
+            ebs["VolumeSize"] = ebs_size
+            ebs["Iops"] = ebs_iops
+            ebs["DeleteOnTermination"] = True
 
             bdm = {}
             bdm["Ebs"] = ebs
