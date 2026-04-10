@@ -630,12 +630,16 @@ class RunnerLauncher(object):
             logging.info("Now launching regular on-demand instance...")
 
             dev_sda1 = {}
-            dev_sda1["size"] = ebs_size
-            dev_sda1["iops"] = ebs_iops
-            dev_sda1["delete_on_termination"] = True
+            dev_sda1["VolumeSize"] = ebs_size
+            dev_sda1["Iops"] = ebs_iops
+            dev_sda1["DeleteOnTermination"] = True
+
+            ebs = {}
+            ebs["/dev/sda1"] = dev_sda1
 
             bdm = {}
-            bdm["/dev/sda1"] = dev_sda1
+            bdm["Ebs"] = ebs
+            bdm["Devicename"] = "/dev/sda1"
 
             response = ec2.run_instances(
                 ImageId=ami_id,
