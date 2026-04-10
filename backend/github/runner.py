@@ -632,6 +632,7 @@ class RunnerLauncher(object):
             ebs = {}
             ebs["VolumeSize"] = ebs_size
             ebs["Iops"] = ebs_iops
+            ebs["VolumeType"] = "io2"
             ebs["DeleteOnTermination"] = True
 
             bdm = {}
