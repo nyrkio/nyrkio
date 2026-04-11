@@ -174,7 +174,7 @@ async def loop_installations():
                     if not queued_jobs:
                         break
 
-                job = queued_jobs.pop()
+                job = queued_jobs.pop(0)
                 last_seen_id = job.get("id")
 
                 # Create a fakr workflow_job event, just like the ones github sends to the webhook
@@ -201,7 +201,7 @@ async def loop_installations():
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
                     exit_counter = 50
-                    while queued_jobs and queued_jobs[-1].get("id") == last_seen_id:
+                    while queued_jobs and queued_jobs[0].get("id") == last_seen_id:
                         logger.info(
                             f"Same job is still queued: We need to wait a bit until GitHub schedules it onto the runner we just launched. ({last_seen_id})"
                         )
@@ -212,6 +212,9 @@ async def loop_installations():
                                 f"Tried 50 times and {last_seen_id} is still in the queue. Exit abruptly and hopefully it's gone next time we're here."
                             )
                             return statuses
+
+                        queued_jobs = await check_queued_workflow_jobs(full_name)
+                        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
                 elif return_status.get("status", "") == "nothing to do":
                     logger.info(
