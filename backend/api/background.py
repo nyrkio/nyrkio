@@ -143,10 +143,6 @@ async def loop_installations():
         repo_list = await refresh_repo_list(app_access_token)
         # for repo in inst["repositories"]:
 
-        # Prevent launching infinite servers when github is not draining the queue
-        # e.g, matrix-sequential
-        last_seen_id = None
-
         for repo in repo_list["repositories"]:
             full_name = repo["full_name"]
             # repo_name = repo["name"]
@@ -174,8 +170,7 @@ async def loop_installations():
                     if not queued_jobs:
                         break
 
-                job = queued_jobs.pop(0)
-                last_seen_id = job.get("id")
+                job = queued_jobs.pop()
 
                 # Create a fakr workflow_job event, just like the ones github sends to the webhook
                 fake_event = {
@@ -200,21 +195,6 @@ async def loop_installations():
                 ):
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
-                    exit_counter = 50
-                    while queued_jobs and queued_jobs[0].get("id") == last_seen_id:
-                        logger.info(
-                            f"Same job is still queued: We need to wait a bit until GitHub schedules it onto the runner we just launched. ({last_seen_id})"
-                        )
-                        await asyncio.sleep(20)
-                        exit_counter -= 1
-                        if exit_counter <= 0:
-                            logger.info(
-                                f"Tried 50 times and {last_seen_id} is still in the queue. Exit abruptly and hopefully it's gone next time we're here."
-                            )
-                            return statuses
-
-                        queued_jobs = await check_queued_workflow_jobs(full_name)
-                        queued_jobs = filter_out_unsupported_jobs(queued_jobs)
 
                 elif return_status.get("status", "") == "nothing to do":
                     logger.info(
