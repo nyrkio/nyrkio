@@ -58,10 +58,12 @@ echo "export EPHEMERAL=\"$EPHEMERAL\""  | sudo tee -a /home/runner/.bashrc
 sudo chown -R runner:runner /home/runner
 
 
-df -h
+df -hT
 echo If user configured larger than normal root disk,...
-sudo growpart /dev/nvme0n1 1
-df -h
+sudo growpart /dev/nvme0n1 1 || true
+sudo xfs_growfs -d / || true
+sudo resize2fs /dev/nvme0n1p1 || true
+df -hT
 
 
 
