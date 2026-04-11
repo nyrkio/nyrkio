@@ -58,6 +58,12 @@ echo "export EPHEMERAL=\"$EPHEMERAL\""  | sudo tee -a /home/runner/.bashrc
 sudo chown -R runner:runner /home/runner
 
 
+df -h
+echo If user configured larger than normal root disk,...
+sudo growpart /dev/nvme0n1 1
+df -h
+
+
 
 # TODO Remove from sudoers
 
