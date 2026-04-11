@@ -201,7 +201,7 @@ async def loop_installations():
                     queued_jobs = await check_queued_workflow_jobs(full_name)
                     queued_jobs = filter_out_unsupported_jobs(queued_jobs)
                     exit_counter = 50
-                    while queued_jobs and queued_jobs[0].get("id") == last_seen_id:
+                    while queued_jobs and queued_jobs[-1].get("id") == last_seen_id:
                         logger.info(
                             f"Same job is still queued: We need to wait a bit until GitHub schedules it onto the runner we just launched. ({last_seen_id})"
                         )
