@@ -685,11 +685,17 @@ class DBStore(object):
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
-        cut = self.hundred_days_ago()
+        # cut = self.hundred_days_ago()
         if id:
             results = await test_results.aggregate(
                 [
-                    {"$match": {"user_id": id, "timestamp": {"$gte": cut}}},
+                    {"$sort": {"timestamp": -1}},
+                    {"$limit": 20000},
+                    {
+                        "$match": {
+                            "user_id": id,
+                        }
+                    },
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
                 ],
