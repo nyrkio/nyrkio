@@ -27,7 +27,7 @@ export const PublicDashboard = () => {
       const orgRepo = parts[0] + "/" + parts[1];
       const testName = parts.slice(2).join("/");
       const url =
-        encodeURIComponent("https://github.com/" + orgRepo) + "/" + testName + "/";
+        encodeURIComponent("https://github.com/" + orgRepo) + "/" + testName;
       results.push(url);
     });
     setPublicData(results);
