@@ -29,7 +29,7 @@ export const TableOrResult = ({ prefix, data, baseUrls, dashboardType, embed, lo
   // If we found an exact match, display the result
   if (data.includes(prefix) || singleTestName) {
     var path = decodeURIComponent(prefix).replace("https://github.com/", "");
-    path = path || singleTestName;
+    path = path || decodeURIComponent(singleTestName);
 
     return (
       <>
