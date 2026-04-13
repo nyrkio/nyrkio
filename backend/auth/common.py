@@ -199,7 +199,7 @@ async def validate_turnstile(token, secret, remoteip=None):
         data=data,
     )
     if response.status_code != 200:
-        return False
+        return {'success': False}
 
     return response.json()
 
