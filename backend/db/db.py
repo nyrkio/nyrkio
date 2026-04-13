@@ -33,6 +33,7 @@ class User(BeanieBaseUser, Document):
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
     is_repo_owner: Optional[bool] = False
+    captcha_token: Optional[str] = None
 
 
 # class BeanieBaseUser(BaseModel):
@@ -120,6 +121,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     billing_runners: Optional[Dict[str, str]] = Field(None)
+    captcha_token: Optional[str] = None
 
 
 class ConnectionStrategy(ABC):
