@@ -165,7 +165,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(cfToken)
         logging.info(cfTokenGet)
         logging.info(user)
-        if not user.captcha_token == cfTokenGet:
+        if not user.captcha_token == cfToken:
             raise HTTPException(
                 status_code=401,
                 detail="Please provide cf-turnstile-response=xxxx in the URI query string. Same as you used the first time.",

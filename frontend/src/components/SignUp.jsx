@@ -84,6 +84,7 @@ export const SignUpPage2 = () => {
 
       const jdata2 = {};
       jdata2.email= email.value;
+      jdata2["cf-turnstile-response"] = cfTurnstileResponse;
 
       console.log(jdata2);
       // Notice how we reuse the same Turnstile response token. While unorthodox
