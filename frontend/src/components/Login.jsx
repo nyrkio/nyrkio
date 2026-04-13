@@ -302,7 +302,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
             </form>
             <div className="mt-1 mb-1 row">
             <form className="row mt-1 sso-login text-center" onSubmit={nop}>
-            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/signup">Reset your password here.</a>.</em></p>
+            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/forgot-password">Reset your password here.</a>.</em></p>
             <hr />
 
             <div className="text-center mb-4 mt-3 xs-10">

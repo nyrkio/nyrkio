@@ -91,6 +91,7 @@ class UserRead(schemas.BaseUser[PydanticObjectId]):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     billing_runners: Optional[Dict[str, str]] = Field(None)
+    captcha_token: Optional[str] = None
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -110,7 +111,8 @@ class UserCreate(schemas.BaseUserCreate):
     # Change the default: Verify your email first, then you're active
     is_active: Optional[bool] = False
     captcha_score: Optional[float] = None
-    catcha_provider: Optional[str] = None
+    captcha_provider: Optional[str] = None
+    captcha_token: Optional[str] = None
 
 
 class UserUpdate(schemas.BaseUserUpdate):

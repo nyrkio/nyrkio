@@ -94,7 +94,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             raise Exception(
                 "Someone tried to POST oauth credentials through the wrong door"
             )
-
+        user_create.captcha_token = token
         user_create.billing = None
         user_create.billing_runners = None
         user_create.slack = None
@@ -159,14 +159,12 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             )
 
         data = await request.json()
-        g_recaptcha_response = data.get("g-recaptcha-response")
-        remoteip = request.client.host
-        if g_recaptcha_response is not None:
-            captcha_ok, captcha_details = await verify_recaptcha(
-                g_recaptcha_response, remoteip
+        cfToken = data.get("cf-turnstile-response")
+        if not user.captcha_token == cfToken:
+            raise HTTPException(
+                status_code=400,
+                detail="Please provide cf-turnstile-response=xxxx in the URI query string. Same as you used the first time.",
             )
-            if not captcha_ok:
-                raise HTTPException(status_code=400, detail="Blocked by ReCaptcha ..")
 
         verify_url = f"{SERVER_NAME}/api/v0/auth/verify-email/{token}"
         msg = read_template_file("verify-email.html", verify_url=verify_url)

@@ -58,10 +58,11 @@ export const SignUpPage2 = () => {
 //     console.log(newUserData);
     const email = document.getElementById("emailInput");
     const password = document.getElementById("passwordInput");
+    const cfTurnstileResponse = turnstile.getResponse(turnstileId);
     const jdata ={
       "email":email.value,
       "password":password.value,
-      "cf-turnstile-response":turnstile.getResponse(turnstileId),
+      "cf-turnstile-response":cfTurnstileResponse,
     }
     console.log(jdata);
     const data = await fetch("/api/v0/auth/register", {
@@ -85,7 +86,10 @@ export const SignUpPage2 = () => {
       jdata2.email= email.value;
 
       console.log(jdata2);
-      const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+      // Notice how we reuse the same Turnstile response token. While unorthodox
+      // This is FastAPI silliness already. The token is stored on the other side,
+      // it is not possible to check it twice against the captcha provider.
+      const verificationData = await fetch(`/api/v0/auth/request-verify-token?cf-turnstile-response=${cfTurnstileResponse}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
