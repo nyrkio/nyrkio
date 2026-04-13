@@ -33,6 +33,7 @@ class User(BeanieBaseUser, Document):
     github_username: Optional[str] = Field(None)
     is_cph_user: Optional[bool] = None
     is_repo_owner: Optional[bool] = False
+    captcha_token: Optional[str] = None
 
 
 # class BeanieBaseUser(BaseModel):
@@ -91,6 +92,7 @@ class UserRead(schemas.BaseUser[PydanticObjectId]):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     billing_runners: Optional[Dict[str, str]] = Field(None)
+    captcha_token: Optional[str] = None
 
 
 class UserCreate(schemas.BaseUserCreate):
@@ -110,7 +112,8 @@ class UserCreate(schemas.BaseUserCreate):
     # Change the default: Verify your email first, then you're active
     is_active: Optional[bool] = False
     captcha_score: Optional[float] = None
-    catcha_provider: Optional[str] = None
+    captcha_provider: Optional[str] = None
+    captcha_token: Optional[str] = None
 
 
 class UserUpdate(schemas.BaseUserUpdate):
@@ -118,6 +121,7 @@ class UserUpdate(schemas.BaseUserUpdate):
     slack: Optional[Dict[str, Any]] = Field(default_factory=dict)
     billing: Optional[Dict[str, str]] = Field(None)
     billing_runners: Optional[Dict[str, str]] = Field(None)
+    captcha_token: Optional[str] = None
 
 
 class ConnectionStrategy(ABC):
@@ -396,6 +400,18 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
+    def unix_timestamp():
+        d = datetime.now(tz=timezone.utc)
+        return d.timestamp()
+
+    @staticmethod
+    def hundred_days_ago():
+        if _TESTING:
+            return 0
+
+        return DBStore.unix_timestamp() - 100 * 24 * 60 * 60
+
+    @staticmethod
     def check_for_missing_keys(data):
         """
         This function is responsible for validating the incoming JSON data and
@@ -669,10 +685,11 @@ class DBStore(object):
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
+        cut = self.hundred_days_ago()
         if id:
             results = await test_results.aggregate(
                 [
-                    {"$match": {"user_id": id}},
+                    {"$match": {"user_id": id, "timestamp": {"$gte": cut}}},
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
                 ],

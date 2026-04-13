@@ -2,33 +2,12 @@ import { useState, useEffect,useCallback } from "react";
 
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
-import {
-  GoogleReCaptchaProvider,
-  useGoogleReCaptcha
-} from 'react-google-recaptcha-v3';
 
 
 export const SignUpPage = () => {
 
   return (
-    <GoogleReCaptchaProvider
-    reCaptchaKey="6LehQ1IsAAAAACQWFomHKj-zBF_cMG91fWzk4nlh"
-    scriptProps={{
-      async: true, // optional, default to false,
-      defer: false, // optional, default to false
-      appendTo: 'head', // optional, default to "head", can be "head" or "body",
-      nonce: undefined // optional, default undefined
-    }}
-    container={{ // optional to render inside custom element
-      element: "recaptchadiv",
-      parameters: {
-        badge: 'inline', // optional, default undefined
-        // theme: 'light', // optional, default undefined
-      }
-    }}
-    >
     <SignUpPage2 />
-    </GoogleReCaptchaProvider>
   );
 
 };
@@ -41,83 +20,49 @@ export const SignUpPage2 = () => {
   };
 
   const [showForm, setShowForm] = useState(formState.Visible);
-  const [token, setToken] = useState();
-  const [refreshRec, setRefreshRec] = useState(1);
-  const { executeRecaptcha } = useGoogleReCaptcha();
 
 
-  const nop = () =>{return true;};
+  const nop = () =>{e.preventDefault(); return true;};
 
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
   };
 
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
-
-  const handleReCaptchaVerify = useCallback(async (nextFormState, email) => {
-    let tryMe = nextFormState || showForm;
-
-    if(tryMe == formState.Visible){
-      if (!executeRecaptcha) {
-        console.log('Execute recaptcha not yet available');
-        return;
-      }
-      else {
-        console.log("Executing recaptcha now...    ")
-      }
-
-      const t = await executeRecaptcha('signupform');
-      if (t) {
-        setToken(t);
-        return t;
-      }
-      else {
-        console.warn("recaptcha didn't return token");
-      }
-      return null;
-    }
-    else if(tryMe == formState.Registered){
-        // const t = await executeRecaptcha('signupform');
-        // trigger account verification email
-        const jdata = {};
-        jdata.email= email;
-
-        console.log(jdata);
-        const verificationData = await fetch("/api/v0/auth/request-verify-token", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-         },
-          body: JSON.stringify(jdata),
-        });
-        if(verificationData.status <300){
-          setShowForm(formState.Sent);
-          console.log("email sent");
-        }
-        else {
-          alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
-        }
-    }
-    }, [executeRecaptcha]);
+//   const [email, setEmail] = useState();
+//   const [password, setPassword] = useState();
+  const [turnstileId, setTurnstileId] = useState();
 
 
-  useEffect(() =>{
-    handleReCaptchaVerify();
-  }, [handleReCaptchaVerify, refreshRec]);
 
   const signUpSubmit = async (e) => {
     e.preventDefault();
+    const widgetId = await turnstile.render("#turnstile-container", {
+      sitekey: "0x4AAAAAAC8z9zGr6wqM9VgI",
+      callback: function (token) {
+        console.log("Turnstile token:", token);
+        signUpSubmit2(widgetId);
+      },
+      "error-callback": function (errorCode) {
+        console.error("Turnstile error:", errorCode);
+      },
+
+    });
+    setTurnstileId(widgetId);
+  };
+  const signUpSubmit2 = async (e) => {
     console.log(e);
+    /*
     let newUserData = new URLSearchParams();
     newUserData.append("email", email);
-    newUserData.append("password", password);
-    newUserData.append("g-recaptcha-response", token);
-    console.log(newUserData);
+    newUserData.append("password", password);*/
+//     console.log(newUserData);
+    const email = document.getElementById("emailInput");
+    const password = document.getElementById("passwordInput");
+    const cfTurnstileResponse = turnstile.getResponse(turnstileId);
     const jdata ={
-      "email":email,
-      "password":password,
-      "g-recaptcha-response":token,
+      "email":email.value,
+      "password":password.value,
+      "cf-turnstile-response":cfTurnstileResponse,
     }
     console.log(jdata);
     const data = await fetch("/api/v0/auth/register", {
@@ -129,17 +74,37 @@ export const SignUpPage2 = () => {
     });
     if (data.status > 299) {
       await data.json().then((body) => {
-        alert("Creating your Nyrkiö account failed. " + data.status);
+        alert("Creating your Nyrkiö account failed. " + (data.detail || data.status ) );
       });
       return false;
     } else {
+      setShowForm(formState.Registered);
+      console.log("User created");
+      // Next ping backend again, because FastAPI cannot do two things in one http request...
 
-//       await executeRecaptcha('signupform');
-//       const t = await handleReCaptchaVerify();
-        setShowForm(formState.Registered);
-        console.log("User created");
-        //setRefreshRec(Math.random());
-        await handleReCaptchaVerify(formState.Registered, email);
+      const jdata2 = {};
+      jdata2.email= email.value;
+      jdata2["cf-turnstile-response"] = cfTurnstileResponse;
+
+      console.log(jdata2);
+      // Notice how we reuse the same Turnstile response token. While unorthodox
+      // This is FastAPI silliness already. The token is stored on the other side,
+      // it is not possible to check it twice against the captcha provider.
+      const verificationData = await fetch(`/api/v0/auth/request-verify-token?cf-turnstile-response=${cfTurnstileResponse}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jdata2),
+      });
+      if(verificationData.status <300){
+        setShowForm(formState.Sent);
+        console.log("email sent");
+      }
+      else {
+        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+      }
+
     }
   };
 
@@ -232,7 +197,6 @@ export const SignUpPage2 = () => {
                   type="email"
                   className="form-control w-50"
                   id="emailInput"
-                  onChange={e => setEmail(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                 />
                 <label htmlFor="passwordInput" className="form-label">
@@ -242,19 +206,16 @@ export const SignUpPage2 = () => {
                   type="password"
                   className="form-control w-50"
                   id="passwordInput"
-                  onChange={e => setPassword(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                   />
               </div>
-              <div id="recaptcha-wrapper"                   style={{"marginLeft": "25%", "marginRight": "25%", textAlign: "center"}} className="p-3 mb-3">
 
-              <div className="text-justify">
-                <button type="submit" className="btn btn-success mt-4" id="recaptchabutton" onClick={signUpSubmit}>
+              <div  style={{"textAlign": "center", paddingBottom: "1em"}}>
+                <button type="submit" className="btn btn-success mt-4" onClick={signUpSubmit}>
                   Submit
                 </button>
               </div>
-              <div id="recaptchadiv" className="mt-5"></div>
-              </div>
+              <div id="turnstile-container"></div>
             </form>
             <div className="row pt-3">
               <hr />
@@ -281,7 +242,6 @@ export const SignUpPage2 = () => {
   }
   if(showForm == formState.Registered ){
     posthog.capture("user_signed_up", { signup_type: "email" });
-    handleReCaptchaVerify();
     return (
       <div className="container">
         <div className="row mt-5 justify-content-center">
