@@ -396,6 +396,18 @@ class DBStore(object):
         self.started = True
 
     @staticmethod
+    def unix_timestamp():
+        d = datetime.now(tz=timezone.utc)
+        return d.timestamp()
+
+    @staticmethod
+    def hundred_days_ago():
+        if _TESTING:
+            return 0
+
+        return DBStore.unix_timestamp() - 100 * 24 * 60 * 60
+
+    @staticmethod
     def check_for_missing_keys(data):
         """
         This function is responsible for validating the incoming JSON data and
@@ -669,10 +681,11 @@ class DBStore(object):
         Returns an empty list if no results are found.
         """
         test_results = self.db.test_results
+        cut = self.hundred_days_ago()
         if id:
             results = await test_results.aggregate(
                 [
-                    {"$match": {"user_id": id}},
+                    {"$match": {"user_id": id, "timestamp": {"$gte": cut}}},
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
                 ],
