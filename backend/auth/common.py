@@ -160,9 +160,14 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
         data = await request.json()
         cfToken = data.get("cf-turnstile-response")
-        if not user.captcha_token == cfToken:
+        cfTokenGet = request.get("cf-turnstile-response")
+        logging.info(data)
+        logging.info(cfToken)
+        logging.info(cfTokenGet)
+        logging.info(user)
+        if not user.captcha_token == cfTokenGet:
             raise HTTPException(
-                status_code=400,
+                status_code=401,
                 detail="Please provide cf-turnstile-response=xxxx in the URI query string. Same as you used the first time.",
             )
 
