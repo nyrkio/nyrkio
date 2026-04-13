@@ -20,31 +20,48 @@ export const SignUpPage2 = () => {
   };
 
   const [showForm, setShowForm] = useState(formState.Visible);
-  const [token, setToken] = useState();
-  const [refreshRec, setRefreshRec] = useState(1);
 
 
-  const nop = () =>{return true;};
+  const nop = () =>{e.preventDefault(); return true;};
 
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
   };
 
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+//   const [email, setEmail] = useState();
+//   const [password, setPassword] = useState();
+  const [turnstileId, setTurnstileId] = useState();
 
 
 
   const signUpSubmit = async (e) => {
     e.preventDefault();
+    const widgetId = await turnstile.render("#turnstile-container", {
+      sitekey: "0x4AAAAAAC8z9zGr6wqM9VgI",
+      callback: function (token) {
+        console.log("Turnstile token:", token);
+        signUpSubmit2(widgetId);
+      },
+      "error-callback": function (errorCode) {
+        console.error("Turnstile error:", errorCode);
+      },
+
+    });
+    setTurnstileId(widgetId);
+  };
+  const signUpSubmit2 = async (e) => {
     console.log(e);
+    /*
     let newUserData = new URLSearchParams();
     newUserData.append("email", email);
-    newUserData.append("password", password);
-    console.log(newUserData);
+    newUserData.append("password", password);*/
+//     console.log(newUserData);
+    const email = document.getElementById("emailInput");
+    const password = document.getElementById("passwordInput");
     const jdata ={
-      "email":email,
-      "password":password,
+      "email":email.value,
+      "password":password.value,
+      "cf-turnstile-response":turnstile.getResponse(turnstileId),
     }
     console.log(jdata);
     const data = await fetch("/api/v0/auth/register", {
@@ -56,13 +73,33 @@ export const SignUpPage2 = () => {
     });
     if (data.status > 299) {
       await data.json().then((body) => {
-        alert("Creating your Nyrkiö account failed. " + data.status);
+        alert("Creating your Nyrkiö account failed. " + (data.detail || data.status ) );
       });
       return false;
     } else {
+      setShowForm(formState.Registered);
+      console.log("User created");
+      // Next ping backend again, because FastAPI cannot do two things in one http request...
 
-        setShowForm(formState.Registered);
-        console.log("User created");
+      const jdata2 = {};
+      jdata2.email= email.value;
+
+      console.log(jdata2);
+      const verificationData = await fetch("/api/v0/auth/request-verify-token", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(jdata2),
+      });
+      if(verificationData.status <300){
+        setShowForm(formState.Sent);
+        console.log("email sent");
+      }
+      else {
+        alert("Your user account is created, but we weren't able to automatically verify your email. Could you please email helloworld@nyrkio.com and we'll have you back to benchmarking in a whiff.");
+      }
+
     }
   };
 
@@ -155,7 +192,6 @@ export const SignUpPage2 = () => {
                   type="email"
                   className="form-control w-50"
                   id="emailInput"
-                  onChange={e => setEmail(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                 />
                 <label htmlFor="passwordInput" className="form-label">
@@ -165,16 +201,16 @@ export const SignUpPage2 = () => {
                   type="password"
                   className="form-control w-50"
                   id="passwordInput"
-                  onChange={e => setPassword(e.target.value)}
                   style={{"marginLeft": "25%", "marginRight": "25%"}}
                   />
               </div>
 
-              <div className="text-justify">
+              <div  style={{"textAlign": "center", paddingBottom: "1em"}}>
                 <button type="submit" className="btn btn-success mt-4" onClick={signUpSubmit}>
                   Submit
                 </button>
               </div>
+              <div id="turnstile-container"></div>
             </form>
             <div className="row pt-3">
               <hr />

@@ -40,6 +40,7 @@ auth_router = APIRouter(prefix="/auth")
 SECRET = os.environ.get("SECRET_KEY", "fooba")
 SERVER_NAME = os.environ.get("SERVER_NAME", "localhost")
 GOOGLE_RECAPTCHA_SECRETKEY = os.environ.get("GOOGLE_RECAPTCHA_SECRETKEY")
+CF_SECRETKEY = os.environ.get("CF_SECRETKEY")
 # The sitekey is just for the frontend to do its api request
 # GOOGLE_RECAPTCHA_SITEKEY = os.environ.get("GOOGLE_RECAPTCHA_SITEKEY")
 
@@ -71,23 +72,22 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             raise ValueError(
                 "Can't ... if stupid framework doesn't share the request so I can get the recaptcha fields."
             )
+
         data = await request.json()
-        g_recaptcha_response = data.get("g-recaptcha-response")
-        remoteip = request.client.host
-        realip = request.headers.get("x-real-ip")
-        forwardedip = request.headers.get(" X-Forwarded-For")
-        logging.info(
-            f"Remote ip for attempted new user registration is {remoteip} {realip} {forwardedip}"
+        token = data.get("cf-turnstile-response")
+        remoteip = (
+            request.headers.get("CF-Connecting-IP")
+            or request.headers.get("X-Forwarded-For")
+            or request.remote_addr
         )
 
-        captcha_ok, captcha_details = await verify_recaptcha(
-            g_recaptcha_response, remoteip
-        )
-        if not captcha_ok:
-            raise HTTPException(status_code=400, detail="Blocked by ReCaptcha")
+        validation = await validate_turnstile(token, CF_SECRETKEY, remoteip)
 
-        user_create.captcha_score = captcha_details.get("score", -1.0)
-        user_create.captcha_provider = "Google reCaptcha v3"
+        if not validation["success"]:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Blocked by CloudFlare: {validation['error-codes']}",
+            )
 
         if user_create.oauth_accounts:
             logging.warning(user_create)
@@ -180,6 +180,25 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
 
     async def get_by_github_username(self, github_username: str):
         return await self.user_db.get_by_github_username(github_username)
+
+
+async def validate_turnstile(token, secret, remoteip=None):
+    url = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
+
+    data = {"secret": secret, "response": token}
+
+    if remoteip:
+        data["remoteip"] = remoteip
+
+    client = httpx.AsyncClient()
+    response = await client.post(
+        url,
+        data=data,
+    )
+    if response.status_code != 200:
+        return False
+
+    return response.json()
 
 
 # Copied from google-recaptcha which is a Flask app, turns out...
