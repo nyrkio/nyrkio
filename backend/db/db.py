@@ -690,12 +690,12 @@ class DBStore(object):
             results = await test_results.aggregate(
                 [
                     {"$sort": {"timestamp": -1}},
-                    {"$limit": 20000},
                     {
                         "$match": {
                             "user_id": id,
                         }
                     },
+                    {"$limit": 20000},
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
                 ],
