@@ -687,24 +687,42 @@ class DBStore(object):
         test_results = self.db.test_results
         # cut = self.hundred_days_ago()
         if id:
-            results = await test_results.aggregate(
+            result = await test_results.aggregate(
                 [
-                    {"$sort": {"timestamp": -1}},
                     {
                         "$match": {
                             "user_id": id,
                         }
                     },
-                    {"$limit": 20000},
+                    {"$sample": {"size": 50000}},
+                    {"$sort": {"timestamp": -1}},
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
                 ],
             ).to_list(None)
-            # TODO(mfleming) Not sure why the mongo query doesn't return sorted results
-            # Henrik: Should now but left this anyway as it also modified structure...
-            sorted_list = results[0]["test_names"] if results else []
-            sorted_list.sort()
-            return sorted_list
+            sample = [row for row in result[0]["test_names"]] if result else []
+            sample.sort()
+
+            recent = await test_results.aggregate(
+                [
+                    {
+                        "$match": {
+                            "user_id": id,
+                        }
+                    },
+                    {"$limit": 2000},
+                    {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
+                    {"$sort": {"test_names": 1}},
+                ],
+            ).to_list(None)
+            augment = (
+                [row for row in recent[0]["test_names"] if row not in sample]
+                if recent
+                else []
+            )
+            full_list = sample + augment
+            full_list.sort()
+            return full_list
         else:
             results = await test_results.aggregate(
                 [
