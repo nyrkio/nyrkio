@@ -49,6 +49,11 @@ a PAT with access to other repos, which were often 100% created by you. But not 
  - [ ] When clicking on a dot in a graph, a modal dialog opens where user can see all the atributes and extra_info stored at this particular commit and test_result. Instead of a modal, change this so that it is a panel that opens or slides open next to the timeline we created in the previous point. If the panel is a little transparent, it can cover the grapsh an the change point table under itself. If needed, it could even occupy the entire screen.
 
 
+ - [ ] Get rid of Sieve cache, store copies of commit message, author and simiĺar metadata in the DocumentDB database.
+ - [ ] For Nyrkio Runners, move the instance type definitions into the database
+ - [ ] Look out for similar opportunities
+
+ 
 ## Long term (which might be sooner than I expect)
 
 
