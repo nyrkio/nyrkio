@@ -64,6 +64,9 @@ services:
       - webhooks
       - worker01
     restart: always
+    # Used to forward /v3/ initially only on staging
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
 
 
 networks:
