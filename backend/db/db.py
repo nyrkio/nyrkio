@@ -694,7 +694,8 @@ class DBStore(object):
                             "user_id": id,
                         }
                     },
-                    {"$sample": {"size": 12000}},
+                    {"$limit": 100000},
+                    {"$sample": {"size": 9000}},
                     {"$sort": {"timestamp": -1}},
                     {"$group": {"_id": 0, "test_names": {"$addToSet": "$test_name"}}},
                     {"$sort": {"test_names": 1}},
