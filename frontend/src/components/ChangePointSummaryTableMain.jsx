@@ -4,6 +4,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 import { commitUrl } from "../lib/github";
+import '../style/ag-table.scss';
 
 const Loading = ({loading}) => {
   if (loading) {
@@ -336,7 +337,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   return (
     <>
       <div className="row text-center">
-        <h3>{title?title:"Performance Changes"}</h3>
+        <h3 className="text-secondary mb-4">{title?title:"Performance Changes"}</h3>
       </div>
       <div
         className="ag-main-cp-table ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
@@ -348,7 +349,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
           style={{width: "100%", maxHeight: "75vhi"}}
-          className="w-100"
+          className="w-100 shadow rounded"
           paginationPageSize={20}
           paginationPageSizeSelector={[10, 20, 50, 100]}
           getRowClass={getRowStyle}

@@ -156,12 +156,14 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
     "" :
     <>
     <span className="col-sm-4 col-md-4">
+      <label for="prPicker" className="visually-hidden">Pull requests</label>
     <select id="prPicker" name="prPicker" className="form-select"
             onChange={(ev)=>prSelected(ev.target.value)} style={{display: "inline"}}>
     {prList}
     </select>
     </span>
     <span className="col-sm-4 col-md-4">
+      <label for="commitPicker" className="visually-hidden">Commits</label>
     <select id="commitPicker" name="commitPicker" className="form-select"
             onChange={(ev)=>{commitSelected(ev.target.value)}} style={{display:"none"}} disabled={true}>
     {commitList}

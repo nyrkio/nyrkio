@@ -484,59 +484,62 @@ const ManyResultWithTestname = ({
 
   const resetOtherButtons = (selectButton) => {
     if (selectButton.id != "btn-graph-overview"){
-      document.getElementById("btn-graph-overview").classList.remove("btn-success");
+      document.getElementById("btn-graph-overview").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-sparklines"){
-      document.getElementById("btn-graph-sparklines").classList.remove("btn-success");
+      document.getElementById("btn-graph-sparklines").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-2x1"){
-      document.getElementById("btn-graph-2x1").classList.remove("btn-success");
+      document.getElementById("btn-graph-2x1").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-1x1"){
-      document.getElementById("btn-graph-1x1").classList.remove("btn-success");
+      document.getElementById("btn-graph-1x1").classList.remove("active");
     }
-    selectButton.classList.add("btn-success");
+    selectButton.classList.add("active");
     // The above doesn't work every time, so schedule backup executions to happen later, to avoid race
     setTimeout(()=>{
-      document.getElementById(selectButton.id).classList.add("btn-success");
+      document.getElementById(selectButton.id).classList.add("active");
     },100);
   }
   const setLayout = (e,setGraphSize) =>{
-      const newLayout = e.currentTarget.id.substring(10);
+    const newLayout = e.currentTarget.id.substring(10);
       console.debug(newLayout);
       setGraphSize(newLayout);
-      localStorage.setItem("graphSize", newLayout);
+    localStorage.setItem("graphSize", newLayout);
       resetOtherButtons(e.currentTarget);
       e.preventDefault();
       e.stopPropagation();
   };
   const GraphSizePicker = ({embed, setGraphSize}) => {
+    useEffect(() => {
+      const savedLayout = localStorage.getItem("graphSize") || "2x1";
+      const btn = document.getElementById(`btn-graph-${savedLayout}`);
+      if (btn) {
+        btn.classList.add("active");
+      }
+    }, []);
+
     return (<>
-            <div className="card col-md-8">
-            <div className="card-header text-center mb-4 mt-3">Choose layout</div>
-            </div>
-            <div className="card col-md-12">
-            <div className="row justify-content-center text-center">
-            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4 col-lg-2">
-            <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
-            </a>
+      <div className="h3 text-start text-secondary">Choose layout</div>
+      <nav className="nav nav-pills nav-fill p-0 gap-3 graph-display-mode">
+        <a id="btn-graph-overview" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
+        </a>
+        {embed == "yes" ? "" :
+          <a  href="?embed=yes" className="nav-link border border-primary" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
 
-            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
-            </a>
-            {embed == "yes" ? "" :
-            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
-
-            }
-            </div>
-            </div>
-            </>);
+        }
+      </nav>
+    </>);
   }
 
   const DashboardSettings = ({
@@ -555,24 +558,20 @@ const ManyResultWithTestname = ({
 
     return (<>
             <div className="text-end" id="dashboard_settings">
-
-            <div className="row prWidgets justify-content-end">
-              <span className="col-sm-1 col-md-1 col-lg-1"></span>
-              <Pulls testName={testName} sendSelectedPr={sendSelectedPr} baseUrls={baseUrls} breadcrumbName={breadcrumbName} dashboardType={dashboardType} />
-              <div className="col-sm-3 col-md-3 col-lg-3">
-              <span className="inactive-label small">Configure...&nbsp;</span>
-              <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
-              >
-              <span className="bi bi-gear-fill"> </span>
-              </button>
-              <a id="linkToGraphs" title="Link here" href="#graphs">¶</a>
+              <div className="row prWidgets gap-3 gap-sm-0 justify-content-end">
+                <Pulls testName={testName} sendSelectedPr={sendSelectedPr} baseUrls={baseUrls} breadcrumbName={breadcrumbName} dashboardType={dashboardType} />
+                <div className="col-sm-4 col-md-4 col-lg-4 d-flex gap-3 justify-content-end">
+                  <button className="btn btn-outline-primary btn-sm btn-square" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse">
+                    <span className="bi bi-gear-fill"> </span>
+                  </button>
+                  <a id="linkToGraphs" className="btn btn-sm btn-outline-primary btn-square align-items-center justify-content-center d-flex" title="Link here" href="#graphs">¶</a>
+                </div>
               </div>
-            </div>
 
             <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
-              <div  className="card card-body">
+              <div  className="card card-body mt-4">
 
-            <div className="row justify-content-center text-center">
+            <div className="text-center">
               <GraphSizePicker embed={embed} setGraphSize={setGraphSize}/>
             </div>
 
@@ -747,8 +746,10 @@ export const SingleResultWithTestname = ({
   const isPublicDash = isPublicDashboard(dashboardType);
   return (
     <>
-          <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
-          <div className="container">
+          <div className="d-flex justify-content-center mb-5">
+            <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
+          </div>
+          <div className="container ">
             <div className="row justify-content-center">
               <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} redraw={redraw}/>
             </div>

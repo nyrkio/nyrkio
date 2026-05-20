@@ -79,23 +79,9 @@ export const PricingPage = ({ loggedIn }) => {
 
         <div className="nyrkio-plans row row-cols-1 row-cols-lg-3 text-center justify-content-center">
 
-
-          <CpuHours loggedIn={loggedIn}/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <div className="col">
+            <CpuHours loggedIn={loggedIn}/>
+          </div>
           <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
@@ -480,60 +466,43 @@ const prePaidToBeUsedLater = () => {
 };
 
 export const CpuHours = ({loggedIn, short}) => {
-  return (
-        <div className="col">
-        <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
-        <div className="card-header py-3">
-          <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
-          {short ? "":
-            (<span className="text-shoulders">for GitHub</span>)}
+  return (<div className="card card--pricing shadow-sm border-primary">
+      <div className="card-body">
+        <div className="card-title-badge badge h4 text-bg-secondary">
+          Nyrkiö Runner
+          {short ? "" : (<span className="text-shoulders">for GitHub</span>)}
         </div>
-        <div className="card-body">
-          <h1 className="card-title pricing-card-title">
-            <span style={{letterSpacing: "4px"}}>0</span><span style={{letterSpacing: "-3px"}}>.1</span><span style={{letterSpacing: "12px"}}> </span><small className="text-body-secondary fw-light" style={{letterSpacing: "2px"}}> eur/hour/cpu
-            <span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
-          </h1>
-          {short? "" :
-            (
-          <ul className="list-unstyled mt-3 mb-4">
+        <div className="card-pricing my-5">
+          <span className="card-pricing__price">0.1</span>&nbsp;
+          <span className="card-pricing__period">eur/hour/cpu</span>
+          <span className="card-pricing__tax">+Tax</span>
+        </div>
+        {short ? "" : (<ul className="list-unstyled mt-3 mb-4">
             <li>Pay as you go, monthly</li>
             <li>High Fidelity c7a instances</li>
             <li>Tuned for <em>stable performance</em></li>
             <li>Change Detection & Graphs included</li>
-          </ul>
-          )}
-          {loggedIn ? (
-            <form
-              action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
-              method="POST"
-            >
-              <input
-                type="hidden"
-                name="lookup_key"
-                value="runner_postpaid_13"
-              />
-              <input type="hidden" name="mode" value="subscription" />
-              <button
-                id="checkout-and-portal-button-runner_postpaid_10"
-                type="submit"
-                className="w-100 btn btn-lg btn-success p-3"
-              >
-                Subscribe (pay after use)
-              </button>
-            </form>
-          ) : (
+          </ul>)}
+        {loggedIn ? (<form
+            action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
+            method="POST"
+          >
+            <input
+              type="hidden"
+              name="lookup_key"
+              value="runner_postpaid_13"
+            />
+            <input type="hidden"  name="mode" value="subscription"/>
             <button
-            type="button"
-            className="w-100 btn btn-lg btn-success p-3"
+              id="checkout-and-portal-button-runner_postpaid_10"
+              type="submit"
+              className="w-100 btn btn-lg btn-success p-3"
             >
-            <a className="btn-link" href="/signup">
-            Log in &amp; Subscribe
-            </a>
+              Subscribe (pay after use)
             </button>
-          )}
-          </div>
-          </div>
-          </div>
+          </form>) : (<a className="btn btn-primary w-100" href="/signup">Log in &amp; Subscribe</a>)}
+      </div>
+    </div>
 
   );
 }
