@@ -337,7 +337,7 @@ export const LogOut = ({ setLoggedIn }) => {
   };
   return (
     <>
-      <Link to="/" className="btn btn-success" onClick={handleLogoutClick}>
+      <Link to="/" className="btn btn-primary" onClick={handleLogoutClick}>
         Log Out
       </Link>
     </>
@@ -349,7 +349,7 @@ export const LoginButton = () => {
     <>
       <Link
         to="/login"
-        className="btn btn-success loginbutton"
+        className="btn btn-primary loginbutton"
       >
         Log In
       </Link>

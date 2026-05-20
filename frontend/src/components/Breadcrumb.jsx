@@ -34,26 +34,22 @@ export const Breadcrumb = ({ testName, baseUrls }) => {
 
   return (
     <>
-      <nav className="navbar col-xs-12 col-lg-11 col-xl-10">
-        <div className="container-fluid breadcrumb-wrapper">
-          <nav aria-label="breadcrumb">
-            <ol className="breadcrumb">
-              {baseUrls.breadcrumbTestRootTitle ? (
-                <li className="breadcrumb-item" key="root">
-                  <em>
-                  <Link to={`${baseUrls.testRoot}`}>
-                    {baseUrls.breadcrumbTestRootTitle}
-                  </Link>
-                  </em>
-                </li>
-              ) : (
-                <span></span>
-              )}
-              {createItems()}
-            </ol>
-          </nav>
-        </div>
-      </nav>
+      <nav aria-label="breadcrumb">
+        <ol className="breadcrumb">
+          {baseUrls.breadcrumbTestRootTitle ? (
+            <li className="breadcrumb-item" key="root">
+              <em>
+              <Link to={`${baseUrls.testRoot}`}>
+                {baseUrls.breadcrumbTestRootTitle}
+              </Link>
+              </em>
+            </li>
+          ) : (
+            <span></span>
+          )}
+          {createItems()}
+        </ol>
+    </nav>
     </>
   );
 };
