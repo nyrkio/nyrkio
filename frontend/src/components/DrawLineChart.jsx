@@ -11,6 +11,7 @@ import { parseTimestamp } from "../lib/utils";
 ChartJS.register(zoomPlugin);
 
 import { commitUrl, branchUrl } from "../lib/github";
+import Icon from "./Icon.jsx";
 
 
 const nyrkio_dark_red = "#a34111";
@@ -306,9 +307,10 @@ export const DrawLineChart = ({
             </div>
 
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="justify-content-between">
             <Button
-              variant="secondary"
+              variant="primary"
+              className="d-inline-flex gap-2"
               onClick={() => {
                 if (result_index === 0) {
                   return;
@@ -318,10 +320,12 @@ export const DrawLineChart = ({
                 setModalIndex(result_index-1);
               }}
             >
+              <Icon name="chevron-left" size={18} />
               Prev
             </Button>
             <Button
-              variant="secondary"
+              variant="primary"
+              className="d-inline-flex gap-2"
               onClick={() => {
                 if (result_index === timestamps.length - 1) {
                   return;
@@ -332,6 +336,7 @@ export const DrawLineChart = ({
               }}
             >
               Next
+              <Icon name="chevron-right" size={18} />
             </Button>
           </Modal.Footer>
         </Modal>
@@ -510,11 +515,11 @@ export const DrawLineChart = ({
       />
       <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
       <div className="chart-wrapper"  style={layout}>
-        <h6 className="text-center">
+        <div className="text-center">
           <a href={metricNameWithHash}>{metricName}</a>{ " "}
           <span className="numfmt">{numberSizeWord?"("+numberSizeWord +")":""}</span>
           <span title={direction}>{directionArrow}</span>
-        </h6>
+        </div>
         <Line
           ref={chartRef}
           datasetIdKey="foo"

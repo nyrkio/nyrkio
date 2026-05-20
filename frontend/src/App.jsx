@@ -13,7 +13,7 @@ import "./App.css";
 import { Login } from "./components/Login.jsx";
 import { Dashboard} from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
-import { NavHeader } from "./components/Nav.jsx";
+import { NavHeader } from "./components/Nav/Nav.jsx";
 import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { DocsCurl } from "./components/DocsCurl.jsx";
@@ -69,31 +69,32 @@ function MainApp({ loggedIn, setLoggedIn }) {
     )
   };
 
-
-
-
   return (
     <>
-      <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-      <div className="container-fluid h-100 row">
-        <div className="col-sm-12 col-md-3 col-xl-2" id="sidepanel">
-          <SidePanel loggedIn={loggedIn} />
+      <div className="container-fluid">
+        <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      </div>
+
+      <div className="container-fluid h-100">
+        <div className="row">
+          <div className="col-sm-12 col-md-3 col-xl-2" id="sidepanel">
+            <SidePanel loggedIn={loggedIn} />
+          </div>
+          <div className="col-sm-12 col-md-9 col-xl-10" id="main-content">
+            <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+          </div>
+          <div className="col-sm-12 px-0" id="main-content2">
+            <Routes>
+              <Route path="/" element={loggedIn ? <Nothing /> : <><FrontPage loggedIn={loggedIn}/></>} />
+              <Route path="/frontpage" element={<><FrontPage loggedIn={loggedIn}/></>} />
+              <Route path="*" element={<Nothing />} />
+            </Routes>
+          </div>
+          <ScrollToTop />
+          <div className="col-12 p-0">
+            <Footer />
+          </div>
         </div>
-        <div
-          className="col-sm-12 col-md-9 col-xl-10 container-fluid"
-          id="main-content"
-        >
-        <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-        </div>
-        <div className="col-sm-12 container-fluid" id="main-content2">
-          <Routes>
-            <Route path="/" element={loggedIn ? <Nothing /> : <><FrontPage loggedIn={loggedIn}/></>} />
-            <Route path="/frontpage" element={<><FrontPage loggedIn={loggedIn}/></>} />
-            <Route path="*" element={<Nothing />} />
-          </Routes>
-        </div>
-        <ScrollToTop />
-        <Footer />
       </div>
     </>
   );

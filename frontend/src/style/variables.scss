@@ -1,0 +1,79 @@
+$primary: #973212;
+$secondary: #50320D;
+
+$body-bg: #fff;
+$body-color: #414141;
+
+$gray-300: #535353;
+
+
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * .25,
+  2: $spacer * .5,
+  3: $spacer,
+  4: $spacer * 1.5,
+  5: $spacer * 3,
+  6: $spacer * 4,
+  7: $spacer * 5,
+);
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1200px,
+  xxl: 1400px,
+  xxxl: 1748px,
+);
+
+$container-max-widths: (
+  sm: 100%,
+  md: 100%,
+  lg: 100%,
+  xl: 1110px,
+  xxl: 1310px,
+  xxxl: 1648px,
+);
+
+$headings-size: (
+  h1: 64px,
+  h2: 48px,
+  h3: 28px,
+  h4: 24px,
+  h5: 20px,
+  h6: 18px,
+);
+
+$display-font-sizes: (
+  1: 5rem,
+  2: 4.5rem,
+  3: 4rem,
+  4: 3.5rem,
+  5: 3rem,
+  6: 2.5rem
+);
+
+
+$grid-gutter-width: 2.5rem;
+
+$btn-padding-x: 2rem;
+$btn-padding-y: 1rem;
+$btn-line-height: 1.2;
+$btn-border-radius: .25rem;
+$btn-font-weight: 600;
+$btn-border-width: 2px;
+
+$font-weight-base: 500;
+$font-size-base: 1rem;
+$font-family-base: "IBM Plex Sans", sans-serif;
+$headings-font-family: "Bebas Neue", sans-serif;
+
+$box-shadow-sm: 0 0 10px 0 #00000026;
+$box-shadow: 0 0 16px 0 #00000040;
+
+$nav-link-color: $secondary;
+$nav-link-hover-color: $primary;
+

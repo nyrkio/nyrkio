@@ -1,0 +1,45 @@
+@use 'sass:color';
+@import './configuration';
+
+.ag-theme-nyrkio {
+  --ag-header-background-color: #{rgba($secondary, .7)};
+  --ag-header-cell-hover-background-color: #{rgba($secondary, .3)};
+  --ag-header-cell-moving-background-color: #fff;
+  --ag-header-foreground-color: #fff;
+
+  --ag-header-column-resize-handle-height: 100%;
+  --ag-header-column-resize-handle-width: 1px;
+  --ag-border-color: #D7D7D7;
+  --ag-cell-horizontal-border: 1px solid #D7D7D7;
+  --ag-header-height: 44px;
+  --ag-font-size: 14px;
+  --ag-foreground-color: #{$body-color};
+  --ag-cell-horizontal-padding: 8px;
+
+  @include media-breakpoint-up(md) {
+    --ag-header-height: 70px;
+    --ag-font-size: 16px;
+    --ag-cell-horizontal-padding: 16px;
+  }
+
+  .ag-header {
+    --ag-icon-font-color: #fff;
+  }
+
+  .ag-picker-field-wrapper {
+    --ag-border-color: #{$primary};
+  }
+
+  .ag-center-cols-container {}
+
+  .ag-paging-panel {
+    @include media-breakpoint-down(md) {
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
+      height: auto;
+      padding-top: 8px;
+      padding-bottom: 8px;
+    }
+  }
+}

@@ -1,12 +1,10 @@
 import Carousel from 'react-bootstrap/Carousel';
-import { TursoMini, DremioMini, TigerbeetleMini, KiekerMini } from "./UsersPage.jsx";
 import Pekka from '../static/ScreenshotTwitterPekkaEnberg.png';
 import Joran from '../static/Screenshot_Joran_Dirk_Greef.png';
 import Pierre from '../static/Pierre_lake.jpg';
 import { DemoVideo } from './FrontPage'
 import Marketplace_GHA from '../static/Nyrkio-GHA-Marketplace-Listing.png'
 import { useEffect, useState } from "react";
-
 
 export function NyrkioCarouselCols() {
   return (
