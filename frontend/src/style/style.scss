@@ -1,0 +1,166 @@
+// Override bootstrap variables.
+@import 'variables';
+
+// Bootstrap core
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+
+// Extend Bootstrap utilities.
+$utilities: map-merge(
+    $utilities,
+    (
+      "width": (
+        property: width,
+        class: w,
+        responsive: true,
+        values: (
+          auto: auto,
+          25: 25%,
+          50: 50%,
+          75: 75%,
+          100: 100%,
+        )
+      )
+    )
+);
+
+// Import full Bootstrap after utility overrides.
+@import 'bootstrap/scss/bootstrap';
+
+// Headings sizes.
+@each $h, $value in $headings-size {
+  .#{$h},
+  #{$h} {
+    @include font-size($value);
+    line-height: 1.2;
+    letter-spacing: .07em;
+  }
+}
+
+.h6,
+h6 {
+  font-family: $font-family-base;
+  letter-spacing: 0;
+  line-height: $line-height-base;
+}
+
+@include media-breakpoint-down(md) {
+  html {
+    font-size: 14px;
+  }
+}
+
+// Extend buttons
+.btn-square {
+  --btn-square-size: calc(#{$btn-line-height * 1em} + (#{$btn-padding-y * 2}) + (#{$btn-border-width * 2}));
+  width: var(--btn-square-size);
+  height: var(--btn-square-size);
+
+  padding: 0;
+}
+
+.btn-none {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+  }
+}
+
+
+
+// Card pricing.
+.card--pricing {
+  text-align: center;
+
+  .card-title-badge {
+    padding: 8px 16px 4px;
+    letter-spacing: 0.08em;
+    font-weight: $font-weight-normal;
+  }
+
+  .card-body {
+    padding: 24px;
+  }
+}
+
+// Pricing formatter.
+.card-pricing {
+  font-family: $headings-font-family;
+  letter-spacing: 0.08em;
+
+  &__price {
+    @include font-size(48px);
+    line-height: 1;
+    color: $primary;
+  }
+
+  &__period {
+    font-size: 20px;
+    color: $secondary;
+    text-transform: uppercase;
+  }
+
+  &__tax {
+    font-family: $font-family-base;
+    font-size: 14px;
+    color: $gray-300;
+  }
+}
+
+// Page elements.
+.mt-section,
+.my-section {
+  @include margin-top(96px);
+}
+
+.mb-section,
+.my-section {
+  @include margin-bottom(96px);
+}
+
+.pt-section,
+.py-section {
+  @include padding-top(96px);
+}
+
+.pb-section,
+.py-section {
+  @include padding-bottom(96px);
+}
+
+.footer__copyright-symbol {
+  width: 16px;
+  height: auto;
+
+  @include media-breakpoint-up(md) {
+    width: 24px;
+  }
+}
+
+// Icon
+.icon {
+  display: inline-block;
+  fill: currentColor;
+}
+
+.offcanvas {
+  --bs-offcanvas-width: 480px;
+}
+
+:root {
+  --bs-nav-link-color: #{$secondary};
+  --bs-nav-link-hover-color: #{$primary};
+}
