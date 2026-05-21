@@ -156,6 +156,7 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
+          export RESTART_POLICY=unless-stopped
           docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
 
   label-result:
