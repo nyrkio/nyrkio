@@ -41,16 +41,19 @@ jobs:
           NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
           SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
+          NYRKIO_GH_RUNNER_SSH: ${{ secrets.NYRKIO_GH_RUNNER_SSH }}
           ENV: staging
         run: |
           mv p/frontend/src/static/* p/
 
           # Build a docker container and push it to ECR
-          echo "$NYRKIO_ENV_STAGING " > .env.backend
+          echo "$NYRKIO_ENV_STAGING" > .env.backend
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
           echo "$SSL_SECRET_KEY" > nyrkio.com.key
-          echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
+          if [ -n "${NYRKIO_GH_RUNNER_SSH:-}" ]; then
+            echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
+          fi
           pwd
           ls -a
 
@@ -102,11 +105,11 @@ jobs:
             echo "SSH_AGENT_PID=SSH_AGENT_PID" >> $GITHUB_ENV
           fi
 
-          echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+          ssh-keyscan staging.nyrkio.com >> $HOME/.ssh/known_hosts
 
           echo "$SSH_PRIVATE_KEY" | ssh-add -
 
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
-          docker compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
