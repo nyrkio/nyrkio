@@ -171,10 +171,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     }
     const fetchData = async () => {
       const response = await fetch("/api/v0/results", {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
+        credentials: "include",
       });
 
       if (response.status != 200) {
@@ -242,10 +239,7 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
       console.debug(baseUrls);
       const base = baseUrls["api"];
       const sumResponse = await fetch(base + summaryPrefix+"summarySiblings", {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
+        credentials: "include",
       });
 
       if (sumResponse.status != 200) {
@@ -660,10 +654,7 @@ export const SingleResultWithTestname = ({
       url2 = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${pr_commit}/test/${testName}`;
     }
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status != 200) {
       console.warn(response);
@@ -688,10 +679,7 @@ export const SingleResultWithTestname = ({
     setDisplayData(cutResultData);
 
     const changes = await fetch(url2, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     var changeData = await changes.json();
     if (changes.status != 200) {

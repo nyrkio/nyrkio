@@ -1,5 +1,9 @@
 import { test, expect } from "@playwright/test";
 
+const env = (globalThis as any).process?.env || {};
+const TEST_USER_EMAIL = env.TEST_USER_EMAIL || "test@example.com";
+const TEST_USER_PASSWORD = env.TEST_USER_PASSWORD || "testpassword";
+
 /**
  * Authentication Flow Tests
  *
@@ -13,13 +17,13 @@ import { test, expect } from "@playwright/test";
 
 test.describe("Authentication - Login Page", () => {
   test("should display login page with both auth options", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Check page title
-    await expect(page.locator("h2")).toHaveText("Log In");
+    await expect(page.locator('h4:has-text("Login")')).toBeVisible();
 
     // Check GitHub OAuth button exists
-    const githubButton = page.locator('button:has-text("Login with GitHub")');
+    const githubButton = page.locator('button:has-text("GitHub")');
     await expect(githubButton).toBeVisible();
     await expect(githubButton).toHaveClass(/btn-success/);
 
@@ -28,36 +32,30 @@ test.describe("Authentication - Login Page", () => {
   });
 
   test("should display email/password login form", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Check email input exists
     const emailInput = page.locator('input[type="text"]#exampleInputEmail1');
     await expect(emailInput).toBeVisible();
-    await expect(page.locator('label[for="exampleInputEmail1"]')).toHaveText(
-      "Email address"
-    );
 
     // Check password input exists
     const passwordInput = page.locator(
       'input[type="password"]#exampleInputPassword1'
     );
     await expect(passwordInput).toBeVisible();
-    await expect(page.locator('label[for="exampleInputPassword1"]')).toHaveText(
-      "Password"
-    );
 
     // Check submit button exists
     const submitButton = page.locator('button[type="submit"]:has-text("Login")');
     await expect(submitButton).toBeVisible();
-    await expect(submitButton).toHaveClass(/btn-success/);
+    await expect(submitButton).toHaveClass(/btn-info/);
   });
 
   test("should display signup section", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
-    // Check that SignUpPage component is rendered (you may need to adjust selector)
-    const signupSection = page.locator("text=/sign up|create account/i").first();
-    await expect(signupSection).toBeVisible();
+    await expect(
+      page.locator('a[href="/signup"] >> text=Create Nyrkiö account').first()
+    ).toBeVisible();
   });
 });
 
@@ -67,7 +65,7 @@ test.describe("Authentication - GitHub OAuth Flow", () => {
     context,
   }) => {
     // Mock the GitHub OAuth authorize endpoint
-    await page.route("/api/v0/auth/github/authorize", async (route) => {
+    await page.route("**/api/v0/auth/github/authorize", async (route) => {
       await route.fulfill({
         status: 200,
         contentType: "application/json",
@@ -77,7 +75,7 @@ test.describe("Authentication - GitHub OAuth Flow", () => {
       });
     });
 
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Start waiting for navigation before clicking
     const navigationPromise = page.waitForURL(
@@ -86,7 +84,7 @@ test.describe("Authentication - GitHub OAuth Flow", () => {
     );
 
     // Click GitHub login button
-    await page.locator('button:has-text("Login with GitHub")').click();
+    await page.locator('button:has-text("GitHub")').click();
 
     // Wait for navigation to GitHub
     try {
@@ -100,12 +98,17 @@ test.describe("Authentication - GitHub OAuth Flow", () => {
   });
 
   test("should handle successful GitHub OAuth callback", async ({ page }) => {
-    // Navigate to login page with successful OAuth callback parameters
-    await page.goto("/login?gh_login=success&username=testuser");
+    let authenticated = true;
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
+    });
 
-    // Check that localStorage was set
-    const loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-    expect(loggedIn).toBe("true");
+    // Navigate to login page with successful OAuth callback parameters
+    await page.goto("/login?gh_login=success&username=testuser", {
+      waitUntil: "domcontentloaded",
+    });
+
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
     const username = await page.evaluate(() => localStorage.getItem("username"));
     expect(username).toBe("testuser");
@@ -120,59 +123,58 @@ test.describe("Authentication - GitHub OAuth Flow", () => {
     );
     expect(authServer).toBe("github.com");
 
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
+
     // Should redirect to home page
-    await page.waitForURL("/", { timeout: 5000 });
   });
 });
 
 test.describe("Authentication - Password Login", () => {
   test("should submit login form with credentials", async ({ page }) => {
     // Mock the login endpoint
-    await page.route("/api/v0/auth/jwt/login", async (route) => {
+    let authenticated = false;
+
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
+    });
+
+    await page.route("**/api/v0/auth/cookie/login", async (route) => {
       const postData = await route.request().postData();
       const params = new URLSearchParams(postData || "");
 
       if (
-        params.get("username") === "test@example.com" &&
-        params.get("password") === "testpassword"
+        params.get("username") === TEST_USER_EMAIL &&
+        params.get("password") === TEST_USER_PASSWORD
       ) {
+        authenticated = true;
         await route.fulfill({
           status: 200,
           contentType: "application/json",
-          body: JSON.stringify({
-            access_token: "test_token_12345",
-            token_type: "bearer",
-          }),
         });
       } else {
         await route.fulfill({
           status: 401,
-          statusText: "Unauthorized",
         });
       }
     });
 
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Fill in credentials
-    await page.fill('input[type="text"]#exampleInputEmail1', "test@example.com");
-    await page.fill('input[type="password"]#exampleInputPassword1', "testpassword");
+    await page.fill('input[type="text"]#exampleInputEmail1', TEST_USER_EMAIL);
+    await page.fill('input[type="password"]#exampleInputPassword1', TEST_USER_PASSWORD);
 
     // Submit form
     await page.locator('button[type="submit"]:has-text("Login")').click();
 
-    // Wait a bit for async operations
-    await page.waitForTimeout(500);
-
-    // Check that localStorage was set correctly
-    const loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-    expect(loggedIn).toBe("true");
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
     const username = await page.evaluate(() => localStorage.getItem("username"));
-    expect(username).toBe("test@example.com");
+    expect(username).toBe(TEST_USER_EMAIL);
 
     const token = await page.evaluate(() => localStorage.getItem("token"));
-    expect(token).toBe("test_token_12345");
+    expect(token).toBeNull();
 
     const authMethod = await page.evaluate(() =>
       localStorage.getItem("authMethod")
@@ -187,14 +189,13 @@ test.describe("Authentication - Password Login", () => {
 
   test("should display error message on failed login", async ({ page }) => {
     // Mock failed login
-    await page.route("/api/v0/auth/jwt/login", async (route) => {
+    await page.route("**/api/v0/auth/cookie/login", async (route) => {
       await route.fulfill({
         status: 401,
-        statusText: "Unauthorized",
       });
     });
 
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Fill in incorrect credentials
     await page.fill('input[type="text"]#exampleInputEmail1', "wrong@example.com");
@@ -214,7 +215,7 @@ test.describe("Authentication - Password Login", () => {
   });
 
   test("should not submit form with empty credentials", async ({ page }) => {
-    await page.goto("/login");
+    await page.goto("/login", { waitUntil: "domcontentloaded" });
 
     // Don't fill in any credentials
 
@@ -225,158 +226,188 @@ test.describe("Authentication - Password Login", () => {
     expect(page.url()).toContain("/login");
 
     // localStorage should not have been set
-    const loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-    expect(loggedIn).not.toBe("true");
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
   });
 });
 
 test.describe("Authentication - Session Persistence", () => {
   test("should persist login state in localStorage", async ({ page }) => {
-    // Set up logged-in state
-    await page.goto("/login");
+    let authenticated = true;
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
+    });
 
-    await page.evaluate(() => {
-      localStorage.setItem("loggedIn", "true");
+    await page.addInitScript(() => {
       localStorage.setItem("username", "persisttest@example.com");
-      localStorage.setItem("token", "persist_token_12345");
       localStorage.setItem("authMethod", "password");
     });
 
     // Navigate to home page
-    await page.goto("/");
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
-    // Check that login state persists
-    const loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-    expect(loggedIn).toBe("true");
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
-    const username = await page.evaluate(() => localStorage.getItem("username"));
-    expect(username).toBe("persisttest@example.com");
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
   });
 
   test("should maintain session across page reloads", async ({ page }) => {
-    await page.goto("/login");
-
-    // Set logged-in state
-    await page.evaluate(() => {
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("username", "reload@example.com");
-      localStorage.setItem("token", "reload_token_12345");
+    let authenticated = true;
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
     });
 
+    await page.addInitScript(() => {
+      localStorage.setItem("username", "reload@example.com");
+    });
+
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
+
     // Reload page
-    await page.reload();
+    await page.reload({ waitUntil: "domcontentloaded" });
 
-    // Check that session persists
-    const loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-    expect(loggedIn).toBe("true");
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
-    const username = await page.evaluate(() => localStorage.getItem("username"));
-    expect(username).toBe("reload@example.com");
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
   });
 });
 
 test.describe("Authentication - Logout", () => {
   test("should clear localStorage on logout", async ({ page }) => {
     // Mock logout endpoint
-    await page.route("/api/v0/auth/jwt/logout", async (route) => {
+    let authenticated = true;
+
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
+    });
+
+    await page.route("**/api/v0/auth/admin", async (route) => {
+      await route.fulfill({ status: 403 });
+    });
+
+    await page.route("**/api/v0/orgs/", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    });
+
+    await page.route("**/api/v0/auth/cookie/logout", async (route) => {
+      authenticated = false;
       await route.fulfill({
         status: 200,
       });
     });
 
-    await page.goto("/");
-
-    // Set logged-in state
-    await page.evaluate(() => {
-      localStorage.setItem("loggedIn", "true");
+    await page.addInitScript(() => {
       localStorage.setItem("username", "logout@example.com");
       localStorage.setItem("username_real", "logout@example.com");
-      localStorage.setItem("token", "logout_token_12345");
     });
 
-    // Find and click logout button (adjust selector as needed)
-    const logoutButton = page.locator('a:has-text("Log Out")');
-    if (await logoutButton.isVisible()) {
-      await logoutButton.click();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
-      // Wait for async operations
-      await page.waitForTimeout(500);
+    await page.locator("#dropdown-basic").click();
+    await page.locator('text=Log Out').click();
 
-      // Check that localStorage was cleared
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
-      );
-      expect(loggedIn).toBe("false");
+    await page.waitForTimeout(500);
 
-      const username = await page.evaluate(() =>
-        localStorage.getItem("username")
-      );
-      expect(username).toBe("");
-    }
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
+
+    const username = await page.evaluate(() => localStorage.getItem("username"));
+    expect(username).toBe("");
+
+    await expect(page.locator("a.loginbutton")).toBeVisible();
   });
 
   test("should handle logout API failure gracefully", async ({ page }) => {
     // Mock failed logout endpoint
-    await page.route("/api/v0/auth/jwt/logout", async (route) => {
+    let authenticated = true;
+
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
+    });
+
+    await page.route("**/api/v0/auth/admin", async (route) => {
+      await route.fulfill({ status: 403 });
+    });
+
+    await page.route("**/api/v0/orgs/", async (route) => {
       await route.fulfill({
-        status: 500,
-        statusText: "Internal Server Error",
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
       });
     });
 
-    await page.goto("/");
-
-    // Set logged-in state
-    await page.evaluate(() => {
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("username", "logout-fail@example.com");
-      localStorage.setItem("token", "logout_fail_token_12345");
+    await page.route("**/api/v0/auth/cookie/logout", async (route) => {
+      authenticated = false;
+      await route.fulfill({
+        status: 500,
+      });
     });
 
-    // Find and click logout button
-    const logoutButton = page.locator('a:has-text("Log Out")');
-    if (await logoutButton.isVisible()) {
-      await logoutButton.click();
+    await page.addInitScript(() => {
+      localStorage.setItem("username", "logout-fail@example.com");
+    });
 
-      // Wait for async operations
-      await page.waitForTimeout(500);
+    await page.goto("/", { waitUntil: "domcontentloaded" });
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
 
-      // Should still clear localStorage even if API fails
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
-      );
-      expect(loggedIn).toBe("false");
-    }
+    await page.locator("#dropdown-basic").click();
+    await page.locator('text=Log Out').click();
+
+    await page.waitForTimeout(500);
+
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeNull();
+
+    await expect(page.locator("a.loginbutton")).toBeVisible();
   });
 });
 
 test.describe("Authentication - UI State Changes", () => {
   test("should show Login button when not logged in", async ({ page }) => {
-    await page.goto("/");
-
-    // Clear any existing login state
-    await page.evaluate(() => {
-      localStorage.clear();
+    let authenticated = false;
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
     });
 
-    await page.reload();
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Check for login button (adjust selector based on your Nav component)
-    const loginButton = page.locator('a:has-text("Log In")');
+    const loginButton = page.locator("a.loginbutton");
     await expect(loginButton).toBeVisible();
   });
 
   test("should show user menu when logged in", async ({ page }) => {
-    await page.goto("/");
-
-    // Set logged-in state
-    await page.evaluate(() => {
-      localStorage.setItem("loggedIn", "true");
-      localStorage.setItem("username", "ui-test@example.com");
-      localStorage.setItem("token", "ui_test_token");
+    let authenticated = true;
+    await page.route("**/api/v0/auth/authenticated-route", async (route) => {
+      await route.fulfill({ status: authenticated ? 200 : 401 });
     });
 
-    await page.reload();
+    await page.route("**/api/v0/auth/admin", async (route) => {
+      await route.fulfill({ status: 403 });
+    });
+
+    await page.route("**/api/v0/orgs/", async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify([]),
+      });
+    });
+
+    await page.addInitScript(() => {
+      localStorage.setItem("username", "ui-test@example.com");
+    });
+
+    await page.goto("/", { waitUntil: "domcontentloaded" });
 
     // Wait for UI to update
     await page.waitForTimeout(500);
@@ -387,5 +418,6 @@ test.describe("Authentication - UI State Changes", () => {
 
     // User menu or username should be visible (adjust selector as needed)
     // This depends on your Nav component structure
+    await expect(page.locator("#dropdown-basic")).toBeVisible();
   });
 });

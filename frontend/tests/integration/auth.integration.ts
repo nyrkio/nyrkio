@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { BACKEND_BASE_URL } from "./auth-utils";
 
 /**
  * Integration Tests for Authentication
@@ -15,10 +16,12 @@ import { test, expect } from "@playwright/test";
  */
 
 // Test data - you may need to adjust based on your test database
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
-  username: process.env.TEST_USER_USERNAME || "testuser",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
+  username: env.TEST_USER_USERNAME || "testuser",
 };
 
 test.describe("Authentication Integration Tests", () => {
@@ -72,16 +75,13 @@ test.describe("Authentication Integration Tests", () => {
       // Should redirect to home page
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Verify logged in state
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
-      );
-      expect(loggedIn).toBe("true");
+      const cookies = await page.context().cookies();
+      expect(cookies.some((c) => c.name === "auth_cookie")).toBe(true);
 
-      // Verify token was stored
-      const token = await page.evaluate(() => localStorage.getItem("token"));
-      expect(token).toBeTruthy();
-      expect(token).toContain(".");
+      const authResponse = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
+      );
+      expect(authResponse.status()).toBe(200);
 
       // Verify auth method
       const authMethod = await page.evaluate(() =>
@@ -119,11 +119,10 @@ test.describe("Authentication Integration Tests", () => {
       // Verify still on login page
       expect(page.url()).toContain("/login");
 
-      // Verify not logged in
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
+      const authResponse = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
       );
-      expect(loggedIn).not.toBe("true");
+      expect(authResponse.status()).not.toBe(200);
     });
 
     test("should validate required fields", async ({ page }) => {
@@ -145,7 +144,6 @@ test.describe("Authentication Integration Tests", () => {
   test.describe("Session Persistence", () => {
     test("should maintain session across page navigation", async ({
       page,
-      request,
     }) => {
       await page.goto("/login");
 
@@ -163,20 +161,8 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Get initial token
-      const initialToken = await page.evaluate(() =>
-        localStorage.getItem("token")
-      );
-      expect(initialToken).toBeTruthy();
-
-      // Verify token works with API
-      const authResponse = await request.get(
-        "http://localhost:8001/api/v0/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${initialToken}`,
-          },
-        }
+      const authResponse = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/users/me`,
       );
       expect(authResponse.status()).toBe(200);
       const userData = await authResponse.json();
@@ -186,32 +172,14 @@ test.describe("Authentication Integration Tests", () => {
       // Navigate to another page (e.g., docs)
       await page.goto("/docs");
 
-      // Verify session persists
-      const tokenAfterNav = await page.evaluate(() =>
-        localStorage.getItem("token")
-      );
-      expect(tokenAfterNav).toBe(initialToken);
-
-      // Verify token still works with API after navigation
-      const authResponse2 = await request.get(
-        "http://localhost:8001/api/v0/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${tokenAfterNav}`,
-          },
-        }
+      const authResponse2 = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/users/me`,
       );
       expect(authResponse2.status()).toBe(200);
-
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
-      );
-      expect(loggedIn).toBe("true");
     });
 
     test("should maintain session across page reload", async ({
       page,
-      request,
     }) => {
       await page.goto("/login");
 
@@ -229,23 +197,12 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Get initial state
-      const initialToken = await page.evaluate(() =>
-        localStorage.getItem("token")
-      );
       const initialUsername = await page.evaluate(() =>
         localStorage.getItem("username")
       );
-      expect(initialToken).toBeTruthy();
 
-      // Verify token works with API before reload
-      const authResponse1 = await request.get(
-        "http://localhost:8001/api/v0/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${initialToken}`,
-          },
-        }
+      const authResponse1 = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/users/me`,
       );
       expect(authResponse1.status()).toBe(200);
       const userData1 = await authResponse1.json();
@@ -255,33 +212,17 @@ test.describe("Authentication Integration Tests", () => {
       await page.reload();
 
       // Verify session persists after reload
-      const tokenAfterReload = await page.evaluate(() =>
-        localStorage.getItem("token")
-      );
-      expect(tokenAfterReload).toBe(initialToken);
-
       const usernameAfterReload = await page.evaluate(() =>
         localStorage.getItem("username")
       );
       expect(usernameAfterReload).toBe(initialUsername);
 
-      // Verify token still works with API after reload
-      const authResponse2 = await request.get(
-        "http://localhost:8001/api/v0/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${tokenAfterReload}`,
-          },
-        }
+      const authResponse2 = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/users/me`,
       );
       expect(authResponse2.status()).toBe(200);
       const userData2 = await authResponse2.json();
       expect(userData2.email).toBe(TEST_USER.email);
-
-      const loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
-      );
-      expect(loggedIn).toBe("true");
     });
   });
 
@@ -303,11 +244,10 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Verify logged in
-      let loggedIn = await page.evaluate(() =>
-        localStorage.getItem("loggedIn")
+      const authResponse1 = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
       );
-      expect(loggedIn).toBe("true");
+      expect(authResponse1.status()).toBe(200);
 
       // Find and click logout button
       const logoutButton = page.locator('a:has-text("Log Out")');
@@ -318,8 +258,10 @@ test.describe("Authentication Integration Tests", () => {
       await page.waitForTimeout(1000);
 
       // Verify logged out state
-      loggedIn = await page.evaluate(() => localStorage.getItem("loggedIn"));
-      expect(loggedIn).toBe("false");
+      const authResponse2 = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
+      );
+      expect(authResponse2.status()).not.toBe(200);
 
       const username = await page.evaluate(() =>
         localStorage.getItem("username")
@@ -334,7 +276,6 @@ test.describe("Authentication Integration Tests", () => {
   test.describe("Protected Routes", () => {
     test("should allow access to protected routes when logged in", async ({
       page,
-      request,
     }) => {
       await page.goto("/login");
 
@@ -352,17 +293,9 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      const token = await page.evaluate(() => localStorage.getItem("token"));
-      expect(token).toBeTruthy();
-
       // Verify we can access protected API endpoints
-      const userResponse = await request.get(
-        "http://localhost:8001/api/v0/users/me",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const userResponse = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/users/me`,
       );
       expect(userResponse.status()).toBe(200);
 
@@ -402,7 +335,7 @@ test.describe("Authentication Integration Tests", () => {
   });
 
   test.describe("API Token Usage", () => {
-    test("should include JWT token in authenticated API requests", async ({
+    test("should not include Authorization header in authenticated API requests", async ({
       page,
     }) => {
       await page.goto("/login");
@@ -421,40 +354,19 @@ test.describe("Authentication Integration Tests", () => {
       // Wait for redirect
       await page.waitForURL("/", { timeout: 10000 });
 
-      // Get the token
-      const token = await page.evaluate(() => localStorage.getItem("token"));
-      expect(token).toBeTruthy();
-
-      // Listen for API requests
-      const apiRequest = page.waitForRequest((request) => {
-        return (
-          request.url().includes("/api/") &&
-          request.headers()["authorization"] !== undefined
-        );
+      let sawAuthorizationHeader = false;
+      page.on("request", (request) => {
+        if (request.url().includes("/api/") && request.headers()["authorization"]) {
+          sawAuthorizationHeader = true;
+        }
       });
 
       // Trigger an authenticated API request
       // This depends on your app - navigate to a page that makes auth'd requests
       await page.goto("/dashboard");
 
-      // Wait for the request (with timeout)
-      try {
-        const request = await Promise.race([
-          apiRequest,
-          new Promise((_, reject) =>
-            setTimeout(() => reject(new Error("Timeout")), 10000)
-          ),
-        ]);
-
-        // Verify the request includes the Bearer token
-        const authHeader = (request as any).headers()["authorization"];
-        expect(authHeader).toContain("Bearer");
-        expect(authHeader).toContain(token);
-      } catch (e) {
-        // If no authenticated requests are made, that's okay for this test
-        // Just verify the token exists in localStorage
-        console.log("No authenticated API requests detected, but token exists");
-      }
+      await page.waitForTimeout(3000);
+      expect(sawAuthorizationHeader).toBe(false);
     });
   });
 });

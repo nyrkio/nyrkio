@@ -56,7 +56,7 @@ jobs:
           pwd
           ls -a
 
-          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg DOMAIN=nyrkio.com
+          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=nyrkio.com
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
@@ -114,4 +114,4 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@nyrkio.com"
           docker context use $ENV
 
-          docker --context $ENV compose -f docker-compose.yml up --no-build -d nginx backend webhooks worker01
+          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01

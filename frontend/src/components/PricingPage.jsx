@@ -126,7 +126,6 @@ export const PricingPage = ({ loggedIn }) => {
                         annualDiscount ? "simple_business_yearly_2409" : "simple_business_monthly_251"
                       }
                     />
-                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="quantity" value="1" />
                     <input type="hidden" name="mode" value="subscription" />
                     <button
@@ -183,7 +182,6 @@ export const PricingPage = ({ loggedIn }) => {
                           : "simple_enterprise_monthly_627"
                       }
                     />
-                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <input type="hidden" name="quantity" value="1" />
                     <input type="hidden" name="mode" value="subscription" />
                     <button
@@ -361,7 +359,6 @@ export const PricingPage = ({ loggedIn }) => {
         name="lookup_key"
         value={"simple_test_yearly"}
         />
-        <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
         <input type="hidden" name="quantity" value="1" />
         <input type="hidden" name="mode" value="subscription" />
         <button
@@ -457,7 +454,6 @@ const prePaidToBeUsedLater = () => {
                       name="lookup_key"
                       value="runner_prepaid_100"
                     />
-                    <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
                     <select id="runner_prepaid_100_quantity" name="quantity" defaultValue={1} style={{width: "90%"}}>
                       <option value="100">1 pack, 100 cpu-hours</option>
                       <option value="200">2 pack, 200 cpu-hours</option>
@@ -516,7 +512,6 @@ export const CpuHours = ({loggedIn, short}) => {
                 name="lookup_key"
                 value="runner_postpaid_13"
               />
-              <input type="hidden" name="access_token" value={localStorage.getItem("token")} />
               <input type="hidden" name="mode" value="subscription" />
               <button
                 id="checkout-and-portal-button-runner_postpaid_10"

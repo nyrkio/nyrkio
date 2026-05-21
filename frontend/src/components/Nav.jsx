@@ -54,7 +54,7 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
       <div className="container-fluid m-1">
         <NavigationItems />
         {loggedIn ? (
-            <UserMenu setLoggedIn={setLoggedIn} />
+            <UserMenu loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         ) : (
           <div className="loginmenu">
           <Link
@@ -73,4 +73,3 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
     </nav>
   );
 };
-

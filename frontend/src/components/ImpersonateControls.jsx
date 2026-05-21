@@ -53,9 +53,9 @@ export const impersonateUser = async (impersonate_user) => {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify(body),
+      credentials: "include",
     });
     const resultData = await results.json();
     console.debug(resultData);
@@ -74,10 +74,7 @@ const getImpersonateUser = async () => {
   const fetchData = async () => {
     const results = await fetch("/api/v0/admin/impersonate", {
       method: "GET",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     const resultData = await results.json();
     console.debug(resultData);
@@ -102,10 +99,7 @@ const stopImpersonateUser = async () => {
     console.log("stopping fetchdata");
     const results = await fetch("/api/v0/admin/impersonate", {
       method: "DELETE",
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     const resultData = await results.json();
     console.debug(resultData);

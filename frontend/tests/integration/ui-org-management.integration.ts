@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { BACKEND_BASE_URL, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Organization Management
@@ -7,67 +8,23 @@ import { test, expect } from "@playwright/test";
  * by comparing what's shown in the UI against what the API returns.
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Organization Dashboard - Org List Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should display user's organizations from API", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display user's organizations from API", async ({ page }) => {
     // Get user's orgs from API
-    const apiResponse = await request.get("http://localhost:8001/api/v0/orgs", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const apiResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/orgs`);
     expect(apiResponse.status()).toBe(200);
     const orgsData = await apiResponse.json();
 
@@ -99,18 +56,10 @@ test.describe("Organization Dashboard - Org List Display", () => {
     }
   });
 
-  test("should display organization results from API", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display organization results from API", async ({ page }) => {
     // Get org results from API
-    const apiResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs/results",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/orgs/results`,
     );
     expect(apiResponse.status()).toBe(200);
     const resultsData = await apiResponse.json();
@@ -142,16 +91,9 @@ test.describe("Organization Dashboard - Org List Display", () => {
     }
   });
 
-  test("should handle user with no organizations gracefully", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should handle user with no organizations gracefully", async ({ page }) => {
     // Get user's orgs from API
-    const apiResponse = await request.get("http://localhost:8001/api/v0/orgs", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const apiResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/orgs`);
     expect(apiResponse.status()).toBe(200);
     const orgsData = await apiResponse.json();
 
@@ -176,33 +118,20 @@ test.describe("Organization Dashboard - Test Results Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should display org test results matching API data", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display org test results matching API data", async ({ page }) => {
     // First check if user has any orgs
-    const orgsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const orgsResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/orgs`);
     const orgs = await orgsResponse.json();
 
     if (orgs && orgs.length > 0) {
       const orgName = orgs[0].login || orgs[0].name;
 
       // Get org results from API
-      const resultsResponse = await request.get(
-        "http://localhost:8001/api/v0/orgs/results",
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
+      const resultsResponse = await page.request.get(
+        `${BACKEND_BASE_URL}/api/v0/orgs/results`,
       );
       expect(resultsResponse.status()).toBe(200);
       const resultsData = await resultsResponse.json();
@@ -232,18 +161,10 @@ test.describe("Organization Dashboard - Test Results Display", () => {
     }
   });
 
-  test("should navigate to org test result detail page", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should navigate to org test result detail page", async ({ page }) => {
     // Get org results from API
-    const resultsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs/results",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const resultsResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/orgs/results`,
     );
     const resultsData = await resultsResponse.json();
 
@@ -278,19 +199,12 @@ test.describe("Organization Settings - Display and Configuration", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should load org settings page", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should load org settings page", async ({ page }) => {
     // Get user's orgs from API
-    const orgsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const orgsResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/orgs`);
     const orgs = await orgsResponse.json();
 
     // Navigate to org settings
@@ -308,19 +222,9 @@ test.describe("Organization Settings - Display and Configuration", () => {
     }
   });
 
-  test("should display org information from API", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display org information from API", async ({ page }) => {
     // Get user's orgs from API
-    const orgsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
+    const orgsResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/orgs`);
     expect(orgsResponse.status()).toBe(200);
     const orgs = await orgsResponse.json();
 
@@ -349,7 +253,7 @@ test.describe("Organization Dashboard - Navigation", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should navigate from dashboard to orgs page", async ({ page }) => {
@@ -416,21 +320,13 @@ test.describe("Organization Dashboard - Hierarchical Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should display org/repo/branch structure correctly", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display org/repo/branch structure correctly", async ({ page }) => {
     // Get org results which have hierarchical names
-    const resultsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs/results",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const resultsResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/orgs/results`,
     );
     const resultsData = await resultsResponse.json();
 
@@ -462,18 +358,10 @@ test.describe("Organization Dashboard - Hierarchical Display", () => {
     }
   });
 
-  test("should allow drilling down into org hierarchy", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should allow drilling down into org hierarchy", async ({ page }) => {
     // Get org results
-    const resultsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs/results",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const resultsResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/orgs/results`,
     );
     const resultsData = await resultsResponse.json();
 
@@ -512,7 +400,7 @@ test.describe("Organization Dashboard - Loading States", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should show loading indicator while fetching orgs", async ({
@@ -535,18 +423,10 @@ test.describe("Organization Dashboard - Loading States", () => {
     await expect(main).toBeVisible();
   });
 
-  test("should display content after loading completes", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display content after loading completes", async ({ page }) => {
     // Get expected data from API
-    const resultsResponse = await request.get(
-      "http://localhost:8001/api/v0/orgs/results",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const resultsResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/orgs/results`,
     );
     const resultsData = await resultsResponse.json();
 

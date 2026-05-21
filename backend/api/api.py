@@ -1,12 +1,15 @@
 # Copyright (c) 2024, Nyrkiö Oy
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Union
+from typing import Dict, List, Set, Union
 import logging
 import sys
 import os
+from urllib.parse import urlparse
+from typing import Optional
 
-from fastapi import FastAPI, APIRouter, Depends, HTTPException
+from fastapi import FastAPI, APIRouter, Depends, HTTPException, Request
 import stripe
+from starlette.responses import PlainTextResponse
 
 from backend.auth import auth
 from backend.auth import challenge_publish
@@ -42,6 +45,159 @@ from backend.api.pydantic_middleware import log_request_middleware
 app = FastAPI(openapi_url="/openapi.json")
 
 app.middleware("http")(log_request_middleware)
+
+
+def _origin_hostname(value: str) -> Optional[str]:
+    """Extract hostname from an origin or referer URL string.
+
+    Args:
+        value: A URL string (e.g., 'https://api.example.com/path').
+
+    Returns:
+        The hostname part of the URL, or None if parsing fails.
+    """
+    try:
+        parsed = urlparse(value)
+        return parsed.hostname
+    except Exception:
+        return None
+
+
+def _normalize_hostname(hostname: Optional[str]) -> Optional[str]:
+    """Normalize a hostname for consistent comparison.
+
+    Handles:
+    - Stripping whitespace and trailing dots
+    - Converting to lowercase
+    - Extracting bare hostname from IPv6 addresses in brackets
+    - Removing port numbers
+
+    Args:
+        hostname: The hostname to normalize.
+
+    Returns:
+        Normalized hostname string, or None if invalid.
+    """
+    if not hostname:
+        return None
+    value = hostname.strip().lower()
+    if not value:
+        return None
+    if value.endswith("."):
+        value = value[:-1]
+    if value.startswith("["):
+        end = value.find("]")
+        if end != -1:
+            return value[1:end]
+    return value.split(":", 1)[0]
+
+
+def _csrf_allowed_hosts() -> tuple[Set[str], Set[str], Set[str]]:
+    """Compute the set of allowed hosts/origins for CSRF validation.
+
+    The allowed set is built from three sources:
+    1. SERVER_HOSTNAME (derived from SERVER_NAME) - always included, plus its www variant
+    2. CSRF_ALLOWED_HOSTS / CSRF_ALLOWED_ORIGINS env vars - comma-separated list
+
+    Pattern formats in env vars:
+    - ``example.com`` - exact hostname match
+    - ``.example.com`` - matches example.com and all subdomains (e.g., api.example.com)
+    - ``*.example.com`` - matches subdomains only (e.g., api.example.com but NOT example.com)
+
+    Returns:
+        A tuple of three sets:
+        - exact: Hostnames that must match exactly
+        - domain_suffixes: Suffixes starting with '.' (match base + all subdomains)
+        - subdomain_suffixes: Suffixes starting with '*.' (match subdomains only)
+    """
+    server_name = getattr(auth, "SERVER_HOSTNAME", None)
+    if not server_name:
+        raw = getattr(auth, "SERVER_NAME", None) or os.environ.get("SERVER_NAME", "localhost")
+        normalizer = getattr(auth, "_normalize_server_hostname", None)
+        server_name = normalizer(raw) if callable(normalizer) else raw
+    server_name = _normalize_hostname(server_name) or "localhost"
+    exact = {server_name}
+    if server_name.startswith("www."):
+        exact.add(server_name[len("www.") :])
+    else:
+        exact.add("www." + server_name)
+
+    domain_suffixes = set()
+    subdomain_suffixes = set()
+    raw_extra = (
+        os.environ.get("CSRF_ALLOWED_HOSTS")
+        or os.environ.get("CSRF_ALLOWED_ORIGINS")
+        or ""
+    )
+    for raw in raw_extra.split(","):
+        item = _normalize_hostname(raw)
+        if not item:
+            continue
+        if item.startswith("*."):
+            subdomain_suffixes.add(item[1:])
+        elif item.startswith("."):
+            domain_suffixes.add(item)
+        else:
+            exact.add(item)
+    return exact, domain_suffixes, subdomain_suffixes
+
+
+def _is_allowed_cookie_origin(hostname: Optional[str]) -> bool:
+    """Check if a hostname is allowed as a cookie origin for CSRF validation.
+
+    The hostname is checked against three types of patterns:
+    1. Exact matches (including the automatic www/non-www pair from SERVER_NAME)
+    2. Domain suffixes (starting with '.') - matches the base domain and all subdomains
+    3. Subdomain suffixes (starting with '*.'') - matches subdomains only
+
+    Args:
+        hostname: The hostname (or host header) to validate.
+
+    Returns:
+        True if the hostname is allowed, False otherwise.
+    """
+    normalized = _normalize_hostname(hostname)
+    if not normalized:
+        return False
+    exact, domain_suffixes, subdomain_suffixes = _csrf_allowed_hosts()
+    if normalized in exact:
+        return True
+    for suffix in domain_suffixes:
+        base = suffix[1:]
+        if normalized == base or normalized.endswith(suffix):
+            return True
+    for suffix in subdomain_suffixes:
+        base = suffix[1:]
+        if normalized != base and normalized.endswith(suffix):
+            return True
+    return False
+
+
+@app.middleware("http")
+async def csrf_middleware(request: Request, call_next):
+    if request.method in {"GET", "HEAD", "OPTIONS"}:
+        return await call_next(request)
+
+    cookie_name = getattr(auth, "COOKIE_NAME", "auth_cookie")
+    if cookie_name in request.cookies:
+        origin = request.headers.get("origin")
+        referer = request.headers.get("referer")
+
+        if not origin and not referer:
+            sec_fetch_site = request.headers.get("sec-fetch-site")
+            if sec_fetch_site and sec_fetch_site.lower() == "cross-site":
+                return PlainTextResponse("CSRF blocked", status_code=403)
+            if not _is_allowed_cookie_origin(request.headers.get("host")):
+                return PlainTextResponse("CSRF blocked", status_code=403)
+        if origin:
+            if not _is_allowed_cookie_origin(_origin_hostname(origin)):
+                return PlainTextResponse("CSRF blocked", status_code=403)
+        elif referer:
+            if not _is_allowed_cookie_origin(_origin_hostname(referer)):
+                return PlainTextResponse("CSRF blocked", status_code=403)
+
+    return await call_next(request)
+
 app.add_exception_handler(RequestValidationError, request_validation_exception_handler)
 app.add_exception_handler(HTTPException, http_exception_handler)
 app.add_exception_handler(Exception, unhandled_exception_handler)

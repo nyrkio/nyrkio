@@ -30,7 +30,7 @@ function perf() {
   if $deploy -eq "true"
   then
     cd ..
-    docker compose -f docker-compose.dev.yml up -d
+    docker compose -f compose.dev.yml up -d
     cd backend
   fi
 
@@ -39,8 +39,8 @@ function perf() {
   if $deploy -eq "true"
   then
     # Dump the logs in case of failure
-    docker compose -f docker-compose.dev.yml logs
-    docker compose -f docker-compose.dev.yml down
+    docker compose -f compose.dev.yml logs
+    docker compose -f compose.dev.yml down
   fi
 
 }

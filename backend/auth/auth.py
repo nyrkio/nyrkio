@@ -4,6 +4,7 @@ import os
 from typing import Tuple
 import logging
 import uuid
+from urllib.parse import urlparse
 
 import httpx
 
@@ -55,11 +56,43 @@ HTTP_HEADERS = {"Authorization": f"Bearer {GITHUB_TOKEN}"}
 
 COOKIE_NAME = "auth_cookie"
 
+
+def _normalize_server_hostname(value: str) -> str:
+    value = (value or "").strip()
+    if not value:
+        return "localhost"
+    if "://" in value:
+        hostname = urlparse(value).hostname
+        if hostname:
+            return hostname
+    value = value.split("/")[0]
+    value = value.split(":")[0]
+    return value
+
+
+SERVER_HOSTNAME = _normalize_server_hostname(SERVER_NAME)
+
+_cookie_secure_env = os.environ.get("COOKIE_SECURE")
+COOKIE_SECURE = (
+    _cookie_secure_env.lower() in {"1", "true", "yes", "y", "on"}
+    if _cookie_secure_env is not None
+    else SERVER_HOSTNAME not in {"localhost", "127.0.0.1"}
+)
+
+_cookie_domain_env = os.environ.get("COOKIE_DOMAIN")
+COOKIE_DOMAIN = (
+    _cookie_domain_env
+    if _cookie_domain_env is not None
+    else None
+    if SERVER_HOSTNAME in {"localhost", "127.0.0.1"}
+    else SERVER_HOSTNAME
+)
+
 cookie_transport = CookieTransport(
     cookie_name=COOKIE_NAME,
-    cookie_domain=SERVER_NAME,
-    cookie_secure=True,
-    cookie_samesite="strict",
+    cookie_domain=COOKIE_DOMAIN,
+    cookie_secure=COOKIE_SECURE,
+    cookie_samesite="lax",
 )
 
 
@@ -109,6 +142,12 @@ auth_router.include_router(
 
 auth_router.include_router(
     fastapi_users.get_auth_router(jwt_backend, SECRET), prefix="/jwt", tags=["auth"]
+)
+
+auth_router.include_router(
+    fastapi_users.get_auth_router(cookie_backend, SECRET),
+    prefix="/cookie",
+    tags=["auth"],
 )
 
 auth_router.include_router(
@@ -358,7 +397,15 @@ async def github_callback(
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/login?gh_login=success&username=" + user.email)
-    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    response.set_cookie(
+        COOKIE_NAME,
+        cookie_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="lax",
+        domain=COOKIE_DOMAIN,
+        path="/",
+    )
     return response
 
 
@@ -421,7 +468,15 @@ async def _sso_mycallback_handler(
     await user_manager.on_after_login(user, request, response)
     cookie_token = await get_jwt_strategy().write_token(user)
     response = RedirectResponse("/login?sso_login=success&username=" + user.email)
-    response.set_cookie(COOKIE_NAME, cookie_token, httponly=True, samesite="strict")
+    response.set_cookie(
+        COOKIE_NAME,
+        cookie_token,
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite="lax",
+        domain=COOKIE_DOMAIN,
+        path="/",
+    )
     return response
 
 

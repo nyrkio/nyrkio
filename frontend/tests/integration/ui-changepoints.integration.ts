@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Change Point Detection
@@ -10,59 +11,22 @@ import { test, expect } from "@playwright/test";
  * performance regressions in test results.
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Change Point Detection - API Endpoint Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should access change points API endpoint", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-api-test-${Date.now()}`;
 
     // Create some test data
@@ -96,7 +60,7 @@ test.describe("Change Point Detection - API Endpoint Tests", () => {
   });
 
   test("should access perCommit changes API endpoint", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-percommit-${Date.now()}`;
 
     // Create test data
@@ -135,11 +99,11 @@ test.describe("Change Point Detection - No Changes State", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should handle test with no change points gracefully", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-no-changes-${Date.now()}`;
 
     // Create stable data (no regression)
@@ -196,11 +160,11 @@ test.describe("Change Point Detection - With Regression Data", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should create data with performance regression", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-regression-${Date.now()}`;
 
     // Create baseline data (fast)
@@ -293,7 +257,7 @@ test.describe("Change Point Detection - With Regression Data", () => {
   });
 
   test("should display changes endpoint data structure", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Use existing test if available
     const resultsResponse = await request.get(
@@ -332,11 +296,11 @@ test.describe("Change Point Detection - UI Display Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should load test result page without errors", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-ui-test-${Date.now()}`;
 
     // Create minimal test data
@@ -369,7 +333,7 @@ test.describe("Change Point Detection - UI Display Tests", () => {
   });
 
   test("should handle empty changes gracefully in UI", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `cp-empty-changes-${Date.now()}`;
 
     // Create single data point (can't detect changes with 1 point)
@@ -413,11 +377,11 @@ test.describe("Change Point Detection - Multiple Tests", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should handle multiple tests with change detection", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const prefix = `cp-multi-${Date.now()}`;
     const testNames = [`${prefix}-a`, `${prefix}-b`, `${prefix}-c`];
 

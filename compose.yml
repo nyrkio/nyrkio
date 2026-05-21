@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   backend:
     image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/backend:${IMAGE_TAG}

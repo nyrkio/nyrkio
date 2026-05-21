@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken } from "./auth-utils";
 
 /**
  * Integration Tests for Settings and Configuration
@@ -15,9 +16,11 @@ async function login(page: any, email: string, password: string) {
   await page.waitForURL("/", { timeout: 10000 });
 }
 
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("User Settings Integration Tests", () => {
@@ -79,7 +82,7 @@ test.describe("Test Configuration", () => {
   });
 
   test("should configure test settings via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-config-test-" + Date.now();
 
     // Submit a test result first
@@ -140,7 +143,7 @@ test.describe("Test Configuration", () => {
   });
 
   test("should retrieve test configuration", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-get-config-test-" + Date.now();
 
     // Submit and configure a test
@@ -199,7 +202,7 @@ test.describe("Test Configuration", () => {
   });
 
   test("should update test to public", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-public-test-" + Date.now();
 
     // Create test
@@ -277,7 +280,7 @@ test.describe("Notifications", () => {
   });
 
   test("should configure notifications via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-notify-test-" + Date.now();
 
     // Create a test
@@ -317,7 +320,7 @@ test.describe("Organization Management", () => {
   });
 
   test("should display user organizations", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Get user's organizations
     const response = await request.get("http://localhost:8001/api/v0/orgs", {
@@ -341,7 +344,7 @@ test.describe("Organization Management", () => {
   });
 
   test("should create organization via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const orgName = "integration-org-" + Date.now();
 
     // Create organization (if API supports it)
@@ -397,7 +400,7 @@ test.describe("Billing", () => {
   });
 
   test("should display subscription status", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Check subscription status via API
     try {

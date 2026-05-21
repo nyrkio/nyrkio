@@ -75,9 +75,9 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify(configObject),
+      credentials: "include",
     });
     if (response.status !== 200) {
       console.error("Failed to POST Nyrkiö org settings for " + orgName);
@@ -96,10 +96,7 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
     // TODO(hingo) yeah actually if we don't get values from the backend it should fail somehow. Now there's a risk of resetting stored values back to defaults. It should only be possible to POST after one successful GET first fetched current values.
     const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
     const response = await fetch("/api/v0/orgs/org/"+orgName, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status !== 200) {
       console.debug("Failed to GET org settings for " + orgName + ". This could be because they don't exist. Using default config values in the meantime.");
@@ -508,9 +505,9 @@ const SlackSettings = ({orgName}) => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify({ code: code }),
+      credentials: "include",
     });
     if (response.status !== 200) {
       console.log("Failed to authenticate with Slack");
@@ -521,10 +518,7 @@ const SlackSettings = ({orgName}) => {
   const fetchSlackStatus = async () => {
     const defaultConfig = {};
     const response = await fetch("/api/v0/orgs/org/"+orgName, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     var data = defaultConfig;
     if (response.status !== 200) {
@@ -648,10 +642,7 @@ const validateOrgName = (checkOrgName, setValidName) => {
     const url = "/api/v0/orgs/";
     console.debug("GET " + url);
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status !== 200) {
@@ -695,10 +686,7 @@ const NotificationSettings = ({orgName}) => {
   const [daysSince, setDaysSince] = useState(defaultConfig.since_days);
   const fetchNotificationConfig = async () => {
     const response = await fetch(`/api/v0/orgs/org/${orgName}`, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);
@@ -731,9 +719,9 @@ const NotificationSettings = ({orgName}) => {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
-      body: JSON.stringify({notifiers: c})
+      body: JSON.stringify({notifiers: c}),
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);

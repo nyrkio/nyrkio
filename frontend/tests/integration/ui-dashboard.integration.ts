@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { BACKEND_BASE_URL, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Dashboard
@@ -7,62 +8,20 @@ import { test, expect } from "@playwright/test";
  * by comparing what's shown in the UI against what the API returns.
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Dashboard UI - Test List Display", () => {
   test.beforeEach(async ({ page }) => {
     // Login will navigate to "/" and set up authentication
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should display test names from API in the dashboard", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
+  test("should display test names from API in the dashboard", async ({ page }) => {
     // Create multiple test results
     const testNames = [
       `ui-test-dashboard-1-${Date.now()}`,
@@ -71,13 +30,10 @@ test.describe("Dashboard UI - Test List Display", () => {
     ];
 
     for (const testName of testNames) {
-      const response = await request.post(
-        `http://localhost:8001/api/v0/result/${testName}`,
+      const response = await page.request.post(
+        `${BACKEND_BASE_URL}/api/v0/result/${testName}`,
         {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          },
+          headers: { "Content-Type": "application/json" },
           data: [
             {
               timestamp: Math.floor(Date.now() / 1000),
@@ -101,9 +57,7 @@ test.describe("Dashboard UI - Test List Display", () => {
     }
 
     // Verify tests exist in API
-    const apiResponse = await request.get("http://localhost:8001/api/v0/results", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
+    const apiResponse = await page.request.get(`${BACKEND_BASE_URL}/api/v0/results`);
     expect(apiResponse.status()).toBe(200);
     const apiTests = await apiResponse.json();
 
@@ -125,20 +79,13 @@ test.describe("Dashboard UI - Test List Display", () => {
     }
   });
 
-  test("should display test values correctly from API", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+  test("should display test values correctly from API", async ({ page }) => {
     const testName = `ui-test-values-${Date.now()}`;
     const testValue = 123.456;
 
     // Create test with specific value
-    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
+    await page.request.post(`${BACKEND_BASE_URL}/api/v0/result/${testName}`, {
+      headers: { "Content-Type": "application/json" },
       data: [
         {
           timestamp: Math.floor(Date.now() / 1000),
@@ -159,11 +106,8 @@ test.describe("Dashboard UI - Test List Display", () => {
     });
 
     // Verify via API
-    const apiResponse = await request.get(
-      `http://localhost:8001/api/v0/result/${testName}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/result/${testName}`,
     );
     const apiData = await apiResponse.json();
     expect(apiData[0].metrics[0].value).toBe(testValue);
@@ -180,20 +124,13 @@ test.describe("Dashboard UI - Test List Display", () => {
     // format needs to be adjusted based on component implementation
   });
 
-  test("should display test units correctly from API", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+  test("should display test units correctly from API", async ({ page }) => {
     const testName = `ui-test-units-${Date.now()}`;
     const testUnit = "requests/sec";
 
     // Create test with specific unit
-    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
+    await page.request.post(`${BACKEND_BASE_URL}/api/v0/result/${testName}`, {
+      headers: { "Content-Type": "application/json" },
       data: [
         {
           timestamp: Math.floor(Date.now() / 1000),
@@ -214,11 +151,8 @@ test.describe("Dashboard UI - Test List Display", () => {
     });
 
     // Verify via API
-    const apiResponse = await request.get(
-      `http://localhost:8001/api/v0/result/${testName}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/result/${testName}`,
     );
     const apiData = await apiResponse.json();
     expect(apiData[0].metrics[0].unit).toBe(testUnit);
@@ -237,14 +171,12 @@ test.describe("Dashboard UI - Test List Display", () => {
 
 test.describe("Dashboard UI - Test Result Details", () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should display all data points from API in chronological order", async ({
     page,
-    request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
     const testName = `ui-test-chronological-${Date.now()}`;
 
     // Create multiple results with known timestamps
@@ -255,11 +187,8 @@ test.describe("Dashboard UI - Test Result Details", () => {
     ];
 
     for (const point of dataPoints) {
-      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+      await page.request.post(`${BACKEND_BASE_URL}/api/v0/result/${testName}`, {
+        headers: { "Content-Type": "application/json" },
         data: [
           {
             timestamp: Math.floor(point.timestamp / 1000),
@@ -281,11 +210,8 @@ test.describe("Dashboard UI - Test Result Details", () => {
     }
 
     // Verify all points exist in API
-    const apiResponse = await request.get(
-      `http://localhost:8001/api/v0/result/${testName}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/result/${testName}`,
     );
     const apiData = await apiResponse.json();
     expect(apiData.length).toBe(3);
@@ -305,21 +231,14 @@ test.describe("Dashboard UI - Test Result Details", () => {
     }
   });
 
-  test("should display correct statistics from API data", async ({
-    page,
-    request,
-  }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+  test("should display correct statistics from API data", async ({ page }) => {
     const testName = `ui-test-stats-${Date.now()}`;
 
     // Create results with known values for statistics
     const values = [100, 200, 300, 400, 500];
     for (const value of values) {
-      await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json"
-        },
+      await page.request.post(`${BACKEND_BASE_URL}/api/v0/result/${testName}`, {
+        headers: { "Content-Type": "application/json" },
         data: [
           {
             timestamp: Math.floor(Date.now() / 1000) - values.indexOf(value),
@@ -341,11 +260,8 @@ test.describe("Dashboard UI - Test Result Details", () => {
     }
 
     // Verify via API
-    const apiResponse = await request.get(
-      `http://localhost:8001/api/v0/result/${testName}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/result/${testName}`,
     );
     const apiData = await apiResponse.json();
     expect(apiData.length).toBe(5);
@@ -371,22 +287,17 @@ test.describe("Dashboard UI - Test Result Details", () => {
 
 test.describe("Dashboard UI - Empty States", () => {
   test.beforeEach(async ({ page }) => {
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should handle viewing test with no results gracefully", async ({
     page,
-    request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
     const nonExistentTest = `ui-test-nonexistent-${Date.now()}`;
 
     // Verify test doesn't exist in API
-    const apiResponse = await request.get(
-      `http://localhost:8001/api/v0/result/${nonExistentTest}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/result/${nonExistentTest}`,
     );
     // API might return 404 or empty results
     const status = apiResponse.status();

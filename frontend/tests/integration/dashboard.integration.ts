@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken } from "./auth-utils";
 
 /**
  * Integration Tests for Dashboard and Test Results
@@ -21,9 +22,11 @@ async function login(page: any, email: string, password: string) {
 }
 
 // Test data
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Dashboard Integration Tests", () => {
@@ -87,7 +90,7 @@ test.describe("Test Results Submission", () => {
 
   test("should submit test result via API", async ({ page, request }) => {
     // Get auth token
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     expect(token).toBeTruthy();
 
     // Submit a test result
@@ -122,7 +125,7 @@ test.describe("Test Results Submission", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const timestamp = Date.now();
     const testName = "integration-view-test-" + timestamp;
 
@@ -182,7 +185,7 @@ test.describe("Test Results Submission", () => {
       const main = page.locator("#main-content");
       await expect(main).toBeVisible();
       // Verify it's not just an empty page
-      const hasContent = await page.locator("body").textContent();
+      const hasContent = (await page.locator("body").textContent()) || "";
       expect(hasContent).toBeTruthy();
       expect(hasContent.length).toBeGreaterThan(100);
     }
@@ -197,7 +200,7 @@ test.describe("Test Results Viewing", () => {
   });
 
   test("should display test details page", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const timestamp = Date.now();
     const testName = "integration-detail-test-" + timestamp;
 
@@ -246,7 +249,7 @@ test.describe("Test Results Viewing", () => {
   });
 
   test("should display chart for test results", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-chart-test-" + Date.now();
 
     // Submit multiple results for a chart
@@ -353,7 +356,7 @@ test.describe("Change Point Detection", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = "integration-changepoint-test-" + Date.now();
 
     // Submit data with a clear performance change

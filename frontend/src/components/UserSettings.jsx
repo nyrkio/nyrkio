@@ -30,8 +30,8 @@ const ApiKey = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
+      credentials: "include",
     });
     if (response.status !== 200) {
       console.error("Failed to generate API key");
@@ -137,9 +137,9 @@ export const HunterSettings = ({callback=noop}) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify(configObject),
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);
@@ -177,9 +177,9 @@ export const HunterSettings = ({callback=noop}) => {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify(configObject),
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);
@@ -203,10 +203,7 @@ export const HunterSettings = ({callback=noop}) => {
     //const defaultConfig = { min_magnitude: 0.05, max_pvalue: 0.001 };
     const defaultConfig = slidersCurrentValue;
     const response = await fetch("/api/v0/user/config", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);
@@ -489,9 +486,9 @@ const SlackSettings = () => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify({ code: code }),
+      credentials: "include",
     });
     if (response.status !== 200) {
       console.log("Failed to authenticate with Slack");
@@ -501,10 +498,7 @@ const SlackSettings = () => {
 
   const fetchSlackStatus = async () => {
     const response = await fetch("/api/v0/user/config", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     const data = await response.json();
 
@@ -622,10 +616,7 @@ const UserInfo = () => {
     const url = "/api/v0/orgs/";
     console.debug("GET " + url);
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status !== 200) {
@@ -728,10 +719,7 @@ const NotificationSettings = () => {
   const [daysSince, setDaysSince] = useState(defaultConfig.since_days);
   const fetchNotificationConfig = async () => {
     const response = await fetch("/api/v0/user/config", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);
@@ -764,9 +752,9 @@ const NotificationSettings = () => {
       method: "PUT",
       headers: {
         "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
-      body: JSON.stringify({notifiers: c})
+      body: JSON.stringify({notifiers: c}),
+      credentials: "include",
     });
     if (response.status == 200) {
       console.debug(response);

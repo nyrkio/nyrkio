@@ -33,10 +33,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
     }
       console.log(url);
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status != 200) {
@@ -68,10 +65,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
     const [repo, pull_number] = pr.split("/pull/");
     var url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/result/${c}/test/${testName}`
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status != 200) {
@@ -92,10 +86,7 @@ export const Pulls = ({testName, sendSelectedPr, baseUrls, breadcrumbName, dashb
       url = `${baseUrls.apiRoot}pulls/${repo}/${pull_number}/changes/${c}/test/${testName}`;
     }
     const response2 = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response2.status != 200) {
