@@ -31,13 +31,29 @@ test: ci-image
 ci-inner: lint-inner format-check-inner test-inner
 
 lint-inner:
+	@if [ "$${CI_IN_CONTAINER:-}" != "1" ]; then \
+		$(MAKE) lint; \
+		exit 0; \
+	fi
 	cd backend && poetry run ruff check . --exclude hunter
 
 format-inner:
+	@if [ "$${CI_IN_CONTAINER:-}" != "1" ]; then \
+		$(MAKE) format; \
+		exit 0; \
+	fi
 	cd backend && poetry run ruff format . --exclude hunter
 
 format-check-inner:
+	@if [ "$${CI_IN_CONTAINER:-}" != "1" ]; then \
+		$(MAKE) format-check; \
+		exit 0; \
+	fi
 	cd backend && poetry run ruff format . --exclude hunter --check
 
 test-inner:
+	@if [ "$${CI_IN_CONTAINER:-}" != "1" ]; then \
+		$(MAKE) test; \
+		exit 0; \
+	fi
 	cd backend && poetry run pytest tests
