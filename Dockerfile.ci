@@ -6,7 +6,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
     POETRY_VERSION=1.7.1 \
     POETRY_VIRTUALENVS_CREATE=false \
-    CI_IN_CONTAINER=1
+    CI_IN_CONTAINER=1 \
+    PYTHONPATH=/repo/backend
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc libpq-dev libc-dev make git && \
