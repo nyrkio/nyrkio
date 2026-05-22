@@ -22,6 +22,4 @@ COPY backend/hunter /repo/backend/hunter
 RUN poetry install --no-interaction --no-root
 
 WORKDIR /repo
-COPY . /repo
-
 CMD ["make", "ci-inner"]

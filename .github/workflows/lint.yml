@@ -10,7 +10,7 @@ jobs:
       - name: Build CI image
         run: docker build -t nyrkio-ci -f Dockerfile.ci .
       - name: Lint
-        run: docker run --rm nyrkio-ci make lint
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/repo" -w /repo nyrkio-ci make lint-inner
 
   format:
     runs-on: ubuntu-latest
@@ -19,4 +19,4 @@ jobs:
       - name: Build CI image
         run: docker build -t nyrkio-ci -f Dockerfile.ci .
       - name: Format check
-        run: docker run --rm nyrkio-ci make format-check
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/repo" -w /repo nyrkio-ci make format-check-inner
