@@ -24,4 +24,4 @@ RUN poetry install --no-interaction --no-root
 WORKDIR /repo
 COPY . /repo
 
-CMD ["bash", "-lc", "make ci-inner"]
+CMD ["make", "ci-inner"]
