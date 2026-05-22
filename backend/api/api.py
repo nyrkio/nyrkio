@@ -96,13 +96,15 @@ def _csrf_allowed_hosts() -> tuple[Set[str], Set[str], Set[str]]:
     """Compute the set of allowed hosts/origins for CSRF validation.
 
     The allowed set is built from three sources:
-    1. SERVER_HOSTNAME (derived from SERVER_NAME) - always included, plus its www variant
+    1. SERVER_HOSTNAME (derived from SERVER_NAME) - always included, plus its
+       www variant
     2. CSRF_ALLOWED_HOSTS / CSRF_ALLOWED_ORIGINS env vars - comma-separated list
 
     Pattern formats in env vars:
     - ``example.com`` - exact hostname match
     - ``.example.com`` - matches example.com and all subdomains (e.g., api.example.com)
-    - ``*.example.com`` - matches subdomains only (e.g., api.example.com but NOT example.com)
+    - ``*.example.com`` - matches subdomains only (e.g., api.example.com but NOT
+      example.com)
 
     Returns:
         A tuple of three sets:
@@ -112,7 +114,9 @@ def _csrf_allowed_hosts() -> tuple[Set[str], Set[str], Set[str]]:
     """
     server_name = getattr(auth, "SERVER_HOSTNAME", None)
     if not server_name:
-        raw = getattr(auth, "SERVER_NAME", None) or os.environ.get("SERVER_NAME", "localhost")
+        raw = getattr(auth, "SERVER_NAME", None) or os.environ.get(
+            "SERVER_NAME", "localhost"
+        )
         normalizer = getattr(auth, "_normalize_server_hostname", None)
         server_name = normalizer(raw) if callable(normalizer) else raw
     server_name = _normalize_hostname(server_name) or "localhost"
@@ -286,14 +290,16 @@ async def get_subtree_summary(
     test_name_prefix: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
     """
-    Get all change points for all test results that are in the sub-tree of `test_name_prefix` and
-    return a summary of that data.
+    Get all change points for all test results that are in the sub-tree of
+    `test_name_prefix` and return a summary of that data.
 
-    The UI would use this information to show something like "project: 57 change points, the latest
-    on 2024-04-20".
+    The UI would use this information to show something like "project: 57 change
+    points, the latest on 2024-04-20".
 
-    Note that for this feature we have added pre-computation and storage of change points.
-    Without such pre-compute, we would here constantly be re-computing all test results of the user!
+    Note that for this feature we have added pre-computation and storage of
+    change points.
+    Without such pre-compute, we would here constantly be re-computing all test
+    results of the user!
     """
     store = DBStore()
     cache = await store.get_summaries_cache(user.id)
@@ -328,7 +334,8 @@ async def get_subtree_summary_siblings(
     parent_test_name_prefix: str, user: User = Depends(auth.current_active_user)
 ) -> Dict:
     """
-    Like /summary but client will ask for the parent prefix, and we return all children of that parent.
+    Like /summary but client will ask for the parent prefix, and we return all
+    children of that parent.
     This allows a single call to replace separate HTTP calls for each list entry.
     """
     store = DBStore()
@@ -432,7 +439,7 @@ async def add_result(
         raise HTTPException(status_code=400, detail="Invalid data")
 
     # Compute the change points and persist the result so they are cheap to GET later.
-    # Since we compute them after POSTing them, may as well return the results to the user.
+    # Since we compute them after POSTing them, return the results to the user.
     return await changes(test_name, notify=1, user=user)
 
 
@@ -456,7 +463,7 @@ async def update_result(
         raise HTTPException(status_code=400, detail="Invalid data")
 
     # Compute the change points and persist the result so they are cheap to GET later.
-    # Since we compute them after POSTing them, may as well return the results to the user.
+    # Since we compute them after POSTing them, return the results to the user.
     return await changes(test_name, notify=1, user=user)
 
 
@@ -523,15 +530,17 @@ async def get_notifiers(
         since_days = config.get("since_days", 14)
         since = _since_days(since_days)
         print(f"slack {slack} for user {user.id} since {since_days} days = {since}")
-        # TODO: I'll leave the slack config to be attached to the user for now, because someone
-        # is already using this. Later we can allow also slack to be configured in the org
+        # TODO: I'll leave the slack config to be attached to the user for now,
+        # because someone is already using this. Later we can allow also slack to
+        # be configured in the org.
         if slack and slack.get("channel"):
             if not user.slack:
                 exceptions.append(
                     HTTPException(
                         status_code=400,
-                        detail="Slack alerts were requested but Slack integration is not configured for this user ({})".format(
-                            user.model_dump()
+                        detail=(
+                            "Slack alerts were requested but Slack integration is not "
+                            "configured for this user ({})".format(user.model_dump())
                         ),
                     )
                 )
@@ -577,7 +586,8 @@ async def get_notifiers(
     if len(exceptions) > 0:
         if len(exceptions) > 1:
             print(
-                "Multiple errors when trying to notify about recent regressions. Only the first one was returned over HTTP to the client:"
+                "Multiple errors when trying to notify about recent regressions. "
+                "Only the first one was returned over HTTP to the client:"
             )
         for exc in exceptions:
             print(exc)

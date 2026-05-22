@@ -30,7 +30,10 @@ def ensure_stripe_is_configured():
     if not stripe_key or stripe_key == "foo":
         raise HTTPException(
             status_code=503,
-            detail="Stripe is not configured: set STRIPE_SECRET_KEY in backend environment",
+            detail=(
+                "Stripe is not configured: set STRIPE_SECRET_KEY in backend "
+                "environment"
+            ),
         )
     stripe.api_key = stripe_key
 
@@ -68,7 +71,9 @@ async def create_checkout_session_postpaid(
         return RedirectResponse(checkout_session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail=f"Error creating checkout session {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating checkout session {e}"
+        )
 
 
 @billing_router.post("/create-checkout-session-prepaid")
@@ -112,7 +117,9 @@ async def create_checkout_session_prepaid(
         return RedirectResponse(checkout_session.url, status_code=303)
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
-        raise HTTPException(status_code=500, detail=f"Error creating checkout session {e}")
+        raise HTTPException(
+            status_code=500, detail=f"Error creating checkout session {e}"
+        )
 
 
 @billing_router.post("/create-checkout-session-js")
@@ -127,7 +134,10 @@ async def create_checkout_session_js(
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -154,7 +164,8 @@ async def create_checkout_session_js(
             cancel_url=stripe_cancel_url(),
         )
         return JSONResponse(
-            {"stripe_checkout_url": checkout_session.url}, status_code=200
+            {"stripe_checkout_url": checkout_session.url},
+            status_code=200,
         )
     except Exception as e:
         logging.error(f"Error creating 2026 JS friendly checkout session: {e}")
@@ -176,7 +187,10 @@ async def create_checkout_session_get(
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -223,7 +237,10 @@ async def create_checkout_session(
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -313,7 +330,8 @@ async def subscribe_success(
     #     )
     # Another try, if these fail, we'll make a note but return success at this point
     try:
-        # Also add all orgs that user is a member of to be covered from this subscription, if they aren't already paid by any other group member.
+        # Also add all orgs that user is a member of to be covered from this
+        # subscription, if they aren't already paid by any other group member.
         db = DBStore()
         orgs = get_user_orgs(user)
         for org in orgs:
