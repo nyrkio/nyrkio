@@ -376,10 +376,7 @@ async def subscribe_success(
 
 def stripe_success_url():
     server = _normalize_server_url(os.environ.get("SERVER_NAME", "localhost"))
-    return (
-        server
-        + "/billing?subscribe_success=true&session_id={CHECKOUT_SESSION_ID}"
-    )
+    return server + "/billing?subscribe_success=true&session_id={CHECKOUT_SESSION_ID}"
 
 
 def stripe_cancel_url():
@@ -408,10 +405,11 @@ def _normalize_server_url(server: str) -> str:
 
 @billing_router.get("/create-portal-session")
 async def create_portal_session(user: User = Depends(auth.current_active_user)):
-    ensure_stripe_is_configured()
     if not user.billing and not user.billing_runners:
         logging.error(f"User {user.email} has no billing information")
         raise HTTPException(status_code=400, detail="User has no billing information")
+
+    ensure_stripe_is_configured()
 
     logging.info("Starting billing/create-portal-session")
     logging.info(user)
