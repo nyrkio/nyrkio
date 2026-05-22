@@ -4,7 +4,11 @@ CI_IMAGE ?= nyrkio-ci
 CI_DOCKERFILE ?= Dockerfile.ci
 
 ci-image:
-	docker build -t $(CI_IMAGE) -f $(CI_DOCKERFILE) .
+	if docker buildx version >/dev/null 2>&1; then \
+		docker buildx build --load -t $(CI_IMAGE) -f $(CI_DOCKERFILE) . ; \
+	else \
+		docker build -t $(CI_IMAGE) -f $(CI_DOCKERFILE) . ; \
+	fi
 
 ci:
 	$(MAKE) ci-image
