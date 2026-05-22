@@ -1,11 +1,8 @@
 @use "sass:map";
 @import '../../style/configuration';
 
+.navbar-site--offcanvas,
 .navbar-site {
-  max-width: map.get($container-max-widths, 'xxxl');
-  margin-left: auto;
-  margin-right: auto;
-
   .navbar-brand {
     img {
       max-width: 76px;
@@ -18,7 +15,8 @@
 
   .nav-link {
     --bs-nav-link-color: #{$secondary};
-    --bs-nav-link-hover-color: #{$primary}
+    --bs-nav-link-hover-color: #{$primary};
+    --bs-navbar-active-color: #{$primary};
   }
 
   .nav-item {

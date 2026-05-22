@@ -38,6 +38,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
+import { RssWidget } from "./components/RssWidget/RssWidget.jsx";
 
 const Nothing = () => {
   return <></>;
@@ -71,31 +72,28 @@ function MainApp({ loggedIn, setLoggedIn }) {
 
   return (
     <>
-      <div className="container-fluid">
+      <header className="page-header container">
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-      </div>
-
-      <div className="container-fluid h-100">
-        <div className="row">
-          <div className="col-sm-12 col-md-3 col-xl-2" id="sidepanel">
-            <SidePanel loggedIn={loggedIn} />
-          </div>
-          <div className="col-sm-12 col-md-9 col-xl-10" id="main-content">
-            <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-          </div>
-          <div className="col-sm-12 px-0" id="main-content2">
-            <Routes>
-              <Route path="/" element={loggedIn ? <Nothing /> : <><FrontPage loggedIn={loggedIn}/></>} />
-              <Route path="/frontpage" element={<><FrontPage loggedIn={loggedIn}/></>} />
-              <Route path="*" element={<Nothing />} />
-            </Routes>
-          </div>
-          <ScrollToTop />
-          <div className="col-12 p-0">
-            <Footer />
-          </div>
+      </header>
+      <main>
+        <div className="container" id="sidepanel">
+          <SidePanel loggedIn={loggedIn} />
         </div>
-      </div>
+        <div id="main-content">
+          <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+        </div>
+
+        <div id="main-content2">
+          <Routes>
+            <Route path="/" element={loggedIn ? <Nothing /> : <><FrontPage loggedIn={loggedIn}/></>} />
+            <Route path="/frontpage" element={<><FrontPage loggedIn={loggedIn}/></>} />
+            <Route path="*" element={<Nothing />} />
+          </Routes>
+        </div>
+        <RssWidget />
+      </main>
+      <ScrollToTop />
+      <Footer />
     </>
   );
 }

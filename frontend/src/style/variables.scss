@@ -10,13 +10,14 @@ $gray-300: #535353;
 $spacer: 1rem;
 $spacers: (
   0: 0,
-  1: $spacer * .25,
-  2: $spacer * .5,
-  3: $spacer,
-  4: $spacer * 1.5,
-  5: $spacer * 3,
-  6: $spacer * 4,
-  7: $spacer * 5,
+  1: $spacer * .25,  // 4px
+  2: $spacer * .5,   // 8px
+  3: $spacer,        // 16px
+  4: $spacer * 1.5,  // 24px
+  5: $spacer * 2,    // 32px
+  6: $spacer * 3,    // 48px
+  7: $spacer * 4,    // 64px
+  8: $spacer * 5,    // 80px
 );
 
 $grid-breakpoints: (
@@ -59,21 +60,28 @@ $display-font-sizes: (
 
 $grid-gutter-width: 2.5rem;
 
+$box-shadow-sm: 0 0 10px 0 #00000026;
+$box-shadow: 0 0 16px 0 #00000040;
+
+$input-btn-padding-y: 1rem;
+$input-btn-padding-x: 1.5rem;
+
 $btn-padding-x: 2rem;
-$btn-padding-y: 1rem;
 $btn-line-height: 1.2;
 $btn-border-radius: .25rem;
 $btn-font-weight: 600;
 $btn-border-width: 2px;
+
+$input-font-weight: 400;
+$input-border-width: 1px;
+$input-border-color: $secondary;
+$input-box-shadow: $box-shadow-sm;
 
 $font-weight-base: 500;
 $font-size-base: 1rem;
 $font-family-base: "IBM Plex Sans", sans-serif;
 $headings-font-family: "Bebas Neue", sans-serif;
 
-$box-shadow-sm: 0 0 10px 0 #00000026;
-$box-shadow: 0 0 16px 0 #00000040;
 
 $nav-link-color: $secondary;
 $nav-link-hover-color: $primary;
-

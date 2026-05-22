@@ -95,7 +95,7 @@ const ChangePointDetection = () => {
   return (
     <>
       <section className="container mt-section">
-        <h2 className="text-center text-primary mb-4">Change Point Detection</h2>
+        <h2 className="text-center text-primary mb-5">Change Point Detection</h2>
         <div className="rounded-3 shadow p-4" style={{backgroundColor: '#FFFDE5'}}>
           <div className="row align-items-center">
             <div className="col-12 col-lg-6 mb-4 mb-lg-0 order-lg-last">
