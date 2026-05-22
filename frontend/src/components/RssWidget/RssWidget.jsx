@@ -72,7 +72,7 @@ export const RssWidget = () => {
   return (
     <>
       <section className="my-section container">
-        <h2 className="text-center text-primary mb-4">Recently on blog</h2>
+        <h2 className="text-center text-primary mb-5">Recently on blog</h2>
         {loading ? "" : (<RssListItems feed={rssFeed} />)}
         <div className="text-center mt-3 mt-lg-5">
           <a className="btn btn-outline-primary d-block d-md-inline-block" href="https://blog.nyrkio.com/" target="_blank">View all articles</a>

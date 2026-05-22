@@ -75,12 +75,5 @@ body:has(.hero-banner) {
     @include media-breakpoint-up(lg) {
       margin-bottom: -112px !important;
     }
-
-    //position: absolute;
-    //z-index: 10;
-    //top: 0;
-    //left: 50%;
-    //transform: translateX(-50%);
-    //width: calc(100% - #{$grid-gutter-width});
   }
 }

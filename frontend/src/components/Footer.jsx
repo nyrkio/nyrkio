@@ -1,19 +1,13 @@
 import ToS from "../static/doc/Nyrkio Terms of Service v2 - 2026-02-19.pdf";
 import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import {Link} from "react-router-dom";
-import footerUpperCrust from "../static/footer-white-graphic.png";
-import {RssWidget} from "./RssWidget/RssWidget.jsx";
-import backgroundImg from "../static/Sayhteella.jpg";
 import '../style/components/footer-banner.scss'
 import { SmallLogo } from "./Logo";
-import icon from "./Icon.jsx";
 import Icon from "./Icon.jsx";
 
 export const Footer = () => {
   return (<>
-
-    <RssWidget />
-    <footer className="">
+    <footer className="page-footer">
       <div className="footer-banner py-section">
         <div className="container">
           <div className="footer-banner__copyright p-3 p-md-4 rounded-3 shadow bg-white">
