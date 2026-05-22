@@ -19,7 +19,7 @@ env:
 
 jobs:
   authorize:
-    if: github.event.action == 'labeled' && github.event.label.name == env.STAGING_DEPLOY_REQUEST_LABEL
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging'
     runs-on: ubuntu-latest
     outputs:
       allowed: ${{ steps.auth.outputs.allowed }}
@@ -46,7 +46,7 @@ jobs:
 
   docker-images:
     needs: authorize
-    if: github.event.action == 'labeled' && github.event.label.name == env.STAGING_DEPLOY_REQUEST_LABEL && needs.authorize.outputs.allowed == 'true'
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -108,7 +108,7 @@ jobs:
 
   deployment:
     needs: [authorize, docker-images]
-    if: github.event.action == 'labeled' && github.event.label.name == env.STAGING_DEPLOY_REQUEST_LABEL && needs.authorize.outputs.allowed == 'true'
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -161,7 +161,7 @@ jobs:
 
   label-result:
     needs: [authorize, docker-images, deployment]
-    if: always() && github.event.action == 'labeled' && github.event.label.name == env.STAGING_DEPLOY_REQUEST_LABEL
+    if: always() && github.event.action == 'labeled' && github.event.label.name == 'deploy:staging'
     runs-on: ubuntu-latest
     steps:
       - name: Update PR labels with deployment result
