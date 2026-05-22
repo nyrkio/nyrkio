@@ -31,6 +31,8 @@ $utilities: map-merge(
 // Import full Bootstrap after utility overrides.
 @import 'bootstrap/scss/bootstrap';
 
+@import 'components/form';
+
 // Headings sizes.
 @each $h, $value in $headings-size {
   .#{$h},
@@ -158,6 +160,22 @@ h6 {
 
 .offcanvas {
   --bs-offcanvas-width: 480px;
+}
+
+#sidepanel:has(.nav-pills--sidebar:empty) {
+  display: none !important;
+}
+
+.nav-pills--sidebar {
+  --bs-nav-pills-link-active-bg: #fff;
+  --bs-nav-pills-link-active-color: #{$primary};
+
+  background-color: #F1F1E4;
+  padding: 10px;
+
+  .active {
+    box-shadow: $box-shadow;
+  }
 }
 
 :root {

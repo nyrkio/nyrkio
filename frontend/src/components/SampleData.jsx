@@ -109,7 +109,7 @@ const SampleDataPublic = ({customerName, customerUrl, customerLogo, orgRepo, tes
   }, [location]);
 
   return (<section className="my-section container text-center nyrkio-public-sample">
-      <h2 className="text-primary">See it for yourself</h2>
+      <h2 className="text-primary mb-5">See it for yourself</h2>
       <p className="mb-3">You can browse real, live benchmark results from other Nyrkiö users. The red dots are Change Points reported by Nyrkiö</p>
       <p>Here is the benchmark data from our friends at <strong>{customerName}</strong></p>
       <div className="mx-auto my-6" style={{maxWidth:'380px'}}>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, NavLink } from "react-router-dom";
 
 export const SidePanel = ({ loggedIn }) => {
   const [orgs, setOrgs] = useState([]);
@@ -43,7 +43,7 @@ export const SidePanel = ({ loggedIn }) => {
 
 
   return (
-    <div className="navbar-nav navbar-left justify-content-start">
+    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm mx-auto gap-4">
       <Routes>
         <Route path="/" element={<FrontPageSidePanel loggedIn={loggedIn} />} />
         <Route path="/dash" element={<DashSidePanel loggedIn={loggedIn} />} />
@@ -239,14 +239,9 @@ const AboutSidePanel = ({ loggedIn }) => {
 };
 const LoginSidePanel = ({ loggedIn }) => {
   document.body.classList.add("section-login");
+  // The links are present in the header and at the bottom of the login/register forms.
   return (
     <>
-      <Link to="/login" className="nav-link nav-link-login">
-        Login
-      </Link>
-      <Link to="/signup" className="nav-link nav-link-login">
-        Create account
-      </Link>
     </>
   );
 };
