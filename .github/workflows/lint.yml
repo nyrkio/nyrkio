@@ -7,18 +7,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@v1
-        with:
-          version: 0.4.10
-          src: "./backend"
-          args: --exclude hunter
+      - name: Build CI image
+        run: docker build -t nyrkio-ci -f Dockerfile.ci .
+      - name: Lint
+        run: docker run --rm nyrkio-ci make lint
 
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@v1
-        with:
-          version: 0.4.10
-          src: "./backend"
-          args: format --exclude hunter --check
+      - name: Build CI image
+        run: docker build -t nyrkio-ci -f Dockerfile.ci .
+      - name: Format check
+        run: docker run --rm nyrkio-ci make format-check
