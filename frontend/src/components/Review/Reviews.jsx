@@ -15,7 +15,7 @@ export default function UsersReviewsSection() {
 
   return (
     <section className="my-section container section--reviews">
-      <h2 className="text-center text-primary">
+      <h2 className="text-center text-primary mb-5">
         What our users say
       </h2>
 

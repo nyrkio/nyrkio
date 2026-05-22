@@ -1,0 +1,11 @@
+input.form-control {
+  box-shadow: $input-box-shadow;
+}
+
+.input-group {
+  box-shadow: $input-box-shadow;
+
+  input.form-control:not(:focus) {
+    box-shadow: none;
+  }
+}
