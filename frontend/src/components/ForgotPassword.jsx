@@ -3,7 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import posthog from "posthog-js";
 import { SignUpPage } from "./SignUp"
 import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
-import Icon from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
 import {PasswordInput} from "./PasswordInput/PasswordInput.jsx";
 
 export const ForgotPassword = () => {
