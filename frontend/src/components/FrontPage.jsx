@@ -79,16 +79,18 @@ const LearnMore = () => {
 
 export const DemoVideo = () => {
   return (
-    <iframe
-    id="demo-video"
-    style={{maxWidth: "90%", maxHeight: "90%", minWidth: "360px", minHeight: "360px"}}
-    src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
-    title="YouTube video player"
-    frameBorder="0"
-    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-    referrerPolicy="strict-origin-when-cross-origin"
-    allowFullScreen
-    ></iframe>
+    <div className="ratio ratio-16x9 mx-auto my-7" style={{maxWidth: "860px"}}>
+      <iframe
+        id="demo-video"
+        src="https://www.youtube.com/embed/EKAhgrdERfk?si=TseG4WK67N5pZ1nu"
+        title="YouTube video player"
+        frameBorder="0"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+        referrerPolicy="strict-origin-when-cross-origin"
+        allowFullScreen
+      ></iframe>
+    </div>
+
   );
 } ;
 const ChangePointDetection = () => {
@@ -230,24 +232,21 @@ const FeatureBanner2 = () => {
 export const FrontPage = ({loggedIn}) => {
   document.body.classList.add("section-front");
   document.body.classList.remove("section-dashboard");
-  return (
-    <>
-      <div className="frontpage page-wrapper">
-        <HeroBanner cta={{
-          access: !loggedIn,
-          title: 'Create account &amp; get started',
-          url: '/signup',
-        }} />
-        <Mission loggedIn={loggedIn} />
-        <OneTwoThree loggedIn={loggedIn} />
-        <Reviews />
-        <WhatMore />
-        <SampleData />
-
-        <ChangePointDetection />
-        </div>
-    </>
-  );
+  return (<>
+    <div className="frontpage page-wrapper">
+      <HeroBanner cta={{
+        access: !loggedIn,
+        title: 'Create account &amp; get started',
+        url: '/signup',
+      }} />
+      <Mission loggedIn={loggedIn} />
+      <OneTwoThree loggedIn={loggedIn} />
+      <Reviews />
+      <WhatMore />
+      <SampleData />
+      <ChangePointDetection />
+    </div>
+  </>);
 };
 
 export const GetStartedButton = ({loggedIn}) => {

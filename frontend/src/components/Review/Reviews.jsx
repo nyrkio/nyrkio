@@ -4,7 +4,7 @@ import './Reviews.scss';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/pagination';
-import '../../style/swiper.scss';
+import '../../style/components/swiper.scss';
 
 import { companiesData } from './../UsersPage.jsx';
 import ReviewCard from '../ReviewCard/ReviewCard.jsx';
