@@ -1,4 +1,4 @@
-export default function Icon({name, className = '', size = 24}) {
+export const Icon = ({name, className = '', size = 24}) => {
   return (
     <svg
       className={`icon ${className}`}
