@@ -17,7 +17,10 @@ export const ForgotPassword = () => {
         <>
           <div className="alert alert-warning d-flex flex-nowrap mt-3" role="alert">
             <Icon name="triangle-exclamation" size="24" className="flex-shrink-0 me-2"/>
-            <div className="text-start">{errorText}</div>
+            <div
+              className="text-start"
+              dangerouslySetInnerHTML={{ __html: errorText }}
+            />
           </div>
         </>
       );
@@ -41,7 +44,7 @@ export const ForgotPassword = () => {
       body: JSON.stringify({"email": email}),
     })
     .then( (response) => {
-      const successText = "We have sent a link to your email that you can use to reset your password. Please check your spam folder. If you didn't receive an email in the next 10 minutes, please email helloworld@nyrkio.com and we will help.";
+      const successText = "We have sent a link to your email that you can use to reset your password. Please check your spam folder. If you didn't receive an email in the next 10 minutes, please email <a href='mailto:helloworld@nyrkio.com'>helloworld@nyrkio.com</a> and we will help.";
       if (response.ok) {
         setSecondPhase(true);
         const repe = response.json();

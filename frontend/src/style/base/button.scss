@@ -1,0 +1,26 @@
+@import '../configuration';
+
+// Extend buttons
+.btn-square {
+  --btn-square-size: calc(#{$btn-line-height * 1em} + (#{$btn-padding-y * 2}) + (#{$btn-border-width * 2}));
+  width: var(--btn-square-size);
+  height: var(--btn-square-size);
+
+  padding: 0;
+}
+
+.btn-none {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  outline: none;
+
+  &:focus-visible {
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb), 0.25);
+  }
+}

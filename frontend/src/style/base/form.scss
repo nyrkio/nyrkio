@@ -1,3 +1,5 @@
+@import '../configuration';
+
 input.form-control {
   box-shadow: $input-box-shadow;
 }
@@ -7,5 +9,15 @@ input.form-control {
 
   input.form-control:not(:focus) {
     box-shadow: none;
+  }
+}
+
+.form-switch {
+  padding-left: 3.5em;
+
+  .form-check-input {
+    height: 1.625em;
+    width: 3em;
+    margin: 0 0 0 -3.5em;
   }
 }

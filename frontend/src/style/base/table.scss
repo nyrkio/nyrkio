@@ -1,0 +1,57 @@
+.table {
+  --bs-table-bg: #fff;
+
+  > thead th {
+    background-color: transparentize($secondary, .3);
+    color: #fff;
+    padding: 22px;
+  }
+
+  > thead {
+    > tr {
+      border-width: 0 !important;
+
+      * {
+        border-width: 0 1px 0 0 !important;
+
+        &:last-child {
+          border-right: 0 none !important;
+        }
+      }
+    }
+  }
+
+  > tbody {
+    > tr > * {
+      &:first-child {
+        border-left: 0 none !important;
+      }
+
+      &:last-child {
+        border-right: 0 none !important;
+      }
+    }
+  }
+
+  th, td {
+    padding: 8px 14px;
+  }
+}
+
+.table-price {
+  td, th {
+    &:first-child {
+      min-width: 168px !important;
+    }
+  }
+
+  > tbody {
+    td, th {
+      height: 65px;
+    }
+
+    td {
+      color: $primary;
+    }
+  }
+}
