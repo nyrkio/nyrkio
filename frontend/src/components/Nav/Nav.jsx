@@ -6,7 +6,7 @@ import { UserMenu } from "./../UserMenu.jsx";
 import { SmallLogo } from "./../Logo";
 import { ImpersonateControls } from "./../ImpersonateControls";
 import "./Nav.scss";
-import Icon from "../Icon.jsx";
+import { Icon } from "../Icon.jsx";
 
 const navLinkClass = ({ isActive }) =>
   `nav-link ${isActive ? "active" : ""}`;

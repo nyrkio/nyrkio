@@ -3,7 +3,7 @@ import PrivacyPolicy from "../static/doc/Privacy Policy Nyrkiö 2024 v1.0.pdf";
 import {Link} from "react-router-dom";
 import '../style/components/footer-banner.scss'
 import { SmallLogo } from "./Logo";
-import Icon from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
 
 export const Footer = () => {
   return (<>

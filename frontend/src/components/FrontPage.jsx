@@ -10,8 +10,8 @@ import fosdembar from "../static/9174011399_3d91025136_c.jpg";
 import stickers from "../static/stickers.png";
 import { HeroBanner } from "./HeroBanner/HeroBanner.jsx";
 import { Mission } from "./Mission/Mission.jsx";
-import Reviews from "./Review/Reviews.jsx";
-import WhatMore from "./WhatMore/WhatMore.jsx";
+import { Reviews }  from "./Review/Reviews.jsx";
+import { WhatMore } from "./WhatMore/WhatMore.jsx";
 
 const FeatureHighlight = () => {
   return (

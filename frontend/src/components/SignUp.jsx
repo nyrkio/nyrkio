@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
-import Icon from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
 import { PasswordInput } from "./PasswordInput/PasswordInput.jsx"
 import { HighlightLoginSection} from "./HighlightLoginSection.jsx";
 
