@@ -43,7 +43,7 @@ export const SidePanel = ({ loggedIn }) => {
 
 
   return (
-    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm mx-auto gap-4">
+    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm mx-auto gap-4 justify-content-center">
       <Routes>
         <Route path="/" element={<FrontPageSidePanel loggedIn={loggedIn} />} />
         <Route path="/dash" element={<DashSidePanel loggedIn={loggedIn} />} />
@@ -75,10 +75,6 @@ export const SidePanel = ({ loggedIn }) => {
         />
         <Route
           path="/product/*"
-          element={<ProductSidePanel loggedIn={loggedIn} />}
-        />
-        <Route
-          path="/pricing/*"
           element={<ProductSidePanel loggedIn={loggedIn} />}
         />
         <Route path="/docs/*" element={<DocsSidePanel loggedIn={loggedIn} />} />
@@ -163,19 +159,12 @@ const ProductSidePanel = ({ loggedIn }) => {
   document.body.classList.add("section-product");
   return (
     <>
-      <Link to="/product" className="nav-link">
-      Nyrkiö Change Detection
-      </Link>
-      <Link to="/product/user-testimonials" className="nav-link">
-      What our users say
-      </Link>
-      <Link to="/pricing" className="nav-link">
-      Pricing
-      </Link>
+      <NavLink to="/product" end className="nav-link">Nyrkiö Change Detection</NavLink>
+      <NavLink to="/product/user-testimonials" className="nav-link">What our users say</NavLink>
       {loggedIn ?
-        <Link to="/billing" className="nav-link">
+        <NavLink to="/billing" className="nav-link">
         Billing
-        </Link>
+        </NavLink>
         :
         ""
       }

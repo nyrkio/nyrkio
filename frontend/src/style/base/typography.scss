@@ -1,0 +1,52 @@
+@import '../configuration';
+
+// Headings sizes.
+@each $h, $value in $headings-size {
+  .#{$h},
+  #{$h} {
+    @include font-size($value);
+    line-height: 1.2;
+    letter-spacing: .07em;
+  }
+}
+
+.h6,
+h6 {
+  font-family: $font-family-base;
+  letter-spacing: 0;
+  line-height: $line-height-base;
+}
+
+
+ul.list-checkmark {
+  li {
+    position: relative;
+    padding-left: 32px;
+    margin-bottom: 4px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    &::before {
+      content: '';
+      display: block;
+      width: 22px;
+      height: 22px;
+      mask: url('../assets/icons/check-mark.svg') center/contain no-repeat;
+      background-color: $primary;
+      position: absolute;
+      top: 0;
+      left: 0;
+    }
+  }
+}
+
+.footer__copyright-symbol {
+  width: 16px;
+  height: auto;
+
+  @include media-breakpoint-up(md) {
+    width: 24px;
+  }
+}

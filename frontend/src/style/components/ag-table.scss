@@ -1,5 +1,5 @@
 @use 'sass:color';
-@import './configuration';
+@import '../configuration';
 
 .ag-theme-nyrkio {
   --ag-header-background-color: #{rgba($secondary, .7)};

@@ -1,0 +1,37 @@
+@import '../configuration';
+
+.offcanvas {
+  --bs-offcanvas-width: 480px;
+}
+
+#sidepanel:has(.nav-pills--sidebar:empty) {
+  display: none !important;
+}
+
+
+@include media-breakpoint-down(md) {
+  html {
+    font-size: 14px;
+  }
+}
+
+// Page elements.
+.mt-section,
+.my-section {
+  @include margin-top(96px);
+}
+
+.mb-section,
+.my-section {
+  @include margin-bottom(96px);
+}
+
+.pt-section,
+.py-section {
+  @include padding-top(96px);
+}
+
+.pb-section,
+.py-section {
+  @include padding-bottom(96px);
+}
