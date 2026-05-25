@@ -1,0 +1,23 @@
+@import '../configuration';
+
+:root {
+  --bs-nav-link-color: #{$secondary};
+  --bs-nav-link-hover-color: #{$primary};
+}
+
+.nav-pills--sidebar {
+  --bs-nav-pills-link-active-bg: #fff;
+  --bs-nav-pills-link-active-color: #{$primary};
+
+  background-color: #F1F1E4;
+  padding: 10px;
+
+  .active {
+    box-shadow: $box-shadow;
+  }
+
+  .nav-link {
+    display: inline-flex;
+    align-items: center;
+  }
+}

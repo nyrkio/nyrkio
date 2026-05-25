@@ -4,7 +4,7 @@ import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
 import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
 import { commitUrl } from "../lib/github";
-import '../style/ag-table.scss';
+import '../style/components/ag-table.scss';
 
 const Loading = ({loading}) => {
   if (loading) {

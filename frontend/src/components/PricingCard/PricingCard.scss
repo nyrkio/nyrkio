@@ -1,0 +1,58 @@
+@import '../../style/configuration';
+
+.card--pricing {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  justify-content: center;
+  box-shadow: $box-shadow-sm;
+  transition: $transition-base;
+  padding: 24px;
+
+  ul {
+    text-align: left;
+  }
+
+  &:hover {
+    box-shadow: $box-shadow;
+  }
+
+  .card-title-badge {
+    padding: 8px 16px 4px;
+    letter-spacing: 0.08em;
+    font-weight: $font-weight-normal;
+    min-width: 200px;
+  }
+
+  .card-pricing__subtitle {
+    font-size: .875rem;
+    color: #535353;
+  }
+}
+
+.card-pricing__cta {
+  margin-top: auto;
+}
+
+.card-pricing {
+  font-family: $headings-font-family;
+  letter-spacing: 0.08em;
+
+  &__price {
+    @include font-size(48px);
+    line-height: 1;
+    color: $primary;
+  }
+
+  &__period {
+    font-size: 20px;
+    color: $secondary;
+    text-transform: uppercase;
+  }
+
+  &__tax {
+    font-family: $font-family-base;
+    font-size: 14px;
+    color: $gray-300;
+  }
+}

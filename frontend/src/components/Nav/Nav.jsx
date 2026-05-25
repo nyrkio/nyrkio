@@ -85,6 +85,12 @@ export const NavHeader = ({ loggedIn, setLoggedIn }) => {
                   Blog
                 </Nav.Link>
               </Nav.Item>
+
+              <Nav.Item>
+                <Nav.Link as={NavLink}  to="/pricing" className={navLinkClass}  onClick={handleClose}>
+                  Pricing
+                </Nav.Link>
+              </Nav.Item>
             </Nav>
 
             {loggedIn ? (
