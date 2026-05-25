@@ -7,12 +7,10 @@ import 'swiper/css/pagination';
 import '../../style/components/swiper.scss';
 
 import { companiesData } from './../UsersPage.jsx';
-import ReviewCard from '../ReviewCard/ReviewCard.jsx';
-import Icon from "../Icon.jsx";
+import { ReviewCard } from '../ReviewCard/ReviewCard.jsx';
+import { Icon } from "../Icon.jsx";
 
-export default function UsersReviewsSection() {
-  const companies = Object.values(companiesData);
-
+export const Reviews = () => {
   return (
     <section className="my-section container section--reviews">
       <h2 className="text-center text-primary mb-5">
@@ -48,11 +46,11 @@ export default function UsersReviewsSection() {
               },
             }}
           >
-            {companies.map((company) => (
-              <SwiperSlide key={company.quoteData.author.name}>
+            {Object.entries(companiesData).map(([id, company]) => (
+              <SwiperSlide key={id}>
                 <ReviewCard
-                  quoteData={company.quoteData}
-                  logo={company.logo}
+                  company={company}
+                  variant="teaser"
                 />
               </SwiperSlide>
             ))}

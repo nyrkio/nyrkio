@@ -1,4 +1,4 @@
-export default function WhatMore() {
+export const WhatMore = () => {
   return (
     <section style={{backgroundColor: '#e5e5e7'}}>
       <div className="py-section container text-center">

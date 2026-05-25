@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Icon from "./../Icon.jsx";
+import { Icon } from "./../Icon.jsx";
 import './PasswordInput.scss';
 
 export const PasswordInput = ({ id, placeholder, className = "form-control", onChange, value }) => {

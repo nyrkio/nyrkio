@@ -11,7 +11,7 @@ import { parseTimestamp } from "../lib/utils";
 ChartJS.register(zoomPlugin);
 
 import { commitUrl, branchUrl } from "../lib/github";
-import Icon from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
 
 
 const nyrkio_dark_red = "#a34111";

@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DemoVideo } from "./FrontPage";
 import { PricingCard } from "./PricingCard/PricingCard.jsx";
-import Icon from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
 
 export const PricingPage = ({ loggedIn }) => {
   const b = 200;
