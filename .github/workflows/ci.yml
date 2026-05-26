@@ -10,7 +10,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          submodules: "true"
+          submodules: recursive
+      - name: Sync submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule status --recursive
       - name: Build CI image
         run: docker build -t nyrkio-ci -f Dockerfile.ci .
       - name: Run tests
