@@ -76,7 +76,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       </header>
       <main>
-        <div className="container" id="sidepanel">
+        <div className="container text-center my-4 my-md-6" id="sidepanel">
           <SidePanel loggedIn={loggedIn} />
         </div>
         <div id="main-content">

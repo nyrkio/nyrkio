@@ -43,7 +43,7 @@ export const SidePanel = ({ loggedIn }) => {
 
 
   return (
-    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm mx-auto gap-4 justify-content-center">
+    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm d-inline-flex mx-auto gap-4 justify-content-center w-100 w-md-auto">
       <Routes>
         <Route path="/" element={<FrontPageSidePanel loggedIn={loggedIn} />} />
         <Route path="/dash" element={<DashSidePanel loggedIn={loggedIn} />} />
@@ -168,10 +168,6 @@ const ProductSidePanel = ({ loggedIn }) => {
         :
         ""
       }
-      <Link to="/public" className="nav-link">
-        Public Dashboards
-        <br /> from other users
-      </Link>
     </>
   );
 };
@@ -181,29 +177,13 @@ const DocsSidePanel = ({ loggedIn }) => {
 
   return (
     <>
-      <Link to="/docs/getting-started" className="nav-link">
-        Nyrkio Runners
-      </Link>
-      <Link to="/docs/change-detection" className="nav-link">
-        Change Detection
-      </Link>
-      <Link to="/docs/getting-started-http" className="nav-link" style={{paddingLeft: "2em", paddingTop: "0px"}}>
-        HTTP API
-      </Link>
-
-      <Link to="/docs/working-with-graphs" className="nav-link">
-      Working with the graphs
-      </Link>
-      <Link to="/docs/git-perf-plugin" className="nav-link">
-        git-perf plugin
-      </Link>
-
-      <Link to="/docs/teams" className="nav-link">
-        Teams / Orgs
-      </Link>
-      <div className="nav-link">
-        <a href="/openapi">API</a>
-      </div>
+      <NavLink to="/docs/getting-started" className="nav-link">Nyrkio Runners</NavLink>
+      <NavLink to="/docs/change-detection" className="nav-link">Change Detection</NavLink>
+      <NavLink to="/docs/getting-started-http" className="nav-link">HTTP API</NavLink>
+      <NavLink to="/docs/working-with-graphs" className="nav-link">Working with the graphs</NavLink>
+      <NavLink to="/docs/git-perf-plugin" className="nav-link">git-perf plugin</NavLink>
+      <NavLink to="/docs/teams" className="nav-link">Teams / Orgs</NavLink>
+      <a className="nav-link" href="/openapi">API</a>
     </>
   );
 };
