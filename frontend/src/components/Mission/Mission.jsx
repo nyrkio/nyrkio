@@ -54,7 +54,7 @@ export const Mission = ({loggedIn}) => {
         <div className="row align-items-center gap-4 gap-md-0">
           <div className="col-12 col-md-6">
             <h3 className="text-secondary">3. Choose a runner</h3>
-            <p>Lastly: Replace the <span className="badge" style={{backgroundColor: '#50320DB2', fontSize: 'inherit', fontWeight: 'inherit'}}>runs-on: ubuntu-latest</span> with <span className="badge" style={{backgroundColor: '#50320DB2', fontSize: 'inherit', fontWeight: 'inherit'}}>runs-on: nyrkio_4</span> </p>
+            <p>Lastly: Replace the <span className="badge text-bg-secondary">runs-on: ubuntu-latest</span> with <span className="badge text-bg-secondary">runs-on: nyrkio_4</span> </p>
             <p>Your tests will now run on Nyrkiö test runners, and typically you'll see the <span className="nyrkio-accent">noise range in your benchmarks decrease by an order of magnitude!</span></p>
           </div>
           <div className="col-12 col-md-6">

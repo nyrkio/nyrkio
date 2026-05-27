@@ -4,18 +4,24 @@ import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 export const DocsGitPerfPlugin = () => {
   return (
     <>
-      <div className="row mt-4 m-2 p-0 col-lg-10">
+      <div className="container nyrkio-docs text-center">
         <h1>git-perf plugin</h1>
-        <p>This is an experimental utility that adds a <code>git perf</code> command to your beloved git. Initially supported commands are: <code>git perf blame</code>, <code>git perf log</code>, <code>git perf status</code>. </p>
-        <p>git-perf plugin will extend your normal git output with performance data from Nyrkiö's <a href="https://nyrkio.com/openapi#/default/changes_per_commit_api_v0_changes_perCommit__test_name_prefix__get"><code>changes/perCommit</code></a> API call. You need to be first using Nyrkiö to benefit from git-perf plugin. And Initially only repositories with <a href="/public/">public performance results</a> are supported. (So to test, you can clone a TigerBeetle or Turso repo.)</p>
+        <p>This is an experimental utility that adds a <code className="badge text-bg-secondary">git perf</code> command to your beloved git. Initially supported commands are: <code className="badge text-bg-secondary">git perf blame</code>, <code className="badge text-bg-secondary">git perf log</code>, <code className="badge text-bg-secondary">git perf status</code>. </p>
+        <p>git-perf plugin will extend your normal git output with performance data from Nyrkiö's changes/perCommit API call. You need to be first using Nyrkiö to benefit from git-perf plugin. And Initially only repositories with public performance results are supported. (So to test, you can clone a TigerBeetle or Turso repo.)</p>
+
+        <div className="d-flex flex-column flex-md-row gap-2 gap-md-4 justify-content-center mb-4 mb-md-6">
+          <a className="btn btn-primary" href="https://nyrkio.com/openapi#/default/changes_per_commit_api_v0_changes_perCommit__test_name_prefix__get">API Docs</a>
+          <a className="btn btn-primary" href="/public/">Public Test Result</a>
+        </div>
+
         <h2>Installation</h2>
-
-        <pre><code>curl https://raw.githubusercontent.com/nyrkio/git-perf/refs/heads/main/src/git-perf &gt; $HOME/bin/git-perf<br />
+        <div className="markdown-container">
+              <pre className="text-start"><code>curl https://raw.githubusercontent.com/nyrkio/git-perf/refs/heads/main/src/git-perf &gt; $HOME/bin/git-perf<br />
         chmod a+x $HOME/bin/git-perf</code></pre>
+        <hr/>
+          <h2>Example</h2>
 
-        <h2>Example</h2>
-
-        <pre>$ git perf log<br />
+          <pre className="text-start">$ git perf log<br />
         ...<br />
         commit f24e254ec6c77e166791461111c7747f33334f0a<br />
         Author: Pekka Enberg<br />
@@ -66,9 +72,9 @@ export const DocsGitPerfPlugin = () => {
         <br />
         Closes #2030</pre>
 
-        <p>The middle commit introduced a +64% perf regression for one benchmark.</p>
+          <p className="text-secondary fw-semibold">The middle commit introduced a +64% perf regression for one benchmark.</p>
 
-        <pre>$ git perf blame core/storage/btree.rs<br />
+          <pre className="text-start">$ git perf blame core/storage/btree.rs<br />
         d688cfd54↑ core/storage/btree.rs (pedrocarlo       2025-05-31 23:24:27 -0300    1) use tracing::#123;instrument, Level#125;;<br />
         d688cfd54↑ core/storage/btree.rs (pedrocarlo       2025-05-31 23:24:27 -0300    2)<br />
         11782cbff  core/storage/btree.rs (Pekka Enberg     2025-04-10 07:52:10 +0300    3) use crate::#123;<br />
@@ -101,9 +107,9 @@ export const DocsGitPerfPlugin = () => {
         99e0cf060⇈ core/storage/btree.rs (meteorgan        2025-07-08 22:55:25 +0800   30)     #125;,<br />
         99e0cf060⇈ core/storage/btree.rs (meteorgan        2025-07-08 22:55:25 +0800   31) #125;;</pre>
 
-        <p>The commits that caused performance changes are decorated with a up ↑ or down ↓ arrow. A double arrow means the change was larger than 10%. Note however that often there are multiple tests that fail and in that case it is arbitrary which one was used to draw the arrow symbol.</p>
+          <p>The commits that caused performance changes are decorated with a up ↑ or down ↓ arrow. A double arrow means the change was larger than 10%.<br className="d-none d-md-block"/>Note however that often there are multiple tests that fail and in that case it is arbitrary which one was used to draw the arrow symbol.</p>
 
-        <pre>$ git perf status<br />
+          <pre className="text-start mb-0">$ git perf status<br />
         On branch main<br />
         Your branch is up to date with 'upstream/main'.<br />
         <br />
@@ -113,9 +119,8 @@ export const DocsGitPerfPlugin = () => {
         The most recent perf change is cb163fc at 2025-07-17 13:56:49: sys:0.001<br />
         290 metrics across 148 tests reported 1686 changes.<br />
         The test 'clickbench/limbo/main/29_SELECT_Title__COUNT____AS_PageViews_FROM_hits_W' caused 19 of above changes.<br />
-        For more details, see https://nyrk.io/gh/tursodatabase%252Fturso/main</pre><br />
-
-
+        For more details, see https://nyrk.io/gh/tursodatabase%252Fturso/main</pre>
+        </div>
       </div>
     </>
   );
