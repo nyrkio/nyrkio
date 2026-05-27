@@ -87,4 +87,4 @@ export const ReviewCard = ({company, loading = 'lazy', variant = 'teaser'}) => {
       )}
     </article>
   );
-};
+}

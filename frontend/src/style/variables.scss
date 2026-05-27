@@ -6,6 +6,7 @@ $body-color: #414141;
 
 $gray-300: #535353;
 $light: #D7D7D7;
+$border-color: $light;
 
 
 $spacer: 1rem;
@@ -83,6 +84,8 @@ $font-size-base: 1rem;
 $font-family-base: "IBM Plex Sans", sans-serif;
 $headings-font-family: "Bebas Neue", sans-serif;
 
+$badge-secondary: #50320DB2;
+$badge-secondary-content: #fff;
 
 $nav-link-color: $secondary;
 $nav-link-hover-color: $primary;
