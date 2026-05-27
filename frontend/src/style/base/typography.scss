@@ -17,6 +17,14 @@ h6 {
   line-height: $line-height-base;
 }
 
+a {
+  word-wrap: break-word;
+}
+
+.protip {
+  font-weight: $font-weight-semibold;
+  color: $secondary;
+}
 
 ul.list-checkmark {
   li {

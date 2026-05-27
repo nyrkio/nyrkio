@@ -36,5 +36,14 @@ $utilities: map-merge(
 @import 'base/button';
 @import 'base/icons';
 @import 'base/table';
+@import 'base/markdown';
 @import 'components/navigation';
 @import 'layout/layout';
+
+
+.badge {
+  &.text-bg-secondary {
+    background-color: $badge-secondary !important;
+    color: $badge-secondary-content !important;
+  }
+}
