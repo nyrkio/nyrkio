@@ -53,11 +53,11 @@ const Teams = () => {
         </div>
 
         <div className="row my-4">
-          <div class="col-md-6">
+          <div className="col-md-6">
             <p>Once you return to Nyrkiö, the newly added org will be visible in the top right menu:</p>
             <img src={imgMenuOrg} width="400" height="469" alt="Screenshot of account menu"/>
           </div>
-          <div class="col-md-6">
+          <div className="col-md-6">
             <p>The org has its own settings page, and from that page you can also see the base URL that you should use to post benchmark results so that they are shared with the org:</p>
             <img src={imgOrgSettings} width="550" height="432" alt="Screenshot of settings" />
           </div>

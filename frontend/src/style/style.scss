@@ -24,6 +24,20 @@ $utilities: map-merge(
           75: 75%,
           100: 100%,
         )
+      ),
+      "font-family": (
+        property: font-family,
+        class: ff,
+        values: (
+          base: var(--bs-body-font-family),
+        )
+      ),
+      "letter-spacing": (
+        property: letter-spacing,
+        class: ls,
+        values: (
+          0: 0,
+        )
       )
     )
 );

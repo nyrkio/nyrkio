@@ -32,19 +32,19 @@ export const Footer = () => {
             </p>
 
             <nav className="d-flex gap-3 justify-content-center mt-4">
-              <a target="_blank" href="https://github.com/nyrkio/nyrkio" aria-label="Github">
+              <a target="_blank" rel="noopener noreferrer" href="https://github.com/nyrkio/nyrkio" aria-label="Github">
                 <Icon name="github-circle" size={32}/>
               </a>
-              <a target="_blank" href="https://twitter.com/nyrkio" aria-label="Twitter">
+              <a target="_blank" rel="noopener noreferrer" href="https://twitter.com/nyrkio" aria-label="Twitter">
                 <Icon name="twitter-circle" size={32}/>
               </a>
-              <a target="_blank" href="https://www.youtube.com/@Nyrkio" aria-label="Youtube">
+              <a target="_blank" rel="noopener noreferrer" href="https://www.youtube.com/@Nyrkio" aria-label="Youtube">
                 <Icon name="youtube-circle" size={32} className="text-primary"/>
               </a>
-              <a target="_blank" href="https://www.instagram.com/nyrk.io/" aria-label="Instagram">
+              <a target="_blank" rel="noopener noreferrer" href="https://www.instagram.com/nyrk.io/" aria-label="Instagram">
                 <Icon name="instagram-circle" size={32}/>
               </a>
-              <a target="_blank" href="https://www.tiktok.com/@nyrk.io" aria-label="TikTok">
+              <a target="_blank" rel="noopener noreferrer" href="https://www.tiktok.com/@nyrk.io" aria-label="TikTok">
                 <Icon name="tiktok-circle" size={32}/>
               </a>
             </nav>
@@ -67,6 +67,7 @@ export const Footer = () => {
         <div className="row">
           <div className="col-6 col-md-4">
             <Link className="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover" to={ToS}
+                  rel="noopener noreferrer"
                   target="_blank" aria-label="View Terms of Service PDF">Terms of Service</Link>
           </div>
           <div className="col-12 col-md-4 order-last order-md-0 text-center mt-3  mt-md-0">
@@ -78,6 +79,7 @@ export const Footer = () => {
           </div>
           <div className="col-6 col-md-4 text-end">
             <Link className="link-secondary link-underline-opacity-0 link-underline-opacity-100-hover"
+                  rel="noopener noreferrer"
                   to={PrivacyPolicy} target="_blank" aria-label="View Privacy Policy PDF">Privacy Policy</Link>
           </div>
         </div>

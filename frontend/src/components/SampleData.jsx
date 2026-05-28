@@ -61,7 +61,7 @@ export const SampleData = ( { customerName } ) => {
 const CustomerLogo = ( { customerLogo, customerName, customerUrl }) => {
   return (
     <>
-      <a href={customerUrl} target="_blank" rel="noreferrer" className="d-block">
+      <a href={customerUrl} target="_blank" rel="noopener noreferrer" className="d-block">
         <img
           src={customerLogo}
           alt={{customerName} + " logo"}

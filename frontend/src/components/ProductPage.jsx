@@ -25,7 +25,7 @@ export const ProductPage = () => {
             </ol>
           </p>
         </div>
-        <div class="col-md-6 text-md-end">
+        <div className="col-md-6 text-md-end">
           <img className="img-fluid border border-2 border-secondary rounded shadow p-3" width="422" height="280" src={nyrkio_gha} alt="Green checkmark as a sign of a passed benchmark on a GitHub pull request"/>
         </div>
       </div>
@@ -43,7 +43,7 @@ export const ProductPage = () => {
 
       <ol>
         <li className="mb-4">
-          Use the well known framework of the programming language you're working with.*
+          Use the well known framework of the programming language you're working with.<sup><a href="#metric_note" id="metric_mark">*</a></sup>
         </li>
         <li className="mb-3">
           Iteratively, as needed, tune your infrastructure, your product, and benchmark tool to minimize environmental noise. For best results, Nyrkio offers a 3rd party GitHub runner to run your continuous benchmarks on. We configure these runners NOT for maximum performance, but rather for maximal <span className="nyrkio-accent">stability and repeatability</span>. Using Nyrkiö Runner for GitHub, users typically see a 10x reduction in environmental noise and the [min, max] range of noise below 10 nanoseconds, sometime within 1 nanoseconds!
@@ -69,7 +69,9 @@ export const ProductPage = () => {
       </ol>
 
 
-      <p className="text-center">*) Nyrkiö users also commonly measure and track other values than benchmark results. Or even purely performance related: Size of release files, memory consumption during  a test, etc... A significant change in such metrics is often worth looking into more carefully.</p>
+      <p className="text-center">
+        <sup id="metric_note">*</sup>) Nyrkiö users also commonly measure and track other values than benchmark results. Or even purely performance related: Size of release files, memory consumption during  a test, etc... A significant change in such metrics is often worth looking into more carefully.<a href="#metric_mark">↩</a>
+      </p>
 
 
       <p className="text-center">Read more: <a href="https://blog.nyrkio.com/2025/05/08/welcome-apache-otava-incubating-project/">How we introduced change point detection as a solution to automatically finding regressions in noisy continuous benchmarking test results</a>.</p>
