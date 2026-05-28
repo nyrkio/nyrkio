@@ -59,6 +59,15 @@ $display-font-sizes: (
   6: 2.5rem
 );
 
+$aspect-ratios: (
+  "1x1": 100%,
+  "4x3": calc(3 / 4 * 100%),
+  "2x3": calc(3 / 2 * 100%),
+  "16x9": calc(9 / 16 * 100%),
+  "21x9": calc(9 / 21 * 100%),
+  "7x10": calc(10 / 7 * 100%),
+);
+
 
 $grid-gutter-width: 2.5rem;
 

@@ -43,7 +43,7 @@ export const SidePanel = ({ loggedIn }) => {
 
 
   return (
-    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm d-inline-flex mx-auto gap-4 justify-content-center w-100 w-md-auto">
+    <div className="nav nav-pills nav-pills--sidebar rounded-2 shadow-sm d-inline-flex mx-auto column-gap-4 justify-content-center w-100 w-md-auto">
       <Routes>
         <Route path="/" element={<FrontPageSidePanel loggedIn={loggedIn} />} />
         <Route path="/dash" element={<DashSidePanel loggedIn={loggedIn} />} />
@@ -191,18 +191,18 @@ const AboutSidePanel = ({ loggedIn }) => {
   document.body.classList.add("section-about");
   return (
     <>
-      <Link to="/about" className="nav-link">
+      <NavLink to="/about" end className="nav-link">
         About Nyrkiö Oy
-      </Link>
-      <Link to="/about/ecosystem" className="nav-link">
+      </NavLink>
+      <NavLink to="/about/ecosystem" className="nav-link">
       Open Source Ecosystem
-      </Link>
-      <Link to="/legal" className="nav-link">
+      </NavLink>
+      <NavLink to="/legal" className="nav-link">
       Legal
-      </Link>
-      <Link to="/legend" className="nav-link">
+      </NavLink>
+      <NavLink to="/legend" className="nav-link">
         The Legend of Nyyrikki
-      </Link>
+      </NavLink>
     </>
   );
 };

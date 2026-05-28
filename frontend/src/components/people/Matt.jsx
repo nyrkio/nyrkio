@@ -1,21 +1,20 @@
 import headShot from "../../static/people/Matt-600x800.jpg";
+import { UserCard } from "../UserCard/UserCard.jsx";
 
 export const MattCard = () => {
   return (
-    <div className="row row-cols-1 row-cols-md-2">
-      <div className="col">
-        <div className="card m-3 rounded-3 shadow people-card">
-          <div className="card-header p-5 justify-content-center text-center">
-            <h4 className="my-2">Matt Fleming</h4>
-            <p>Co-founder</p>
-            </div>
-        </div>
-      </div>
-      <div className="col p-4">
-      <p>
-      Matt Fleming was a co-founder and the CTO for the first 1-2 years. He not only wrote most of the first version of Nyrkiö Change Detection, but he even came up with the Company name, and many other things. Matt had to take a break from the startup lifestyle, and now works at CloudFlare on Linux kernel stuff again.        </p>
-      </div>
-    </div>
+    <>
+      <UserCard profile={{
+        // image: {
+        //   src: headShot,
+        //   width: 600,
+        //   height: 800
+        // },
+        name: 'Matt Fleming',
+        position: 'Co-founder',
+        description: "<p>Matt Fleming was a co-founder and the CTO for the first 1-2 years. He not only wrote most of the first version of Nyrkiö Change Detection, but he even came up with the Company name, and many other things. Matt had to take a break from the startup lifestyle, and now works at CloudFlare on Linux kernel stuff again.</p>"
+      }}/>
+    </>
   );
 };
 

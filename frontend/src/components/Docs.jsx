@@ -61,7 +61,7 @@ export const Docs = () => {
 
 const SetupSteps = () => {
   return (
-    <div >
+    <div>
       <h1 id="getting-started" className="text-primary text-center mb-4 mb-md-5">Getting started with Nyrkio Runners</h1>
 
       <p className="text-center mx-auto" style={{maxWidth: "1000px"}}>
