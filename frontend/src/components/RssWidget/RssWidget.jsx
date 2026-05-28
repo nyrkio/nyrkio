@@ -59,7 +59,7 @@ export const RssWidget = () => {
                       }).format(d)}
                     </div>
                   </div>
-                  <a className="rss-card__link" href={item.links?.[0]?.url} target="_blank" rel="noreferrer">{item.title}</a>
+                  <a className="rss-card__link" href={item.links?.[0]?.url} target="_blank" rel="noopener noreferrer">{item.title}</a>
                 </div>
               </SwiperSlide>
             );
@@ -75,7 +75,7 @@ export const RssWidget = () => {
         <h2 className="text-center text-primary mb-5">Recently on blog</h2>
         {loading ? "" : (<RssListItems feed={rssFeed} />)}
         <div className="text-center mt-3 mt-lg-5">
-          <a className="btn btn-outline-primary d-block d-md-inline-block" href="https://blog.nyrkio.com/" target="_blank">View all articles</a>
+          <a className="btn btn-outline-primary d-block d-md-inline-block" href="https://blog.nyrkio.com/" target="_blank" rel="noopener noreferrer">View all articles</a>
         </div>
       </section>
     </>
