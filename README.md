@@ -106,7 +106,7 @@ SECRET_KEY=
 END
 
 export IMAGE_TAG=$(git rev-parse HEAD)
-docker compose -f docker-compose.dev.yml up --build
+docker compose -f compose.dev.yml up --build
 ```
 
 ### Contributing
@@ -143,7 +143,6 @@ https://www.apache.org/licenses/LICENSE-2.0
 
 Apache and Apache Otava are trademarks of the Apache Software Foundation
 Nyrkiö and Nyrkiö Change Detection are trademarks of Nyrkiö Oy
-
 
 
 

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { BACKEND_BASE_URL, getJwtToken, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Test Configuration
@@ -10,67 +11,26 @@ import { test, expect } from "@playwright/test";
  * - Git repo and branch settings
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Test Configuration - API Endpoints", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
-  test("should access config API endpoint", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+  test("should access config API endpoint", async ({ page }) => {
     const testName = `config-api-test-${Date.now()}`;
 
     // Create a test first
-    await request.post(`http://localhost:8001/api/v0/result/${testName}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json"
-      },
+    await page.request.post(`${BACKEND_BASE_URL}/api/v0/result/${testName}`, {
+      headers: { "Content-Type": "application/json" },
       data: [{
         timestamp: Math.floor(Date.now() / 1000),
         metrics: [{ name: "performance", value: 100, unit: "ms" }],
@@ -83,11 +43,8 @@ test.describe("Test Configuration - API Endpoints", () => {
     });
 
     // Try to get config
-    const configResponse = await request.get(
-      `http://localhost:8001/api/v0/config/${testName}`,
-      {
-        headers: { Authorization: `Bearer ${token}` }
-      }
+    const configResponse = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/config/${testName}`,
     );
 
     expect(configResponse.status()).toBe(200);
@@ -96,7 +53,7 @@ test.describe("Test Configuration - API Endpoints", () => {
   });
 
   test("should create new test configuration via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-create-${Date.now()}`;
 
     // Create test config
@@ -140,11 +97,11 @@ test.describe("Test Configuration - Public/Private Toggle", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should set test to public via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-public-${Date.now()}`;
 
     // Create test data
@@ -203,7 +160,7 @@ test.describe("Test Configuration - Public/Private Toggle", () => {
   });
 
   test("should set test to private via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-private-${Date.now()}`;
 
     // Create test data
@@ -262,7 +219,7 @@ test.describe("Test Configuration - Public/Private Toggle", () => {
   });
 
   test("should toggle test visibility multiple times", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-toggle-${Date.now()}`;
 
     // Create test data
@@ -348,11 +305,11 @@ test.describe("Test Configuration - Git Attributes", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should store git repo in config", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-git-repo-${Date.now()}`;
     const gitRepo = "https://github.com/example/test-repo";
 
@@ -392,7 +349,7 @@ test.describe("Test Configuration - Git Attributes", () => {
   });
 
   test("should store branch in config", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-branch-${Date.now()}`;
     const branch = "feature/new-feature";
 
@@ -436,11 +393,11 @@ test.describe("Test Configuration - Empty State", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should handle test with no config gracefully", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-no-config-${Date.now()}`;
 
     // Try to get config for test that doesn't exist
@@ -459,7 +416,7 @@ test.describe("Test Configuration - Empty State", () => {
   });
 
   test("should create config for new test", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `config-new-test-${Date.now()}`;
 
     // Create config before any results

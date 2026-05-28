@@ -96,10 +96,7 @@ export const AdminDashboard = () => {
   const [results, setResults] = useState([{}]);
   const fetchData = async () => {
     const tempresults = await fetch("/api/v0/admin/all_users", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     const resultData = await tempresults.json();
     console.debug(resultData);
@@ -117,6 +114,5 @@ export const AdminDashboard = () => {
  }
  return <MainAdminDashboard results={results} />;
 };
-
 
 

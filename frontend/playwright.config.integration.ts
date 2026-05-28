@@ -1,5 +1,8 @@
 import { defineConfig } from "@playwright/test";
 
+const env = (globalThis as any).process?.env || {};
+const baseURL = env.PLAYWRIGHT_BASE_URL || "http://localhost:5173";
+
 /**
  * Integration Test Configuration
  *
@@ -26,7 +29,7 @@ export default defineConfig({
   // Backend should already be running via nyrkio_backend.py
 
   use: {
-    baseURL: "http://localhost:5173",
+    baseURL,
 
     // Slower action timeout for integration tests
     actionTimeout: 15000,
@@ -42,7 +45,7 @@ export default defineConfig({
   },
 
   // Retry failed tests once in case of flakiness
-  retries: process.env.CI ? 2 : 1,
+  retries: env.CI ? 2 : 1,
 
   reporter: [
     ["list"],

@@ -16,9 +16,11 @@ async function login(page: any, email: string, password: string) {
   await page.waitForURL("/", { timeout: 10000 });
 }
 
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("User Settings UI - User Information Display", () => {
@@ -72,22 +74,13 @@ test.describe("User Settings UI - API Token Display", () => {
     expect(pageContent.length).toBeGreaterThan(100);
   });
 
-  test("should allow copying current token from localStorage", async ({
-    page,
-  }) => {
+  test("should not store JWT in localStorage", async ({ page }) => {
     // Navigate to user settings
     await page.goto("/user/settings");
     await page.waitForTimeout(2000);
 
-    // Get current token from localStorage
-    const currentToken = await page.evaluate(() =>
-      localStorage.getItem("token")
-    );
-    expect(currentToken).toBeTruthy();
-
-    // Verify token is a valid JWT format (3 parts separated by dots)
-    const tokenParts = currentToken?.split(".");
-    expect(tokenParts?.length).toBe(3);
+    const currentToken = await page.evaluate(() => localStorage.getItem("token"));
+    expect(currentToken).toBeFalsy();
 
     // Page should be displaying something about tokens
     const main = page.locator("#main-content");
@@ -106,14 +99,9 @@ test.describe("User Settings UI - Account Information", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
     // Get user data from API
-    const apiResponse = await request.get(
-      "http://localhost:8001/api/v0/users/me",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      "http://localhost:8001/api/v0/users/me"
     );
     const userData = await apiResponse.json();
 
@@ -138,14 +126,9 @@ test.describe("User Settings UI - Account Information", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
-
     // Get user data from API
-    const apiResponse = await request.get(
-      "http://localhost:8001/api/v0/users/me",
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
+    const apiResponse = await page.request.get(
+      "http://localhost:8001/api/v0/users/me"
     );
     const userData = await apiResponse.json();
 

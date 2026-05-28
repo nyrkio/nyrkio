@@ -176,7 +176,7 @@ When started, the Docker stack runs:
 
 ### Features
 
-- Uses `docker-compose.dev.yml`
+- Uses `compose.dev.yml`
 - Checks for Docker and Docker Compose availability
 - Verifies `.env.backend` exists before starting
 - Shows status of all running containers
@@ -207,7 +207,7 @@ python3 etc/nyrkio_docker.py restart
 
 ### Docker Compose File
 
-Uses `docker-compose.dev.yml` in the repository root. This includes:
+Uses `compose.dev.yml` in the repository root. This includes:
 - Backend service
 - Webhooks service (same image as backend, different entrypoint)
 - MongoDB service
@@ -386,4 +386,4 @@ python3 etc/test_management_scripts.py
 
 - Main README: `../README.md`
 - Environment variables: `../.env.backend.example`
-- Docker setup: `../docker-compose.dev.yml`
+- Docker setup: `../compose.dev.yml`

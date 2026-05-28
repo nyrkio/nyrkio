@@ -1,0 +1,27 @@
+FROM python:3.10-slim
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    POETRY_VERSION=1.7.1 \
+    POETRY_VIRTUALENVS_CREATE=false \
+    CI_IN_CONTAINER=1 \
+    PYTHONPATH=/repo/backend
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc libpq-dev libc-dev make git && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:${PATH}"
+
+RUN pip install --upgrade pip && pip install "poetry==${POETRY_VERSION}"
+
+WORKDIR /repo/backend
+COPY backend/pyproject.toml backend/poetry.lock /repo/backend/
+COPY backend/hunter /repo/backend/hunter
+RUN poetry install --no-interaction --no-root
+
+WORKDIR /repo
+CMD ["make", "ci-inner"]

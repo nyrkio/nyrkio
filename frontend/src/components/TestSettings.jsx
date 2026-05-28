@@ -19,10 +19,7 @@ export const TestSettings = ({ dashboardType, testName, attributes }) => {
   const fetchData = async () => {
     console.debug("Fetching from " + fetchUrl + testName);
     const response = await fetch(fetchUrl + testName, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status == 200) {
@@ -77,9 +74,9 @@ export const TestSettings = ({ dashboardType, testName, attributes }) => {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify(newConfig),
+      credentials: "include",
     });
 
     if (response.status === 200) {

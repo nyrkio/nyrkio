@@ -24,10 +24,7 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
       }
 
       const response = await fetch(url, {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
+        credentials: "include",
       });
 
       if (response.status != 200) {

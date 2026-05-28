@@ -23,75 +23,59 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
   const authSubmit = async (e) => {
     e.preventDefault();
-    console.log("Auth submit: " + username + " " + password.substring(0,2));
     let credentialsData = new URLSearchParams();
     credentialsData.append("username", username);
     credentialsData.append("password", password);
 
-    const data = await fetch("/api/v0/auth/jwt/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: credentialsData,
-    })
-      .then((response) => {
-        if (response.ok) {
-          return response.json();
-        } else {
-          console.error(
-            "Authentication to Nyrkiö.com failed: " +
-              response.status +
-              " " +
-              response.statusText,
-          );
-          setErrorText(
-            "Authentication to Nyrkiö.com failed! (" +
-              response.status +
-              " " +
-              response.statusText +
-              ")",
-          );
-          setLoggedIn(false);
-          return false;
-        }
-      })
-      .then((body) => {
-        if (!body) {
-          console.log("Empty response when logging in. (" +
-              response.status +
-              " " +
-              response.statusText +
-              ")");
-          setErrorText("Empty response when logging in. ((" +
-              response.status +
-              " " +
-              response.statusText +
-              ")");
-          setLoggedIn(false);
-          return;
-        }
-        console.log("Logged in. (" + username + ")");
-        setErrorText("");
-        setLoggedIn(true);
-
-        localStorage.setItem("loggedIn", "true");
-        localStorage.setItem("username", username);
-        localStorage.setItem("username_real", username);
-        localStorage.setItem("token", body["access_token"]);
-        localStorage.setItem("authMethod", "password");
-        localStorage.setItem("authServer", "nyrkio.com");
-
-        posthog.capture("login", { property: username });
-        try {
-          window.location.href = "/";
-        } catch (error) {
-          console.log(error);
-        }
-      })
-      .catch((error) => {
-        console.log(error);
+    try {
+      const response = await fetch("/api/v0/auth/cookie/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: credentialsData,
+        credentials: "include",
       });
+
+      if (!response.ok) {
+        console.error(
+          "Authentication to Nyrkiö.com failed: " +
+            response.status +
+            " " +
+            response.statusText,
+        );
+        setErrorText(
+          "Authentication to Nyrkiö.com failed! (" +
+            response.status +
+            " " +
+            response.statusText +
+            ")",
+        );
+        setLoggedIn(false);
+        return;
+      }
+
+      console.log("Logged in. (" + username + ")");
+      setErrorText("");
+      setLoggedIn(true);
+
+      localStorage.removeItem("token");
+      localStorage.setItem("username", username);
+      localStorage.setItem("username_real", username);
+      localStorage.setItem("authMethod", "password");
+      localStorage.setItem("authServer", "nyrkio.com");
+
+      posthog.capture("login", { property: username });
+      try {
+        window.location.href = "/";
+      } catch (error) {
+        console.log(error);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrorText("Authentication to Nyrkiö.com failed!");
+      setLoggedIn(false);
+    }
   };
 
   // TODO (mfleming) Move to lib
@@ -114,7 +98,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   if (query.get("gh_login") === "success") {
     const username = query.get("username");
     setLoggedIn(true);
-    localStorage.setItem("loggedIn", "true");
+    localStorage.removeItem("token");
     localStorage.setItem("username", username);
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "github.com");
@@ -146,7 +130,7 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   if (query.get("sso_login") === "success" && query.get("username") !== undefined && query.get("username") !== "") {
     const username = query.get("username");
     setLoggedIn(true);
-    localStorage.setItem("loggedIn", "true");
+    localStorage.removeItem("token");
     localStorage.setItem("username", username);
     localStorage.setItem("authMethod", "oauth");
     localStorage.setItem("authServer", "onelogin.com");
@@ -320,12 +304,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 };
 
 const logoutTasks = async ({setLoggedIn}) => {
-    const response = await fetch("/api/v0/auth/jwt/logout", {
+    const response = await fetch("/api/v0/auth/cookie/logout", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
@@ -336,9 +317,9 @@ const logoutTasks = async ({setLoggedIn}) => {
     console.log("Setting logged in to false");
     setLoggedIn(false);
 
-    localStorage.setItem("loggedIn", "false");
     localStorage.setItem("username", "");
     localStorage.setItem("username_real", "");
+    localStorage.removeItem("token");
     document.body.classList.remove( "impersonate-user" );
 
     posthog.reset();

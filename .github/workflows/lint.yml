@@ -7,18 +7,30 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@v1
         with:
-          version: 0.4.10
-          src: "./backend"
-          args: --exclude hunter
+          submodules: recursive
+      - name: Sync submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule status --recursive
+      - name: Build CI image
+        run: docker build -t nyrkio-ci -f Dockerfile.ci .
+      - name: Lint
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/repo" -w /repo nyrkio-ci make lint-inner
 
   format:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - uses: chartboost/ruff-action@v1
         with:
-          version: 0.4.10
-          src: "./backend"
-          args: format --exclude hunter --check
+          submodules: recursive
+      - name: Sync submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule status --recursive
+      - name: Build CI image
+        run: docker build -t nyrkio-ci -f Dockerfile.ci .
+      - name: Format check
+        run: docker run --rm -v "$GITHUB_WORKSPACE:/repo" -w /repo nyrkio-ci make format-check-inner

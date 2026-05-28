@@ -1,9 +1,52 @@
 name: Deploy (Staging)
 on:
   pull_request:
+    types: [labeled]
+
+concurrency:
+  group: staging-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+env:
+  STAGING_DEPLOY_REQUEST_LABEL: deploy:staging
+  STAGING_DEPLOY_SUCCESS_LABEL: deployed:staging
+  STAGING_DEPLOY_FAILURE_LABEL: deploy-failed:staging
 
 jobs:
+  authorize:
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging'
+    runs-on: ubuntu-latest
+    outputs:
+      allowed: ${{ steps.auth.outputs.allowed }}
+    steps:
+      - name: Authorize deploy trigger actor
+        id: auth
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const username = context.actor;
+
+            const resp = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner,
+              repo,
+              username,
+            });
+
+            const perm = resp.data.permission;
+            const allowed = ['admin', 'maintain', 'write'].includes(perm);
+            core.info(`staging deploy authz: actor=${username} permission=${perm} allowed=${allowed}`);
+            core.setOutput('allowed', allowed ? 'true' : 'false');
+
   docker-images:
+    needs: authorize
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -41,27 +84,31 @@ jobs:
           NYRKIO_PEM: ${{ secrets.NYRKIO_PEM }}
           SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
+          NYRKIO_GH_RUNNER_SSH: ${{ secrets.NYRKIO_GH_RUNNER_SSH }}
           ENV: staging
         run: |
           mv p/frontend/src/static/* p/
 
           # Build a docker container and push it to ECR
-          echo "$NYRKIO_ENV_STAGING " > .env.backend
+          echo "$NYRKIO_ENV_STAGING" > .env.backend
           echo "$NYRKIO_PEM" > backend/keys/nyrkio.pem
           echo "$SSL_CERT_CHAIN" > nyrkio_com_chain.crt
           echo "$SSL_SECRET_KEY" > nyrkio.com.key
-          echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
+          if [ -n "${NYRKIO_GH_RUNNER_SSH:-}" ]; then
+            echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
+          fi
           pwd
           ls -a
 
-          docker compose -f docker-compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com
+          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:
-    needs: docker-images
+    needs: [authorize, docker-images]
+    if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
     steps:
@@ -102,11 +149,50 @@ jobs:
             echo "SSH_AGENT_PID=SSH_AGENT_PID" >> $GITHUB_ENV
           fi
 
-          echo "$SSH_PUBLIC_KEY" >> $HOME/.ssh/known_hosts
+          ssh-keyscan staging.nyrkio.com >> $HOME/.ssh/known_hosts
 
           echo "$SSH_PRIVATE_KEY" | ssh-add -
 
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
-          docker compose -f docker-compose.yml up --no-build -d nginx backend webhooks worker01
+          export RESTART_POLICY=unless-stopped
+          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+
+  label-result:
+    needs: [authorize, docker-images, deployment]
+    if: always() && github.event.action == 'labeled' && github.event.label.name == 'deploy:staging'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update PR labels with deployment result
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue_number = context.payload.pull_request.number;
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            const requested = process.env.STAGING_DEPLOY_REQUEST_LABEL;
+            const success = process.env.STAGING_DEPLOY_SUCCESS_LABEL;
+            const failure = process.env.STAGING_DEPLOY_FAILURE_LABEL;
+
+            const authorized = '${{ needs.authorize.outputs.allowed }}' === 'true';
+            const results = ['${{ needs.docker-images.result }}', '${{ needs.deployment.result }}'];
+            const overall = authorized && results.every(r => r === 'success') ? 'success' : 'failure';
+            const target = overall === 'success' ? success : failure;
+            const remove = [requested, success, failure].filter(l => l !== target);
+
+            for (const name of remove) {
+              try {
+                await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
+              } catch (e) {
+                if (e.status !== 404) throw e;
+              }
+            }
+
+            await github.rest.issues.addLabels({
+              owner,
+              repo,
+              issue_number,
+              labels: [target],
+            });

@@ -159,11 +159,22 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
 }
 
 function App() {
-  const [loggedIn, setLoggedIn] = React.useState(() => {
-    const saved = localStorage.getItem("loggedIn");
-    const initialValue = JSON.parse(saved);
-    return initialValue || false;
-  });
+  const [loggedIn, setLoggedIn] = React.useState(false);
+
+  React.useEffect(() => {
+    localStorage.removeItem("token");
+    const check = async () => {
+      try {
+        const response = await fetch("/api/v0/auth/authenticated-route", {
+          credentials: "include",
+        });
+        setLoggedIn(response.status === 200);
+      } catch (e) {
+        setLoggedIn(false);
+      }
+    };
+    check();
+  }, []);
 
   return (
     <>

@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { BACKEND_BASE_URL } from "./auth-utils";
 
 /**
  * Integration Tests for Navigation and UI
@@ -15,9 +16,11 @@ async function login(page: any, email: string, password: string) {
   await page.waitForURL("/", { timeout: 10000 });
 }
 
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Navigation Integration Tests", () => {
@@ -139,9 +142,10 @@ test.describe("Authenticated Navigation", () => {
   });
 
   test("should maintain auth state across navigation", async ({ page }) => {
-    const initialToken = await page.evaluate(() =>
-      localStorage.getItem("token")
+    const initialAuth = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
     );
+    expect(initialAuth.status()).toBe(200);
 
     // Navigate to several pages
     await page.goto("/tests");
@@ -151,14 +155,10 @@ test.describe("Authenticated Navigation", () => {
     await page.goto("/docs/getting-started");
     await page.waitForTimeout(500);
 
-    // Token should still be present
-    const finalToken = await page.evaluate(() => localStorage.getItem("token"));
-    expect(finalToken).toBe(initialToken);
-
-    const loggedIn = await page.evaluate(() =>
-      localStorage.getItem("loggedIn")
+    const finalAuth = await page.request.get(
+      `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,
     );
-    expect(loggedIn).toBe("true");
+    expect(finalAuth.status()).toBe(200);
   });
 });
 

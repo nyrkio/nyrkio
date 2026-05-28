@@ -13,10 +13,7 @@ export const OrgDashboard = ({embed}) => {
 
   const fetchOrgs = async () => {
     const response = await fetch("/api/v0/orgs/results", {
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     const data = await response.json();

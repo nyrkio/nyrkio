@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Public Dashboard
@@ -10,48 +11,11 @@ import { test, expect } from "@playwright/test";
  * without requiring them to have Nyrkio accounts.
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Public Dashboard - Unauthenticated Access", () => {
@@ -59,9 +23,9 @@ test.describe("Public Dashboard - Unauthenticated Access", () => {
     // First, login and create a public test
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `public-test-${Date.now()}`;
 
     // Create test data
@@ -115,9 +79,9 @@ test.describe("Public Dashboard - Unauthenticated Access", () => {
     // First, login and create a private test
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `private-test-${Date.now()}`;
 
     // Create test data
@@ -182,9 +146,9 @@ test.describe("Public Dashboard - Public Test Data Display", () => {
     // Login and create public test
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `public-format-${Date.now()}`;
 
     // Create multiple data points
@@ -250,9 +214,9 @@ test.describe("Public Dashboard - Public Test Data Display", () => {
     // Login and create public test with regression
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `public-changes-${Date.now()}`;
 
     // Create baseline data
@@ -328,9 +292,9 @@ test.describe("Public Dashboard - UI Display", () => {
     // Login and create public test
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `public-ui-${Date.now()}`;
 
     // Create test data
@@ -382,9 +346,9 @@ test.describe("Public Dashboard - UI Display", () => {
     // Login and create public test
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `public-display-${Date.now()}`;
 
     // Create test data
@@ -446,9 +410,9 @@ test.describe("Public Dashboard - Toggle Visibility", () => {
     // Login
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
 
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `toggle-visibility-${Date.now()}`;
 
     // Create test (private by default)
@@ -491,8 +455,8 @@ test.describe("Public Dashboard - Toggle Visibility", () => {
     expect([403, 404]).toContain(privateResponse.status());
 
     // Login again and set to public
-    await login(page, TEST_USER.email, TEST_USER.password);
-    const token2 = await page.evaluate(() => localStorage.getItem("token"));
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
+    const token2 = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     await request.post(`http://localhost:8001/api/v0/config/${testName}`, {
       headers: {

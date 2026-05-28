@@ -5,15 +5,13 @@ import Dropdown from "react-bootstrap/Dropdown";
 import { ImpersonateControls } from "./ImpersonateControls";
 import posthog from "posthog-js";
 
-export const UserMenu = ({ setLoggedIn }) => {
+export const UserMenu = ({ loggedIn, setLoggedIn }) => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [orgs, setOrgs] = useState([]);
   var username = null;
-  if (localStorage.getItem("loggedIn") == "true") {
+  if (loggedIn) {
     username = localStorage.getItem("username");
   }
-  console.debug("username");
-  console.debug(username);
 
   const navigate = useNavigate();
 
@@ -21,10 +19,7 @@ export const UserMenu = ({ setLoggedIn }) => {
   const checkForAdminPrvis = async () => {
     const response = await fetch("/api/v0/auth/admin", {
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status === 200) {
@@ -36,10 +31,7 @@ export const UserMenu = ({ setLoggedIn }) => {
     const url = "/api/v0/orgs/";
     console.debug("GET " + url);
     const response = await fetch(url, {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (response.status !== 200) {
@@ -72,12 +64,9 @@ export const UserMenu = ({ setLoggedIn }) => {
   }, []);
 
   const handleLogoutClick = async () => {
-    const response = await fetch("/api/v0/auth/jwt/logout", {
+    const response = await fetch("/api/v0/auth/cookie/logout", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (response.status !== 200 && response.status !== 204) {
       console.error(
@@ -87,7 +76,6 @@ export const UserMenu = ({ setLoggedIn }) => {
     console.log("Setting logged in to false");
     setLoggedIn(false);
 
-    localStorage.setItem("loggedIn", "false");
     localStorage.removeItem("token");
     localStorage.setItem("username", "");
     localStorage.setItem("username_real", "");

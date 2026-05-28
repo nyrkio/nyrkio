@@ -8,6 +8,13 @@ import sys
 from pathlib import Path
 
 
+COMPOSE_FILE = "compose.dev.yml"
+
+
+def get_root_dir() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
 def check_docker():
     """Check if Docker is available"""
     try:
@@ -22,10 +29,10 @@ def is_stack_running():
     """Check if the Docker stack is running"""
     try:
         result = subprocess.run(
-            ["docker", "compose", "-f", "docker-compose.dev.yml", "ps", "--quiet"],
+            ["docker", "compose", "-f", COMPOSE_FILE, "ps", "--quiet"],
             capture_output=True,
             text=True,
-            cwd=Path(__file__).parent
+            cwd=get_root_dir()
         )
         return bool(result.stdout.strip())
     except:
@@ -34,7 +41,7 @@ def is_stack_running():
 
 def start_stack():
     """Start the full Docker stack"""
-    root_dir = Path(__file__).parent
+    root_dir = get_root_dir()
 
     # Check if .env.backend exists
     env_file = root_dir / ".env.backend"
@@ -77,14 +84,14 @@ def start_stack():
     # Start docker compose
     subprocess.run([
         "docker", "compose",
-        "-f", "docker-compose.dev.yml",
+        "-f", COMPOSE_FILE,
         "up", "--build"
     ], cwd=root_dir)
 
 
 def stop_stack():
     """Stop the Docker stack"""
-    root_dir = Path(__file__).parent
+    root_dir = get_root_dir()
 
     # Check Docker
     if not check_docker():
@@ -99,7 +106,7 @@ def stop_stack():
     print("Stopping Nyrkiö Docker stack...")
     subprocess.run([
         "docker", "compose",
-        "-f", "docker-compose.dev.yml",
+        "-f", COMPOSE_FILE,
         "down"
     ], cwd=root_dir)
     print("Docker stack stopped successfully")
@@ -124,9 +131,9 @@ def status_stack():
         # Show running containers
         subprocess.run([
             "docker", "compose",
-            "-f", "docker-compose.dev.yml",
+            "-f", COMPOSE_FILE,
             "ps"
-        ], cwd=Path(__file__).parent)
+        ], cwd=get_root_dir())
     else:
         print("Docker stack is not running")
 

@@ -25,12 +25,26 @@ class BillingInfo(BaseModel):
     quantity: int
 
 
+def ensure_stripe_is_configured():
+    stripe_key = os.environ.get("STRIPE_SECRET_KEY", "").strip()
+    if not stripe_key or stripe_key == "foo":
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "Stripe is not configured: set STRIPE_SECRET_KEY in backend "
+                "environment"
+            ),
+        )
+    stripe.api_key = stripe_key
+
+
 @billing_router.post("/create-checkout-session-postpaid")
 async def create_checkout_session_postpaid(
     mode: Annotated[str, Form()],
     lookup_key: Annotated[str, Form()],
     user: User = Depends(auth.current_active_user),
 ):
+    ensure_stripe_is_configured()
     if mode not in ["subscription"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
@@ -58,7 +72,7 @@ async def create_checkout_session_postpaid(
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
-            status_code=500, detail="Error creating checkout session {e}"
+            status_code=500, detail=f"Error creating checkout session {e}"
         )
 
 
@@ -69,6 +83,7 @@ async def create_checkout_session_prepaid(
     quantity: Annotated[int, Form()],
     user: User = Depends(auth.current_active_user),
 ):
+    ensure_stripe_is_configured()
     if mode not in ["payment"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
@@ -103,7 +118,7 @@ async def create_checkout_session_prepaid(
     except Exception as e:
         logging.error(f"Error creating checkout session: {e}")
         raise HTTPException(
-            status_code=500, detail="Error creating checkout session {e}"
+            status_code=500, detail=f"Error creating checkout session {e}"
         )
 
 
@@ -114,11 +129,15 @@ async def create_checkout_session_js(
     quantity: Annotated[int, Form()],
     user: User = Depends(auth.current_active_user),
 ):
+    ensure_stripe_is_configured()
     if mode not in ["subscription", "payment", "setup"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -145,7 +164,8 @@ async def create_checkout_session_js(
             cancel_url=stripe_cancel_url(),
         )
         return JSONResponse(
-            {"stripe_checkout_url": checkout_session.url}, status_code=200
+            {"stripe_checkout_url": checkout_session.url},
+            status_code=200,
         )
     except Exception as e:
         logging.error(f"Error creating 2026 JS friendly checkout session: {e}")
@@ -162,11 +182,15 @@ async def create_checkout_session_get(
     quantity: int,
     user: User = Depends(auth.current_active_user),
 ):
+    ensure_stripe_is_configured()
     if mode not in ["subscription", "payment", "setup"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -208,11 +232,15 @@ async def create_checkout_session(
     quantity: Annotated[int, Form()],
     user: User = Depends(auth.current_active_user),
 ):
+    ensure_stripe_is_configured()
     if mode not in ["subscription", "payment", "setup"]:
         logging.error(f"Invalid checkout mode: {mode}")
         raise HTTPException(
             status_code=400,
-            detail="Invalid checkout mode, expected 'payment', 'setup', or 'subscription'",
+            detail=(
+                "Invalid checkout mode, expected 'payment', 'setup', or "
+                "'subscription'"
+            ),
         )
 
     if mode == "payment":
@@ -261,6 +289,7 @@ async def subscribe_success(
         auth.get_user_manager
     ),
 ):
+    ensure_stripe_is_configured()
     plan = None
     session_id = data["session_id"]
     customer_id = None
@@ -291,7 +320,7 @@ async def subscribe_success(
 
     except Exception as e:
         logging.error(f"Error subscribing user: {e}")
-        raise HTTPException(status_code=500, detail="Error subscribing user: {e}")
+        raise HTTPException(status_code=500, detail=f"Error subscribing user: {e}")
     # finally:
     #     db = DBStore()
     #     db.log_json_event(
@@ -301,7 +330,8 @@ async def subscribe_success(
     #     )
     # Another try, if these fail, we'll make a note but return success at this point
     try:
-        # Also add all orgs that user is a member of to be covered from this subscription, if they aren't already paid by any other group member.
+        # Also add all orgs that user is a member of to be covered from this
+        # subscription, if they aren't already paid by any other group member.
         db = DBStore()
         orgs = get_user_orgs(user)
         for org in orgs:
@@ -345,18 +375,32 @@ async def subscribe_success(
 
 
 def stripe_success_url():
-    server = os.environ["SERVER_NAME"]
+    server = _normalize_server_url(os.environ.get("SERVER_NAME", "localhost"))
     return server + "/billing?subscribe_success=true&session_id={CHECKOUT_SESSION_ID}"
 
 
 def stripe_cancel_url():
-    server = os.environ["SERVER_NAME"]
+    server = _normalize_server_url(os.environ.get("SERVER_NAME", "localhost"))
     return server + "/billing?subscribe_cancel=true"
 
 
 def stripe_return_url():
-    server = os.environ["SERVER_NAME"]
+    server = _normalize_server_url(os.environ.get("SERVER_NAME", "localhost"))
     return server + "/billing"
+
+
+def _normalize_server_url(server: str) -> str:
+    server = server.strip().rstrip("/")
+    if server.startswith("http://") or server.startswith("https://"):
+        return server
+    if (
+        server == "localhost"
+        or server == "127.0.0.1"
+        or server.startswith("localhost:")
+        or server.startswith("127.0.0.1:")
+    ):
+        return "http://" + server
+    return "https://" + server
 
 
 @billing_router.get("/create-portal-session")
@@ -364,6 +408,8 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
     if not user.billing and not user.billing_runners:
         logging.error(f"User {user.email} has no billing information")
         raise HTTPException(status_code=400, detail="User has no billing information")
+
+    ensure_stripe_is_configured()
 
     logging.info("Starting billing/create-portal-session")
     logging.info(user)

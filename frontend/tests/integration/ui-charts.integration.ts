@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken } from "./auth-utils";
 
 /**
  * UI Validation Tests for Charts and Graphs
@@ -16,9 +17,11 @@ async function login(page: any, email: string, password: string) {
   await page.waitForURL("/", { timeout: 10000 });
 }
 
+const env = (globalThis as any).process?.env || {};
+
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Chart UI - Data Visualization", () => {
@@ -32,7 +35,7 @@ test.describe("Chart UI - Data Visualization", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-render-${Date.now()}`;
 
     // Submit multiple data points
@@ -103,7 +106,7 @@ test.describe("Chart UI - Data Visualization", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-points-${Date.now()}`;
 
     // Create exactly 10 data points
@@ -161,7 +164,7 @@ test.describe("Chart UI - Data Visualization", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-trend-${Date.now()}`;
 
     // Create data with clear upward trend
@@ -219,7 +222,7 @@ test.describe("Chart UI - Data Visualization", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-single-${Date.now()}`;
 
     // Create single data point
@@ -282,7 +285,7 @@ test.describe("Chart UI - Change Point Visualization", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-changepoint-${Date.now()}`;
 
     // Create data with obvious performance regression
@@ -364,7 +367,7 @@ test.describe("Chart UI - Time Range and Zoom", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const testName = `ui-chart-timerange-${Date.now()}`;
 
     // Create data spanning a week
@@ -435,7 +438,7 @@ test.describe("Chart UI - Multiple Metrics", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Create tests with different units
     const tests = [

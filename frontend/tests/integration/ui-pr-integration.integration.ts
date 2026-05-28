@@ -1,4 +1,5 @@
 import { test, expect } from "@playwright/test";
+import { getJwtToken, loginWithCookie } from "./auth-utils";
 
 /**
  * UI Validation Tests for Pull Request Integration
@@ -9,59 +10,22 @@ import { test, expect } from "@playwright/test";
  * Critical for CI/CD workflow where test results are linked to PRs.
  */
 
-// Helper to login - uses API directly to bypass UI login form issues
-async function login(page: any, email: string, password: string) {
-  // Get authentication token from API
-  const response = await page.request.post('http://localhost:8001/api/v0/auth/jwt/login', {
-    form: {
-      username: email,
-      password: password
-    }
-  });
-
-  if (!response.ok()) {
-    throw new Error(`Login failed with status ${response.status()}: ${await response.text()}`);
-  }
-
-  const { access_token } = await response.json();
-
-  // Navigate to home page first
-  await page.goto('/');
-
-  // Then inject token and loggedIn flag into localStorage
-  await page.evaluate((token) => {
-    localStorage.setItem('token', token);
-    localStorage.setItem('username', 'testuser');
-    localStorage.setItem('loggedIn', 'true');
-  }, access_token);
-
-  // Reload page to trigger authentication
-  await page.reload();
-
-  // Wait for app to recognize authentication
-  await page.waitForTimeout(1000);
-
-  // Verify token is present
-  const storedToken = await page.evaluate(() => localStorage.getItem('token'));
-  if (!storedToken) {
-    throw new Error('Token not found in localStorage after login');
-  }
-}
+const env = (globalThis as any).process?.env || {};
 
 const TEST_USER = {
-  email: process.env.TEST_USER_EMAIL || "test@example.com",
-  password: process.env.TEST_USER_PASSWORD || "testpassword123",
+  email: env.TEST_USER_EMAIL || "test@example.com",
+  password: env.TEST_USER_PASSWORD || "testpassword123",
 };
 
 test.describe("Pull Request Integration - PR List Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should display pull requests from API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Get PRs from API
     const apiResponse = await request.get("http://localhost:8001/api/v0/pulls", {
@@ -86,7 +50,7 @@ test.describe("Pull Request Integration - PR List Display", () => {
   });
 
   test("should handle user with no PR results", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
 
     // Get PRs from API
     const apiResponse = await request.get("http://localhost:8001/api/v0/pulls", {
@@ -109,14 +73,14 @@ test.describe("Pull Request Integration - PR Results Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should submit PR result via API and verify storage", async ({
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Math.floor(Date.now() / 1000); // Unique PR number
     const benchmarkName = `pr-test-${Date.now()}`;
@@ -174,7 +138,7 @@ test.describe("Pull Request Integration - PR Results Display", () => {
   });
 
   test("should retrieve PR result via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Math.floor(Date.now() / 1000);
     const benchmarkName = `pr-retrieve-test-${Date.now()}`;
@@ -231,11 +195,11 @@ test.describe("Pull Request Integration - PR Changes Display", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should get PR changes via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Math.floor(Date.now() / 1000);
     const benchmarkName = `pr-changes-test-${Date.now()}`;
@@ -297,7 +261,7 @@ test.describe("Pull Request Integration - PR Changes Display", () => {
     page,
     request,
   }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Math.floor(Date.now() / 1000);
     const testName = `specific-test-${Date.now()}`;
@@ -380,11 +344,11 @@ test.describe("Pull Request Integration - PR Deletion", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should delete PR results via API", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Math.floor(Date.now() / 1000);
     const benchmarkName = `pr-delete-test-${Date.now()}`;
@@ -443,7 +407,7 @@ test.describe("Pull Request Integration - UI Navigation", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   // Note: This test requires /api/v0/users/me endpoint which is not yet implemented
@@ -476,11 +440,11 @@ test.describe("Pull Request Integration - Error Handling", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await page.evaluate(() => localStorage.clear());
-    await login(page, TEST_USER.email, TEST_USER.password);
+    await loginWithCookie(page, TEST_USER.email, TEST_USER.password);
   });
 
   test("should handle non-existent PR gracefully", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const nonExistentPR = 999999999;
     const benchmarkName = "nonexistent-test";
@@ -498,7 +462,7 @@ test.describe("Pull Request Integration - Error Handling", () => {
   });
 
   test("should handle invalid PR data gracefully", async ({ page, request }) => {
-    const token = await page.evaluate(() => localStorage.getItem("token"));
+    const token = await getJwtToken(page, TEST_USER.email, TEST_USER.password);
     const repo = "test-org/test-repo";
     const pullNumber = Date.now();
 

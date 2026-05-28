@@ -7,9 +7,9 @@ const SubscribeSuccess = ({ sessionId }) => {
       method: "POST",
       headers: {
         "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
       },
       body: JSON.stringify({ session_id: sessionId }),
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -64,10 +64,7 @@ const UserBillingPage = () => {
   const [loading, setLoading] = useState(true);
   const fetchBillingInfo = async () => {
     const response = await fetch("/api/v0/user/config", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     if (!response.ok) {
@@ -95,10 +92,7 @@ const UserBillingPage = () => {
 
   const getMeteredUsageStatus = async () => {
     const response = await fetch("/api/v0/user/meters", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
     if (!response.ok) {
       console.error(
@@ -129,12 +123,12 @@ const UserBillingPage = () => {
         method: "POST",
         headers: {
           "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
         },
         body: JSON.stringify({
           plan: plan,
           orgs: [{name: ev.target.name, paid_by: ev.target.checked}],
-        })
+        }),
+        credentials: "include",
       });
       if (response3.status !== 200) {
         console.error("Failed to POST org subscription configuration");
@@ -146,10 +140,7 @@ const UserBillingPage = () => {
 
     const getOrganizations = async (plan) => {
       const response2 = await fetch("/api/v0/orgs/subscriptions?plan=" + plan, {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("token"),
-        },
+        credentials: "include",
       });
       if (response2.status !== 200) {
         console.error("Failed to GET org subscription configuration");
@@ -333,10 +324,7 @@ const UserBillingPage = () => {
 
   const onClick = async () => {
     const response = await fetch("/api/v0/billing/create-portal-session", {
-      headers: {
-        "Content-type": "application/json",
-        Authorization: "Bearer " + localStorage.getItem("token"),
-      },
+      credentials: "include",
     });
 
     let portalSession = await response.json();
