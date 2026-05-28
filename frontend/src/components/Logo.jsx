@@ -21,9 +21,9 @@ export const LogoBrown = () => {
   );
 };
 
-export const SmallLogo = ({loading='eager'}) => {
+export const SmallLogo = ({loading='eager', className = ''}) => {
   return (
-    <div className="nyrkio-logo nyrkio-logo-default" >
+    <div className={`nyrkio-logo nyrkio-logo-default ${className}`} >
       <img
         loading={loading}
         src="/p/logo/full/new/NyrkioLogo_Final_Full_Brown46-shadow-300.png"

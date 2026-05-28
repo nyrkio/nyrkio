@@ -1,117 +1,199 @@
-const cols = "col-sm-6 col-md-4 oss-user-card";
-const style = {paddingRight: "3em", marginTop: "4em"};
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination } from "swiper/modules";
 
-export const MongoDB = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>MongoDB</h4>
-    <p>The MongoDB performance team is the home of this idea, and the core math that is the <em>E-Divisive Means</em> algorithm was implemented there.</p>
-    <p>After almost a decade in production use, the shift to <em>Continuous Benchmarking</em> has unlocked a culture where responsibility for performance benchmarks and fixing regressions has been delegated down to individual feature teams. Nowadays MongoDB automatically analyzes over a million data points per build, produceed by their automated performance testing framework. This is only possible thanks to finding an algorithm that allows for automatic processing of results with a low false positive rate.</p>
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+import '../style/components/swiper.scss';
+import {Icon} from "./Icon.jsx";
 
-    <p>Read more...</p>
+const companies = [
+  {
+    title: "MongoDB",
+    description: [
+      "The MongoDB performance team is the home of this idea, and the core math behind the E-Divisive Means algorithm was implemented there.",
+      "After almost a decade in production use, the shift to Continuous Benchmarking has unlocked a culture where responsibility for performance benchmarks and fixing regressions has been delegated to individual feature teams. Nowadays MongoDB automatically analyzes over a million data points per build, produced by their automated performance testing framework.",
+    ],
+    links: [
+      {
+        title: "Change Point Detection in Software Performance Testing",
+        url: "https://arxiv.org/abs/2003.00584",
+        meta: "Daly et al., 2020",
+      },
+      {
+        title: "Automated System Performance Testing at MongoDB",
+        url: "https://arxiv.org/abs/2004.08425",
+        meta: "Ingo & Daly, 2020",
+      },
+      {
+        title: "Creating a Virtuous Cycle in Performance Testing at MongoDB",
+        url: "https://dl.acm.org/doi/10.1145/3427921.3450234",
+        meta: "Daly, 2021",
+      },
+      {
+        title: "MongoDB 8.0: Improving Performance, Avoiding Regressions",
+        url: "https://www.mongodb.com/company/blog/mongodb-8-0-improving-performance-avoiding-regressions",
+        meta: "Mark Benvenuto, 2025",
+      },
+    ],
+  },
 
-    <ul>
-    <li><a href="https://arxiv.org/abs/2003.00584">Change Point Detection in Software Performance Testing</a>, Daly et.al., 2020.</li>
-    <li><a href="https://arxiv.org/abs/2004.08425">Automated System Performance Testing at MongoDB</a>, Ingo & Daly, 2020.</li>
-    <li><a href="https://dl.acm.org/doi/10.1145/3427921.3450234">Creating a Virtuous Cycle in Performance Testing at MongoDB</a>, Daly, 2021.</li>
-    <li><a href="https://www.mongodb.com/company/blog/mongodb-8-0-improving-performance-avoiding-regressions">MongoDB 8.0: Improving Performance, Avoiding Regressions</a>, Mark Benvenuto, 2025.</li>
-    </ul>
+  {
+    title: "Netflix",
+    description: [
+      "At Netflix, maintaining reliable performance is paramount to the end-user experience.",
+      "The Netflix TVUI team was the first company to use the Change Point Detection algorithm developed and open-sourced at MongoDB.",
+    ],
+    links: [
+      {
+        title: "Fixing Performance Regressions Before They Happen",
+        url: "https://netflixtechblog.com/fixing-performance-regressions-before-they-happen-eab2602b86fe",
+        meta: "Angus Croll, 2022",
+      },
+      {
+        title: "Netflix: A Shining Example of QA Done Right",
+        url: "https://bismabhundi.medium.com/netflix-a-shining-example-of-qa-done-right-c566196dfceb",
+        meta: "Bisma Latif, 2024",
+      },
+    ],
+  },
+
+  {
+    title: "DataStax",
+    description: [
+      "DataStax automated a suite of performance tests as part of a Continuous Benchmarking workflow.",
+      "DataStax built upon the E-Divisive algorithm open-sourced by MongoDB and transformed it into a fully functional command-line tool.",
+    ],
+    links: [
+      {
+        title:
+          "Hunter: Using Change Point Detection to Hunt for Performance Regressions",
+        url: "https://arxiv.org/abs/2301.03034",
+        meta: "Fleming & Kołaczkowski, 2024",
+      },
+      {
+        title: "Detecting Performance Regressions with DataStax Hunter",
+        url: "https://medium.com/building-the-open-data-stack/detecting-performance-regressions-with-datastax-hunter-c22dc444aea4",
+        meta: "Piotr Kołaczkowski",
+      },
+    ],
+  },
+
+  {
+    title: "Confluent",
+    description: [
+      "Confluent uses Apache Otava as part of a Continuous Benchmarking workflow to test Kafka Streams performance.",
+    ],
+    links: [
+      {
+        title:
+          "Automating Speed: A Proven Approach to Preventing Performance Regressions in Kafka Streams",
+        url: "https://www.confluent.io/events/kafka-summit-london-2024/automating-speed-a-proven-approach-to-preventing-performance-regressions-in/",
+        meta: "Alexander Sorokoumov & John Roessler, 2024",
+      },
+    ],
+  },
+
+  {
+    title: "Red Hat OpenShift",
+    description: [
+      "OpenShift is Red Hat's Kubernetes platform.",
+      "Red Hat uses Apache Otava as part of Cloud Bulldozer, a performance testing and analysis framework.",
+    ],
+    links: [
+      {
+        title: "Cloud Bulldozer",
+        url: "https://github.com/cloud-bulldozer",
+        meta: "GitHub",
+      },
+    ],
+  },
+
+  {
+    title: "Tarantool",
+    description: [
+      "Tarantool is a NoSQL database and Lua application server known for high performance.",
+      "To guard against performance regressions, they recently added Apache Otava to their CI pipeline.",
+    ],
+    links: [
+      {
+        title: "Project discussion about Apache Otava",
+        url: "https://github.com/tarantool/tarantool/pull/11408",
+        meta: "GitHub",
+      },
+    ],
+  },
+];
+
+const CompanyCard = ({ item }) => {
+  return (
+    <div className="h-100 p-4 d-flex flex-column border rounded-2 bg-white shadow-sm border border-primary">
+      <h3 className="mb-3 fs-5 ff-base text-center text-secondary ls-0">{item.title}</h3>
+
+      {item.description.map((text, index) => (
+        <p key={index}>{text}</p>
+      ))}
+      <br/>
+      <ul className="ps-3 mt-auto mb-0">
+        {item.links.map((link, index) => (
+          <li key={index} className="mb-2">
+            <a
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {link.title}
+            </a>
+            {link.meta && <> — {link.meta}</>}
+          </li>
+        ))}
+      </ul>
     </div>
-    </>
-    );
+  );
 };
 
+export const OssUserSlider = () => {
+  return (
+    <div className="swiper-slider">
+      <button type="button" className="btn btn-swiper btn-prev btn-primary btn-square d-none d-xl-block" id="oss-users-prev" aria-label="Previous">
+        <Icon name="chevron-left" size={24} className="text-white"/>
+      </button>
+      <button type="button" className="btn btn-swiper btn-next btn-primary btn-square d-none d-xl-block" id="oss-users-next" aria-label="Next">
+        <Icon name="chevron-right" size={24} className="text-white"/>
+      </button>
+      <Swiper
+        modules={[Pagination, Navigation]}
+        spaceBetween={20}
+        pagination={{ clickable: true }}
+        autoHeight={true}
+        navigation={{
+          prevEl: '#oss-users-prev',
+          nextEl: '#oss-users-next',
+        }}
+        slidesPerView={1}
+        breakpoints={{
+          768: {
+            slidesPerView: 2,
+            autoHeight: false,
+          },
 
-export const Netflix = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>Netflix</h4>
-    <p>At Netflix maintaining reliable performance is paramount to the end user experience. A sluggish transfer between UI screens could lead to users abandoning the service altogether, or in any case usability will suffer. Netflix runs on TVs and set top boxes, which have less resources than a laptop or PC. Hence the environment is more sensitive to performance issues, and performance regressions may have very visible consequences, including crashing the Netflix app entirely.</p>
-    <p>The Netflix TVUI team was the first company to use the Change Point Detection algorithm developed and open sourced at MongoDB.</p>
+          992: {
+            slidesPerView: 3,
+            autoHeight: false,
+          },
 
-    <p>Read more...</p>
-
-    <ul>
-    <li><a href="https://netflixtechblog.com/fixing-performance-regressions-before-they-happen-eab2602b86fe">Fixing Performance Regressions Before they Happen</a>, Angus Croll, 2022</li>
-    <li><a href="https://bismabhundi.medium.com/netflix-a-shining-example-of-qa-done-right-c566196dfceb">Netflix: A Shining Example of QA Done Right</a>, Bisma Latif, 2024.</li>
-    <li><a href="https://www.reddit.com/r/programming/comments/teddg5/netflix_fixing_performance_regressions_before/">Netflix: Fixing Performance Regressions Before they Happen</a>, Reddit, 2022.</li>
-    </ul>
+          1400: {
+            slidesPerView: 4,
+            autoHeight: false,
+          },
+        }}
+      >
+        {companies.map((item, index) => (
+          <SwiperSlide key={index} className="h-auto">
+            <CompanyCard item={item} />
+          </SwiperSlide>
+        ))}
+      </Swiper>
     </div>
-    </>
-    );
+  );
 };
-
-export const Datastax = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>Datastax</h4>
-    <p>Datastax, just like MongoDB, had taken the step to automate a suite of performance tests, aka <em>Continuous Benchmarking</em>. The results of nightly builds would be stored in a Grafana / Prometheus database and dashboard, and a human engineer would look at the dashboards every now and then. When MongoDB published their paper on using Change Point Detection to analyze such results, Datastax engineers were eager to automate also the analysis part of the work.</p>
-    <p>Datastax built upon the E-Divisive algorithm open sourced by MongoDB, and made major additions. Datastax also published their work in the same conference as MongoDB had done, and open sourced their additions as MongoDB had done. This transformed what was essentially a math or signal processing library, to a fully functional command-line tool, that can read and output CSV files, and several database sources, such as Postgresql.</p>
-
-    <p>Read more...</p>
-
-    <ul>
-    <li><a href="https://arxiv.org/abs/2301.03034">Hunter: Using Change Point Detection to Hunt for Performance Regressions</a>, Fleming & Kołaczkowski, 2024.</li>
-    <li><a href="https://medium.com/building-the-open-data-stack/detecting-performance-regressions-with-datastax-hunter-c22dc444aea4">Detecting Performance Regressions with DataStax Hunter</a>, Piotr Kołaczkowski</li>
-    </ul>
-    </div>
-    </>
-    );
-};
-
-
-export const Confluent = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>Confluent</h4>
-    <p>Confluent uses Apache Otava as part of a Continuous Benchmarking workflow to test performance of Kafka Streams. The streaming of data requires extreme performance, as Kafka clusters kan scale to dozens of nodes, and millions of messages per second.</p>
-
-    <p>Reading list</p>
-
-    <ul>
-    <li><a href="https://www.confluent.io/events/kafka-summit-london-2024/automating-speed-a-proven-approach-to-preventing-performance-regressions-in/">Automating Speed: A Proven Approach to Preventing Performance Regressions in Kafka Streams</a>, Alexander Sorokoumov & John Roessler, 2024</li>
-    </ul>
-    </div>
-    </>
-    );
-};
-
-
-
-
-export const RedHat = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>Red Hat OpenShift</h4>
-    <p>OpenShift is Red Hat's Kubernetes platform. It is a basic Infrastructure as a Service and naturally customers expect reliable performance and no surprises.</p>
-    <p>Red Hat uses Apache Otava as part of Cloud Bulldozer, a performance testing and results analysis framework. The results  are made available to the OpenShift community. This way everyone benefits from the results of Red Hat's Continuous Benchmarking efforts.</p>
-
-    <p>Read more...</p>
-
-    <ul>
-    <li><a href="https://github.com/cloud-bulldozer">https://github.com/cloud-bulldozer</a></li>
-    </ul>
-    </div>
-    </>
-    );
-};
-
-
-
-export const Tarantool = () => {
-    return (<>
-    <div className={cols} style={style}>
-    <h4>Tarantool</h4>
-    <p>Tarantool is a NoSQL database and Lua application server. It's known as a high performance application platform. To guard against performance regressions, they recently added Apache Otava to their CI pipeline.</p>
-
-    <p>Read more...</p>
-
-    <ul>
-    <li><a href="https://github.com/tarantool/tarantool/pull/11408">Project discussion about how to best use Apache Otava</a></li>
-    </ul>
-    </div>
-    </>
-    );
-};
-
-

@@ -165,7 +165,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
         const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
         return (
-          <a href={url} target="_blank">
+          <a href={url} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
         );
