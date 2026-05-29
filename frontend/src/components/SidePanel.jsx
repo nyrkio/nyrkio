@@ -122,18 +122,18 @@ const DashSidePanel = ({ loggedIn }) => {
   if (loggedIn) {
     return (
       <>
-      <Link to="/tests" className="nav-link">
+      <NavLink to="/tests" className="nav-link">
       My Dashboard
-      </Link>
-      <Link to="/orgs" className="nav-link">
+      </NavLink>
+      <NavLink to="/orgs" className="nav-link">
       Org Dashboards
-      </Link>
-      <Link to="/public" className="nav-link">
+      </NavLink>
+      <NavLink to="/public" className="nav-link">
       Public Dashboards
-      </Link>
-      <Link to="/frontpage" className="nav-link">
+      </NavLink>
+      <NavLink to="/frontpage" className="nav-link">
       Front page
-      </Link>
+      </NavLink>
       </>
     );
   }
@@ -219,16 +219,10 @@ const SettingsSidePanel = ({ loggedIn, orgs }) => {
   document.body.classList.add("section-settings");
   return (
     <>
-    <Link to="/user/settings" className="nav-link nav-link-login">
-    <span className="bi bi-person-fill"></span> User Settings
-    </Link>
+    <NavLink to="/user/settings" className="nav-link nav-link-login">User Settings</NavLink>
     <OrgsList orgs={orgs}/>
-    <Link to="/billing" className="nav-link nav-link-login">
-    <span className="bi bi-credit-card"></span> Billing
-    </Link>
-    <Link to="/pricing" className="nav-link nav-link-login">
-    <span className="bi bi-credit-card"></span> Upgrade your subscription
-    </Link>
+    <NavLink to="/billing" className="nav-link nav-link-login">Billing</NavLink>
+    <NavLink to="/pricing" className="nav-link nav-link-login">Upgrade your subscription</NavLink>
     </>
   );
 };
@@ -237,9 +231,7 @@ const OrgsList = ({orgs}) => {
   for (let i=0; i<orgs.length; i++){
     const thisOrg = orgs[i];
     orgsHtml.push(
-      <Link to={"/org/"+thisOrg}  className="nav-link nav-link-login" key={i}>
-      <span className="bi bi-people-fill"></span> {thisOrg} Settings
-      </Link>
+      <NavLink to={"/org/"+thisOrg}  className="nav-link nav-link-login" key={i}>{thisOrg} Settings</NavLink>
     );
   }
   return (<>{orgsHtml}</>);
