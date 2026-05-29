@@ -192,7 +192,7 @@ const UserBillingPage = () => {
     const pt = planType[plan];
     const initialRows = 3;
     let rownr = 0;
-    return stripedata.map(day =>
+    return stripedata?.map(day =>
       <tr key={day.id} className={rownr++ >= initialRows? "stripedataCollapse" : ""}>
       <td>{new Date(day.start_time*1000).toDateString()}</td>
       <td style={{textAlign: "right"}}>{Math.round(1000*day.aggregated_value)/1000}</td>
@@ -225,7 +225,7 @@ const UserBillingPage = () => {
   const CpuHoursTable = ({stripedata, plan}) => {
     let totalHours = 0;
     let totalEuros = 0;
-    stripedata.map((day) => {
+    stripedata?.map((day) => {
       totalHours = totalHours + day.aggregated_value;
       totalEuros = totalEuros + day.aggregated_value / 10;
     });
