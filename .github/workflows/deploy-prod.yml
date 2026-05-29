@@ -9,19 +9,25 @@ jobs:
     environment: prod
     steps:
       - name: Checkout this repo (nyrkio)
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
-          submodules: "true"
+          submodules: recursive
+
+      - name: Sync submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule status --recursive
 
       - name: Check out nyrkio-proprietary
-        uses: actions/checkout@master
+        uses: actions/checkout@v6
         with:
           repository: nyrkio/nyrkio-proprietary
           path: p
           token: ${{ secrets.CHECKOUTP }}
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -29,7 +35,9 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
 
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
@@ -67,12 +75,18 @@ jobs:
     runs-on: ubuntu-latest
     environment: prod
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v6
         with:
-          submodules: "true"
+          submodules: recursive
+
+      - name: Sync submodules
+        run: |
+          git submodule sync --recursive
+          git submodule update --init --recursive
+          git submodule status --recursive
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -80,7 +94,9 @@ jobs:
 
       - name: Login to Amazon ECR
         id: login-ecr
-        uses: aws-actions/amazon-ecr-login@v1
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
 
 
       - name: docker compose up
