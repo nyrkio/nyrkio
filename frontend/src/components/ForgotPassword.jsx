@@ -6,7 +6,7 @@ import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
 import { Icon } from "./Icon.jsx";
 import {PasswordInput} from "./PasswordInput/PasswordInput.jsx";
 
-export const ForgotPassword = () => {
+export const ForgotPassword = ({loggedIn}) => {
   const [errorText, setErrorText] = useState("");
   const [secondPhase, setSecondPhase] = useState(false);
   const [queryParams, setQueryParams] = useSearchParams();
@@ -77,7 +77,7 @@ export const ForgotPassword = () => {
   const RequestForm = () => {
     return (
       <div id="request_form">
-          <form  onSubmit={emailSubmit}>
+          <form onSubmit={emailSubmit}>
             <div className="text-start mb-3">
               <label className="form-label" htmlFor="email">Email</label>
               <input
@@ -111,6 +111,9 @@ export const ForgotPassword = () => {
       return "";
     };
     const newPasswordSubmit = async (e) => {
+
+
+
       e.preventDefault();
       const form = e.target;
       const token = form.elements[0].value;
@@ -192,9 +195,12 @@ export const ForgotPassword = () => {
 
       {!isSecondPhase ? <RequestForm /> : <SetPassword />}
 
-      <hr className="my-4 my-md-5" />
+      {!loggedIn ? (<>
+        <hr className="my-4 my-md-5" />
+        <p className="mb-0 fw-normal">I remembered it, <a href="/login">Log In</a></p>
+      </>) : (<></>)}
 
-      <p className="mb-0 fw-normal">I remembered it, <a href="/login">Log In</a></p>
+
     </HighlightLoginSection>
   );
 };

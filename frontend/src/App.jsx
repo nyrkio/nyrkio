@@ -124,7 +124,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       />
       <Route
       path="/forgot-password"
-      element={<ForgotPassword />}
+      element={<ForgotPassword loggedIn={loggedIn} />}
       />
       <Route path="/public/*"
       element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
