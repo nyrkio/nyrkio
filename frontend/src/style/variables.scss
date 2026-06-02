@@ -111,8 +111,13 @@ $nav-link-hover-color: $primary;
 //
 //$form-check-input-active-filter:          brightness(90%) !default;
 //
-$form-check-input-bg: #9CA3AF;
-$form-check-input-border:                   1px solid #9CA3AF;
+$form-check-input-width: 1.75em;
+$form-check-input-bg:                     #fff;
+$form-check-input-checked-bg-color:      #fff;
+$form-check-input-checked-border-color:  $primary;
+$form-check-input-checked-bg-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><path fill="%2350320D" d="M435.36 118.165l-240.868 240.849c-1.619 1.626-3.544 2.915-5.662 3.796-2.119 0.88-4.391 1.334-6.685 1.334s-4.568-0.454-6.686-1.334c-2.119-0.882-4.044-2.17-5.663-3.796l-93.147-93.233c-1.62-1.626-3.544-2.916-5.663-3.796s-4.391-1.334-6.686-1.334c-2.294 0-4.567 0.454-6.686 1.334s-4.044 2.17-5.663 3.796c-1.626 1.62-2.916 3.544-3.795 5.663s-1.334 4.391-1.334 6.687c0 2.294 0.453 4.566 1.334 6.685s2.17 4.043 3.795 5.663l93.181 93.164c9.83 9.811 23.15 15.322 37.039 15.322s27.209-5.51 37.039-15.322l240.849-240.797c1.624-1.619 2.911-3.542 3.79-5.66s1.33-4.388 1.33-6.68c0-2.293-0.452-4.563-1.33-6.68s-2.166-4.041-3.79-5.66c-1.62-1.626-3.544-2.915-5.663-3.796s-4.391-1.334-6.687-1.334c-2.294 0-4.566 0.454-6.685 1.334s-4.043 2.17-5.663 3.796z"></path></svg>');
+
+
 //$form-check-input-border-radius:          .25em !default;
 //$form-check-radio-border-radius:          50% !default;
 //$form-check-input-focus-border:           $input-focus-border-color !default;
@@ -137,6 +142,7 @@ $form-check-input-border:                   1px solid #9CA3AF;
 // scss-docs-end form-check-variables
 
 // scss-docs-start form-switch-variables
+
 $form-switch-width: 3em;
 $form-switch-color: #E5E7EB;
 $form-switch-width:               1.625em;
@@ -173,40 +179,3 @@ $form-range-track-bg: #50320DB2;
 //$form-range-thumb-disabled-bg:             var(--#{$prefix}secondary-color) !default;
 //$form-range-thumb-transition:              background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out !default;
 // scss-docs-end form-range-variables
-
-
-// scss-docs-start form-check-variables
-$form-check-input-width:                  1em !default;
-//$form-check-min-height:                   $font-size-base * $line-height-base !default;
-//$form-check-padding-start:                $form-check-input-width + .5em !default;
-//$form-check-margin-bottom:                .125rem !default;
-//$form-check-label-color:                  null !default;
-//$form-check-label-cursor:                 null !default;
-//$form-check-transition:                   null !default;
-//
-//$form-check-input-active-filter:          brightness(90%) !default;
-//
-//$form-check-input-bg:                     $input-bg !default;
-//$form-check-input-border:                 var(--#{$prefix}border-width) solid var(--#{$prefix}border-color) !default;
-//$form-check-input-border-radius:          .25em !default;
-//$form-check-radio-border-radius:          50% !default;
-//$form-check-input-focus-border:           $input-focus-border-color !default;
-//$form-check-input-focus-box-shadow:       $focus-ring-box-shadow !default;
-//
-//$form-check-input-checked-color:          $component-active-color !default;
-//$form-check-input-checked-bg-color:       $component-active-bg !default;
-//$form-check-input-checked-border-color:   $form-check-input-checked-bg-color !default;
-//$form-check-input-checked-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$form-check-input-checked-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>") !default;
-//$form-check-radio-checked-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2' fill='#{$form-check-input-checked-color}'/></svg>") !default;
-//
-//$form-check-input-indeterminate-color:          $component-active-color !default;
-//$form-check-input-indeterminate-bg-color:       $component-active-bg !default;
-//$form-check-input-indeterminate-border-color:   $form-check-input-indeterminate-bg-color !default;
-//$form-check-input-indeterminate-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$form-check-input-indeterminate-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>") !default;
-//
-//$form-check-input-disabled-opacity:        .5 !default;
-//$form-check-label-disabled-opacity:        $form-check-input-disabled-opacity !default;
-//$form-check-btn-check-disabled-opacity:    $btn-disabled-opacity !default;
-//
-//$form-check-inline-margin-end:    1rem !default;
-// scss-docs-end form-check-variables

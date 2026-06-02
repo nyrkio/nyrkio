@@ -59,24 +59,21 @@ export const OrgDashboard = ({embed}) => {
 
   return (
     <>
-      <div className="row text-center">
-        <h1 className="mb-4">Organization Test Results</h1>
-      </div>
-      <div className="row justify-content-center text-center pt-5">
-        {loading ? (
-          <p>Loading...</p>
-        ) : (
-          <TableOrResult
-            prefix={prefix}
-            data={orgData}
-            baseUrls={baseUrls}
-            dashboardType={dashboardTypes.ORG}
-            embed={embed}
-            loading={loading}
-            setLoading={setLoading}
-          />
-        )}
-      </div>
+      <h1 className="text-center text-primary mb-4">Organization Test Results</h1>
+
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <TableOrResult
+          prefix={prefix}
+          data={orgData}
+          baseUrls={baseUrls}
+          dashboardType={dashboardTypes.ORG}
+          embed={embed}
+          loading={loading}
+          setLoading={setLoading}
+        />
+      )}
     </>
   );
 };

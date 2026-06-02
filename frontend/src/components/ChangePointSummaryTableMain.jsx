@@ -162,9 +162,9 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       return (<Loading loading={loading} />);
     }
     return (
-      <>
+      <div className="text-center mb-4">
         <span className="no-changepoints">(no changepoints)</span>
-      </>
+      </div>
     );
   }
 

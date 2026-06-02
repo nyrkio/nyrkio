@@ -67,10 +67,10 @@ export const PublicDashboard = () => {
   return (
     <div className="container">
       <div className="row text-center">
-        <h1 className="mb-4">Public Test Results</h1>
+        <h1 className="mb-4 text-primary text-center">Public Test Results</h1>
         <p>Public benchmark results as shared by Nyrkiö users.</p>
       </div>
-      <div className="row justify-content-center text-center pt-5" style={{"minHeight": "650px"}} height="650px">
+      <div className="row justify-content-center text-center pt-5" style={{"minHeight": "650px"}}>
         {loading ? (
           <p>Loading...</p>
         ) : (

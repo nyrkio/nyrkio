@@ -749,9 +749,9 @@ const NotificationSettings = () => {
     <HighlightLoginSection maxWidth="1000px">
       <h2 className="h3 text-secondary mb-3">Notification settings</h2>
       <form className="text-start">
-        <div className="form-check">
+        <div className="form-check mb-3">
           <input className="form-check-input" type="checkbox" id="notifiers_github_issues" name="notifiers_github_issues" checked={githubCheckbox} onChange={(e) => toggleGithub(e)}/>{" "}
-          <label class="form-check-label" htmlFor="notifiers_github_issues"> Create a GitHub issue if a change point was found and the commit is at most
+          <label className="form-check-label" htmlFor="notifiers_github_issues"> Create a GitHub issue if a change point was found and the commit is at most
             <input className="form-control d-inline form-control-sm mx-2 text-center"
                    style={{width:'46px'}}
                    type="text"
@@ -763,7 +763,7 @@ const NotificationSettings = () => {
         </div>
         <div className="form-check">
           <input className="form-check-input" type="checkbox" id="notifiers_github_pr" name="notifiers_github_pr" checked={githubPrCheckbox} onChange={(e) => toggleGithubPr(e)}/>{" "}
-          <label htmlFor="notifiers_github_pr" class="form-check-label">Post a comment on pull requests.</label>
+          <label htmlFor="notifiers_github_pr" className="form-check-label">Post a comment on pull requests.</label>
         </div>
       </form>
     </HighlightLoginSection>
