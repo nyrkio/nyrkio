@@ -21,6 +21,7 @@ import graph_4x4 from "../static/icons/graph-4x4.png";
 import graph_nx1 from "../static/icons/graph-nx1.png";
 import graph_2x1 from "../static/icons/graph-2x1.png";
 import graph_1x1 from "../static/icons/graph-1x1.png";
+import {Icon} from "./Icon.jsx";
 
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
@@ -54,10 +55,12 @@ export const TestList = ({
   if (shortNames.length == 0) {
     return (
       <li className="list-group-item nyrkio-empty" key="0">
-        <span
-          className="bi bi-emoji-surprise"
-          title="There are no test results"
-        ></span>
+        <div>
+          <Icon name="meh" size="46" />
+          <div className="mt-2">
+            There are no test results
+          </div>
+        </div>
       </li>
     );
   }
@@ -217,17 +220,22 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     console.warn("Unhandled prefix in URI: " + prefix);
     return (<NoMatch />);
   }
-  return (<TableOrResult data={unencodedTestNames}
-                         singleTestName={testName}
-                         prefix={prefix}
-                         summaries={summaries2}
-                         setSummaries={setSummaries2}
-                         loading={loading}
-                         setLoading={setLoading}
-                         dashboardType={dashboardTypes.USER}
-                         baseUrls={baseUrls}
-                         />);
+  return (<>
+      <div className="container">
+        <h1 className="text-center text-primary mb-4">Select Tests</h1>
 
+      </div>
+      <TableOrResult data={unencodedTestNames}
+                     singleTestName={testName}
+                     prefix={prefix}
+                     summaries={summaries2}
+                     setSummaries={setSummaries2}
+                     loading={loading}
+                     setLoading={setLoading}
+                     dashboardType={dashboardTypes.USER}
+                     baseUrls={baseUrls}
+      />
+    </>)
 };
 
 
@@ -350,55 +358,43 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
   return (
     <>
-      <div className="container-fluid pt-5 text-center benchmark-select col-sm-12 col-lg-12 col-xl-12">
-            <div className="container-fluid">
-              <div className="card">
-                <div className="card-header w-100">Select tests</div>
+      <div className="container">
+        <div className="text-center" id="showTestListCardBody">
+          <Loading loading={loading} />
+          <ul className="list-group list-group-flush">
+            <TestList
+              testNames={testNames}
+              shortNames={shortNames}
+              prefix={prefix}
+              displayNames={displayNames}
+              loading={loading}
+              setLoading={setLoading}
+              baseUrls={baseUrls}
+              setSummaries={setSummaries}
+              summaries={summaries}
+            />
+          </ul>
+        </div>
 
+        <ShowGraphsCard
+          testNames={testNames}
+          shortNames={shortNames}
+          prefix={prefix}
+          displayNames={displayNames}
+          baseUrls={baseUrls}
+          breadcrumbName={prefix}
+          dashboardType={dashboardType}
+          embed={embed}
+          loading={loading}
+          setLoading={setLoading}
+          setSummaries={setSummaries}
+          summaries={summaries}
 
-                <div className="card-body" id="showTestListCardBody">
-                  <Loading loading={loading} />
-                  <ul className="list-group list-group-flush">
-                    <TestList
-                      testNames={testNames}
-                      shortNames={shortNames}
-                      prefix={prefix}
-                      displayNames={displayNames}
-                      loading={loading}
-                      setLoading={setLoading}
-                      baseUrls={baseUrls}
-                      setSummaries={setSummaries}
-                      summaries={summaries}
-                    />
-                  </ul>
-                </div>
-              </div>
-              <ShowGraphsCard
-                    testNames={testNames}
-                    shortNames={shortNames}
-                    prefix={prefix}
-                    displayNames={displayNames}
-                    baseUrls={baseUrls}
-                    breadcrumbName={prefix}
-                    dashboardType={dashboardType}
-                    embed={embed}
-                    loading={loading}
-                    setLoading={setLoading}
-                    setSummaries={setSummaries}
-                    summaries={summaries}
-
-              />
-              <div className="card">
-                <div className="card-body create-new-test">
-                  <Link to="/docs/change-detection" className="btn btn-success col-xs-6 col-md-5 col-lg-4 col-xl-3">
-                    <span className="bi bi-plus-square-fill">
-                      &nbsp;&nbsp; Add test results
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            </div>
+        />
+        <div className="text-center mt-4">
+          <Link to="/docs/change-detection" className="btn btn-primary">+ Add test results</Link>
+        </div>
+      </div>
     </>
   );
 };
