@@ -1,8 +1,10 @@
-from datetime import datetime
-import json
-import requests
 import os
 import sys
+from datetime import datetime
+
+import json
+
+import requests
 
 GITHUB_TOKEN = os.environ["GITHUB_TOKEN"]
 
@@ -34,7 +36,11 @@ GIT_TARGET_BRANCH = os.environ.get("GIT_TARGET_BRANCH")
 
 
 def create_nyrkio_payload(benchmark, extra_info):
-    commit = GIT_COMMIT if GIT_COMMIT else os.environ.get("GITHUB_SHA")
+    commit = (
+        GIT_COMMIT
+        if (GIT_COMMIT and GIT_COMMIT != "None")
+        else os.environ.get("GITHUB_SHA")
+    )
     branch = GIT_TARGET_BRANCH if GIT_TARGET_BRANCH else "main"
 
     # The loops we need to jump through to get the commit time are
@@ -42,7 +48,8 @@ def create_nyrkio_payload(benchmark, extra_info):
     # git show -s --format=%ct HEAD. Instead we have to use the
     # REST API.
     response = requests.get(
-        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{commit}", headers=headers
+        f"https://api.github.com/repos/nyrkio/nyrkio/commits/{commit}",
+        headers=headers,
     )
     response.raise_for_status()
     timestamp = int(

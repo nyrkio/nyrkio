@@ -7,6 +7,7 @@ jobs:
   docker-images:
     runs-on: ubuntu-latest
     environment: prod
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     steps:
       - name: Checkout this repo (nyrkio)
         uses: actions/checkout@v6
@@ -74,6 +75,7 @@ jobs:
     needs: docker-images
     runs-on: ubuntu-latest
     environment: prod
+    if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     steps:
       - uses: actions/checkout@v6
         with:
