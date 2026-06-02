@@ -3,8 +3,12 @@
 CI_IMAGE ?= nyrkio-ci
 CI_DOCKERFILE ?= Dockerfile.ci
 EXTRA_INFO ?= /repo/extra_info.json
+PERF_COMPOSE_PROJECT ?= nyrkio-perf
+PERF_NETWORK ?= $(PERF_COMPOSE_PROJECT)_default
+TEST_HOST ?= http://nginx
 
 CI_RUN = docker run --rm -v $(CURDIR):/repo -w /repo
+CI_RUN_PERF = docker run --rm --network $(PERF_NETWORK) -v $(CURDIR):/repo -w /repo
 PERF_ENV = \
 	-e NYRKIO_ENV_TESTING \
 	-e NYRKIO_USERNAME \
@@ -13,7 +17,8 @@ PERF_ENV = \
 	-e GIT_COMMIT \
 	-e IMAGE_TAG \
 	-e GITHUB_TOKEN \
-	-e GIT_TARGET_BRANCH
+	-e GIT_TARGET_BRANCH \
+	-e TEST_HOST=$(TEST_HOST)
 
 ci-image:
 	if docker buildx version >/dev/null 2>&1; then \
@@ -47,9 +52,9 @@ perf: ci-image
 	@lscpu -J > extra_info.json
 	@printf '%s\n' "$$NYRKIO_ENV_TESTING" > .env.backend
 	@set -e; \
-	trap 'docker compose -f compose.dev.yml logs || true; docker compose -f compose.dev.yml down || true' EXIT; \
-	docker compose -f compose.dev.yml up -d; \
-	$(CI_RUN) $(PERF_ENV) $(CI_IMAGE) make perf-inner; \
+	trap 'docker compose -p $(PERF_COMPOSE_PROJECT) -f compose.dev.yml logs || true; docker compose -p $(PERF_COMPOSE_PROJECT) -f compose.dev.yml down || true' EXIT; \
+	docker compose -p $(PERF_COMPOSE_PROJECT) -f compose.dev.yml up -d; \
+	$(CI_RUN_PERF) $(PERF_ENV) $(CI_IMAGE) make perf-inner; \
 	$(CI_RUN) $(PERF_ENV) $(CI_IMAGE) make perf-process-inner
 
 ci-inner: lint-inner format-check-inner test-inner
