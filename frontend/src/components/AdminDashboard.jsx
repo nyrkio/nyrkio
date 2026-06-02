@@ -51,16 +51,28 @@ const UserTable = ({ data }) => {
   console.log("data is");
   console.log(data);
   return (
-    <div className="row">
-      <ul>
-        {Object.entries(data).map(([idx, user]) => {
-          return (
-            <li className="list-group-item" key={user['_id'] || -1}>
-              <Link to={`/`} onClick={(event) => {event.preventDefault(); impersonateUser(user).then(()=>{ window.location.href = '/'})}}>{user['email']}</Link>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="table-responsive rounded shadow">
+      <table className="table table-bordered text-center border-light">
+        <thead>
+        <tr>
+          <th>Email</th>
+          <th>Active</th>
+          <th>Superuser</th>
+          <th>Verified</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {Object.values(data || {}).map((user) => (
+          <tr key={user['_id'] || -1}>
+            <td className="text-start"><Link to={`/`} onClick={(event) => {event.preventDefault(); impersonateUser(user).then(()=>{ window.location.href = '/'})}}>{user['email']}</Link></td>
+            <td>{user.is_active ? "Yes" : "No"}</td>
+            <td>{user.is_superuser ? "Yes" : "No"}</td>
+            <td>{user.is_verified ? "Yes" : "No"}</td>
+          </tr>
+        ))}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -68,18 +80,9 @@ const UserTable = ({ data }) => {
 const MainAdminDashboard = ({ results }) => {
   return (
     <>
-      <div className="container col-10">
-        <h1>Admin Dashboard</h1>
-        <div>
-          <div className="card">
-            <div className="card-header">Impersonate user:</div>
-            <div className="card-body">
-              <ul className="list-group list-group-flush">
-                <UserTable data={results} />
-              </ul>
-            </div>
-          </div>
-        </div>
+      <div className="container">
+        <h1 className="text-center text-primary my-4 my-md-5">Admin Dashboard</h1>
+        <UserTable data={results} />
       </div>
     </>
   );
