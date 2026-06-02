@@ -15,9 +15,15 @@ input.form-control {
 .form-switch {
   padding-left: 3.5em;
 
+
   .form-check-input {
+    --bs-form-check-bg: #9CA3AF;
     height: 1.625em;
     width: 3em;
     margin: 0 0 0 -3.5em;
+
+    &:checked {
+      background-color: $primary;
+    }
   }
 }

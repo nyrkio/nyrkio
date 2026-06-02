@@ -47,7 +47,9 @@ export const RssWidget = () => {
             return (
               <SwiperSlide key={item.id}>
                 <div className="rss-card d-flex flex-column shadow-sm rounded-3 border border-primary p-3 h-100">
-                  <div className="rss-card__image rounded-3 ratio ratio-16x9 mb-4 overflow-hidden" style={{backgroundColor: '#D9D9D9'}}></div>
+                  <div className="rss-card__image rounded-3 ratio ratio-16x9 mb-4 overflow-hidden" style={{backgroundColor: '#D9D9D9'}}>
+                    {/* @todo: add image <img className="img-fluid w-100" src={item.image} alt={`${item.title} teaser`} loading="lazy"/>*/}
+                  </div>
                   <h3 className="rss-card__title text-secondary h5">{item.title}</h3>
                   <div className="rss-card__footer d-flex justify-content-between mt-auto">
                     <div className="rss-card__author text-truncate">{item.authors?.[0]?.name || "Unknown"}</div>
