@@ -5,11 +5,9 @@ import {
   Route,
   Navigate,
   useLocation,
-  useParams,
   useSearchParams
 } from "react-router-dom";
 
-import "./App.css";
 import { Login } from "./components/Login.jsx";
 import { Dashboard} from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
@@ -68,7 +66,7 @@ function MainApp({ loggedIn, setLoggedIn }) {
       </div>
     </>
     )
-  };
+  }
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
 import { Icon } from "./Icon.jsx";
@@ -23,7 +23,7 @@ export const SignUpPage2 = () => {
   const [showForm, setShowForm] = useState(formState.Visible);
 
 
-  const nop = () =>{e.preventDefault(); return true;};
+  const nop = (e) =>{e.preventDefault(); return true;};
 
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);

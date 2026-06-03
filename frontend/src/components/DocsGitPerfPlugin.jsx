@@ -1,5 +1,3 @@
-import { useEffect, useState } from "react";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 
 export const DocsGitPerfPlugin = () => {
   return (

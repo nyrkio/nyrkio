@@ -1,4 +1,4 @@
-import { OrigTestList, TestList, SingleResultWithTestname } from "./Dashboard";
+import { OrigTestList, SingleResultWithTestname } from "./Dashboard";
 import { createShortNames } from "../lib/utils";
 import { Breadcrumb } from "./Breadcrumb";
 import { AllChangePoints } from "./AllChangePoints";

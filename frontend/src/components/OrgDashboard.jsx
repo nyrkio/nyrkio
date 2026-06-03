@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
-import { dashboardTypes, getOrg } from "../lib/utils";
+import { dashboardTypes } from "../lib/utils";
 
 export const OrgDashboard = ({embed}) => {
   const location = useLocation();
