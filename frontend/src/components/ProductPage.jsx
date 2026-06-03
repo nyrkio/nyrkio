@@ -1,7 +1,5 @@
-import tigerbeetle from "../static/tigerbeetle-change-points.png";
 import nyrkio_gha from "../static/Nyrkio_GHA.png";
 import nyrkio_pr from "../static/NyrkioPrReport.png";
-import { LogoBrown } from "./Logo";
 import { SampleData } from "./SampleData";
 import { GetStartedButton } from "./FrontPage";
 import { CpuHours } from "./PricingPage";

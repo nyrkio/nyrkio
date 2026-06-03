@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SingleResultWithTestname } from "./Dashboard";
 import { impersonateUser } from "./ImpersonateControls";
@@ -19,13 +19,12 @@ const UserResults = ({ user, testNames, embed }) => {
     <div>
       <h2>{user}</h2>
       <ul>
-        {testNames.map((testName) => {
-          return Object.values(testName).map((testName) => {
+        {testNames.map((testName, i) => {
+          return Object.values(testName).map((testName, j) => {
             console.debug(testName);
             if (testName === undefined || testName.length === 0) {
-              return <></>;
+              return <Fragment key={`${i}-${j}`}></Fragment>;
             }
-
             const baseUrls = {
               api: "/api/v0/admin/result/" + user + "/",
               testRoot: "/admin",
@@ -33,6 +32,7 @@ const UserResults = ({ user, testNames, embed }) => {
             };
             return (
               <SingleResultWithTestname
+                key={`${i}-${j}`}
                 testName={testName}
                 baseUrls={baseUrls}
                 breadcrumbName={testName}

@@ -3,7 +3,6 @@ import { SannaCard } from "./people/Sanna.jsx";
 import { JoeCard } from "./people/Joe.jsx";
 import { MattCard } from "./people/Matt.jsx";
 import { YoutubeEmbed } from "./Youtube.jsx";
-import imgTbChangePoints from "../static/tigerbeetle-change-points-2-trans.png"
 import imgGHA from "../static/Nyrkio_GHA.png";
 
 export const AboutPage = () => {
