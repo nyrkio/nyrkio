@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { ImpersonateControls } from "./ImpersonateControls";
 import posthog from "posthog-js";
 
 export const UserMenu = ({ loggedIn, setLoggedIn }) => {

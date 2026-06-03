@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button, Modal, ModalHeader } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
-import { Tooltip } from "chart.js";
 // DO NOT REMOVE
 // necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";

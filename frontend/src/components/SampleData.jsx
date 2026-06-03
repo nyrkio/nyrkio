@@ -1,13 +1,9 @@
-import { set } from "date-fns";
 import { useEffect, useState } from "react";
-import { DrawLineChart } from "./DrawLineChart";
 import tigerBeetleLogo from "../static/tb-logo-black.png";
 import tursoLogo from "../static/turso-banner.png";
 import kiekerLogo from "../static/kieker-logo.svg";
-import { OrigTestList } from "./Dashboard.jsx";
-import { PublicDashboard } from "./PublicDashboard";
 import { TableOrResult } from "./TableOrResult";
-import { parseGitHubRepo, dashboardTypes } from "../lib/utils";
+import { dashboardTypes } from "../lib/utils";
 import '../style/components/sample-data.scss'
 
 
@@ -25,9 +21,9 @@ export const SampleData = ( { customerName } ) => {
   let customerUrl = "https://turso.tech";
   let testName = "main/turso/main/mvcc-ops-throughput/read";
   let graphName = "time";
+  const randomNum = Math.floor(Math.random() * (publicCustomers.length));
+  const c = publicCustomers[randomNum];
   if (customerName === undefined) {
-    const randomNum = Math.floor(Math.random() * (publicCustomers.length));
-    const c = publicCustomers[randomNum];
     customerName = c[0];
     customerUrl = c[1];
     customerLogo = c[2];

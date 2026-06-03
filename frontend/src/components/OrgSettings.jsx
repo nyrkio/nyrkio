@@ -1,9 +1,7 @@
-import { set } from "date-fns";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocation } from "react-router";
 import { throttle } from "../lib/utils";
-import { Modal } from "react-bootstrap";
 
 export const OrgSettings = () => {
   const [validName, setValidName] = useState(false);
@@ -22,9 +20,9 @@ export const OrgSettings = () => {
     return;
   }
   useEffect(()=>{
-    validateOrgName(orgName,setValidName);
-  }
-  ,[])
+      validateOrgName(orgName,setValidName);
+    }
+    ,[]);
   if (!validName){
       return (
         <>
