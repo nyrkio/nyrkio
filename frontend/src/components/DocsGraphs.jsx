@@ -1,7 +1,6 @@
 import { Link } from "react-router-dom";
 
 import imgSettingsSlack from "../static/docs/settings-slack.png";
-import imgSettingsUserInfo from "../static/docs/settings-userinfo.png";
 import imgUiFrontpage from "../static/docs/ui-frontpage.png";
 import imgUiResult2 from "../static/docs/ui-result2.png";
 import imgUiResultHover from "../static/docs/ui-result-hover.png";

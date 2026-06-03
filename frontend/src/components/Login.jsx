@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import posthog from "posthog-js";
-import { SignUpPage } from "./SignUp"
 import { Icon } from './Icon.jsx';
 import { PasswordInput } from "./PasswordInput/PasswordInput.jsx";
 import { HighlightLoginSection } from "./HighlightLoginSection.jsx";

@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import posthog from "posthog-js";
-import { SignUpPage } from "./SignUp"
 import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
 import { Icon } from "./Icon.jsx";
 import {PasswordInput} from "./PasswordInput/PasswordInput.jsx";
@@ -118,6 +117,7 @@ export const ForgotPassword = ({loggedIn}) => {
       const form = e.target;
       const token = form.elements[0].value;
       const password = form.elements[1].value;
+      const email = form.elements[0].value;
 
       posthog.capture("reset-password", { property: email });
 

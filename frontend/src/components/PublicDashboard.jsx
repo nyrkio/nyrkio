@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import { parseGitHubRepo, dashboardTypes, getOrgRepo } from "../lib/utils";
+import { dashboardTypes, getOrgRepo } from "../lib/utils";
 import { TableOrResult } from "./TableOrResult";
 
 export const PublicDashboard = () => {

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { Link } from "react-router-dom";
 import remarkGfm from "remark-gfm";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import introDocAction from "../docs/intro-action.md";

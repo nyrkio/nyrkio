@@ -1,4 +1,3 @@
-import React from 'react';
 
 export const HighlightLoginSection = ({ title, children, maxWidth = '900px' }) => {
   return (

@@ -1,7 +1,6 @@
 import { Link, NavLink } from "react-router-dom";
 import { useState } from "react";
 import { Navbar, Container, Offcanvas, Nav } from "react-bootstrap";
-import { LogOut, LoginButton } from "./../Login.jsx";
 import { UserMenu } from "./../UserMenu.jsx";
 import { SmallLogo } from "./../Logo";
 import { ImpersonateControls } from "./../ImpersonateControls";

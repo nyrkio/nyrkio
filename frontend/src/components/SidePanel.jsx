@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Routes, Route, Link, NavLink } from "react-router-dom";
 
 export const SidePanel = ({ loggedIn }) => {
