@@ -60,16 +60,10 @@
     "fast-glob": "^3.3.3",
     "git-commit-info": "^2.0.2",
     "mongodb": "^7.0.0",
-    "msw": "^2.14.6",
     "playwright": "^1.42.1",
     "prettier": "3.2.5",
     "sass": "^1.99.0",
     "vite": "^5.0.13",
     "vite-plugin-svg-icons": "^2.0.1"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }
