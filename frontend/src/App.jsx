@@ -145,7 +145,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       <Route path="/docs/git-perf-plugin" element={<DocsGitPerfPlugin />} />
       <Route path="/docs/teams" element={<DocsTeams />} />
       <Route path="/user/settings" element={<UserSettings />} />
-      <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
+      <Route path="/admin/*" element={<AdminDashboard embed={embed} loggedIn={loggedIn}/>} />
       <Route
       path="/billing"
       element={<BillingPage loggedIn={loggedIn} />}
