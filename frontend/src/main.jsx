@@ -9,12 +9,6 @@ posthog.init("phc_pj5OcqAS68hS0aIO0a3lqodk6lRekPEsz3VMdz6o7Z1", {
   api_host: "https://eu.posthog.com",
 });
 
-
-// if (import.meta.env.DEV) {
-//   const { worker } = await import('./mocks/browser');
-//   await worker.start();
-// }
-
 ReactDOM.createRoot(document.getElementById("root")).render(
   <App />
 );
