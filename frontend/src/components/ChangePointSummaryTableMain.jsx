@@ -5,13 +5,7 @@ import { formatCommit, parseTimestamp } from "../lib/utils";
 import { useMemo } from "react";
 import { commitUrl } from "../lib/github";
 import '../style/components/ag-table.scss';
-
-const Loading = ({loading}) => {
-  if (loading) {
-    return (<><div className="loading summary-table">Loading...</div></>);
-  }
-  return (<><div className="loading_done"></div></>);
-};
+import { Loading } from "./Loading.jsx";
 
 export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, queryStringTextTimestamp, loading, metricsData, isPublicDashboard }) => {
   var rowData = [];
@@ -159,8 +153,9 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
   if (rowData.length === 0) {
     if (loading) {
-      return (<Loading loading={loading} />);
+      return (<div className="my-4"><Loading loading={loading} text="Loading results..."/></div>);
     }
+
     return (
       <div className="text-center mb-4">
         <span className="no-changepoints">(no changepoints)</span>

@@ -9,19 +9,19 @@ export const UserSettings = () => {
   // TODO: Get entire config once here
   return (
     <>
-      <div className="mb-7">
+      <div className="mb-4 mb-md-7">
         <ApiKey />
       </div>
-      <div className="mb-7">
+      <div className="mb-4 mb-md-7">
         <HunterSettings />
       </div>
-      <div className="mb-7">
+      <div className="mb-4 mb-md-7">
         <NotificationSettings />
       </div>
-      <div className="mb-7">
+      <div className="mb-4 mb-md-7">
         <SlackSettings />
       </div>
-      <div className="mb-7">
+      <div className="mb-4 mb-md-7">
         <UserInfo />
       </div>
     </>

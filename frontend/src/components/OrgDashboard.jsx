@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { TableOrResult } from "./TableOrResult";
 import { dashboardTypes } from "../lib/utils";
+import { Loading } from "./Loading.jsx";
 
 export const OrgDashboard = ({embed}) => {
   const location = useLocation();
@@ -62,7 +63,7 @@ export const OrgDashboard = ({embed}) => {
       <h1 className="text-center text-primary mb-4">Organization Test Results</h1>
 
       {loading ? (
-        <p>Loading...</p>
+        <Loading loading={loading} text="Loading organization test results..." />
       ) : (
         <TableOrResult
           prefix={prefix}
