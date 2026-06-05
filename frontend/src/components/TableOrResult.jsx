@@ -3,13 +3,6 @@ import { createShortNames } from "../lib/utils";
 import { Breadcrumb } from "./Breadcrumb";
 import { AllChangePoints } from "./AllChangePoints";
 
-const Loading = ({loading}) => {
-  if (loading) {
-    return (<><div>Loading...</div></>);
-  }
-  return (<><div className="loading_done"></div></>);
-};
-
 // Decide whether we should display a table of test names or a single result.
 // If the current url includes a pathname that we match exactly in data
 // then we should display that result.

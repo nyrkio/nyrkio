@@ -2,6 +2,7 @@ import { useState, useEffect, Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SingleResultWithTestname } from "./Dashboard";
 import { impersonateUser } from "./ImpersonateControls";
+import { Forbidden } from "./Forbidden";
 
 const UserResults = ({ user, testNames, embed }) => {
   console.debug("testname");
@@ -93,29 +94,27 @@ const AdminUserResults = ({ user, results }) => {
   return <UserResults user={user} testNames={testNames} />;
 };
 
-export const AdminDashboard = () => {
+export const AdminDashboard = ({loggedIn}) => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([{}]);
+
   const fetchData = async () => {
     const tempresults = await fetch("/api/v0/admin/all_users", {
       credentials: "include",
     });
     const resultData = await tempresults.json();
-    console.debug(resultData);
     setResults(resultData);
   };
 
   useEffect(() => {
+    if (!loggedIn) return;
     setLoading(true);
-    fetchData().finally(() => {
-      setLoading(false);
-    });
-  }, []);
-  if (loading) {
-    return <div>Loading...</div>;
- }
- return <MainAdminDashboard results={results} />;
+    fetchData().finally(() => setLoading(false));
+  }, [loggedIn]);
+
+  if (!loggedIn) return <Forbidden />;
+  if (loading) return <div>Loading...</div>;
+
+  return <MainAdminDashboard results={results} />;
 };
-
-
