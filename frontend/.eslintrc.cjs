@@ -10,7 +10,7 @@ module.exports = {
     "plugin:react/jsx-runtime",
     "plugin:react-hooks/recommended",
   ],
-  ignorePatterns: ["dist", ".eslintrc.cjs", "public/mockServiceWorker.js"],
+  ignorePatterns: ["dist", ".eslintrc.cjs"],
   parserOptions: { ecmaVersion: "latest", sourceType: "module" },
   settings: { react: { version: "18.2" } },
   plugins: ["react-refresh", "unused-imports"],
@@ -33,10 +33,6 @@ module.exports = {
     "no-undef": "error",
     "react-hooks/rules-of-hooks": "error",
     "unused-imports/no-unused-imports": "error",
-    // "unused-imports/no-unused-vars": [
-    //   "warn",
-    //   { vars: "all", varsIgnorePattern: "^_", args: "after-used", argsIgnorePattern: "^_" },
-    // ],
   },
   overrides: [
     {
