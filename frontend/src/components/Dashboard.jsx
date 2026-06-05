@@ -20,17 +20,11 @@ import graph_4x4 from "../static/icons/graph-4x4.png";
 import graph_nx1 from "../static/icons/graph-nx1.png";
 import graph_2x1 from "../static/icons/graph-2x1.png";
 import graph_1x1 from "../static/icons/graph-1x1.png";
-import {Icon} from "./Icon.jsx";
+import { Icon } from "./Icon.jsx";
+import { Loading } from "./Loading.jsx";
 
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
-};
-
-const Loading = ({loading}) => {
-  if (loading) {
-    return (<><div>Loading...</div></>);
-  }
-  return (<><div className="loading_done"></div></>);
 };
 
 const maxGraphsPerPage=30;
@@ -51,9 +45,9 @@ export const TestList = ({
       return <NoMatch />;
 
   }
-  if (shortNames.length == 0) {
+  if (shortNames.length === 0) {
     return (
-      <li className="list-group-item nyrkio-empty" key="0">
+      <li className="list-group-item nyrkio-empty p-7" key="0">
         <div>
           <Icon name="meh" size="46" />
           <div className="mt-2">
@@ -74,7 +68,7 @@ export const TestList = ({
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
-        <li className="list-group-item" key={index}>
+        <li className="list-group-item d-flex align-items-center" key={index}>
           <Link
             to={`/${baseUrls.result}/${longName}`}
             state={{ testName: longName }}
@@ -91,7 +85,7 @@ export const TestList = ({
       var p = name;
       if (prefix !== undefined) p = prefix + "/" + name;
       return (
-        <li className="list-group-item" key={index}>
+        <li className="list-group-item list-group-item-action" key={index}>
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
             <TestListEntry
               name={displayName}
@@ -300,10 +294,9 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
     if (subtree.length>0 && subtree.length<50)
         return(
           <>  <div style={{textAlign: "right"}}>
-              <button className="btn btn-nothing text-right mt-5 col-xs-6 col-md-5 col-lg-4 col-xl-3" style={{right: 0}} title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
-              onClick={(ev)=>{localStorage.setItem("showAllGraphs", ev.target.attributes["aria-expanded"].value);}}
-              >
-              ▼ Show graphs here
+              <button className="btn btn-nothing btn-outline-primary my-4 d-inline-flex justify-content-center gap-2" title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
+                onClick={(ev)=>{localStorage.setItem("showAllGraphs", ev.target.attributes["aria-expanded"].value);}}>
+                <Icon name="chevron-down" size="18"/> Show graphs here
               </button>
               </div>
               <div>
@@ -359,8 +352,9 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
     <>
       <div className="container">
         <div className="text-center" id="showTestListCardBody">
+          <h2 className="h3 text-secondary">Select tests</h2>
           <Loading loading={loading} />
-          <ul className="list-group list-group-flush">
+          <ul className="list-group mx-auto">
             <TestList
               testNames={testNames}
               shortNames={shortNames}
@@ -838,59 +832,20 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSumma
     }
   }, [location]);
 
-  if (!nameIsGitHubRepo(name)) {
-    return (
-      <>
-        <div className="row justify-content-center">
-          <div className="col">
-            {name}{" "}
-            <SummarizeChangePoints
-              longName={longName}
-              summaries={summaries} loading={loading}
-            />
-          </div>
-        </div>
-      </>
-    );
-  }
+  return (<div className="d-flex align-items-center gap-3">
+      <Loading loading={loading}/>
 
-  if (imageUrl) {
-    return (
-      <div className="row justify-content-center">
-        <Loading loading={loading} />
-        <div className="col-1">
-          <img
-            src={imageUrl}
-            alt="GitHub repo avatar"
-            title="GitHub repo avatar"
-            style={{ width: "30px", height: "30px" }}
-          />
-        </div>
-        <div className="col">
-          {name.replace("https://github.com/", "")}{" "}
-          <SummarizeChangePoints
-            longName={longName}
-            summaries={summaries} loading={loading}
-          />
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <>
-        <div className="row justify-content-center">
-          <Loading loading={loading} />
-          <div className="col">
-            {name.replace("https://github.com/", "")}{" "}
-            <SummarizeChangePoints
-              longName={longName}
-              summaries={summaries} loading={loading}
-            />
-          </div>
-        </div>
-      </>
-    );
-  }
+        { nameIsGitHubRepo(name) ?
+          <div className="ratio ratio-1x1 rounded-circle overflow-hidden" style={{width: '32px', backgroundColor: '#e5e5e7'}}>
+            {imageUrl ? <img className="img-fluid object-fit-cover" src={imageUrl} alt="GitHub repo avatar" width="32" height="32" title="GitHub repo avatar"/> : ''}
+          </div> : <></>}
+
+      {nameIsGitHubRepo(name) ? name.replace("https://github.com/", "") : name }
+      <SummarizeChangePoints
+        longName={longName}
+        summaries={summaries} loading={loading}
+      />
+    </div>)
 };
 
 // Helper function to catch invalid urls that contain non-existent test names
@@ -903,18 +858,7 @@ const validTestName = (name, testNames) => {
 const SummarizeChangePoints = ({ longName, summaries,loading }) => {
   const key = decodeURIComponent(longName).replace("https://github.com","");
   // Later we will use data-longname attribute to read more content from a JSON object we fetch from the server
-  return (
-        <div
-          className="summarize-change-points placeholder-summary"
-          style={{
-            position: "absolute",
-            right: "0.5em",
-            top: 0,
-            textAlign: "right",
-          }}
-          data-longname={key}
-        >
-        </div>);
+  return (<div className="summarize-change-points placeholder-summary ms-auto text-end" data-longname={key}></div>);
 };
 
 /*
