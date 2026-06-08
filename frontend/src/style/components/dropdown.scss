@@ -1,0 +1,26 @@
+@import '../configuration';
+
+.dropdown-toggle {
+  display: flex;
+  align-items: center;
+
+  &::after {
+    border: none !important;
+    display: inline-block;
+    width: 15px;
+    height: 8px;
+    margin-left: 8px;
+    vertical-align: middle;
+    mask-image: $form-select-indicator;
+    background-color: currentColor;
+    mask-repeat: no-repeat;
+    transition: transform 0.2s ease-in-out, background-color 0.2s ease;
+  }
+
+  &.show {
+    &::after {
+      transform: rotate(180deg);
+    }
+  }
+}
+

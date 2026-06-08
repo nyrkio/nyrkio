@@ -4,11 +4,6 @@
   --bs-offcanvas-width: 480px;
 }
 
-#sidepanel:has(.nav-pills--sidebar:empty) {
-  display: none !important;
-}
-
-
 @include media-breakpoint-down(md) {
   html {
     font-size: 14px;

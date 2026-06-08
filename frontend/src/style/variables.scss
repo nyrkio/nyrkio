@@ -26,7 +26,7 @@ $grid-breakpoints: (
   xs: 0,
   sm: 576px,
   md: 768px,
-  lg: 992px,
+  lg: 1024px,
   xl: 1200px,
   xxl: 1400px,
   xxxl: 1748px,
@@ -179,3 +179,6 @@ $form-range-track-bg: #50320DB2;
 //$form-range-thumb-disabled-bg:             var(--#{$prefix}secondary-color) !default;
 //$form-range-thumb-transition:              background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out !default;
 // scss-docs-end form-range-variables
+
+$form-select-indicator: url('data:image/svg+xml;utf8,<svg width="15" height="8" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.53674e-07 0.880038L0.836092 0L7.08136 6.57352C7.19371 6.69052 7.34153 6.75525 7.5 6.75525C7.65847 6.75525 7.80629 6.69052 7.91864 6.57352L14.1639 0L15 0.880038L8.75473 7.45356C8.42006 7.80582 7.97422 8 7.5 8C7.02578 8 6.58113 7.80582 6.24527 7.45356L9.53674e-07 0.880038Z" fill="%23503" /></svg>');
+$dropdown-link-hover-bg: #F1F1E4;
