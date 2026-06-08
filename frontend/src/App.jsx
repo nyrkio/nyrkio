@@ -12,7 +12,6 @@ import { Login } from "./components/Login.jsx";
 import { Dashboard} from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
 import { NavHeader } from "./components/Nav/Nav.jsx";
-import { SidePanel } from "./components/SidePanel";
 import { Docs } from "./components/Docs.jsx";
 import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
@@ -74,9 +73,6 @@ function MainApp({ loggedIn, setLoggedIn }) {
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       </header>
       <main>
-        <div className="container text-center my-4 my-md-6" id="sidepanel">
-          <SidePanel loggedIn={loggedIn} />
-        </div>
         <div id="main-content">
           <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         </div>

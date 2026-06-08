@@ -13,16 +13,57 @@
     }
   }
 
+  .loginmenu {
+    .btn {
+      @include media-breakpoint-down(xl) {
+        padding-left: 18px;
+        padding-right: 18px;
+      }
+    }
+  }
+
   .nav-link {
     --bs-nav-link-color: #{$secondary};
     --bs-nav-link-hover-color: #{$primary};
     --bs-navbar-active-color: #{$primary};
-  }
 
-  .nav-item {
     @include media-breakpoint-down(lg) {
       --bs-nav-link-padding-y: 1rem;
+
+      &:not(.dropdown-toggle) {
+        border-bottom: $border-width solid $border-color;
+      }
+    }
+  }
+
+  // Dropdown
+  @include media-breakpoint-down(lg) {
+    .dropdown {
       border-bottom: $border-width solid $border-color;
+    }
+
+    .dropdown-toggle {
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .dropdown-menu {
+      padding: 0;
+      border: 0 none;
+      margin: 0 0 20px;
+    }
+
+    .dropdown-item {
+      --bs-dropdown-link-active-bg: $dropdown-bg;
+      --bs-dropdown-link-active-color: $primary;
+      --bs-dropdown-link-hover-color: $dropdown-color;
+      --bs-dropdown-link-hover-bg: $dropdown-bg;
+      padding: 4px 0;
+
+      &.active {
+        color: $primary;
+        text-decoration: underline;
+      }
     }
   }
 }
