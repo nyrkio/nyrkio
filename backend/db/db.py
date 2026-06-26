@@ -193,13 +193,13 @@ class NyrkioUserDatabase(BeanieUserDatabase):
                 for sso_org in sso_orgs:
                     if sso_org["login"] in user_orgs:
                         continue
-                        sso_org_envelope = {
-                            "url": sso_org["url"],
-                            "state": "active",
-                            "role": "user",
-                            "organization_url": sso_org["url"],
-                            "organization": sso_org,
-                        }
+                    sso_org_envelope = {
+                        "url": sso_org["url"],
+                        "state": "active",
+                        "role": "user",
+                        "organization_url": sso_org["url"],
+                        "organization": sso_org,
+                    }
                     user.oauth_accounts[i].organizations.append(sso_org_envelope)
 
         await user.save()
