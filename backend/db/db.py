@@ -13,8 +13,14 @@ from pymongo.errors import BulkWriteError
 import asyncio
 from mongomock_motor import AsyncMongoMockClient
 from beanie import Document, PydanticObjectId, init_beanie
-from fastapi_users.db import BaseOAuthAccount, BeanieBaseUser, BeanieUserDatabase
-from fastapi_users import schemas
+from fastapi_users.db import (
+    BaseUserDatabase,
+    BaseOAuthAccount,
+    BeanieBaseUser,
+    BeanieUserDatabase,
+)
+from fastapi_users import schemas, models
+from fastapi_users_db_beanie import UP_BEANIE
 from pydantic import Field
 
 from hunter.series import AnalyzedSeries
@@ -80,6 +86,104 @@ class NyrkioUserDatabase(BeanieUserDatabase):
             )
 
         return None
+
+    async def _get_sso_mapped_orgs(self, oauth_name):
+        gh_like_organizations = []
+        sso_config = await self.store.get_sso_config(oauth_full_domain=oauth_name)
+        rows = len(sso_config)
+        if rows != 1:
+            raise ValueError(
+                f"Found {len(sso_config)} results when trying to find sso config for {oauth_name}"
+            )
+        print(sso_config)
+        orgs = sso_config[0].get("github_org_map", [])
+        print(orgs)
+
+        for o in orgs:
+            gh_like_organizations.append(
+                {
+                    "login": o,
+                    # compute integer id as a hash of the name...
+                    "id": hash(o),
+                    "node_id": hex(hash(o)),
+                    "url": f"https://{oauth_name}/orgs/{o}",
+                    "repos_url": f"https://api.github.com/orgs/{o}/repos",
+                    "description": "Group is created and managed by Nyrkiö.",
+                }
+            )
+
+        print(self.oauth_account_model)
+        return gh_like_organizations
+
+    async def add_oauth_account(
+        self: "BaseUserDatabase[models.UOAP, models.ID]",
+        user: models.UOAP,
+        create_dict: Dict[str, Any],
+    ) -> models.UOAP:
+        """Create an OAuth account and add it to the user."""
+        # Fastapi users object model is so broken. This method is copy pasted from parent,
+        # because the same method contains both the creation of a new user object, and immediately
+        # saving it to DB, without any chance of doing our own thing between. So parent method is
+        # copy pasted here and we never call super(). Check back periodically whether new versions
+        # do something completely different...
+        if self.oauth_account_model is None:
+            raise NotImplementedError()
+        oauth_account = self.oauth_account_model(**create_dict)
+        user.oauth_accounts.append(oauth_account)  # type: ignore
+
+        # New code, nyrkio
+        sso_orgs = await self._get_sso_mapped_orgs(create_dict["oauth_name"])
+        # Find org names that already exist for user (if it is not a new user)
+        matched_oauth_account, user_orgs = filter_user_orgs(
+            sso_orgs, user, create_dict["oauth_name"]
+        )
+        # Now we add any órgs the user doesn't already have. (Such as all of them when creating the user)
+        for sso_org in sso_orgs:
+            if sso_org["login"] in user_orgs:
+                continue
+            matched_oauth_account.organizations.append(sso_org)
+
+        # Back to copy pasted code from parent
+        await user.save()
+        return user
+
+    async def update_oauth_account(
+        self, user: UP_BEANIE, oauth_account: models.OAP, update_dict: Dict[str, Any]
+    ) -> UP_BEANIE:
+        """Update an OAuth account on a user."""
+        # Code copy pasted from parent mixed with new nyrkio code
+        if self.oauth_account_model is None:
+            raise NotImplementedError()
+
+        for i, existing_oauth_account in enumerate(user.oauth_accounts):  # type: ignore
+            if (
+                existing_oauth_account.oauth_name == oauth_account.oauth_name
+                and existing_oauth_account.account_id == oauth_account.account_id
+            ):
+                for key, value in update_dict.items():
+                    setattr(user.oauth_accounts[i], key, value)  # type: ignore
+                # Nyrkio code
+                sso_orgs = self._get_sso_mapped_orgs(update_dict["oauth_name"])
+                user_orgs = [o["login"] for o in user.oauth_accounts[i].organizations]
+                # Now we add any órgs the user doesn't already have.
+                for sso_org in sso_orgs:
+                    if sso_org["login"] in user_orgs:
+                        continue
+                    user.oauth_accounts[i].organizations.append(sso_org)
+
+        await user.save()
+        return user
+
+
+def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list:
+    user_orgs = []
+    if not user.oauth_accounts:
+        user.oauth_accounts = []
+    for acct in user.oauth_accounts:
+        if acct.oauth_name != oauth_full_domain:
+            continue
+        user_orgs += [o["login"] for o in acct.organizations]
+        return acct, user_orgs
 
 
 async def get_user_db():
@@ -315,6 +419,29 @@ class MockDBStrategy(ConnectionStrategy):
         )
         self.gh_users.append(await manager.create(gh_user2))
 
+        self.sso_users = []
+        sso_user1 = UserCreate(
+            id="255501024",
+            email="sso_user@example.com",
+            password="not_used",
+            is_active=True,
+            is_verified=True,
+            github_username="not_used",
+            oauth_accounts=[
+                OAuthAccount(
+                    account_id="255501024",
+                    account_email="sso_user@example.com",
+                    oauth_name="test.example.com",
+                    access_token="abcdef12345",
+                    organizations=[
+                        {"login": "nyrkio2", "id": 456},
+                        {"login": "nyrkio3", "id": 789},
+                    ],
+                )
+            ],
+        )
+        self.sso_users.append(await manager.create(sso_user1))
+
     def get_test_user(self):
         assert self.user, "init_db() must be called first"
         return self.user
@@ -322,6 +449,9 @@ class MockDBStrategy(ConnectionStrategy):
     def get_github_users(self):
         assert self.gh_users, "init_db() must be called first"
         return self.gh_users
+
+    def get_sso_users(self):
+        assert self.sso_users, "init_db() must be called first"
 
 
 class DBStoreAlreadyInitialized(Exception):
@@ -1794,6 +1924,16 @@ async def do_on_startup():
     strategy = MockDBStrategy() if _TESTING else MongoDBStrategy()
     store.setup(strategy)
     await store.startup()
+
+
+async def mock_user_db():
+    store = DBStore()
+    store.setup(MockDBStrategy())
+    await store.startup()
+    udb = NyrkioUserDatabase()
+    udb.store = store
+    udb.User = store.db.User
+    yield udb
 
 
 def separate_meta_one(doc: Dict) -> Tuple[Dict, Dict]:

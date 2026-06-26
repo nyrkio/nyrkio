@@ -1466,7 +1466,7 @@ def test_superuser_can_see_all_test_results(client):
     response = superuser_client.get("/api/v0/admin/results")
     assert response.status_code == 200
     superuser_data = response.json()
-    assert len(superuser_data) == 4
+    assert len(superuser_data) == 5
 
     client_results = superuser_data[client.email]
     assert client_results == [{"test_name": "benchmark1"}]
@@ -1509,7 +1509,7 @@ def test_get_results_for_users_test(client):
     assert response.status_code == 200
 
     superuser_data = response.json()
-    assert len(superuser_data) == 4
+    assert len(superuser_data) == 5
 
     client_results = superuser_data[client.email]
     assert client_results == [{"test_name": "benchmark1"}]

@@ -241,19 +241,31 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
             redirect_url=redirect_url,
         )
 
-        @sso_router.get("/mycallback", include_in_schema=True)
-        async def sso_callback(
-            request: Request,
-            access_token_state: Tuple[OAuth2Token, str] = Depends(
-                sso_oauth2_authorize_callback
-            ),
-            user_manager: BaseUserManager[models.UP, models.ID] = Depends(
-                get_user_manager
-            ),
-        ):
-            return await _sso_mycallback_handler(
-                oauth_full_domain, sso_oauth, request, access_token_state, user_manager
-            )
+        def generate_sso_callback(oauth_full_domain, sso_oauth):
+            async def sso_callback(
+                request: Request,
+                access_token_state: Tuple[OAuth2Token, str] = Depends(
+                    sso_oauth2_authorize_callback
+                ),
+                user_manager: BaseUserManager[models.UP, models.ID] = Depends(
+                    get_user_manager
+                ),
+            ):
+                return await _sso_mycallback_handler(
+                    oauth_full_domain,
+                    sso_oauth,
+                    request,
+                    access_token_state,
+                    user_manager,
+                )
+
+            return sso_callback
+
+        sso_router.add_api_route(
+            "/mycallback",
+            endpoint=generate_sso_callback(oauth_full_domain, sso_oauth),
+            include_in_schema=True,
+        )
 
         from backend.api.api import app
 
