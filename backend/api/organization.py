@@ -35,7 +35,8 @@ def get_user_orgs(user: User) -> List[Dict]:
 
     orgs = []
     for account in user.oauth_accounts:
-        if account.oauth_name != "github" or not account.organizations:
+        # if account.oauth_name != "github" or not account.organizations:
+        if not account.organizations:
             continue
 
         for org in account.organizations:
