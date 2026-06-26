@@ -476,7 +476,7 @@ async def _sso_mycallback_handler(
         for i, org in enumerate(oauth_acct.organizations):
             if "sub" in org and userinfo["sub"] == org["sub"]:
                 # Update whatever is the newest info
-                oauth_acct.organizations[i] =userinfo
+                oauth_acct.organizations[i] = userinfo
                 found = True
         if not found:
             oauth_acct.organizations.append(userinfo)
