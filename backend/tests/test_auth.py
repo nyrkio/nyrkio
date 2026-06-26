@@ -1,10 +1,13 @@
 import asyncio
 from datetime import datetime
+import pytest
+
 from backend.auth import auth
 from backend.auth.common import get_user_manager
 from backend.db.db import get_user_db, DBStore, MockDBStrategy
 
 from fastapi import Depends
+from fastapi_users.exceptions import UserAlreadyExists
 
 
 def test_test_user_can_login(client):
@@ -108,7 +111,23 @@ def test_sso_groups_created():
             "well_known_config": "https://test.example.com/oidc/2/.well-known/openid-configuration",
         },
     }
+    ssoprovider2 = {
+        "oauth_issuer": "onelogin_for_test2",
+        "org_name": "Test2",
+        "org_contact_email": "test2@example.com",
+        "org_domain": "example.com",
+        "github_org_map": ["test_gh_org"],
+        "oauth_full_domain": "test2.example.com",
+        "oauth_tld": "example.com",
+        "scopes": ["openid", "profile", "groups"],
+        "secrets": {
+            "client_id": "abc",
+            "client_secret": "123",
+            "well_known_config": "https://test.example.com/oidc/2/.well-known/openid-configuration",
+        },
+    }
     asyncio.run(db.sso.insert_one(ssoprovider))
+    asyncio.run(db.sso.insert_one(ssoprovider2))
     sso_config = asyncio.run(
         user_manager.user_db.store.db.sso.find().to_list()
     )  # get_sso_config()#oauth_full_domain=oauth_name)
@@ -128,5 +147,133 @@ def test_sso_groups_created():
     print(vars(user))
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
     print(u)
+    # {
+    #     'email': 'sso_user2@example.com',
+    #     'hashed_password': '$2b$12$08Jb.V8vWWg/6jjepS8SW.BIlKoFzdbTYER41bZv7YuZoqPXc1CQe',
+    #     'is_active': True,
+    #     'is_superuser': False,
+    #     'is_verified': False,
+    #     'oauth_accounts': [
+    #         {'id': ObjectId('6a3e967a2b4ccd43c982485b'),
+    #          'oauth_name': 'test.example.com',
+    #          'access_token': 'abcdef12345',
+    #          'account_id': '255509999',
+    #          'account_email': 'sso_user2@example.com',
+    #          'expires_at': 1782486750,
+    #          'refresh_token': '8ef8e5aa',
+    #          'organizations': [
+    #              {'url': 'https://test.example.com/orgs/test_gh_org',
+    #               'state': 'active',
+    #               'role': 'user',
+    #               'organization_url': 'https://test.example.com/orgs/test_gh_org',
+    #               'organization':
+    #                   {
+    #                       'login': 'test_gh_org',
+    #                       'id': 2197284774778783075,
+    #                       'node_id': '0x1e7e52dc67104563',
+    #                       'url': 'https://test.example.com/orgs/test_gh_org',
+    #                       'repos_url': 'https://api.github.com/orgs/test_gh_org/repos',
+    #                       'description': 'Group is created and managed by Nyrkiö.'
+    #                   }
+    #             }
+    #         ]}
+    #     ],
+    #     'slack': {},
+    #     'billing': None,
+    #     'billing_runners': None,
+    #     'superuser': None,
+    #     'github_username': None,
+    #     'is_cph_user': None,
+    #     'is_repo_owner': False,
+    #     'captcha_token': None,
+    #     '_id': ObjectId('6a3e967a2b4ccd43c982485a')
+    # }
+
     assert u["email"] == "sso_user2@example.com"
-    assert u["oauth_accounts"][0]["organizations"][0]["login"] == "test_gh_org"
+    assert u["oauth_accounts"][0]["expires_at"] == exp
+    # assert u["oauth_accounts"][0]["state"] == "active"
+    # assert u["oauth_accounts"][0]["url"] == "https://test.example.com/orgs/test_gh_org"
+    assert u["oauth_accounts"][0]["organizations"][0]["state"] == "active"
+    # assert u["oauth_accounts"][0]["organizations"][0]["expires_at"] == exp
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["url"]
+        == "https://test.example.com/orgs/test_gh_org"
+    )
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
+        == "test_gh_org"
+    )
+
+    # Update existing user
+    # This one only refreshes the expires_at field
+    exp += 11111
+    fut = user_manager.oauth_callback(
+        oauth_name="test.example.com",
+        access_token="abcdef12345",
+        account_id="255509999",
+        account_email="sso_user2@example.com",
+        expires_at=exp,
+        refresh_token="8ef8e5aa",
+        associate_by_email=False,
+    )
+    user = asyncio.run(fut)
+    print(vars(user))
+    u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
+    print(u)
+    assert u["email"] == "sso_user2@example.com"
+    assert (
+        u["oauth_accounts"][0]["expires_at"] == exp
+    ), "The existing oauth_account entry was refreshed"
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["url"]
+        == "https://test.example.com/orgs/test_gh_org"
+    )
+    assert u["oauth_accounts"][0]["organizations"][0]["state"] == "active"
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
+        == "test_gh_org"
+    )
+
+    # Now add a second openauth provider/source
+    # Even if oauth_name makes this a unique and independent user,
+    # For internal reasons we must reject users where account_id already exists,
+    # even if it was from another provider completely
+    with pytest.raises(UserAlreadyExists):
+        exp += 1111
+        fut = user_manager.oauth_callback(
+            oauth_name="test2.example.com",
+            access_token="345",
+            account_id="255509999",
+            account_email="sso_user2@example.com",
+            expires_at=exp,
+            refresh_token="8ef8e5aa",
+            associate_by_email=False,
+        )
+        user = asyncio.run(fut)
+
+    # Changing account_id and (optional) account_email and it works
+    exp += 11
+    fut = user_manager.oauth_callback(
+        oauth_name="test.example.com",
+        access_token="345",
+        account_id="255509999999",
+        account_email="sso_user2222@example.com",
+        expires_at=exp,
+        refresh_token="8ef8e5aa",
+        associate_by_email=False,
+    )
+    user = asyncio.run(fut)
+    print(vars(user))
+    u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
+    print(u)
+    assert u["email"] == "sso_user2222@example.com"
+    assert u["oauth_accounts"][0]["expires_at"] == exp
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["url"]
+        == "https://test.example.com/orgs/test_gh_org"
+    )
+    assert u["oauth_accounts"][0]["organizations"][0]["state"] == "active"
+    assert (
+        u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
+        == "test_gh_org"
+    )
