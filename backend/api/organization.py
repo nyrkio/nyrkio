@@ -40,7 +40,8 @@ def get_user_orgs(user: User) -> List[Dict]:
             continue
 
         for org in account.organizations:
-            orgs.append(org)
+            if "organization" in org and "login" in org["organization"]:
+                orgs.append(org)
     return orgs
 
 
