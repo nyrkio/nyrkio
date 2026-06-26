@@ -175,6 +175,11 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         if self.oauth_account_model is None:
             raise NotImplementedError()
 
+        # Nyrkio code
+        # Make sure admin provisioned orgs from
+        # db.sso.<oauth_full_domain==oauth_name>.github_org_map
+        # are also updated
+        sso_orgs = await self._get_sso_mapped_orgs(update_dict["oauth_name"])
         for i, existing_oauth_account in enumerate(user.oauth_accounts):  # type: ignore
             if (
                 existing_oauth_account.oauth_name == oauth_account.oauth_name
@@ -182,25 +187,36 @@ class NyrkioUserDatabase(BeanieUserDatabase):
             ):
                 for key, value in update_dict.items():
                     setattr(user.oauth_accounts[i], key, value)  # type: ignore
-                # Nyrkio code
-                sso_orgs = await self._get_sso_mapped_orgs(update_dict["oauth_name"])
-                user_orgs = [
-                    o["organization"]["login"]
-                    for o in user.oauth_accounts[i].organizations
-                    if "login" in o.get("organization", {})
-                ]
-                # Now we add any órgs the user doesn't already have.
-                for sso_org in sso_orgs:
-                    if sso_org["login"] in user_orgs:
-                        continue
-                    sso_org_envelope = {
-                        "url": sso_org["url"],
-                        "state": "active",
-                        "role": "user",
-                        "organization_url": sso_org["url"],
-                        "organization": sso_org,
-                    }
-                    user.oauth_accounts[i].organizations.append(sso_org_envelope)
+                # Nyrkiö code
+                # Reset existing org if found, append those that don't exist yet
+                # Note: Careful with matching oauth_name / oauth_full_domain otherwise
+                # this can easily overwrite everyone's github orgs too
+                notfound_sso_orgs = []
+                for j, sso_org in enumerate(sso_orgs):
+                    found = False
+                    for k, user_existing_org in enumerate(
+                        user.oauth_accounts[i].organizations
+                    ):
+                        sso_org_envelope = {
+                            "url": sso_org["url"],
+                            "state": "active",
+                            "role": "user",
+                            "organization_url": sso_org["url"],
+                            "organization": sso_org,
+                        }
+                        if (
+                            "organization" in user_existing_org
+                            and "login" in user_existing_org["organization"]
+                            and sso_org["login"]
+                            == user_existing_org["organization"]["login"]
+                        ):
+                            sso_orgs[j] = sso_org_envelope
+                            found = True
+
+                    if not found:
+                        notfound_sso_orgs.append(sso_org_envelope)
+
+                user.oauth_accounts[i].organizations.extend(notfound_sso_orgs)
 
         await user.save()
         return user

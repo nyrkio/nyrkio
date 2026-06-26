@@ -101,7 +101,7 @@ def test_sso_groups_created():
         "org_name": "Test",
         "org_contact_email": "test@example.com",
         "org_domain": "example.com",
-        "github_org_map": ["test_gh_org"],
+        "github_org_map": ["test_gh_org", "another_org"],
         "oauth_full_domain": "test.example.com",
         "oauth_tld": "example.com",
         "scopes": ["openid", "profile", "groups"],
@@ -116,7 +116,7 @@ def test_sso_groups_created():
         "org_name": "Test2",
         "org_contact_email": "test2@example.com",
         "org_domain": "example.com",
-        "github_org_map": ["test_gh_org"],
+        "github_org_map": ["test_gh_org2"],
         "oauth_full_domain": "test2.example.com",
         "oauth_tld": "example.com",
         "scopes": ["openid", "profile", "groups"],
@@ -203,6 +203,14 @@ def test_sso_groups_created():
         u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
         == "test_gh_org"
     )
+    assert (
+        u["oauth_accounts"][0]["organizations"][1]["url"]
+        == "https://test.example.com/orgs/another_org"
+    )
+    assert (
+        u["oauth_accounts"][0]["organizations"][1]["organization"]["login"]
+        == "another_org"
+    )
 
     # Update existing user
     # This one only refreshes the expires_at field
@@ -233,6 +241,51 @@ def test_sso_groups_created():
         u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
         == "test_gh_org"
     )
+    assert (
+        u["oauth_accounts"][0]["organizations"][1]["url"]
+        == "https://test.example.com/orgs/another_org"
+    )
+    assert (
+        u["oauth_accounts"][0]["organizations"][1]["organization"]["login"]
+        == "another_org"
+    )
+
+    # This should append new orgs in addition to pre-existing ones
+    exp += 1
+    fut = user_manager.oauth_callback(
+        oauth_name="test.example.com",
+        access_token="abcdef12345",
+        account_id="255501024",
+        account_email="sso_user@example.com",
+        expires_at=exp,
+        refresh_token="8ef8e5aa",
+        associate_by_email=False,
+    )
+    user = asyncio.run(fut)
+    print(vars(user))
+    u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
+    print(u)
+    assert u["email"] == "sso_user@example.com"
+    assert (
+        u["oauth_accounts"][0]["expires_at"] == exp
+    ), "The existing oauth_account entry was refreshed"
+    assert (
+        u["oauth_accounts"][0]["organizations"][2]["url"]
+        == "https://test.example.com/orgs/test_gh_org"
+    )
+    assert u["oauth_accounts"][0]["organizations"][2]["state"] == "active"
+    assert (
+        u["oauth_accounts"][0]["organizations"][2]["organization"]["login"]
+        == "test_gh_org"
+    )
+    assert (
+        u["oauth_accounts"][0]["organizations"][3]["url"]
+        == "https://test.example.com/orgs/another_org"
+    )
+    assert (
+        u["oauth_accounts"][0]["organizations"][3]["organization"]["login"]
+        == "another_org"
+    )
 
     # Now add a second openauth provider/source
     # Even if oauth_name makes this a unique and independent user,
@@ -254,7 +307,7 @@ def test_sso_groups_created():
     # Changing account_id and (optional) account_email and it works
     exp += 11
     fut = user_manager.oauth_callback(
-        oauth_name="test.example.com",
+        oauth_name="test2.example.com",
         access_token="345",
         account_id="255509999999",
         account_email="sso_user2222@example.com",
@@ -270,10 +323,10 @@ def test_sso_groups_created():
     assert u["oauth_accounts"][0]["expires_at"] == exp
     assert (
         u["oauth_accounts"][0]["organizations"][0]["url"]
-        == "https://test.example.com/orgs/test_gh_org"
+        == "https://test2.example.com/orgs/test_gh_org2"
     )
     assert u["oauth_accounts"][0]["organizations"][0]["state"] == "active"
     assert (
         u["oauth_accounts"][0]["organizations"][0]["organization"]["login"]
-        == "test_gh_org"
+        == "test_gh_org2"
     )
