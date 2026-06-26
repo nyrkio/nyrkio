@@ -67,6 +67,16 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         self.store = DBStore()
         self.User = self.store.db.User
 
+    # async def update_oauth_account(self, u,acct,dic):
+    #     print(u,acct,dic)
+    #     return await super().update_oauth_account(u,acct,dic)
+
+    # async def get_by_oauth_account(self, oauth_name, account_id):
+    #     print(oauth_name, account_id)
+    #     res = await super().get_by_oauth_account(oauth_name, account_id)
+    #     print(res)
+    #     return res
+
     async def get_by_github_username(self, github_username: str):
         res = await self.User.find_one({github_username: github_username})
         if res:
@@ -126,7 +136,9 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         # saving it to DB, without any chance of doing our own thing between. So parent method is
         # copy pasted here and we never call super(). Check back periodically whether new versions
         # do something completely different...
+        print("add_oauth_account")
         if self.oauth_account_model is None:
+            print("self.oauth_account_model is None")
             raise NotImplementedError()
         oauth_account = self.oauth_account_model(**create_dict)
         user.oauth_accounts.append(oauth_account)  # type: ignore
@@ -141,7 +153,14 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         for sso_org in sso_orgs:
             if sso_org["login"] in user_orgs:
                 continue
-            matched_oauth_account.organizations.append(sso_org)
+            sso_org_envelope = {
+                "url": sso_org["url"],
+                "state": "active",
+                "role": "user",
+                "organization_url": sso_org["url"],
+                "organization": sso_org,
+            }
+            matched_oauth_account.organizations.append(sso_org_envelope)
 
         # Back to copy pasted code from parent
         await user.save()
@@ -151,6 +170,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         self, user: UP_BEANIE, oauth_account: models.OAP, update_dict: Dict[str, Any]
     ) -> UP_BEANIE:
         """Update an OAuth account on a user."""
+        print("update_oauth_account")
         # Code copy pasted from parent mixed with new nyrkio code
         if self.oauth_account_model is None:
             raise NotImplementedError()
@@ -165,15 +185,22 @@ class NyrkioUserDatabase(BeanieUserDatabase):
                 # Nyrkio code
                 sso_orgs = await self._get_sso_mapped_orgs(update_dict["oauth_name"])
                 user_orgs = [
-                    o["login"]
+                    o["organization"]["login"]
                     for o in user.oauth_accounts[i].organizations
-                    if "login" in o
+                    if "login" in o.get("organization", {})
                 ]
                 # Now we add any órgs the user doesn't already have.
                 for sso_org in sso_orgs:
                     if sso_org["login"] in user_orgs:
                         continue
-                    user.oauth_accounts[i].organizations.append(sso_org)
+                        sso_org_envelope = {
+                            "url": sso_org["url"],
+                            "state": "active",
+                            "role": "user",
+                            "organization_url": sso_org["url"],
+                            "organization": sso_org,
+                        }
+                    user.oauth_accounts[i].organizations.append(sso_org_envelope)
 
         await user.save()
         return user
@@ -186,7 +213,11 @@ def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list
     for acct in user.oauth_accounts:
         if acct.oauth_name != oauth_full_domain:
             continue
-        user_orgs += [o["login"] for o in acct.organizations if "login" in o]
+        user_orgs += [
+            o["organization"]["login"]
+            for o in acct.organizations
+            if "login" in o.get("organization", {})
+        ]
         return acct, user_orgs
 
 
