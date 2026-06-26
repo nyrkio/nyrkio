@@ -163,7 +163,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
                 for key, value in update_dict.items():
                     setattr(user.oauth_accounts[i], key, value)  # type: ignore
                 # Nyrkio code
-                sso_orgs = self._get_sso_mapped_orgs(update_dict["oauth_name"])
+                sso_orgs = await self._get_sso_mapped_orgs(update_dict["oauth_name"])
                 user_orgs = [
                     o["login"]
                     for o in user.oauth_accounts[i].organizations
