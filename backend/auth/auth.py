@@ -470,7 +470,8 @@ async def _sso_mycallback_handler(
                 detail="This should never happen",
             )
 
-        oauth_acct.organizations = []
+        if not oauth_acct.organizations:
+            oauth_acct.organizations = []
         oauth_acct.organizations.append(userinfo)
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
