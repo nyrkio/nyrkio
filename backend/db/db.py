@@ -164,7 +164,11 @@ class NyrkioUserDatabase(BeanieUserDatabase):
                     setattr(user.oauth_accounts[i], key, value)  # type: ignore
                 # Nyrkio code
                 sso_orgs = self._get_sso_mapped_orgs(update_dict["oauth_name"])
-                user_orgs = [o["login"] for o in user.oauth_accounts[i].organizations]
+                user_orgs = [
+                    o["login"]
+                    for o in user.oauth_accounts[i].organizations
+                    if "login" in o
+                ]
                 # Now we add any órgs the user doesn't already have.
                 for sso_org in sso_orgs:
                     if sso_org["login"] in user_orgs:
@@ -182,7 +186,7 @@ def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list
     for acct in user.oauth_accounts:
         if acct.oauth_name != oauth_full_domain:
             continue
-        user_orgs += [o["login"] for o in acct.organizations]
+        user_orgs += [o["login"] for o in acct.organizations if "login" in o]
         return acct, user_orgs
 
 
