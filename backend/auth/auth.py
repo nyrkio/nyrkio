@@ -472,7 +472,14 @@ async def _sso_mycallback_handler(
 
         if not oauth_acct.organizations:
             oauth_acct.organizations = []
-        oauth_acct.organizations.append(userinfo)
+        found = False
+        for i, org in enumerate(oauth_acct.organizations):
+            if "sub" in org and userinfo["sub"] == org["sub"]:
+                # Update whatever is the newest info
+                oauth_acct.organizations[i] =userinfo
+                found = True
+        if not found:
+            oauth_acct.organizations.append(userinfo)
 
     update = UserUpdate(oauth_accounts=user.oauth_accounts)
     user = await user_manager.update(update, user, safe=True)
