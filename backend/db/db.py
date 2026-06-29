@@ -28,6 +28,7 @@ from hunter.series import AnalyzedSeries
 
 class OAuthAccount(BaseOAuthAccount):
     organizations: Optional[List[Dict]] = Field(default_factory=list)
+    upstream_userinfo: Optional[Dict] = None
 
 
 class User(BeanieBaseUser, Document):
