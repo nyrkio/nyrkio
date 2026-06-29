@@ -97,7 +97,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
 
         return None
 
-    async def _get_sso_mapped_orgs(self, oauth_name):
+    async def _get_allowed_github_orgs(self, oauth_name):
         gh_like_organizations = []
         sso_config = await self.store.get_sso_config(oauth_full_domain=oauth_name)
         rows = len(sso_config)
@@ -106,23 +106,23 @@ class NyrkioUserDatabase(BeanieUserDatabase):
                 f"Found {len(sso_config)} results when trying to find sso config for {oauth_name}"
             )
         print(sso_config)
-        orgs = sso_config[0].get("github_org_map", [])
+        orgs = sso_config[0].get("allowed_github_orgs", [])
         print(orgs)
 
         for o in orgs:
-            gh_like_organizations.append(
-                {
-                    "login": o,
-                    # compute integer id as a hash of the name...
-                    "id": hash(o),
-                    "node_id": hex(hash(o)),
-                    "url": f"https://{oauth_name}/orgs/{o}",
-                    "repos_url": f"https://api.github.com/orgs/{o}/repos",
-                    "description": "Group is created and managed by Nyrkiö.",
-                }
+            login = o["login"]
+            o["url"] = o["url"] if "url" in o else f"https://{oauth_name}/orgs/{login}"
+            o["repos_url"] = (
+                o["repos_url"]
+                if "repos_url" in o
+                else f"https://api.github.com/orgs/{login}/repos"
             )
-
-        print(self.oauth_account_model)
+            o["description"] = (
+                o["description"]
+                if "description" in o
+                else "Group is created and managed by Nyrkiö."
+            )
+            gh_like_organizations.append(o)
         return gh_like_organizations
 
     async def add_oauth_account(
@@ -144,7 +144,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         user.oauth_accounts.append(oauth_account)  # type: ignore
 
         # New code, nyrkio
-        sso_orgs = await self._get_sso_mapped_orgs(create_dict["oauth_name"])
+        sso_orgs = await self._get_allowed_github_orgs(create_dict["oauth_name"])
         # Find org names that already exist for user (if it is not a new user)
         matched_oauth_account, user_orgs = filter_user_orgs(
             sso_orgs, user, create_dict["oauth_name"]
@@ -179,7 +179,7 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         # Make sure admin provisioned orgs from
         # db.sso.<oauth_full_domain==oauth_name>.github_org_map
         # are also updated
-        sso_orgs = await self._get_sso_mapped_orgs(update_dict["oauth_name"])
+        sso_orgs = await self._get_allowed_github_orgs(update_dict["oauth_name"])
         for i, existing_oauth_account in enumerate(user.oauth_accounts):  # type: ignore
             if (
                 existing_oauth_account.oauth_name == oauth_account.oauth_name

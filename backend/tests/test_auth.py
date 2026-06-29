@@ -101,7 +101,10 @@ def test_sso_groups_created():
         "org_name": "Test",
         "org_contact_email": "test@example.com",
         "org_domain": "example.com",
-        "github_org_map": ["test_gh_org", "another_org"],
+        "allowed_github_orgs": [
+            {"login": "test_gh_org", "id": 901},
+            {"login": "another_org", "id": 902},
+        ],
         "oauth_full_domain": "test.example.com",
         "oauth_tld": "example.com",
         "scopes": ["openid", "profile", "groups"],
@@ -116,7 +119,10 @@ def test_sso_groups_created():
         "org_name": "Test2",
         "org_contact_email": "test2@example.com",
         "org_domain": "example.com",
-        "github_org_map": ["test_gh_org2"],
+        "allowed_github_orgs": [
+            {"login": "test_gh_org2", "id": 901},
+            {"login": "another_org", "id": 902},
+        ],
         "oauth_full_domain": "test2.example.com",
         "oauth_tld": "example.com",
         "scopes": ["openid", "profile", "groups"],
@@ -169,8 +175,7 @@ def test_sso_groups_created():
     #               'organization':
     #                   {
     #                       'login': 'test_gh_org',
-    #                       'id': 2197284774778783075,
-    #                       'node_id': '0x1e7e52dc67104563',
+    #                       'id': 900,
     #                       'url': 'https://test.example.com/orgs/test_gh_org',
     #                       'repos_url': 'https://api.github.com/orgs/test_gh_org/repos',
     #                       'description': 'Group is created and managed by Nyrkiö.'
