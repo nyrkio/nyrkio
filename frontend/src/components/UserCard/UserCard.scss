@@ -1,0 +1,43 @@
+@import '../../style/configuration.scss';
+
+.user-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  height: 100%;
+
+  @include media-breakpoint-up(md) {
+    flex-direction: row;
+    gap: 24px;
+    align-items: flex-start;
+  }
+}
+
+.user-card__image {
+  --bs-aspect-ratio: calc(1 / 1 * 100%);
+  background: #FFFDE5;
+
+  @include media-breakpoint-up(sm) {
+    --bs-aspect-ratio: calc(3 / 4 * 100%);
+  }
+
+  @include media-breakpoint-up(md) {
+    --bs-aspect-ratio: calc(10 / 7 * 100%);
+    flex: 0 0 280px;
+    width: 280px;
+  }
+
+  @include media-breakpoint-up(xl) {
+    --bs-aspect-ratio: calc(1 / 1 * 100%);
+    height: 100%
+  }
+
+  @include media-breakpoint-up(xxxl) {
+    --bs-aspect-ratio: calc(10 / 7 * 100%);
+  }
+}
+
+.user-card__content {
+  flex-grow: 1;
+}

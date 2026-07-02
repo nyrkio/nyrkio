@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, Fragment } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { SingleResultWithTestname } from "./Dashboard";
 import { impersonateUser } from "./ImpersonateControls";
+import { Forbidden } from "./Forbidden";
 
 const UserResults = ({ user, testNames, embed }) => {
   console.debug("testname");
@@ -19,13 +20,12 @@ const UserResults = ({ user, testNames, embed }) => {
     <div>
       <h2>{user}</h2>
       <ul>
-        {testNames.map((testName) => {
-          return Object.values(testName).map((testName) => {
+        {testNames.map((testName, i) => {
+          return Object.values(testName).map((testName, j) => {
             console.debug(testName);
             if (testName === undefined || testName.length === 0) {
-              return <></>;
+              return <Fragment key={`${i}-${j}`}></Fragment>;
             }
-
             const baseUrls = {
               api: "/api/v0/admin/result/" + user + "/",
               testRoot: "/admin",
@@ -33,6 +33,7 @@ const UserResults = ({ user, testNames, embed }) => {
             };
             return (
               <SingleResultWithTestname
+                key={`${i}-${j}`}
                 testName={testName}
                 baseUrls={baseUrls}
                 breadcrumbName={testName}
@@ -51,16 +52,28 @@ const UserTable = ({ data }) => {
   console.log("data is");
   console.log(data);
   return (
-    <div className="row">
-      <ul>
-        {Object.entries(data).map(([idx, user]) => {
-          return (
-            <li className="list-group-item" key={user['_id'] || -1}>
-              <Link to={`/`} onClick={(event) => {event.preventDefault(); impersonateUser(user).then(()=>{ window.location.href = '/'})}}>{user['email']}</Link>
-            </li>
-          );
-        })}
-      </ul>
+    <div className="table-responsive rounded shadow">
+      <table className="table table-bordered text-center border-light">
+        <thead>
+        <tr>
+          <th>Email</th>
+          <th>Active</th>
+          <th>Superuser</th>
+          <th>Verified</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {Object.values(data || {}).map((user) => (
+          <tr key={user['_id'] || -1}>
+            <td className="text-start"><Link to={`/`} onClick={(event) => {event.preventDefault(); impersonateUser(user).then(()=>{ window.location.href = '/'})}}>{user['email']}</Link></td>
+            <td>{user.is_active ? "Yes" : "No"}</td>
+            <td>{user.is_superuser ? "Yes" : "No"}</td>
+            <td>{user.is_verified ? "Yes" : "No"}</td>
+          </tr>
+        ))}
+        </tbody>
+      </table>
     </div>
   );
 };
@@ -68,18 +81,9 @@ const UserTable = ({ data }) => {
 const MainAdminDashboard = ({ results }) => {
   return (
     <>
-      <div className="container col-10">
-        <h1>Admin Dashboard</h1>
-        <div>
-          <div className="card">
-            <div className="card-header">Impersonate user:</div>
-            <div className="card-body">
-              <ul className="list-group list-group-flush">
-                <UserTable data={results} />
-              </ul>
-            </div>
-          </div>
-        </div>
+      <div className="container">
+        <h1 className="text-center text-primary my-4 my-md-5">Admin Dashboard</h1>
+        <UserTable data={results} />
       </div>
     </>
   );
@@ -90,29 +94,27 @@ const AdminUserResults = ({ user, results }) => {
   return <UserResults user={user} testNames={testNames} />;
 };
 
-export const AdminDashboard = () => {
+export const AdminDashboard = ({loggedIn}) => {
   const location = useLocation();
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState([{}]);
+
   const fetchData = async () => {
     const tempresults = await fetch("/api/v0/admin/all_users", {
       credentials: "include",
     });
     const resultData = await tempresults.json();
-    console.debug(resultData);
     setResults(resultData);
   };
 
   useEffect(() => {
+    if (!loggedIn) return;
     setLoading(true);
-    fetchData().finally(() => {
-      setLoading(false);
-    });
-  }, []);
-  if (loading) {
-    return <div>Loading...</div>;
- }
- return <MainAdminDashboard results={results} />;
+    fetchData().finally(() => setLoading(false));
+  }, [loggedIn]);
+
+  if (!loggedIn) return <Forbidden />;
+  if (loading) return <div>Loading...</div>;
+
+  return <MainAdminDashboard results={results} />;
 };
-
-

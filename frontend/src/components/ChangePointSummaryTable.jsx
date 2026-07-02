@@ -2,7 +2,7 @@ import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
-import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
+import { useMemo } from "react";
 import { commitUrl } from "../lib/github";
 
 const Loading = ({loading}) => {
@@ -14,7 +14,6 @@ const Loading = ({loading}) => {
 
 export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTimestamp, loading, metricsData }) => {
   var rowData = [];
-
   const directionMap = {};
   if(Array.isArray(metricsData)){
     metricsData.forEach((m)=>directionMap[m.name]=m.direction);
@@ -165,7 +164,7 @@ export const ChangePointSummaryTable = ({ title, changeData, queryStringTextTime
         const url = commitUrl(repo, commit);
         const text = formatCommit(commit, commit_msg);
         return (
-          <a href={url} target="_blank">
+          <a href={url} target="_blank" rel="noopener noreferrer">
             {text}
           </a>
         );

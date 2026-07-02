@@ -52,15 +52,11 @@ export const AllChangePoints = ({ testNamePrefix, baseUrls }) => {
   };
   useEffect(loadData, [location]);
 
-  return (
-      <>
-      <div className="row justify-content-center">
-      <ChangePointSummaryTableMain
-        changeData={changePointData}
-        loading={loading}
-        baseUrls={baseUrls}
-      />
-      </div>
-      </>
-    )
+  return (<>
+    <ChangePointSummaryTableMain
+      changeData={changePointData}
+      loading={loading}
+      baseUrls={baseUrls}
+    />
+  </>)
 };

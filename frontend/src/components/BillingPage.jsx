@@ -108,8 +108,6 @@ const UserBillingPage = () => {
     setMeterStatus(data.data);
   };
 
-
-
   const SelectOrgs = ({plan}) => {
     const username = localStorage.getItem("username");
     const [orgs, setOrgs] = useState(["-"]);
@@ -184,15 +182,11 @@ const UserBillingPage = () => {
     );
   };
 
-
-
-
-
   const CpuHoursTableData = ({stripedata, plan}) => {
     const pt = planType[plan];
     const initialRows = 3;
     let rownr = 0;
-    return stripedata.map(day =>
+    return stripedata?.map(day =>
       <tr key={day.id} className={rownr++ >= initialRows? "stripedataCollapse" : ""}>
       <td>{new Date(day.start_time*1000).toDateString()}</td>
       <td style={{textAlign: "right"}}>{Math.round(1000*day.aggregated_value)/1000}</td>
@@ -225,7 +219,7 @@ const UserBillingPage = () => {
   const CpuHoursTable = ({stripedata, plan}) => {
     let totalHours = 0;
     let totalEuros = 0;
-    stripedata.map((day) => {
+    stripedata?.map((day) => {
       totalHours = totalHours + day.aggregated_value;
       totalEuros = totalEuros + day.aggregated_value / 10;
     });
@@ -344,34 +338,23 @@ const UserBillingPage = () => {
   const BillingButton = ({plan}) => {
     console.debug(`plan: {plan}`);
 
-
-    if(plan=="Free" || plan === undefined) {
+    if (plan == "Free" || plan === undefined) {
       return (
-        <a className="btn btn-success" href="/pricing">
-          Upgrade to Nyrkiö Business
-        </a>
-
+        <a className="btn btn-primary" href="/pricing">Upgrade to Nyrkiö Business</a>
       );
-    }else{
+    } else {
       return (
-        <a className="btn btn-success" onClick={onClick}>
-        Manage subscription (Stripe)
-        </a>
+        <a className="btn btn-primary" onClick={onClick}>Manage subscription (Stripe)</a>
       );
     }
-
   };
 
   return (
     <div className="container text-center">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <h1>Billing</h1>
-          <p>Manage your subscription here.</p>
-        </div>
-      </div>
-      {!runnerPlan || billingPlan != "free"?(
-      <>
+      <h1 className="text-primary mb-2">Billing</h1>
+      <p className="fw-semibold text-secondary">Manage your subscription here</p>
+
+      {!runnerPlan || billingPlan != "free" ? (<>
       <div className="row p-5">
         <div className="card nyrkio-billing">
           <div className="card-body shadow">
@@ -386,27 +369,24 @@ const UserBillingPage = () => {
           </div>
         </div>
       </div>
-      </>
-       ):""}
+      </>):""}
 
 
-      {runnerPlan?(
-      <>
-      <div className="row p-5">
-        <div className="card nyrkio-billing">
-          <div className="card-body shadow">
-            <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
-            <p className="card-body-text">{planMap[runnerPlan]}</p>
-            <p className="card-body-text">Covered by this subscription: &nbsp;&nbsp;&nbsp;
-            <SelectOrgs plan={runnerPlan} />
-            </p>
-            <CpuHoursTable stripedata={meterStatus} plan={runnerPlan} />
-            <BillingButton plan={planMap[runnerPlan]}/>
+      {runnerPlan?(<>
+        <div className="row p-5">
+          <div className="card nyrkio-billing">
+            <div className="card-body shadow">
+              <h3 className="card-title">Nyrkiö Runner for GitHub</h3>
+              <p className="card-body-text">{planMap[runnerPlan]}</p>
+              <p className="card-body-text">Covered by this subscription: &nbsp;&nbsp;&nbsp;
+              <SelectOrgs plan={runnerPlan} />
+              </p>
+              <CpuHoursTable stripedata={meterStatus} plan={runnerPlan} />
+              <BillingButton plan={planMap[runnerPlan]}/>
+            </div>
           </div>
         </div>
-      </div>
-      </>
-       ):""}
+      </>):""}
     </div>
   );
 };

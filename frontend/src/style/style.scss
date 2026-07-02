@@ -1,0 +1,64 @@
+// Override bootstrap variables.
+@import 'variables';
+
+// Bootstrap core
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+@import 'bootstrap/scss/utilities';
+
+// Extend Bootstrap utilities.
+$utilities: map-merge(
+    $utilities,
+    (
+      "width": (
+        property: width,
+        class: w,
+        responsive: true,
+        values: (
+          auto: auto,
+          25: 25%,
+          50: 50%,
+          75: 75%,
+          100: 100%,
+        )
+      ),
+      "font-family": (
+        property: font-family,
+        class: ff,
+        values: (
+          base: var(--bs-body-font-family),
+        )
+      ),
+      "letter-spacing": (
+        property: letter-spacing,
+        class: ls,
+        values: (
+          0: 0,
+        )
+      )
+    )
+);
+
+// Import full Bootstrap after utility overrides.
+@import 'bootstrap/scss/bootstrap';
+
+@import 'base/typography';
+@import 'base/form';
+@import 'base/button';
+@import 'base/icons';
+@import 'base/table';
+@import 'base/markdown';
+@import 'components/navigation';
+@import 'components/dropdown';
+@import 'layout/layout';
+
+
+.badge {
+  &.text-bg-secondary {
+    background-color: $badge-secondary !important;
+    color: $badge-secondary-content !important;
+  }
+}

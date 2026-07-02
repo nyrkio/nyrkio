@@ -1,8 +1,9 @@
-import { useState, useEffect,useCallback } from "react";
-
+import { useState } from "react";
 import posthog from "posthog-js";
 import gh_permissions_img from "../static/github_permissions.png";
-
+import { Icon } from "./Icon.jsx";
+import { PasswordInput } from "./PasswordInput/PasswordInput.jsx"
+import { HighlightLoginSection} from "./HighlightLoginSection.jsx";
 
 export const SignUpPage = () => {
 
@@ -22,7 +23,7 @@ export const SignUpPage2 = () => {
   const [showForm, setShowForm] = useState(formState.Visible);
 
 
-  const nop = () =>{e.preventDefault(); return true;};
+  const nop = (e) =>{e.preventDefault(); return true;};
 
   const handleSignUpClick = () => {
     setShowForm(formState.Visible);
@@ -134,144 +135,83 @@ export const SignUpPage2 = () => {
     window.location.href = url;
   };
 
-
-
-
   if (showForm === formState.Visible || showForm == formState.Registered) {
     return (
-      <div id="signup" className="container">
-        <div className="row">
-          <div className="col">
-            <h4 className="text-left mt-5">Create new account</h4>
-          </div>
-        </div>
-        <div className="row ">
-          <div className="text-justify mt-5 col-lg-6  "  style={{"paddingRight": "1em"}}>
-            <p>           <strong className="nyrkio-accent">Recommended:</strong><br /> Create account &amp; Install Nyrkiö as a GitHub app <sup>*</sup>:</p>
-            <button className="btn btn-success" onClick={githubInstall}>
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="16"
-              height="16"
-              fill="currentColor"
-              className="bi bi-github"
-              viewBox="0 0 16 16"
-            >
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-            </svg>{" "}
-              Install Nyrkiö GitHub app &nbsp;
-            </button>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
-            <p>&nbsp;</p>
+      <div id="signup">
+        <HighlightLoginSection title="Create new account">
+          <h2 className="h3 text-secondary mb-2">Recommended:</h2>
+          <p className="mb-3 mb-md-5">Create account &amp; Install Nyrkiö as a <a href="#github_note" id="github_note_text">GitHub&nbsp;app<sup>*</sup></a>:</p>
+          <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubInstall}>
+            <Icon name="github-circle"/>
+            Install Nyrkiö GitHub app &nbsp;
+          </button>
+
+          <hr className="my-4 my-md-5"/>
+
+          <h2 className="h3 text-secondary mb-2">Create account without GitHub integration:</h2>
+          <form onSubmit={e => nop()}>
+            <div className="mb-3 text-start">
+              <label htmlFor="emailInput" className="form-label">
+                Email address
+              </label>
+              <input
+                type="email"
+                className="form-control"
+                placeholder="Enter Email Address"
+                id="emailInput"
+              />
+            </div>
+            <div className="text-start">
+              <label htmlFor="passwordInput" className="form-label">
+                Password
+              </label>
+              <PasswordInput
+                id="passwordInput"
+                placeholder="Enter your Password"
+              />
+            </div>
+            <button type="submit" className="btn btn-primary mt-4 w-100 w-md-auto" onClick={signUpSubmit}>Submit</button>
+
+            <div id="turnstile-container" className="mt-4"></div>
+
+            <hr className="my-4 my-md-5"/>
+
+            <p className="mb-1 fw-normal">Already have an account? <a href="/login">Log&nbsp;in&nbsp;here</a></p>
+            <p className="mb-0 fw-normal">Have an account but forgot the password? <a href="/forgot-password">Reset&nbsp;password&nbsp;here</a></p>
+          </form>
+        </HighlightLoginSection>
+        <div className="container">
+          <div id="github_note" className="text-center mt-5 mt-md-7 w-100 mx-auto" style={{maxWidth: "480px"}}>
+            <p className="text-secondary text-start">*) GitHub will ask to grant Nyrkiö the following permissions:</p>
+            <div className="p-3 border border-secondary rounded-2 shadow d-inline-block">
+              <img src={gh_permissions_img} alt="Github permissions dialog" className="img-fluid"/>
             </div>
 
-          {/*
-          <div className="text-center mt-5 col-lg-4  "  style={{"paddingLeft": "1em"}}>
-            <hr />
-            <p>GitHub OAuth login only:</p>
-            <button className="btn btn-success" onClick={githubSubmit}>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                fill="currentColor"
-                className="bi bi-github"
-                viewBox="0 0 16 16"
-              >
-                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-              </svg>{" "}
-              Login with GitHub &nbsp;
-            </button>
-          </div>
-          */}
-          <div className="  mt-5 mb-5 col-lg-6" style={{"textAlign": "center"}}>
-          <p><em>Create account without GitHub integration:</em></p>
-            <form onSubmit={e => nop()}>
-              <div className="mb-3">
-                <label htmlFor="emailInput" className="form-label">
-                  Email address
-                </label>
-                <input
-                  type="email"
-                  className="form-control w-50"
-                  id="emailInput"
-                  style={{"marginLeft": "25%", "marginRight": "25%"}}
-                />
-                <label htmlFor="passwordInput" className="form-label">
-                  Password
-                </label>
-                <input
-                  type="password"
-                  className="form-control w-50"
-                  id="passwordInput"
-                  style={{"marginLeft": "25%", "marginRight": "25%"}}
-                  />
-              </div>
-
-              <div  style={{"textAlign": "center", paddingBottom: "1em"}}>
-                <button type="submit" className="btn btn-success mt-4" onClick={signUpSubmit}>
-                  Submit
-                </button>
-              </div>
-              <div id="turnstile-container"></div>
-            </form>
-            <div className="row pt-3">
-              <hr />
-              <div className="form-text text-justify" >
-                  Already have an acccount? <a href="/login">Log in here</a>
-              </div>
-              <div className="form-text text-justify" >
-                  Have an account but forgot the password? <a href="/forgot-password">Reset password here.</a>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div className="row">
-        <hr />
-          <div className="text-justify col-lg-4">
-            <p><sup>*)</sup>GitHub will ask to grant Nyrkiö the following permissions:</p>
-            <img src={gh_permissions_img} alt="Github permissions dialog" width="100%"/>
-            <p>You can choose to not grant any one of those permissions. Nyrkiö will
-            continue to work without the particular feature.</p>
+            <p className="mt-4 fw-normal">You can choose to not grant any one of those permissions.
+              Nyrkiö&nbsp;will continue to work without the particular feature. <a href="#github_note_text">↩</a>
+            </p>
           </div>
         </div>
       </div>
     );
   }
-  if(showForm == formState.Registered ){
+  if (showForm == formState.Registered){
     posthog.capture("user_signed_up", { signup_type: "email" });
     return (
-      <div className="container">
-        <div className="row mt-5 justify-content-center">
-          <div className="col-md-6">
-            <h3>Thank you for registering!</h3>
-            <p>
-            Your Nyrkiö account is now created, but before you can login, we want to verify your email address.
-            I'm trying to send you an email now....
-            <br />
-            <br />
-            You can also just email us at helloworld@nyrkio.com
-            </p>
-          </div>
-        </div>
-      </div>
+      <HighlightLoginSection title="Thank you for registering!">
+        <p>Your Nyrkiö account is now created, but before you can login, we want to verify your email address. I'm trying to send you an email now....</p>
+        <p className="mb-0">You can also just email us at <a href="mailto:helloworld@nyrkio.com">helloworld@nyrkio.com</a></p>
+      </HighlightLoginSection>
     );
-  } else if(showForm == formState.Sent){
+  } else if (showForm == formState.Sent){
     posthog.capture("user_verification_requested", { signup_type: "email" });
     return (
-      <div className="container">
-        <div className="row mt-5 justify-content-center">
-          <div className="col-md-6">
-            <h3>Thank you for registering!</h3>
-            <p>
-              We have sent you an email with a link to confirm your account.
-              Once you have confirmed your account, you can log in.
-            </p>
-          </div>
-        </div>
-      </div>
+      <HighlightLoginSection title="Thank you for registering!">
+        <p className="mb-0">
+          We have sent you an email with a link to confirm your account.<br className="d-none d-md-block"/>
+          Once you have confirmed your account, you can log in.
+        </p>
+      </HighlightLoginSection>
     );
   }
 };

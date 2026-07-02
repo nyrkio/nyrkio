@@ -1,8 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { Button, Modal, ModalHeader } from "react-bootstrap";
+import { Button, Modal } from "react-bootstrap";
 import { Line } from "react-chartjs-2";
-import { Tooltip } from "chart.js";
 // DO NOT REMOVE
 // necessary to avoid "category is not a registered scale" error.
 import { Chart as ChartJS } from "chart.js/auto";
@@ -11,6 +10,7 @@ import { parseTimestamp } from "../lib/utils";
 ChartJS.register(zoomPlugin);
 
 import { commitUrl, branchUrl } from "../lib/github";
+import { Icon } from "./Icon.jsx";
 
 
 const nyrkio_dark_red = "#a34111";
@@ -73,7 +73,7 @@ export const DrawLineChart = ({
   };
   const getLayout = (layout) => {
     if(layout=="overview") return {width:"100%", maxWidth: "100%", outerWidth: "25%", height:"50%", maxHeight:"50%"};
-    if(layout=="sparklines") return {width:"100%", height:"50px", maxHeight:"50px"};
+    if(layout=="sparklines") return {width:"100%", height:"100px", maxHeight:"100px"};
     if(layout=="2x1") return {width: "100%", minWidth: "100%", height: "70%", maxHeight: "70%"};
     if(layout=="1x1") return {width: "100%", height: "90%", maxHeight: "90%"};
     return {width: "100%", height: "80%", maxHeight: "80%"};
@@ -306,9 +306,10 @@ export const DrawLineChart = ({
             </div>
 
           </Modal.Body>
-          <Modal.Footer>
+          <Modal.Footer className="justify-content-between">
             <Button
-              variant="secondary"
+              variant="primary"
+              className="d-inline-flex gap-2"
               onClick={() => {
                 if (result_index === 0) {
                   return;
@@ -318,10 +319,12 @@ export const DrawLineChart = ({
                 setModalIndex(result_index-1);
               }}
             >
+              <Icon name="chevron-left" size={18} />
               Prev
             </Button>
             <Button
-              variant="secondary"
+              variant="primary"
+              className="d-inline-flex gap-2"
               onClick={() => {
                 if (result_index === timestamps.length - 1) {
                   return;
@@ -332,6 +335,7 @@ export const DrawLineChart = ({
               }}
             >
               Next
+              <Icon name="chevron-right" size={18} />
             </Button>
           </Modal.Footer>
         </Modal>
@@ -386,7 +390,7 @@ export const DrawLineChart = ({
             if(target.chart.getZoomLevel() != 1){
               const buttons = document.getElementsByClassName("resetzoom");
               for (let b of buttons){
-                b.style.opacity = 0.5;
+                b.style.opacity = 1;
               }
             }
         };
@@ -509,12 +513,13 @@ export const DrawLineChart = ({
         setTimestamp={setModalData}
       />
       <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
-      <div className="chart-wrapper"  style={layout}>
-        <h6 className="text-center">
+
+      <div className="chart-wrapper mb-4" style={layout}>
+        <div className="text-center">
           <a href={metricNameWithHash}>{metricName}</a>{ " "}
           <span className="numfmt">{numberSizeWord?"("+numberSizeWord +")":""}</span>
           <span title={direction}>{directionArrow}</span>
-        </h6>
+        </div>
         <Line
           ref={chartRef}
           datasetIdKey="foo"
@@ -684,7 +689,11 @@ export const DrawLineChart = ({
           }}
         />
       </div>
-      <button className="btn-secondary resetzoom" style={{opacity: 0}} onClick={(ev)=>resetAllZooms(ev)}>Reset zoom</button>
+        <div className="text-end">
+          <button className="btn btn-square btn-outline-primary btn-sm resetzoom" aria-label="Reset zoom" title="Reset zoom" style={{opacity: 0}} onClick={(ev)=>resetAllZooms(ev)}>
+            <Icon name="zoom-out" size="22" />
+          </button>
+        </div>
       </div>
     </>
   )};

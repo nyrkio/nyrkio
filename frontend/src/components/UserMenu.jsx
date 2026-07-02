@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import "bootstrap-icons/font/bootstrap-icons.css";
 import Dropdown from "react-bootstrap/Dropdown";
-import { ImpersonateControls } from "./ImpersonateControls";
 import posthog from "posthog-js";
 
 export const UserMenu = ({ loggedIn, setLoggedIn }) => {
@@ -106,8 +105,9 @@ export const UserMenu = ({ loggedIn, setLoggedIn }) => {
 
   return (
     <Dropdown id="dropdownwrapper">
-      <Dropdown.Toggle variant="success" id="dropdown-basic">
-        <span className="bi bi-gear-fill"> {username}</span>
+      <Dropdown.Toggle variant="primary" id="dropdown-basic" className="d-flex gap-2 w-100 align-items-center">
+        <span className="bi bi-gear-fill"></span>
+        <span className="d-inline-block text-truncate" style={{maxWidth: '136px'}}>{username}</span>
       </Dropdown.Toggle>
 
       <Dropdown.Menu>

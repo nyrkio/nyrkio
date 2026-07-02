@@ -1,22 +1,25 @@
 import { useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { useSearchParams } from "react-router-dom";
 import posthog from "posthog-js";
-import { SignUpPage } from "./SignUp"
+import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
+import { Icon } from "./Icon.jsx";
+import {PasswordInput} from "./PasswordInput/PasswordInput.jsx";
 
-export const ForgotPassword = () => {
+export const ForgotPassword = ({loggedIn}) => {
   const [errorText, setErrorText] = useState("");
   const [secondPhase, setSecondPhase] = useState(false);
   const [queryParams, setQueryParams] = useSearchParams();
-
-
-
 
   const ErrorMessage = () => {
     if (errorText) {
       return (
         <>
-          <div className="alert alert-warning mt-3" role="alert">
-            {errorText}
+          <div className="alert alert-warning d-flex flex-nowrap mt-3" role="alert">
+            <Icon name="triangle-exclamation" size="24" className="flex-shrink-0 me-2"/>
+            <div
+              className="text-start"
+              dangerouslySetInnerHTML={{ __html: errorText }}
+            />
           </div>
         </>
       );
@@ -40,7 +43,7 @@ export const ForgotPassword = () => {
       body: JSON.stringify({"email": email}),
     })
     .then( (response) => {
-      const successText = "We have sent a link to your email that you can use to reset your password. Please check your spam folder. If you didn't receive an email in the next 10 minutes, please email helloworld@nyrkio.com and we will help.";
+      const successText = "We have sent a link to your email that you can use to reset your password. Please check your spam folder. If you didn't receive an email in the next 10 minutes, please email <a href='mailto:helloworld@nyrkio.com'>helloworld@nyrkio.com</a> and we will help.";
       if (response.ok) {
         setSecondPhase(true);
         const repe = response.json();
@@ -72,35 +75,24 @@ export const ForgotPassword = () => {
 
   const RequestForm = () => {
     return (
-      <div id="request_form" className="mt-3 mb-3 row col-xs-8">
-      <div>
-      &nbsp;
-      </div>
-      <form className="row mt-1 sso-login text-center" onSubmit={emailSubmit}>
-            <div className="col-md-3">
-            &nbsp;
-            </div>
-            <div className="col-xs-6 col-md-6">
-            <input
+      <div id="request_form">
+          <form onSubmit={emailSubmit}>
+            <div className="text-start mb-3">
+              <label className="form-label" htmlFor="email">Email</label>
+              <input
                 type="text"
-                placeholder="myemail@example.com"
+                placeholder="Enter your email"
                 className="form-control"
                 id="email"
-                name="email"
-                style={{lineHeight:"0"}}
-                />
-          <br                   style={{lineHeight:"10px"}}
-          />
+                name="email" />
             </div>
-            <br />
-            <div className="text-center mb-4 mt-3 xs-12">
-            <button type="submit" className="btn-success btn passreset xs-12" style={{minWidth:"12em"}}>
+            <div className="text-center mt-4 mt-md-5">
+              <button type="submit" className="btn btn-primary passreset w-100 w-md-auto" style={{minWidth:"12em"}}>
                 Send email to reset your password
               </button>
             </div>
           </form>
-        </div>
-
+      </div>
     );
   };
   const SetPassword = ({token}) => {
@@ -118,10 +110,14 @@ export const ForgotPassword = () => {
       return "";
     };
     const newPasswordSubmit = async (e) => {
+
+
+
       e.preventDefault();
       const form = e.target;
       const token = form.elements[0].value;
       const password = form.elements[1].value;
+      const email = form.elements[0].value;
 
       posthog.capture("reset-password", { property: email });
 
@@ -162,56 +158,50 @@ export const ForgotPassword = () => {
 
 
     return (
-      <div id="set_password_form" className="mt-3 mb-3 row col-xs-8">
-      <div>
-      &nbsp;
-      </div>
-      <form className="row mt-1 passreset text-center" onSubmit={newPasswordSubmit}>
-            <div className="col-md-3">
-            &nbsp;
-            </div>
-            <div className="col-xs-6 col-md-6">
-            <p>Token we sent you:</p> <input
-                type="text"
-                placeholder="[token was sent to your email]"
-                defaultValue={queryParams.get("token")}
-                className="form-control"
-                id="token"
-                name="token"
-                style={{lineHeight:"0"}}
-                />
-          <br                   style={{lineHeight:"10px"}}
-          />
-            <p>New password:</p> <input
-                type="password"
-                className="form-control"
-                id="new_password"
-                name="new_password"
-                style={{lineHeight:"0"}}
-                />
-          <br                   style={{lineHeight:"10px"}}
-          />
-            </div>
-            <br />
-            <div className="text-center mb-4 mt-3 sso-login xs-12">
-            <button type="submit" className="btn-success btn col-xs-12" style={{minWidth:"12em"}}>
-                Set new password
-              </button>
-            </div>
-          </form>
-          <ErrorMessage2 className="mb-5"/>
+      <div id="set_password_form">
+        <ErrorMessage2 className="mb-3"/>
+        <form className="passreset" onSubmit={newPasswordSubmit}>
+          <div className="text-start mb-3">
+            <label className="form-label" htmlFor="token">Token was sent to your email</label>
+            <input
+              type="text"
+              placeholder="Enter your Token"
+              defaultValue={queryParams.get("token")}
+              className="form-control"
+              id="token"
+              name="token"
+            />
           </div>
+          <div className="text-start">
+            <label className="form-label" htmlFor="new_password">New password</label>
+            <PasswordInput
+              id="new_password"
+              name="new_password"
+              placeholder="Enter your Password"
+            />
+          </div>
+          <button type="submit" className="btn btn-primary mt-4 mt-md-5 w-100 w-md-auto">
+            Set new password
+          </button>
+        </form>
+      </div>
     );
   };
 
+  const isSecondPhase = secondPhase || queryParams.get("token");
   return (
-    <div>
-        <RequestForm />
-        <div className="row">
-          <ErrorMessage className="mb-5"/>
-        </div>
-        {secondPhase || queryParams.get("token") ? <SetPassword /> : ""}
-      </div>
+    <HighlightLoginSection title="Reset Password">
+      <ErrorMessage className="mb-5"/>
+
+      {!isSecondPhase ? <RequestForm /> : <SetPassword />}
+
+      {!loggedIn ? (<>
+        <hr className="my-4 my-md-5" />
+        <p className="mb-0 fw-normal">I remembered it, <a href="/login">Log In</a></p>
+      </>) : (<></>)}
+
+
+    </HighlightLoginSection>
   );
 };
 

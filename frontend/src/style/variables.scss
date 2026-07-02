@@ -1,0 +1,184 @@
+$primary: #973212;
+$secondary: #50320D;
+
+$body-bg: #fff;
+$body-color: #414141;
+
+$gray-300: #535353;
+$light: #D7D7D7;
+$border-color: $light;
+
+
+$spacer: 1rem;
+$spacers: (
+  0: 0,
+  1: $spacer * .25,  // 4px
+  2: $spacer * .5,   // 8px
+  3: $spacer,        // 16px
+  4: $spacer * 1.5,  // 24px
+  5: $spacer * 2,    // 32px
+  6: $spacer * 3,    // 48px
+  7: $spacer * 4,    // 64px
+  8: $spacer * 5,    // 80px
+);
+
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1200px,
+  xxl: 1400px,
+  xxxl: 1748px,
+);
+
+$container-max-widths: (
+  sm: 100%,
+  md: 100%,
+  lg: 100%,
+  xl: 1110px,
+  xxl: 1310px,
+  xxxl: 1648px,
+);
+
+$headings-size: (
+  h1: 64px,
+  h2: 48px,
+  h3: 28px,
+  h4: 24px,
+  h5: 20px,
+  h6: 18px,
+);
+
+$display-font-sizes: (
+  1: 5rem,
+  2: 4.5rem,
+  3: 4rem,
+  4: 3.5rem,
+  5: 3rem,
+  6: 2.5rem
+);
+
+$aspect-ratios: (
+  "1x1": 100%,
+  "4x3": calc(3 / 4 * 100%),
+  "2x3": calc(3 / 2 * 100%),
+  "16x9": calc(9 / 16 * 100%),
+  "21x9": calc(9 / 21 * 100%),
+  "7x10": calc(10 / 7 * 100%),
+);
+
+
+$grid-gutter-width: 2.5rem;
+
+$box-shadow-sm: 0 0 10px 0 #00000026;
+$box-shadow: 0 0 16px 0 #00000040;
+
+$input-btn-padding-y: 1rem;
+$input-btn-padding-x: 1.5rem;
+
+$btn-padding-x: 2rem;
+$btn-line-height: 1.2;
+$btn-border-radius: .25rem;
+$btn-font-weight: 600;
+$btn-border-width: 2px;
+
+$input-font-weight: 400;
+$input-border-width: 1px;
+$input-border-color: $secondary;
+$input-box-shadow: $box-shadow-sm;
+
+$font-weight-base: 500;
+$font-size-base: 1rem;
+$font-family-base: "IBM Plex Sans", sans-serif;
+$headings-font-family: "Bebas Neue", sans-serif;
+
+$badge-secondary: #50320DB2;
+$badge-secondary-content: #fff;
+
+$nav-link-color: $secondary;
+$nav-link-hover-color: $primary;
+
+
+// scss-docs-start form-check-variables
+//$form-check-input-width:                  1em !default;
+//$form-check-min-height:                   $font-size-base * $line-height-base !default;
+//$form-check-padding-start:                $form-check-input-width + .5em !default;
+//$form-check-margin-bottom:                .125rem !default;
+//$form-check-label-color:                  null !default;
+//$form-check-label-cursor:                 null !default;
+//$form-check-transition:                   null !default;
+//
+//$form-check-input-active-filter:          brightness(90%) !default;
+//
+$form-check-input-width: 1.75em;
+$form-check-input-bg:                     #fff;
+$form-check-input-checked-bg-color:      #fff;
+$form-check-input-checked-border-color:  $primary;
+$form-check-input-checked-bg-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 512 512"><path fill="%2350320D" d="M435.36 118.165l-240.868 240.849c-1.619 1.626-3.544 2.915-5.662 3.796-2.119 0.88-4.391 1.334-6.685 1.334s-4.568-0.454-6.686-1.334c-2.119-0.882-4.044-2.17-5.663-3.796l-93.147-93.233c-1.62-1.626-3.544-2.916-5.663-3.796s-4.391-1.334-6.686-1.334c-2.294 0-4.567 0.454-6.686 1.334s-4.044 2.17-5.663 3.796c-1.626 1.62-2.916 3.544-3.795 5.663s-1.334 4.391-1.334 6.687c0 2.294 0.453 4.566 1.334 6.685s2.17 4.043 3.795 5.663l93.181 93.164c9.83 9.811 23.15 15.322 37.039 15.322s27.209-5.51 37.039-15.322l240.849-240.797c1.624-1.619 2.911-3.542 3.79-5.66s1.33-4.388 1.33-6.68c0-2.293-0.452-4.563-1.33-6.68s-2.166-4.041-3.79-5.66c-1.62-1.626-3.544-2.915-5.663-3.796s-4.391-1.334-6.687-1.334c-2.294 0-4.566 0.454-6.685 1.334s-4.043 2.17-5.663 3.796z"></path></svg>');
+
+
+//$form-check-input-border-radius:          .25em !default;
+//$form-check-radio-border-radius:          50% !default;
+//$form-check-input-focus-border:           $input-focus-border-color !default;
+//$form-check-input-focus-box-shadow:       $focus-ring-box-shadow !default;
+//
+//$form-check-input-checked-color:          $component-active-color !default;
+//$form-check-input-checked-bg-color:       $component-active-bg !default;
+//$form-check-input-checked-border-color:   $form-check-input-checked-bg-color !default;
+//$form-check-input-checked-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$form-check-input-checked-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/></svg>") !default;
+//$form-check-radio-checked-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='2' fill='#{$form-check-input-checked-color}'/></svg>") !default;
+//
+//$form-check-input-indeterminate-color:          $component-active-color !default;
+//$form-check-input-indeterminate-bg-color:       $component-active-bg !default;
+//$form-check-input-indeterminate-border-color:   $form-check-input-indeterminate-bg-color !default;
+//$form-check-input-indeterminate-bg-image:       url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'><path fill='none' stroke='#{$form-check-input-indeterminate-color}' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10h8'/></svg>") !default;
+//
+//$form-check-input-disabled-opacity:        .5 !default;
+//$form-check-label-disabled-opacity:        $form-check-input-disabled-opacity !default;
+//$form-check-btn-check-disabled-opacity:    $btn-disabled-opacity !default;
+//
+//$form-check-inline-margin-end:    1rem !default;
+// scss-docs-end form-check-variables
+
+// scss-docs-start form-switch-variables
+
+$form-switch-width: 3em;
+$form-switch-color: #E5E7EB;
+$form-switch-width:               1.625em;
+//$form-switch-padding-start:       $form-switch-width + .5em !default;
+//$form-switch-bg-image:            url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-color}'/></svg>") !default;
+//$form-switch-border-radius:       $form-switch-width !default;
+//$form-switch-transition:          background-position .15s ease-in-out !default;
+//
+//$form-switch-focus-color:         $input-focus-border-color !default;
+//$form-switch-focus-bg-image:      url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-focus-color}'/></svg>") !default;
+//
+//$form-switch-checked-color:       $component-active-color !default;
+//$form-switch-checked-bg-image:    url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'><circle r='3' fill='#{$form-switch-checked-color}'/></svg>") !default;
+//$form-switch-checked-bg-position: right center !default;
+// scss-docs-end form-switch-variables
+
+// scss-docs-start form-range-variables
+//$form-range-track-width:          100% !default;
+$form-range-track-height: .25rem;
+//$form-range-track-cursor:         pointer !default;
+$form-range-track-bg: #50320DB2;
+//$form-range-track-border-radius:  1rem !default;
+//$form-range-track-box-shadow:     var(--#{$prefix}box-shadow-inset) !default;
+//
+//$form-range-thumb-width:                   1rem !default;
+//$form-range-thumb-height:                  $form-range-thumb-width !default;
+//$form-range-thumb-bg:                      $component-active-bg !default;
+//$form-range-thumb-border:                  0 !default;
+//$form-range-thumb-border-radius:           1rem !default;
+//$form-range-thumb-box-shadow:              0 .1rem .25rem rgba($black, .1) !default;
+//$form-range-thumb-focus-box-shadow:        0 0 0 1px $body-bg, $input-focus-box-shadow !default;
+//$form-range-thumb-focus-box-shadow-width:  $input-focus-width !default; // For focus box shadow issue in Edge
+//$form-range-thumb-active-bg:               tint-color($component-active-bg, 70%) !default;
+//$form-range-thumb-disabled-bg:             var(--#{$prefix}secondary-color) !default;
+//$form-range-thumb-transition:              background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out !default;
+// scss-docs-end form-range-variables
+
+$form-select-indicator: url('data:image/svg+xml;utf8,<svg width="15" height="8" viewBox="0 0 15 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.53674e-07 0.880038L0.836092 0L7.08136 6.57352C7.19371 6.69052 7.34153 6.75525 7.5 6.75525C7.65847 6.75525 7.80629 6.69052 7.91864 6.57352L14.1639 0L15 0.880038L8.75473 7.45356C8.42006 7.80582 7.97422 8 7.5 8C7.02578 8 6.58113 7.80582 6.24527 7.45356L9.53674e-07 0.880038Z" fill="%23503" /></svg>');
+$dropdown-link-hover-bg: #F1F1E4;

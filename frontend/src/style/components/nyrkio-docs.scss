@@ -1,0 +1,67 @@
+@use 'sass:map';
+@import '../configuration';
+
+.nyrkio-docs {
+  h1 {
+    color: $primary;
+    text-align: center;
+    margin-bottom: map.get($spacers, 4);
+
+    @include media-breakpoint-up(md) {
+      margin-bottom: map.get($spacers, 5);
+    }
+  }
+
+  h2 {
+    @include font-size (map.get($headings-size, h3));
+    color: $secondary;
+    margin-bottom: map.get($spacers, 3);
+
+    @include media-breakpoint-up(md) {
+      margin-bottom: map.get($spacers, 4);
+    }
+  }
+
+  h3 {
+    @include font-size (map.get($headings-size, h4));
+    color: $secondary;
+    margin-bottom: map.get($spacers, 3);
+
+    @include media-breakpoint-up(md) {
+      margin-bottom: map.get($spacers, 4);
+    }
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
+    border: 2px solid var(--bs-secondary);
+    border-radius: var(--bs-border-radius);
+    box-shadow: var(--bs-box-shadow);
+    margin-bottom: map.get($spacers, 3)
+  }
+
+  p {
+    margin-bottom: map.get($spacers, 2);
+
+    &:not(:has(+p)) {
+      margin-bottom: map.get($spacers, 4);
+    }
+  }
+
+  hr {
+    margin: map.get($spacers, 4) 0;
+
+    @include media-breakpoint-up(md) {
+      margin: map.get($spacers, 6) 0;
+    }
+  }
+
+  .btn {
+    width: 100%;
+
+    @include media-breakpoint-up(md) {
+      width: auto;
+    }
+  }
+}

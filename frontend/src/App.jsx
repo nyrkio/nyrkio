@@ -5,16 +5,13 @@ import {
   Route,
   Navigate,
   useLocation,
-  useParams,
   useSearchParams
 } from "react-router-dom";
 
-import "./App.css";
 import { Login } from "./components/Login.jsx";
 import { Dashboard} from "./components/Dashboard.jsx";
 import { FrontPage } from "./components/FrontPage.jsx";
-import { NavHeader } from "./components/Nav.jsx";
-import { SidePanel } from "./components/SidePanel";
+import { NavHeader } from "./components/Nav/Nav.jsx";
 import { Docs } from "./components/Docs.jsx";
 import { DocsCurl } from "./components/DocsCurl.jsx";
 import { DocsGraphs } from "./components/DocsGraphs.jsx";
@@ -38,6 +35,7 @@ import { NoMatch } from "./components/NoMatch.jsx";
 import posthog from "posthog-js";
 import { AdminDashboard } from "./components/AdminDashboard.jsx";
 import { BillingPage } from "./components/BillingPage.jsx";
+import { RssWidget } from "./components/RssWidget/RssWidget.jsx";
 
 const Nothing = () => {
   return <></>;
@@ -67,34 +65,29 @@ function MainApp({ loggedIn, setLoggedIn }) {
       </div>
     </>
     )
-  };
-
-
-
+  }
 
   return (
     <>
-      <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-      <div className="container-fluid h-100 row">
-        <div className="col-sm-12 col-md-3 col-xl-2" id="sidepanel">
-          <SidePanel loggedIn={loggedIn} />
+      <header className="page-header container">
+        <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+      </header>
+      <main>
+        <div id="main-content">
+          <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         </div>
-        <div
-          className="col-sm-12 col-md-9 col-xl-10 container-fluid"
-          id="main-content"
-        >
-        <RouteMap embed={embed} loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
-        </div>
-        <div className="col-sm-12 container-fluid" id="main-content2">
+
+        <div id="main-content2">
           <Routes>
             <Route path="/" element={loggedIn ? <Nothing /> : <><FrontPage loggedIn={loggedIn}/></>} />
             <Route path="/frontpage" element={<><FrontPage loggedIn={loggedIn}/></>} />
             <Route path="*" element={<Nothing />} />
           </Routes>
         </div>
-        <ScrollToTop />
-        <Footer />
-      </div>
+        <RssWidget />
+      </main>
+      <ScrollToTop />
+      <Footer />
     </>
   );
 }
@@ -125,7 +118,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       />
       <Route
       path="/forgot-password"
-      element={<ForgotPassword />}
+      element={<ForgotPassword loggedIn={loggedIn} />}
       />
       <Route path="/public/*"
       element={<Dashboard loggedIn={loggedIn} embed={embed} path="/public/"/>}
@@ -148,7 +141,7 @@ function RouteMap({loggedIn, embed, setLoggedIn, }) {
       <Route path="/docs/git-perf-plugin" element={<DocsGitPerfPlugin />} />
       <Route path="/docs/teams" element={<DocsTeams />} />
       <Route path="/user/settings" element={<UserSettings />} />
-      <Route path="/admin/*" element={<AdminDashboard embed={embed}/>} />
+      <Route path="/admin/*" element={<AdminDashboard embed={embed} loggedIn={loggedIn}/>} />
       <Route
       path="/billing"
       element={<BillingPage loggedIn={loggedIn} />}

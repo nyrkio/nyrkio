@@ -6,11 +6,10 @@ import { GraphNavWidgets } from "./GraphNavWidgets";
 import { DrawLineChart } from "./DrawLineChart";
 import { ChangePointSummaryTableMain } from "./ChangePointSummaryTableMain";
 import { NoMatch } from "./NoMatch";
-import { createShortNames, dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
+import { dashboardTypes, applyHash, parseTimestamp } from "../lib/utils";
 import { TestSettings } from "./TestSettings";
 import { HunterSettings } from "./UserSettings";
 import { HunterSettingsOrg } from "./OrgSettings";
-import { SidePanel } from "./SidePanel";
 import { OrgDashboard } from "./OrgDashboard";
 import { PublicDashboard } from "./PublicDashboard";
 import { TableOrResult } from "./TableOrResult";
@@ -21,16 +20,11 @@ import graph_4x4 from "../static/icons/graph-4x4.png";
 import graph_nx1 from "../static/icons/graph-nx1.png";
 import graph_2x1 from "../static/icons/graph-2x1.png";
 import graph_1x1 from "../static/icons/graph-1x1.png";
+import { Icon } from "./Icon.jsx";
+import { Loading } from "./Loading.jsx";
 
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
-};
-
-const Loading = ({loading}) => {
-  if (loading) {
-    return (<><div>Loading...</div></>);
-  }
-  return (<><div className="loading_done"></div></>);
 };
 
 const maxGraphsPerPage=30;
@@ -51,13 +45,15 @@ export const TestList = ({
       return <NoMatch />;
 
   }
-  if (shortNames.length == 0) {
+  if (shortNames.length === 0) {
     return (
-      <li className="list-group-item nyrkio-empty" key="0">
-        <span
-          className="bi bi-emoji-surprise"
-          title="There are no test results"
-        ></span>
+      <li className="list-group-item nyrkio-empty p-7" key="0">
+        <div>
+          <Icon name="meh" size="46" />
+          <div className="mt-2">
+            There are no test results
+          </div>
+        </div>
       </li>
     );
   }
@@ -72,7 +68,7 @@ export const TestList = ({
     if (testNames.includes(longName) || testNames.includes(name)) {
       if (!testNames.includes(longName)) longName = name;
       return (
-        <li className="list-group-item" key={index}>
+        <li className="list-group-item d-flex align-items-center" key={index}>
           <Link
             to={`/${baseUrls.result}/${longName}`}
             state={{ testName: longName }}
@@ -89,7 +85,7 @@ export const TestList = ({
       var p = name;
       if (prefix !== undefined) p = prefix + "/" + name;
       return (
-        <li className="list-group-item" key={index}>
+        <li className="list-group-item list-group-item-action" key={index}>
           <Link to={`/${baseUrls.tests}/${p}`} state={{ testName: name }}>
             <TestListEntry
               name={displayName}
@@ -217,17 +213,22 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     console.warn("Unhandled prefix in URI: " + prefix);
     return (<NoMatch />);
   }
-  return (<TableOrResult data={unencodedTestNames}
-                         singleTestName={testName}
-                         prefix={prefix}
-                         summaries={summaries2}
-                         setSummaries={setSummaries2}
-                         loading={loading}
-                         setLoading={setLoading}
-                         dashboardType={dashboardTypes.USER}
-                         baseUrls={baseUrls}
-                         />);
+  return (<>
+      <div className="container">
+        <h1 className="text-center text-primary mb-4">Select Tests</h1>
 
+      </div>
+      <TableOrResult data={unencodedTestNames}
+                     singleTestName={testName}
+                     prefix={prefix}
+                     summaries={summaries2}
+                     setSummaries={setSummaries2}
+                     loading={loading}
+                     setLoading={setLoading}
+                     dashboardType={dashboardTypes.USER}
+                     baseUrls={baseUrls}
+      />
+    </>)
 };
 
 
@@ -293,10 +294,9 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
     if (subtree.length>0 && subtree.length<50)
         return(
           <>  <div style={{textAlign: "right"}}>
-              <button className="btn btn-nothing text-right mt-5 col-xs-6 col-md-5 col-lg-4 col-xl-3" style={{right: 0}} title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
-              onClick={(ev)=>{localStorage.setItem("showAllGraphs", ev.target.attributes["aria-expanded"].value);}}
-              >
-              ▼ Show graphs here
+              <button className="btn btn-nothing btn-outline-primary my-4 d-inline-flex justify-content-center gap-2" title="Click here to display all graphs on this page" type="button" id="allGraphsButton" data-bs-toggle="collapse"  data-target="#allGraphsPage" href="#allGraphsPage" aria-expanded={ariaExpanded} aria-controls="allGraphsPage"
+                onClick={(ev)=>{localStorage.setItem("showAllGraphs", ev.target.attributes["aria-expanded"].value);}}>
+                <Icon name="chevron-down" size="18"/> Show graphs here
               </button>
               </div>
               <div>
@@ -350,55 +350,44 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
   return (
     <>
-      <div className="container-fluid pt-5 text-center benchmark-select col-sm-12 col-lg-12 col-xl-12">
-            <div className="container-fluid">
-              <div className="card">
-                <div className="card-header w-100">Select tests</div>
+      <div className="container">
+        <div className="text-center" id="showTestListCardBody">
+          <h2 className="h3 text-secondary">Select tests</h2>
+          <Loading loading={loading} />
+          <ul className="list-group mx-auto">
+            <TestList
+              testNames={testNames}
+              shortNames={shortNames}
+              prefix={prefix}
+              displayNames={displayNames}
+              loading={loading}
+              setLoading={setLoading}
+              baseUrls={baseUrls}
+              setSummaries={setSummaries}
+              summaries={summaries}
+            />
+          </ul>
+        </div>
 
+        <ShowGraphsCard
+          testNames={testNames}
+          shortNames={shortNames}
+          prefix={prefix}
+          displayNames={displayNames}
+          baseUrls={baseUrls}
+          breadcrumbName={prefix}
+          dashboardType={dashboardType}
+          embed={embed}
+          loading={loading}
+          setLoading={setLoading}
+          setSummaries={setSummaries}
+          summaries={summaries}
 
-                <div className="card-body" id="showTestListCardBody">
-                  <Loading loading={loading} />
-                  <ul className="list-group list-group-flush">
-                    <TestList
-                      testNames={testNames}
-                      shortNames={shortNames}
-                      prefix={prefix}
-                      displayNames={displayNames}
-                      loading={loading}
-                      setLoading={setLoading}
-                      baseUrls={baseUrls}
-                      setSummaries={setSummaries}
-                      summaries={summaries}
-                    />
-                  </ul>
-                </div>
-              </div>
-              <ShowGraphsCard
-                    testNames={testNames}
-                    shortNames={shortNames}
-                    prefix={prefix}
-                    displayNames={displayNames}
-                    baseUrls={baseUrls}
-                    breadcrumbName={prefix}
-                    dashboardType={dashboardType}
-                    embed={embed}
-                    loading={loading}
-                    setLoading={setLoading}
-                    setSummaries={setSummaries}
-                    summaries={summaries}
-
-              />
-              <div className="card">
-                <div className="card-body create-new-test">
-                  <Link to="/docs/change-detection" className="btn btn-success col-xs-6 col-md-5 col-lg-4 col-xl-3">
-                    <span className="bi bi-plus-square-fill">
-                      &nbsp;&nbsp; Add test results
-                    </span>
-                  </Link>
-                </div>
-              </div>
-            </div>
-            </div>
+        />
+        <div className="text-center mt-4">
+          <Link to="/docs/change-detection" className="btn btn-primary">+ Add test results</Link>
+        </div>
+      </div>
     </>
   );
 };
@@ -484,59 +473,62 @@ const ManyResultWithTestname = ({
 
   const resetOtherButtons = (selectButton) => {
     if (selectButton.id != "btn-graph-overview"){
-      document.getElementById("btn-graph-overview").classList.remove("btn-success");
+      document.getElementById("btn-graph-overview").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-sparklines"){
-      document.getElementById("btn-graph-sparklines").classList.remove("btn-success");
+      document.getElementById("btn-graph-sparklines").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-2x1"){
-      document.getElementById("btn-graph-2x1").classList.remove("btn-success");
+      document.getElementById("btn-graph-2x1").classList.remove("active");
     }
     if (selectButton.id != "btn-graph-1x1"){
-      document.getElementById("btn-graph-1x1").classList.remove("btn-success");
+      document.getElementById("btn-graph-1x1").classList.remove("active");
     }
-    selectButton.classList.add("btn-success");
+    selectButton.classList.add("active");
     // The above doesn't work every time, so schedule backup executions to happen later, to avoid race
     setTimeout(()=>{
-      document.getElementById(selectButton.id).classList.add("btn-success");
+      document.getElementById(selectButton.id).classList.add("active");
     },100);
   }
   const setLayout = (e,setGraphSize) =>{
-      const newLayout = e.currentTarget.id.substring(10);
+    const newLayout = e.currentTarget.id.substring(10);
       console.debug(newLayout);
       setGraphSize(newLayout);
-      localStorage.setItem("graphSize", newLayout);
+    localStorage.setItem("graphSize", newLayout);
       resetOtherButtons(e.currentTarget);
       e.preventDefault();
       e.stopPropagation();
   };
   const GraphSizePicker = ({embed, setGraphSize}) => {
+    useEffect(() => {
+      const savedLayout = localStorage.getItem("graphSize") || "2x1";
+      const btn = document.getElementById(`btn-graph-${savedLayout}`);
+      if (btn) {
+        btn.classList.add("active");
+      }
+    }, []);
+
     return (<>
-            <div className="card col-md-8">
-            <div className="card-header text-center mb-4 mt-3">Choose layout</div>
-            </div>
-            <div className="card col-md-12">
-            <div className="row justify-content-center text-center">
-            <a  id="btn-graph-overview" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4 col-lg-2">
-            <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
-            </a>
+      <div className="h3 text-start text-secondary">Choose layout</div>
+      <nav className="nav nav-pills nav-fill p-0 gap-3 graph-display-mode">
+        <a id="btn-graph-overview" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_4x4} alt="4x4" title="Show graphs in a overview layout"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
+        </a>
+        <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="nav-link border border-primary">
+          <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
+        </a>
+        {embed == "yes" ? "" :
+          <a  href="?embed=yes" className="nav-link border border-primary" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
 
-            <a  id="btn-graph-sparklines" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_nx1} alt="nx1" title="Show graphs in a sparkline layout"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-2x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_2x1} alt="2x1" title="Show 2 large graphs"  style={{width:100, height:60}} />
-            </a>
-            <a  id="btn-graph-1x1" href="#" onClick={(e) => setLayout(e,setGraphSize)} className="btn btn-primary col-sm-4  col-lg-2">
-            <img src={graph_1x1} alt="1x1" title="Show 1 graphfor maximum detail" style={{width:100, height:60}} />
-            </a>
-            {embed == "yes" ? "" :
-            <a  href="?embed=yes" className="btn btn-primary col-sm-4  col-lg-2" style={{backgroundColor: "#ffffffff", minWidth:100, minHeight:70}}><span style={{position: "relative", top: "25%", color: "#999999", fontWeight: "bold", border: "2px solid #999999", padding: "10px"}}>Embed</span></a>
-
-            }
-            </div>
-            </div>
-            </>);
+        }
+      </nav>
+    </>);
   }
 
   const DashboardSettings = ({
@@ -555,24 +547,20 @@ const ManyResultWithTestname = ({
 
     return (<>
             <div className="text-end" id="dashboard_settings">
-
-            <div className="row prWidgets justify-content-end">
-              <span className="col-sm-1 col-md-1 col-lg-1"></span>
-              <Pulls testName={testName} sendSelectedPr={sendSelectedPr} baseUrls={baseUrls} breadcrumbName={breadcrumbName} dashboardType={dashboardType} />
-              <div className="col-sm-3 col-md-3 col-lg-3">
-              <span className="inactive-label small">Configure...&nbsp;</span>
-              <button className="btn" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse"
-              >
-              <span className="bi bi-gear-fill"> </span>
-              </button>
-              <a id="linkToGraphs" title="Link here" href="#graphs">¶</a>
+              <div className="row prWidgets gap-3 gap-sm-0 justify-content-end">
+                <Pulls testName={testName} sendSelectedPr={sendSelectedPr} baseUrls={baseUrls} breadcrumbName={breadcrumbName} dashboardType={dashboardType} />
+                <div className="col-sm-4 col-md-4 col-lg-4 d-flex gap-3 justify-content-end">
+                  <button className="btn btn-outline-primary btn-sm btn-square" title="settings" type="button" id="dashboardSettingsButton" data-bs-toggle="collapse"  data-target="#dashboardSettingsCollapse" href="#dashboardSettingsCollapse" aria-expanded="false" aria-controls="dashboardSettingsCollapse">
+                    <span className="bi bi-gear-fill"> </span>
+                  </button>
+                  <a id="linkToGraphs" className="btn btn-sm btn-outline-primary btn-square align-items-center justify-content-center d-flex" title="Link here" href="#graphs">¶</a>
+                </div>
               </div>
-            </div>
 
             <div className="collapse text-lg-end" aria-labelledby="dashboardSettingsButton" id="dashboardSettingsCollapse">
-              <div  className="card card-body">
+              <div  className="card card-body mt-4">
 
-            <div className="row justify-content-center text-center">
+            <div className="text-center">
               <GraphSizePicker embed={embed} setGraphSize={setGraphSize}/>
             </div>
 
@@ -747,8 +735,10 @@ export const SingleResultWithTestname = ({
   const isPublicDash = isPublicDashboard(dashboardType);
   return (
     <>
-          <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
-          <div className="container">
+          <div className="d-flex justify-content-center mb-5">
+            <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
+          </div>
+          <div className="container ">
             <div className="row justify-content-center">
               <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} redraw={redraw}/>
             </div>
@@ -842,59 +832,20 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSumma
     }
   }, [location]);
 
-  if (!nameIsGitHubRepo(name)) {
-    return (
-      <>
-        <div className="row justify-content-center">
-          <div className="col">
-            {name}{" "}
-            <SummarizeChangePoints
-              longName={longName}
-              summaries={summaries} loading={loading}
-            />
-          </div>
-        </div>
-      </>
-    );
-  }
+  return (<div className="d-flex align-items-center gap-3">
+      <Loading loading={loading}/>
 
-  if (imageUrl) {
-    return (
-      <div className="row justify-content-center">
-        <Loading loading={loading} />
-        <div className="col-1">
-          <img
-            src={imageUrl}
-            alt="GitHub repo avatar"
-            title="GitHub repo avatar"
-            style={{ width: "30px", height: "30px" }}
-          />
-        </div>
-        <div className="col">
-          {name.replace("https://github.com/", "")}{" "}
-          <SummarizeChangePoints
-            longName={longName}
-            summaries={summaries} loading={loading}
-          />
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <>
-        <div className="row justify-content-center">
-          <Loading loading={loading} />
-          <div className="col">
-            {name.replace("https://github.com/", "")}{" "}
-            <SummarizeChangePoints
-              longName={longName}
-              summaries={summaries} loading={loading}
-            />
-          </div>
-        </div>
-      </>
-    );
-  }
+        { nameIsGitHubRepo(name) ?
+          <div className="ratio ratio-1x1 rounded-circle overflow-hidden" style={{width: '32px', backgroundColor: '#e5e5e7'}}>
+            {imageUrl ? <img className="img-fluid object-fit-cover" src={imageUrl} alt="GitHub repo avatar" width="32" height="32" title="GitHub repo avatar"/> : ''}
+          </div> : <></>}
+
+      {nameIsGitHubRepo(name) ? name.replace("https://github.com/", "") : name }
+      <SummarizeChangePoints
+        longName={longName}
+        summaries={summaries} loading={loading}
+      />
+    </div>)
 };
 
 // Helper function to catch invalid urls that contain non-existent test names
@@ -907,18 +858,7 @@ const validTestName = (name, testNames) => {
 const SummarizeChangePoints = ({ longName, summaries,loading }) => {
   const key = decodeURIComponent(longName).replace("https://github.com","");
   // Later we will use data-longname attribute to read more content from a JSON object we fetch from the server
-  return (
-        <div
-          className="summarize-change-points placeholder-summary"
-          style={{
-            position: "absolute",
-            right: "0.5em",
-            top: 0,
-            textAlign: "right",
-          }}
-          data-longname={key}
-        >
-        </div>);
+  return (<div className="summarize-change-points placeholder-summary ms-auto text-end" data-longname={key}></div>);
 };
 
 /*

@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
-import { parseGitHubRepo, dashboardTypes, getOrgRepo } from "../lib/utils";
+import { dashboardTypes, getOrgRepo } from "../lib/utils";
 import { TableOrResult } from "./TableOrResult";
+import { Loading } from "./Loading.jsx";
 
 export const PublicDashboard = () => {
   const location = useLocation();
@@ -67,12 +68,12 @@ export const PublicDashboard = () => {
   return (
     <div className="container">
       <div className="row text-center">
-        <h1 className="mb-4">Public Test Results</h1>
+        <h1 className="mb-4 text-primary text-center">Public Test Results</h1>
         <p>Public benchmark results as shared by Nyrkiö users.</p>
       </div>
-      <div className="row justify-content-center text-center pt-5" style={{"minHeight": "650px"}} height="650px">
+      <div className="row justify-content-center text-center pt-5">
         {loading ? (
-          <p>Loading...</p>
+          <Loading loading={loading} text="Loading tests..."/>
         ) : (
           <TableOrResult
             prefix={prefix}

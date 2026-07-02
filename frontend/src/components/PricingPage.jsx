@@ -1,5 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { DemoVideo } from "./FrontPage";
+import { PricingCard } from "./PricingCard/PricingCard.jsx";
+import { Icon } from "./Icon.jsx";
 
 export const PricingPage = ({ loggedIn }) => {
   const b = 200;
@@ -43,6 +45,155 @@ export const PricingPage = ({ loggedIn }) => {
     }
   };
 
+  const BusinessPricingCard = () => {
+    const businessFinalPrice = annualDiscount
+      ? (businessPrice * 12 * (1 - annualSavingsPercent / 100))
+      : businessPrice;
+
+    const businessPeriod = annualDiscount ? " eur/yr" : " eur/mo";
+
+    return (
+      <PricingCard
+        className="h-100"
+        title="Business"
+        pricing={{
+          price: businessFinalPrice,
+          period: businessPeriod,
+        }}
+      >
+        <PricingCard.FeatureList>
+          <li>1 Git repository</li>
+          <li>1600 cpu-hours / month</li>
+          <li>Email and Slack notifications</li>
+          <li>Support for teams</li>
+        </PricingCard.FeatureList>
+
+        <PricingCard.CTA>
+          {loggedIn ? (
+            <form
+              action={`/api/v0/billing/create-checkout-session?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
+              method="POST"
+            >
+              <input
+                type="hidden"
+                name="lookup_key"
+                value={
+                  annualDiscount ? "simple_business_yearly_2409" : "simple_business_monthly_251"
+                }
+              />
+              <input type="hidden"  name="quantity" value="1" />
+              <input type="hidden" name="mode" value="subscription" />
+              <button
+                id="checkout-and-portal-button-business"
+                type="submit"
+                className="btn btn-primary w-100"
+              >
+                Subscribe
+              </button>
+            </form>
+          ) : (
+            <a className="btn btn-primary w-100" href="/signup">Sign up</a>
+          )}
+        </PricingCard.CTA>
+      </PricingCard>
+    );
+  }
+
+  const EnterprisePricingCard = () => {
+    let enterpriseFinalPrice = "";
+    let enterprisePeriod = "";
+    let enterpriseTax = "+Tax";
+
+    if (enterprisePrice === null) {
+      enterpriseFinalPrice = "Call us";
+      enterprisePeriod = "";
+      enterpriseTax = "";
+    } else if (annualDiscount) {
+      enterpriseFinalPrice = (enterprisePrice * 12 * (1 - annualSavingsPercent / 100));
+      enterprisePeriod = " eur/yr";
+    } else {
+      enterpriseFinalPrice = enterprisePrice;
+      enterprisePeriod = " eur/mo";
+    }
+
+    return (
+      <PricingCard
+        className="h-100"
+        title="Enterprise"
+        pricing={{
+          price: enterpriseFinalPrice,
+          period: enterprisePeriod,
+          tax: enterpriseTax
+        }}
+      >
+
+        <PricingCard.FeatureList>
+          <li>10 Git repositories</li>
+          <li>4000 cpu-hours / month</li>
+          <li>SSO (OneLogin, Okta)</li>
+          <li>JIRA integration</li>
+        </PricingCard.FeatureList>
+
+
+        <PricingCard.CTA>
+          {enterprisePrice === null ? (
+            <a className="btn btn-lg btn-primary w-100 p-3" href="/contact">
+              Contact Sales
+            </a>
+          ) : loggedIn ? (
+              <form
+                action="/api/v0/billing/create-checkout-session?mode=subscription"
+                method="POST"
+              >
+                <input
+                  type="hidden"
+                  name="lookup_key"
+                  value={
+                    annualDiscount
+                      ? "simple_enterprise_yearly_6275"
+                      : "simple_enterprise_monthly_627"
+                  }
+                />
+                <input type="hidden"  name="quantity" value="1" />
+                <input type="hidden" name="mode" value="subscription" />
+                <button
+                  id="checkout-and-portal-button-enterprise"
+                  type="submit"
+                  className="btn btn-primary w-100"
+                >
+                  Subscribe
+                </button>
+              </form>
+            ) : (<a className="btn btn-primary w-100" href="/signup">Sign up</a>
+            )}
+        </PricingCard.CTA>
+      </PricingCard>
+    );
+  }
+
+  const FreePricingCard = () => {
+    return (
+      <PricingCard
+        className="h-100"
+        title="Free"
+        pricing={{
+          price: 0,
+          period: 'eur/mo',
+        }}
+      >
+        <PricingCard.FeatureList>
+          <li>1 Git branch</li>
+          <li>10 tests per branch</li>
+          <li>10 metrics per test</li>
+          <li>History of 100 points per metric</li>
+        </PricingCard.FeatureList>
+        <PricingCard.CTA>
+          <a className="btn btn-primary w-100" href="/signup">Sign up for free</a>
+        </PricingCard.CTA>
+      </PricingCard>
+    );
+  }
+
   const EnterprisePrice = () => {
     if (enterprisePrice === null) {
       return <>Call us</>;
@@ -65,370 +216,204 @@ export const PricingPage = ({ loggedIn }) => {
   };
 
 
+  const pricingCardColClass = loggedIn ? 'col-lg-4 mb-5 mb-md-6' : 'col-md-6 col-lg-3 mb-5 mb-md-6';
 
   return (
     <>
-      <div
-        className="nyrkio-pricing container py-3"
-        style={{ maxWidth: "2000px" }}
-      >
-        <div className="container-fluid justify-content-center text-center w-100">
-          <h1>Pricing</h1>
-        </div>
-
-
-        <div className="nyrkio-plans row row-cols-1 row-cols-lg-3 text-center justify-content-center">
-
-
-          <CpuHours loggedIn={loggedIn}/>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-          <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
-              <div className="card-header py-3">
-                <h4 className="my-0 fw-normal">Business</h4>
-                <span className="text-shoulders">.</span>
-                </div>
-              <div className="card-body">
-                <p className="nyrkio-annual">{busYear}</p>
-                <h1 className="card-title pricing-card-title">
-                  <BusinessPrice />
-                  <small><span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
-                </h1>
-                <ul className="list-unstyled mt-3 mb-4">
-                  <li>1 Git repository</li>
-                  <li>1600 cpu-hours / month</li>
-                  <li>Email and Slack notifications</li>
-                  <li>Support for teams</li>
-                </ul>
-                {loggedIn ? (
-                  <form
-                    action={`/api/v0/billing/create-checkout-session?mode=subscription&lookup_key=${annualDiscount ? "simple_business_yearly" : "simple_business_monthly"}&quantity=1`}
-                    method="POST"
-                  >
-                    <input
-                      type="hidden"
-                      name="lookup_key"
-                      value={
-                        annualDiscount ? "simple_business_yearly_2409" : "simple_business_monthly_251"
-                      }
-                    />
-                    <input type="hidden" name="quantity" value="1" />
-                    <input type="hidden" name="mode" value="subscription" />
-                    <button
-                      id="checkout-and-portal-button-business"
-                      type="submit"
-                      className="w-100 btn btn-lg btn-success p-3"
-                    >
-                      Subscribe
-                    </button>
-                  </form>
-                ) : (
-                  <button
-                    type="button"
-                    className="w-100 btn btn-lg btn-success p-3"
-                  >
-                    <a className="btn-link" href="/signup">
-                      Sign up
-                    </a>
-                  </button>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm m-4">
-              <div className="card-header py-3 text-bg-primary">
-                <h4 className="my-0 fw-normal">Enterprise</h4>
-                .
-                </div>
-              <div className="card-body">
-                <p className="nyrkio-annual">{entYear}</p>
-                <h1 className="card-title pricing-card-title">
-                  <EnterprisePrice />
-                  <small><span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
-                </h1>
-                <ul className="list-unstyled mt-3 mb-4">
-                  <li>10 Git repositories</li>
-                  <li>4000 cpu-hours / month</li>
-                  <li>SSO (OneLogin, Okta)</li>
-                  <li>JIRA integration</li>
-                </ul>
-                {loggedIn ? (
-                  <form
-                    action="/api/v0/billing/create-checkout-session?mode=subscription"
-                    method="POST"
-                  >
-                    <input
-                      type="hidden"
-                      name="lookup_key"
-                      value={
-                        annualDiscount
-                          ? "simple_enterprise_yearly_6275"
-                          : "simple_enterprise_monthly_627"
-                      }
-                    />
-                    <input type="hidden" name="quantity" value="1" />
-                    <input type="hidden" name="mode" value="subscription" />
-                    <button
-                      id="checkout-and-portal-button-enterprise"
-                      type="submit"
-                      className="w-100 btn btn-lg btn-success p-3"
-                    >
-                      Subscribe
-                    </button>
-                  </form>
-                ) : (
-                  <button
-                    type="button"
-                    className="w-100 btn btn-lg btn-success p-3"
-                  >
-                    <a className="btn-link" href="/signup">
-                      Sign up
-                    </a>
-                  </button>
-                )}
-              </div>
-            </div>
+      <div className="nyrkio-pricing container py-3">
+        <h1 className="text-primary text-center">Pricing</h1>
+        <div className="d-flex justify-content-center mt-5 mb-6" id="annual_discount_label">
+          <div className="form-check form-switch d-flex d-md-block flex-column align-items-center text-center p-0">
+            <input
+              className="form-check-input mb-2 ms-0 mb-md-0 me-2"
+              type="checkbox"
+              role="switch"
+              id="flexSwitchAnnual"
+              onChange={updateDiscount}
+            />
+            <label className="form-check-label" htmlFor="flexSwitchAnnual">
+              Save {bannualSavingsEuro} € or {annualSavingsEuro} € ({annualSavingsPercent} %) <br className="d-md-none" />by paying for the full year up front!
+            </label>
           </div>
         </div>
-
-        <div className="p-5 pt-2 pb-4 m-5 calculator-annual rounded-3 shadow-sm">
-          <div className="row">
-            <div className="col col-xs-8" id="annual_discount_label">
-              <div className="form-check form-switch">
-                <input
-                  className="form-check-input"
-                  type="checkbox"
-                  role="switch"
-                  id="flexSwitchAnnual"
-                  onChange={updateDiscount}
-                />
-                <label className="form-check-label" htmlFor="flexSwitchAnnual">
-                  Save {bannualSavingsEuro} € or {annualSavingsEuro} € ({annualSavingsPercent} %) by paying for the full year up front!
-                </label>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="container-fluid justify-content-center text-center w-100">
-          <DemoVideo />
-        </div>
-        <h2 className="display-6 text-center mb-4 nyrkio-compare-plans">
-          Compare plans
-        </h2>
-
         <div className="row">
-          <div className="table-responsive">
-            <table className="table text-center pricing-table">
-              <thead>
-                <tr>
-                  <th style={{ width: "20%" }}></th>
-                  <th style={{ width: "20%" }}>Free</th>
-                  <th style={{ width: "20%" }}>Runner</th>
-                  <th style={{ width: "20%" }}>Business</th>
-                  <th style={{ width: "20%" }}>Enterprise</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th scope="row" className="text-start">
-                    GitHub repositories
-                  </th>
-                  <td>1</td>
-                  <td>1</td>
-                  <td>10</td>
-                  <td>10</td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    CPU-Hours / month
-                  </th>
-                  <td>1</td>
-                  <td>10</td>
-                  <td>Unlimited</td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    GitHub PR gating
-                  </th>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                  <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                  <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    GitHub organization support
-                  </th>
-                  <td></td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    Slack alerts
-                  </th>
-                  <td></td>
-                  <td>
-                  <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                  <i className="bi bi-check"></i>
-                  </td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    Jira integration
-                  </th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                    <i className="bi bi-check"></i>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    Security
-                  </th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>Dedicated VPC, peering, or run on your own infrastructure</td>
-                </tr>
-                <tr>
-                  <th scope="row" className="text-start">
-                    Single sign-on (OneLogin, Okta)
-                  </th>
-                  <td></td>
-                  <td></td>
-                  <td></td>
-                  <td>
-                  <i className="bi bi-check"></i>
-                  </td>
-                </tr>
-              </tbody>
+          { !loggedIn ?
+            (<div className={pricingCardColClass}><FreePricingCard /></div>) :
+            ('')
+          }
 
+          <div className={pricingCardColClass}>
+            <CpuHours loggedIn={loggedIn}/>
+          </div>
+          <div className={pricingCardColClass}>
+            <BusinessPricingCard />
+          </div>
 
-            </table>
+          <div className={pricingCardColClass}>
+            <EnterprisePricingCard />
           </div>
         </div>
+
+        <DemoVideo />
+
+        <h3 className="text-center text-secondary mb-4">Compare plans</h3>
+        <div className="table-responsive rounded shadow">
+          <table className="table-price table table-bordered text-center border-light align-middle">
+            <thead>
+            <tr>
+              <th style={{ width: "200px" }}>Name</th>
+              <th style={{ width: "20%" }}>Free</th>
+              <th style={{ width: "20%" }}>Runner</th>
+              <th style={{ width: "20%" }}>Business</th>
+              <th style={{ width: "20%" }}>Enterprise</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <th scope="row" className="text-start">
+                GitHub repositories
+              </th>
+              <td>1</td>
+              <td>1</td>
+              <td>10</td>
+              <td>10</td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                CPU-Hours / month
+              </th>
+              <td>1</td>
+              <td>10</td>
+              <td>Unlimited</td>
+              <td> - </td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                GitHub PR gating
+              </th>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                GitHub organization support
+              </th>
+              <td> - </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                -
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                Slack alerts
+              </th>
+              <td> - </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                Jira integration
+              </th>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                Security
+              </th>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>Dedicated VPC, peering, or run on your own infrastructure</td>
+            </tr>
+            <tr>
+              <th scope="row" className="text-start">
+                Single sign-on (OneLogin, Okta)
+              </th>
+              <td>-</td>
+              <td>-</td>
+              <td>-</td>
+              <td>
+                <div className="d-flex justify-content-center">
+                  <Icon name="check-mark-circle" size="24" />
+                </div>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
-      <div style={{opacity: 0.01, width: "100px", position: "absolute", right: "0px"}} >
-      {loggedIn ? (
-        <form
-        action="/api/v0/billing/create-checkout-session?mode=subscription"
-        method="POST"
-        >
-        <input
-        type="hidden"
-        name="lookup_key"
-        value={"simple_test_yearly"}
-        />
-        <input type="hidden" name="quantity" value="1" />
-        <input type="hidden" name="mode" value="subscription" />
-        <button
-        id="checkout-and-portal-button-test"
-        type="submit"
-        className="w-100 btn btn-lg btn-success"
-        style={{width: "50px", maxWidth: "100px", backgroundColor: "#dddddd", position: "absolute", right: "0px", border: "white 1px solid"}}
-        >
-        Test
-        </button>
-        </form>
-      ) : (
-        <button
-        type="button"
-        className="w-100 btn btn-lg btn-success p-3"
-        >
-        <a className="btn-link" href="/signup">
-        Sign up
-        </a>
-        </button>
-      )}
+      <div className="container text-center mt-4 mt-md-6">
+        {loggedIn ? (
+          <form action="/api/v0/billing/create-checkout-session?mode=subscription"
+                method="POST">
+            <input
+              type="hidden"
+              name="lookup_key"
+              value={"simple_test_yearly"}/>
+            <input type="hidden"  name="quantity" value="1" />
+            <input type="hidden" name="mode" value="subscription" />
+            <button
+              id="checkout-and-portal-button-test"
+              type="submit"
+              className="btn btn-primary w-100 w-md-auto">Get Started</button>
+          </form>
+        ) : (<a className="btn btn-primary w-100 w-md-auto" href="/signup">Sign up</a>)}
       </div>
-
-      {loggedIn ? (<>
-        <hr />
-
-      <div
-        className="nyrkio-pricing container py-3"
-      >
-
-
-        <div className="nyrkio-plans row row-cols-1 row-cols-lg-3 text-center justify-content-center">
-
-        <div className="col">
-            <div className="card mb-4 rounded-3 shadow-sm m-4">
-              <div className="card-header py-3">
-                <h4 className="my-0 fw-normal">Free</h4>
-              </div>
-              <div className="card-body">
-                <h1 className="card-title pricing-card-title">
-                  0<small className="text-body-secondary fw-light"> €/mo</small>
-                </h1>
-                <ul className="list-unstyled mt-3 mb-4">
-                  <li>1 Git branch</li>
-                  <li>10 tests per branch</li>
-                  <li>10 metrics per test</li>
-                  <li>History of 100 points per metric</li>
-                </ul>
-                <button
-                  type="button"
-                  className="w-100 btn btn-lg btn-outline-success p-3"
-                >
-                  Sign up for free
-                </button>
-              </div>
-            </div>
-          </div>
-
-
-          </div>
-          </div>
-          </>):
-          ""}
     </>
   );
 };
 
 const prePaidToBeUsedLater = () => {
   return ( <>
-
             <div className="col">
             <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
               <div className="card-header py-3">
@@ -481,59 +466,45 @@ const prePaidToBeUsedLater = () => {
 
 export const CpuHours = ({loggedIn, short}) => {
   return (
-        <div className="col">
-        <div className="card mb-4 rounded-3 shadow-sm border-success m-4">
-        <div className="card-header py-3">
-          <h4 className="my-0 fw-normal">Nyrkiö Runner</h4>
-          {short ? "":
-            (<span className="text-shoulders">for GitHub</span>)}
-        </div>
-        <div className="card-body">
-          <h1 className="card-title pricing-card-title">
-            <span style={{letterSpacing: "4px"}}>0</span><span style={{letterSpacing: "-3px"}}>.1</span><span style={{letterSpacing: "12px"}}> </span><small className="text-body-secondary fw-light" style={{letterSpacing: "2px"}}> eur/hour/cpu
-            <span style={{color:"#555555", fontFamily:"Helvetica, Arial, Inter, sans", fontSize:"50%", letterSpacing:"0.0"}}>+Tax</span></small>
-          </h1>
-          {short? "" :
-            (
-          <ul className="list-unstyled mt-3 mb-4">
-            <li>Pay as you go, monthly</li>
-            <li>High Fidelity c7a instances</li>
-            <li>Tuned for <em>stable performance</em></li>
-            <li>Change Detection & Graphs included</li>
-          </ul>
-          )}
-          {loggedIn ? (
-            <form
-              action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
-              method="POST"
-            >
-              <input
-                type="hidden"
-                name="lookup_key"
-                value="runner_postpaid_13"
-              />
-              <input type="hidden" name="mode" value="subscription" />
-              <button
-                id="checkout-and-portal-button-runner_postpaid_10"
-                type="submit"
-                className="w-100 btn btn-lg btn-success p-3"
-              >
-                Subscribe (pay after use)
-              </button>
-            </form>
-          ) : (
-            <button
-            type="button"
-            className="w-100 btn btn-lg btn-success p-3"
-            >
-            <a className="btn-link" href="/signup">
-            Log in &amp; Subscribe
-            </a>
-            </button>
-          )}
-          </div>
-          </div>
-          </div>
+    <>
+      <PricingCard
+        className="h-100"
+        title="Nyrkiö Runner"
+        subtitle="For GitHub"
+        short={short}
+        pricing={{
+          price: "0.1",
+          period: "eur/hour/cpu",
+        }}
+      >
+        <PricingCard.FeatureList>
+          <li>Pay as you go, monthly</li>
+          <li>High Fidelity c7a instances</li>
+          <li>Tuned for <em>stable performance</em></li>
+          <li>Change Detection & Graphs included</li>
+        </PricingCard.FeatureList>
 
+        <PricingCard.CTA>
+          {loggedIn ? (<form
+            action="/api/v0/billing/create-checkout-session-postpaid?mode=subscription"
+            method="POST"
+          >
+            <input
+              type="hidden"
+              name="lookup_key"
+              value="runner_postpaid_13"
+            />
+            <input type="hidden"  name="mode" value="subscription"/>
+            <button
+              id="checkout-and-portal-button-runner_postpaid_10"
+              type="submit"
+              className="btn btn-primary w-100"
+            >
+              Subscribe (pay after use)
+            </button>
+          </form>) : (<a className="btn btn-primary w-100" href="/signup">Log in &amp; Subscribe</a>)}
+        </PricingCard.CTA>
+      </PricingCard>
+    </>
   );
 }

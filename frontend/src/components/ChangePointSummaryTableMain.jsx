@@ -2,15 +2,10 @@ import { AgGridReact } from "ag-grid-react"; // React Grid Logic
 import "ag-grid-community/styles/ag-grid.css"; // Core CSS
 import "ag-grid-community/styles/ag-theme-quartz.css"; // Theme
 import { formatCommit, parseTimestamp } from "../lib/utils";
-import React, { StrictMode, useCallback, useMemo, useRef, foo } from "react";
+import { useMemo } from "react";
 import { commitUrl } from "../lib/github";
-
-const Loading = ({loading}) => {
-  if (loading) {
-    return (<><div className="loading summary-table">Loading...</div></>);
-  }
-  return (<><div className="loading_done"></div></>);
-};
+import '../style/components/ag-table.scss';
+import { Loading } from "./Loading.jsx";
 
 export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, queryStringTextTimestamp, loading, metricsData, isPublicDashboard }) => {
   var rowData = [];
@@ -158,12 +153,13 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
   if (rowData.length === 0) {
     if (loading) {
-      return (<Loading loading={loading} />);
+      return (<div className="my-4"><Loading loading={loading} text="Loading results..."/></div>);
     }
+
     return (
-      <>
+      <div className="text-center mb-4">
         <span className="no-changepoints">(no changepoints)</span>
-      </>
+      </div>
     );
   }
 
@@ -285,7 +281,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
         else {
           prevCommit = text;
           return (
-            <a href={url} target="_blank">
+            <a href={url} target="_blank" rel="noopener noreferrer">
               {text}
             </a>
           );
@@ -336,7 +332,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
   return (
     <>
       <div className="row text-center">
-        <h3>{title?title:"Performance Changes"}</h3>
+        <h3 className="text-secondary mb-4">{title?title:"Performance Changes"}</h3>
       </div>
       <div
         className="ag-main-cp-table ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
@@ -348,7 +344,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
           pagination={true}
           autoSizeStrategy={autoSizeStrategy}
           style={{width: "100%", maxHeight: "75vhi"}}
-          className="w-100"
+          className="w-100 shadow rounded"
           paginationPageSize={20}
           paginationPageSizeSelector={[10, 20, 50, 100]}
           getRowClass={getRowStyle}

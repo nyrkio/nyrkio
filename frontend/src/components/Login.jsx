@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import posthog from "posthog-js";
-import { SignUpPage } from "./SignUp"
+import { Icon } from './Icon.jsx';
+import { PasswordInput } from "./PasswordInput/PasswordInput.jsx";
+import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
 
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
@@ -12,8 +14,9 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
     if (errorText) {
       return (
         <>
-          <div className="alert alert-warning mt-3" role="alert">
-            {errorText}
+          <div className="alert alert-danger mt-3 d-flex flex-nowrap" role="alert">
+            <Icon name="triangle-exclamation" size="24" className="flex-shrink-0 me-2"/>
+            <div className="text-start">{errorText}</div>
           </div>
         </>
       );
@@ -167,139 +170,70 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
 
 
   return (
-    <div className="container">
-      <div className="row">
-        <div className="col">
-          <h4 className="text-center mb-5 mt-3">Login</h4>
-        </div>
-      </div>
-      <div className="row ">
-      <div className="mt-3 sso-login" style={{"textAlign": "center"}}>
-      <div className="text-center mb-4 mt-3 sso-login xs-10">
-        <button className="btn-success btn col-lg-3 col-md-4 col-sm-8 col-xs-10" onClick={githubSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
-            <div className="svgwrapper">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="25"
-              height="16"
-              fill="currentColor"
-              className="bi bi-github"
-              viewBox="0 0 16 16"
-            >
-              <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.012 8.012 0 0 0 16 8c0-4.42-3.58-8-8-8" />
-            </svg>{" "}
-            </div>
-            GitHub
-          </button>
-        </div>
-        <p><em>Recommended</em></p>
-        </div>
-      </div>
-      <div className="mt-3 mb-3">
-      &nbsp;
-      <hr />
-      </div>
+    <HighlightLoginSection title="Log in">
+      <h2 className="h3 text-secondary mb-3 mb-md-5">Recommended:</h2>
+      <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubSubmit}>
+        <Icon name="github-circle"/>
+        Install Nyrkio Github app
+      </button>
 
-      <div className="row ">
-      <div className="text-right mb-4 mt-3 sso-login col-md-4 col-sm-1 col-xs-0">
-      </div>
-      <div className="text-right mb-4 mt-3 sso-login col-md-4 col-sm-6 col-xs-8" style={{maxWidth:"60%"}} >
-      <input
-        type="text"
-        defaultValue={sso_domain_default}
-        placeholder="your domain"
-        className="form-control mb-2"
-        style={{"display": "inline", "textAlign": "right"}}
-        id="oauth_my_domain"
-        onChange={(e) => setUsername(e.target.value)}
-        />
-        </div>
-        <div className="text-left mb-4 mt-3 col-md-4 col-sm-3 col-xs-4"  style={{maxWidth:"30%"}}>
-        &nbsp;&nbsp;<big><strong>.</strong>&nbsp;</big><span className="oauth_tld">onelogin.com</span>
-        </div>
-        </div>
+      <hr className="my-4 my-md-5"/>
 
-        <div className="row ">
-        <div className="text-center mb-4 mt-3 sso-login xs-10">
-        <button id="ssoSubmitButton" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-10"
-        onLoad={ssoAutoSubmit} onClick={ssoSubmit}  style={{"height":"3em", "maxHeight":"3em", minWidth:"12em"}}>
-          <div className="svgwrapper">
-          <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="25"
-          height="20"
-          fill="currentColor"
-          className="bi"
-          viewBox="-40 -57 100 105"
-          >
-          <path
-          fill="#b28b56"
-          d="m -1.1259762,-57.653222 c -27.8865388,0 -50.5505098,22.618369 -50.5505098,50.5052342 0,27.9322898 22.618371,50.5506448 50.5505098,50.5506448 27.9322382,0 50.5508382,-22.618355 50.5508382,-50.5506448 0,-27.8868652 -22.6186,-50.5052342 -50.5508382,-50.5052342 z"
+      <h2 className="h3 text-secondary mb-2">Log in</h2>
+      <div className="text-start mb-4 mb-md-5">
+        <label htmlFor="oauth_my_domain" className="form-label">Domain</label>
+        <div className="input-group">
+          <input
+            type="text"
+            defaultValue={sso_domain_default}
+            placeholder="Enter your Domain"
+            className="form-control"
+            id="oauth_my_domain"
+            onChange={(e) => setUsername(e.target.value)}
+            aria-describedby="oauth_tld"
           />
-          <path
-          fill="#422b16"
-          d="m 6.4135741,10.746842 c 0,0.9538 -0.4998967,1.45342 -1.4534901,1.45342 h -9.0836437 c -0.9536934,0 -1.45349,-0.49962 -1.45349,-1.45342 v -21.891638 h -6.9490583 c -0.953594,0 -1.452991,-0.49961 -1.452991,-1.45337 v -9.083697 c 0,-0.9538 0.499397,-1.45337 1.452991,-1.45337 H 5.186984 c 0.9540934,0 1.1809901,0.49957 1.1809901,1.18085 v 32.701225 z"
-          />
-          </svg>{" "}
-          </div>
-          OneLogin
-          </button>
+          <span className="input-group-text oauth_tld bg-primary text-white border-primary fw-semibold" id="oauth_tld">.onelogin.com</span>
         </div>
-        <p style={{"color":"#999999", textAlign: "center"}}><em>Single Sign on with OneLogin or Okta is available for subscribers. Email sales@nyrkio.com and we'll get you connected.</em></p>
       </div>
 
-      <div className="mt-1 mb-1 row">
-      &nbsp;
-      <hr />
-      </div>
-      <form className="row mt-1 sso-login text-center" onSubmit={authSubmit}>
-            <div className="col-xl-3 col-lg-2 col-md-1 col-sm-0 col-xs-0">
-            </div>
-            <div className="col-xl-6 col-lg-8 col-md-10 col-sm-12 col-xs-12">
-            <input
-                type="text"
-                placeholder="email"
-                className="form-control"
-                id="exampleInputEmail1"
-                onChange={(e) => setUsername(e.target.value)}
-                style={{lineHeight:"0"}}
-                />
-          <br                   style={{lineHeight:"10px"}}
-          />
-                <input
-                  placeholder="passw0rd"
-                  type="password"
-                  className="form-control"
-                  id="exampleInputPassword1"
-                  onChange={(e) => setPassword(e.target.value)}
-                  style={{lineHeight:"0"}}
-                  />
-            <br                   style={{lineHeight:"10px"}}
-            />
-            </div>
-            <br />
-            <div className="text-center mb-4 mt-3 sso-login xs-10">
-            <button type="submit" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-12" style={{minWidth:"12em"}}>
-                Login
-              </button>
-            </div>
-            </form>
-            <div className="mt-1 mb-1 row">
-            <form className="row mt-1 sso-login text-center" onSubmit={nop}>
-            <p style={{"color":"#999999"}}><em>Forgot password? <a href="/forgot-password">Reset your password here.</a>.</em></p>
-            <hr />
+      <button id="ssoSubmitButton" className="btn btn-primary mb-3 w-100 w-md-auto" onLoad={ssoAutoSubmit} onClick={ssoSubmit}>
+        OneLogin
+      </button>
+      <p className="fw-normal">Single Sign on with OneLogin or Okta is available for subscribers.<br/>
+        Email <strong>sales@nyrkio.com</strong> and we'll get you connected.</p>
 
-            <div className="text-center mb-4 mt-3 xs-10">
-              <a href="/signup"><button type="button" className="btn-info btn col-lg-3 col-md-4 col-sm-8 col-xs-12" style={{minWidth:"12em"}}>
-                Create Nyrkiö account
-              </button></a>
-              </div>
-              </form>
+      <hr className="my-4 my-md-5"/>
+
+      <ErrorMessage className="mb-4 mb-md-5"/>
+      <form className="sso-login text-start" onSubmit={authSubmit}>
+        <div className="mb-3">
+          <label htmlFor="exampleInputEmail1" className="form-label">Email Address</label>
+          <input
+            type="text"
+            placeholder="Enter your Email Adress"
+            className="form-control"
+            id="exampleInputEmail1"
+            onChange={(e) => setUsername(e.target.value)}
+          />
         </div>
-        <div className="row">
-          <ErrorMessage className="mb-5"/>
+        <div className="mb-3">
+          <label htmlFor="exampleInputPassword1" className="form-label">Password</label>
+          <PasswordInput
+            id="exampleInputPassword1"
+            placeholder="Enter your Password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </div>
-      </div>
+        <div className="text-center mt-4 mt-md-5">
+          <button type="submit" className="btn btn-primary w-100 w-md-auto">Login</button>
+        </div>
+      </form>
+
+      <hr className="my-4 my-md-5"/>
+
+      <p className="mb-1 fw-normal">Don't have an account? <a href="/signup">Create&nbsp;new&nbsp;account</a></p>
+      <p className="mb-0 fw-normal">Have an account but forgot the password? <a href="/forgot-password">Reset&nbsp;password&nbsp;here</a></p>
+    </HighlightLoginSection>
   );
 };
 
@@ -337,7 +271,7 @@ export const LogOut = ({ setLoggedIn }) => {
   };
   return (
     <>
-      <Link to="/" className="btn btn-success" onClick={handleLogoutClick}>
+      <Link to="/" className="btn btn-primary" onClick={handleLogoutClick}>
         Log Out
       </Link>
     </>
@@ -349,7 +283,7 @@ export const LoginButton = () => {
     <>
       <Link
         to="/login"
-        className="btn btn-success loginbutton"
+        className="btn btn-primary loginbutton"
       >
         Log In
       </Link>

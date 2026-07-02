@@ -1,0 +1,54 @@
+@import '../../style/configuration';
+
+.review-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.review-card__author {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.review-card__logo {
+  display: block;
+  max-width: 120px;
+  width: 100%;
+  height: auto;
+}
+
+.review-card__image {
+  aspect-ratio: 1;
+  display: block;
+  width: 80px;
+  height: auto;
+  object-fit: cover;
+  border-radius: 50%;
+  object-position: 50% 0;
+}
+
+.review-card__link {
+  margin-top: auto;
+}
+
+.review-card--full {
+  .review-card__quote {
+    @include media-breakpoint-up(md) {
+      min-height: 146px;
+    }
+
+    @include media-breakpoint-up(lg) {
+      min-height: 120px;
+    }
+    @include media-breakpoint-up(xxl) {
+      min-height: 144px;
+    }
+
+    @include media-breakpoint-up(xxxl) {
+      min-height: 120px;
+    }
+  }
+}
+
