@@ -16,11 +16,14 @@ services:
     environment:
       - API_PORT=8000
       - GIT_SHA=${IMAGE_TAG}
+      - SMTP_HOST=mailhog.nyrkio.local
+      - SMTP_PORT=1025
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
     depends_on:
       - mongodb
+      - mailhog
 
   webhooks:
     build: backend
@@ -47,6 +50,14 @@ services:
     hostname: api.nyrkio.local
     depends_on:
      - mongodb
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    container_name: mailhog
+    hostname: mailhog.nyrkio.local
+    ports:
+      - "1025:1025" # SMTP
+      - "8025:8025" # Web UI
 
   nginx:
     build:
