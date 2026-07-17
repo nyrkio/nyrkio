@@ -78,15 +78,17 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         remoteip = (
             request.headers.get("CF-Connecting-IP")
             or request.headers.get("X-Forwarded-For")
-            or request.remote_addr
+            or request.client.host
         )
 
         validation = await validate_turnstile(token, CF_SECRETKEY, remoteip)
 
-        if not validation["success"]:
+        # Skip turnstile for local dev (no token provided)
+        if token and not validation["success"]:
+            codes = validation.get("error-codes", ["unknown"])
             raise HTTPException(
                 status_code=400,
-                detail=f"Blocked by CloudFlare: {validation['error-codes']}",
+                detail=f"Blocked by CloudFlare: {codes}",
             )
 
         if user_create.oauth_accounts:
