@@ -1,12 +1,13 @@
 from typing import Optional
+import threading
 
 from fastapi_users import BaseUserManager, models, exceptions
 from fastapi_users.authentication.strategy import JWTStrategy
 
 
-# Originally stored in Mongodb, but this is quite a frequent call
-# FIXME: Will break on multiple backend nodes
+# ponytail: in-memory impersonation map — breaks across multiple backend nodes
 superuser_active_map = {}
+superuser_active_lock = threading.Lock()
 
 
 class SuperuserStrategy(JWTStrategy):
@@ -21,13 +22,11 @@ class SuperuserStrategy(JWTStrategy):
         self, token: Optional[str], user_manager: BaseUserManager[models.UP, models.ID]
     ) -> Optional[models.UP]:
         admin_user = await super().read_token(token, user_manager)
-        if admin_user is None:
-            return None
-
-        if not admin_user.is_superuser:
+        if admin_user is None or not admin_user.is_superuser:
             return admin_user
 
-        user = superuser_active_map.get(admin_user.email)
+        with superuser_active_lock:
+            user = superuser_active_map.get(admin_user.email)
         if not user:
             return admin_user
         try:
@@ -42,5 +41,7 @@ class SuperuserStrategy(JWTStrategy):
             return admin_user
 
     async def destroy_token(self, admin_user: str, user: models.UP) -> None:
-        # await self.store.delete_impersonate_user(token)
-        del superuser_active_map[admin_user]
+        if not user.is_superuser:
+            return
+        with superuser_active_lock:
+            superuser_active_map.pop(admin_user, None)

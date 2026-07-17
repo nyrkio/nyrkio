@@ -96,17 +96,17 @@ cookie_transport = CookieTransport(
 )
 
 
+def get_superuser_strategy() -> SuperuserStrategy:
+    return SuperuserStrategy(secret=SECRET, lifetime_seconds=None)
+
+
 cookie_backend = AuthenticationBackend(
     name="cookie",
     transport=cookie_transport,
-    get_strategy=get_jwt_strategy,
+    get_strategy=get_superuser_strategy,
 )
 
 auth_router = APIRouter(prefix="/auth")
-
-
-def get_superuser_strategy() -> SuperuserStrategy:
-    return SuperuserStrategy(secret=SECRET, lifetime_seconds=None)
 
 
 superuser_backend = AuthenticationBackend(
@@ -307,31 +307,29 @@ async def github_callback(
     user_manager: BaseUserManager[models.UP, models.ID] = Depends(get_user_manager),
 ):
     token, state = access_token_state
-    # Verify that we can decode the token so know it's valid
-    # try:
-    #     jwt.decode(token, SECRET, audience=[STATE_TOKEN_AUDIENCE], algorithms=["HS256"])
-    # except jwt.DecodeError as e:
-    #     logging.error(e)
-    #     await DBStore().log_json_event(
-    #         {
-    #             "token": token,
-    #             "state": state,
-    #             "token_type": repr(type(token)),
-    #             "state_type": repr(type(state)),
-    #             "token_keys()": list(token.keys()),
-    #             "error": repr(e),
-    #             "type": "jwt.DecodeError",
-    #             "file": "auth.py",
-    #             "method": "github_callback",
-    #         },
-    #         "error",
-    #     )
-    #     raise HTTPException(
-    #         status_code=status.HTTP_400_BAD_REQUEST,
-    #         detail="Couldn't decode Github Oauth response.",
-    #     )
 
-    account_id, account_email = await github_oauth.get_id_email(token["access_token"])
+    if token is None:
+        await DBStore().log_json_event(
+            {"state": state, "error": "token is None from OAuth callback"},
+            "oauth_error",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub OAuth token exchange failed. Please try again.",
+        )
+
+    access_token = token.get("access_token")
+    if access_token is None:
+        await DBStore().log_json_event(
+            {"token_keys": list(token.keys()), "error": "missing access_token"},
+            "oauth_error",
+        )
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="GitHub OAuth returned no access token. Please try again.",
+        )
+
+    account_id, account_email = await github_oauth.get_id_email(access_token)
     # gh_profile = await github_oauth.get_profile(token["access_token"])
     # print("OAuth2 callback")
     # print(gh_profile)
@@ -425,7 +423,21 @@ async def _sso_mycallback_handler(
     oauth_full_domain, sso_oauth, request, access_token_state, user_manager
 ):
     token, state = access_token_state
-    account_id, account_email = await sso_oauth.get_id_email(token["access_token"])
+
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="SSO OAuth token exchange failed. Please try again.",
+        )
+
+    access_token = token.get("access_token")
+    if access_token is None:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="SSO OAuth returned no access token. Please try again.",
+        )
+
+    account_id, account_email = await sso_oauth.get_id_email(access_token)
     if account_email is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
@@ -435,7 +447,7 @@ async def _sso_mycallback_handler(
     try:
         user = await user_manager.oauth_callback(
             oauth_full_domain,
-            token["access_token"],
+            access_token,
             account_id,
             account_email,
             token.get("expires_at"),
@@ -456,7 +468,7 @@ async def _sso_mycallback_handler(
             detail="This user is deactivated at nyrkio.com",
         )
 
-    userinfo = await sso_oauth.get_userinfo(token["access_token"])
+    userinfo = await sso_oauth.get_userinfo(access_token)
 
     for oauth_acct in user.oauth_accounts:
         if oauth_acct.oauth_name != oauth_full_domain:

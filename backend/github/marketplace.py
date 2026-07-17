@@ -37,27 +37,34 @@ async def _github_events(gh_event: Dict):
 
     await handle_pull_requests(gh_event)
 
-    if gh_event["action"] in ["created", "added", "removed"]:
-        gh_id = gh_event["installation"]["account"]["id"]
-        await store.set_github_installation(gh_id, gh_event)
-    if gh_event["action"] in ["deleted"]:
-        gh_id = gh_event["installation"]["account"]["id"]
-        await store.set_github_installation(
-            gh_id,
-            {
-                "nyrkio_status": "deleted",
-                "nyrkio_datetime": datetime.now(tz=timezone.utc),
-            },
-        )
+    if gh_event.get("action") in ["created", "added", "removed"]:
+        installation = gh_event.get("installation")
+        if installation:
+            gh_id = installation["account"]["id"]
+            await store.set_github_installation(gh_id, gh_event)
+    if gh_event.get("action") in ["deleted"]:
+        installation = gh_event.get("installation")
+        if installation:
+            gh_id = installation["account"]["id"]
+            await store.set_github_installation(
+                gh_id,
+                {
+                    "nyrkio_status": "deleted",
+                    "nyrkio_datetime": datetime.now(tz=timezone.utc),
+                },
+            )
 
     # Would need more permissions on github
     # I will rather trigger this from the pull_request events that we already get
-    if gh_event["action"] in ["queued"] and "workflow_job" in gh_event:
-        repo_owner = gh_event["repository"]["owner"]["login"]
-        repo_name = gh_event["repository"]["name"]
-        sender = gh_event["sender"]["login"]
+    if gh_event.get("action") in ["queued"] and "workflow_job" in gh_event:
+        repository = gh_event.get("repository")
+        sender = gh_event.get("sender")
+        if not repository or not sender:
+            return "Thank you for using Nyrkiö. For Faster Software!"
+        repo_owner = repository["owner"]["login"]
+        repo_name = repository["name"]
         org_name = None
-        if "organization" in gh_event and gh_event["organization"]:
+        if gh_event.get("organization"):
             org_name = gh_event["organization"]["login"]
         logger.info(
             f"Workflow job for ({org_name}/{repo_owner}/{repo_name}) triggered by {sender}"
