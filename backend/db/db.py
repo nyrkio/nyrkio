@@ -279,6 +279,11 @@ class UserUpdate(schemas.BaseUserUpdate):
     billing_runners: Optional[Dict[str, str]] = Field(None)
     captcha_token: Optional[str] = None
 
+    def create_update_dict(self):
+        d = super().create_update_dict()
+        d.pop("password", None)
+        return d
+
 
 class ConnectionStrategy(ABC):
     @abstractmethod
