@@ -89,31 +89,6 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         return None
 
 class SsoNyrkioUserDatabase(NyrkioUserDatabase):
-    def __init__(self):
-        super().__init__(User, OAuthAccount)
-        self.store = DBStore()
-        self.User = self.store.db.User
-
-    async def get_by_github_username(self, github_username: str):
-        res = await self.User.find_one({github_username: github_username})
-        if res:
-            return User(**res)
-
-        res = await self.User.find(
-            {"oauth_accounts.organizations.user.login": github_username}
-        ).to_list(99)
-
-        if len(res) == 1:
-            obj = res[0]
-            return User(**obj)
-
-        if len(res) > 1:
-            raise DBStoreMultipleResults(
-                f"Failed to get user by their github_username '{github_username}'. Query returned more than one result."
-            )
-
-        return None
-
     async def _get_allowed_github_orgs(self, oauth_name):
         gh_like_organizations = []
         sso_config = await self.store.get_sso_config(oauth_full_domain=oauth_name)
