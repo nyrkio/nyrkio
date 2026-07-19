@@ -68,15 +68,31 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         self.store = DBStore()
         self.User = self.store.db.User
 
-    # async def update_oauth_account(self, u,acct,dic):
-    #     print(u,acct,dic)
-    #     return await super().update_oauth_account(u,acct,dic)
+    async def get_by_github_username(self, github_username: str):
+        res = await self.User.find_one({github_username: github_username})
+        if res:
+            return User(**res)
 
-    # async def get_by_oauth_account(self, oauth_name, account_id):
-    #     print(oauth_name, account_id)
-    #     res = await super().get_by_oauth_account(oauth_name, account_id)
-    #     print(res)
-    #     return res
+        res = await self.User.find(
+            {"oauth_accounts.organizations.user.login": github_username}
+        ).to_list(99)
+
+        if len(res) == 1:
+            obj = res[0]
+            return User(**obj)
+
+        if len(res) > 1:
+            raise DBStoreMultipleResults(
+                f"Failed to get user by their github_username '{github_username}'. Query returned more than one result."
+            )
+
+        return None
+
+class SsoNyrkioUserDatabase(NyrkioUserDatabase):
+    def __init__(self):
+        super().__init__(User, OAuthAccount)
+        self.store = DBStore()
+        self.User = self.store.db.User
 
     async def get_by_github_username(self, github_username: str):
         res = await self.User.find_one({github_username: github_username})
@@ -222,7 +238,6 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         await user.save()
         return user
 
-
 def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list:
     user_orgs = []
     if not user.oauth_accounts:
@@ -241,6 +256,10 @@ def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list
 async def get_user_db():
     # yield BeanieUserDatabase(User, OAuthAccount)
     yield NyrkioUserDatabase()
+
+async def get_sso_user_db():
+    # yield BeanieUserDatabase(User, OAuthAccount)
+    yield SsoNyrkioUserDatabase()
 
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):

@@ -42,6 +42,7 @@ from backend.auth.superuser import SuperuserStrategy
 from backend.auth.common import (
     UserManager,
     get_user_manager,
+    get_sso_user_manager,
     jwt_backend,
     get_jwt_strategy,
     bearer_transport,
@@ -248,7 +249,7 @@ async def _dynamic_sso_callback_setup(oauth_full_domain, oauth_config):
                     sso_oauth2_authorize_callback
                 ),
                 user_manager: BaseUserManager[models.UP, models.ID] = Depends(
-                    get_user_manager
+                    get_sso_user_manager
                 ),
             ):
                 return await _sso_mycallback_handler(
