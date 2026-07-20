@@ -141,11 +141,11 @@ auth_router.include_router(
 
 
 auth_router.include_router(
-    fastapi_users.get_auth_router(jwt_backend, SECRET), prefix="/jwt", tags=["auth"]
+    fastapi_users.get_auth_router(jwt_backend), prefix="/jwt", tags=["auth"]
 )
 
 auth_router.include_router(
-    fastapi_users.get_auth_router(cookie_backend, SECRET),
+    fastapi_users.get_auth_router(cookie_backend),
     prefix="/cookie",
     tags=["auth"],
 )
