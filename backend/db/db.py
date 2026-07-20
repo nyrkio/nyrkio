@@ -102,6 +102,8 @@ class NyrkioUserDatabase(BeanieUserDatabase):
         gh_like_organizations = []
         sso_config = await self.store.get_sso_config(oauth_full_domain=oauth_name)
         rows = len(sso_config)
+        if rows == 0:
+            return []
         if rows != 1:
             raise ValueError(
                 f"Found {len(sso_config)} results when trying to find sso config for {oauth_name}"
