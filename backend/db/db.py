@@ -128,6 +128,35 @@ class NyrkioUserDatabase(BeanieUserDatabase):
             gh_like_organizations.append(o)
         return gh_like_organizations
 
+
+class SsoNyrkioUserDatabase(NyrkioUserDatabase):
+    """User database for SSO OAuth flows.
+
+    Gracefully handles missing SSO configs (returns empty org list)
+    instead of raising ValueError, since SSO providers may not have
+    pre-configured org mappings.
+    """
+
+    async def _get_allowed_github_orgs(self, oauth_name):
+        gh_like_organizations = []
+        sso_config = await self.store.get_sso_config(oauth_full_domain=oauth_name)
+        if len(sso_config) == 0:
+            return []
+        if len(sso_config) != 1:
+            raise ValueError(
+                f"Found {len(sso_config)} results when trying to find sso config for {oauth_name}"
+            )
+        orgs = sso_config[0].get("allowed_github_orgs", [])
+        for o in orgs:
+            login = o["login"]
+            o["url"] = o.get("url", f"https://{oauth_name}/orgs/{login}")
+            o["repos_url"] = o.get(
+                "repos_url", f"https://api.github.com/orgs/{login}/repos"
+            )
+            o["description"] = o.get("description", "Group is created and managed by Nyrkiö.")
+            gh_like_organizations.append(o)
+        return gh_like_organizations
+
     async def add_oauth_account(
         self: "BaseUserDatabase[models.UOAP, models.ID]",
         user: models.UOAP,
@@ -243,6 +272,11 @@ def filter_user_orgs(sso_orgs: list, user: User, oauth_full_domain: str) -> list
 async def get_user_db():
     # yield BeanieUserDatabase(User, OAuthAccount)
     yield NyrkioUserDatabase()
+
+
+async def get_sso_user_db():
+    # yield BeanieUserDatabase(User, OAuthAccount)
+    yield SsoNyrkioUserDatabase()
 
 
 class UserRead(schemas.BaseUser[PydanticObjectId]):

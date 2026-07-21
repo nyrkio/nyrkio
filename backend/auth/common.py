@@ -23,7 +23,7 @@ from backend.auth.email import send_email, read_template_file
 from fastapi_users.authentication import JWTStrategy
 import os
 
-from backend.db.db import User, DBStore, get_user_db
+from backend.db.db import User, DBStore, get_user_db, get_sso_user_db
 
 auth_router = APIRouter(prefix="/auth")
 
@@ -46,6 +46,10 @@ CF_SECRETKEY = os.environ.get("CF_SECRETKEY")
 
 
 async def get_user_manager(user_db: BeanieUserDatabase = Depends(get_user_db)):
+    yield UserManager(user_db)
+
+
+async def get_sso_user_manager(user_db: BeanieUserDatabase = Depends(get_sso_user_db)):
     yield UserManager(user_db)
 
 
