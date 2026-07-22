@@ -198,9 +198,9 @@ def test_sso_groups_created():
     user = asyncio.run(fut)
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
     assert u["email"] == "sso_user2@example.com"
-    assert u["oauth_accounts"][0]["expires_at"] == exp, (
-        "The existing oauth_account entry was refreshed"
-    )
+    assert (
+        u["oauth_accounts"][0]["expires_at"] == exp
+    ), "The existing oauth_account entry was refreshed"
     assert (
         u["oauth_accounts"][0]["organizations"][0]["url"]
         == "https://test.example.com/orgs/test_gh_org"
@@ -233,9 +233,9 @@ def test_sso_groups_created():
     user = asyncio.run(fut)
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
     assert u["email"] == "sso_user@example.com"
-    assert u["oauth_accounts"][0]["expires_at"] == exp, (
-        "The existing oauth_account entry was refreshed"
-    )
+    assert (
+        u["oauth_accounts"][0]["expires_at"] == exp
+    ), "The existing oauth_account entry was refreshed"
     assert (
         u["oauth_accounts"][0]["organizations"][2]["url"]
         == "https://test.example.com/orgs/test_gh_org"
