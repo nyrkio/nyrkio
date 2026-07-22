@@ -59,11 +59,13 @@ export const OrgDashboard = ({embed}) => {
   };
 
   return (
-    <>
+    <div className="container">
       <h1 className="text-center text-primary mb-4">Organization Test Results</h1>
 
       {loading ? (
-        <Loading loading={loading} text="Loading organization test results..." />
+        <div className="text-center">
+          <Loading loading={loading} text="Loading organization test results..." />
+        </div>
       ) : (
         <TableOrResult
           prefix={prefix}
@@ -75,6 +77,6 @@ export const OrgDashboard = ({embed}) => {
           setLoading={setLoading}
         />
       )}
-    </>
+    </div>
   );
 };

@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useLocation } from "react-router";
 import { throttle } from "../lib/utils";
+import {HighlightLoginSection} from "./HighlightLoginSection";
+import {Icon} from "./Icon.jsx";
 
 export const OrgSettings = () => {
   const [validName, setValidName] = useState(false);
@@ -35,15 +37,20 @@ export const OrgSettings = () => {
 
   return (
     <>
-      <div className="container text-center">
-        <h3 className="text-center" style={{marginBottom: 0}}><span className="bi bi-people-fill"></span> {orgName}</h3>
-        <p className="text-center">
-           <a href={"/orgs/"+orgName}  style={{color: "#999999"}}>Test results: {protocol}//{hostname}/orgs/{orgName}</a>
-           <br />
-           <a href={"https://github.com/orgs/"+orgName+"/people"}  style={{color: "#999999"}}>Org membership: https://github.com/orgs/{orgName}</a>
-        </p>
+      <div className="container">
+        <h1 className="h2 text-primary text-center mb-4 mt-4 mt-md-6"><span className="bi bi-people-fill"></span> {orgName}</h1>
+        <div className="d-flex flex-column flex-md-row gap-4 justify-content-center mb-4 mb-md-7">
+          <a className="btn btn-primary w-100 w-md-auto" style={{minWidth: "200px"}} href={"/orgs/"+orgName}>Test results</a>
+          <a className="btn btn-outline-primary w-100 w-md-auto" style={{minWidth: "200px"}} href={"https://github.com/orgs/"+orgName+"/people"}>Org membership</a>
+        </div>
+      </div>
+      <div className="mb-4 mb-md-7">
         <HunterSettingsOrg orgName={orgName} />
+      </div>
+      <div className="mb-4 mb-md-7">
         <NotificationSettings orgName={orgName} />
+      </div>
+      <div className="mb-4 mb-md-7">
         <SlackSettings orgName={orgName} />
       </div>
     </>
@@ -312,85 +319,69 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
     return (
       <>
       <div id="nyrkio-cp-sliders">
-      <div className="row mt-5 ">
-      <div className="col-xs-12 col-md-6 col-lg-6">
-      <em>Lower P-values (ex: 0.001) will find the most significant regressions, while minimizing false positives.</em>
-      </div>
-      <div className="col-xs-0 col-md-1 col-lg-1"></div>
-      <div className="col-xs-12 col-md-5 col-lg-5">
-      <em>Higher P-values (ex: 0.05) will find more change points.</em>
-      </div>
-      </div>
-      <div className="row mt-4 ">
-      <div className="col col-md-12">
-      <label htmlFor="nyrkio-p-value-slider" className="form-label">
-      P-value:{" "}
-      </label>
-      </div>
-      <div className="col col-md-10">
-      <input
-      type="range"
-      id="nyrkio-p-value-slider"
-      name="nyrkio-p-value-slider"
-      className="nyrkio-p-value-slider nyrkio-slider"
-      style={{ width: "100%" }}
-      defaultValue={slidersCurrentValue.max_pvalue_raw}
-      min={0}
-      max={pValueSliderMax}
-      step={1}
-      precision={1}
-      tooltip="off"
-      onChange={(ev) => pvalueUpdate(ev.target.value)}
-      />
-      </div>
-      <div className="col col-md-2">
-      <span id="nyrkio-p-value-value" className="form-label">
-      {slidersCurrentValue.max_pvalue}
-      </span>
-      </div>
-      </div>
-      <div className="row mt-5">
-      <div className="col-xs-12 col-md-6 col-lg-6">
-      <em>You can filter out regressions that are so small that it's not worth fixing them even if they are "real"/statistically significant.</em>
-      </div>
-      <div className="col-xs-0 col-md-0 col-lg-1"></div>
-      <div className="col-xs-12 col-md-6 col-lg-5">
-      <em>For example, you might only care about regressions that are 5% or larger.</em>
-      </div>
-      </div>
+        <div className="row">
+          <div className="col-md-6">
+            Lower P-values (ex: 0.001) will find the most significant regressions, while minimizing false positives.
+          </div>
+          <div className="col-md-6">
+            Higher P-values (ex: 0.05) will find more change points.
+          </div>
+        </div>
+        <div className="mt-2">
+          <label htmlFor="nyrkio-p-value-slider" className="form-label d-flex justify-content-between">
+            P-value:{" "}
+            <span id="nyrkio-p-value-value" className="form-label">{slidersCurrentValue.max_pvalue}</span>
+          </label>
+          <input
+            type="range"
+            id="nyrkio-p-value-slider"
+            name="nyrkio-p-value-slider"
+            className="nyrkio-p-value-slider nyrkio-slider form-range"
+            style={{ width: "100%" }}
+            defaultValue={slidersCurrentValue.max_pvalue_raw}
+            min={0}
+            max={pValueSliderMax}
+            step={1}
+            precision={1}
+            tooltip="off"
+            onChange={(ev) => pvalueUpdate(ev.target.value)}
+          />
+        </div>
 
-      <div className="row mt-5">
-      <div className="col col-md-12">
-      <label
-      htmlFor="nyrkio-min-magnitude-slider"
-      className="form-label"
-      >
-      Change magnitude:{" "}
-      </label>
-      </div>
-      <div className="col col-md-10">
-      <input
-      type="range"
-      id="nyrkio-min-magnitude-slider"
-      name="nyrkio-min-magnitude-slider"
-      className="nyrkio-min-magnitude-slider nyrkio-slider"
-      style={{ width: "100%" }}
-      defaultValue={slidersCurrentValue.min_magnitude_raw}
-      min={0}
-      max={minMagnitudeSliderMax}
-      step={1}
-      precision={1}
-      tooltip="off"
-      onChange={(ev) => minMagnitudeUpdate(ev.target.value)}
-      />
-      </div>
-      <div className="col col-md-2">
-      <span id="nyrkio-min-magnitude-value" className="form-label">
-      {slidersCurrentValue.min_magnitude}
-      </span>
-      <span className="form-label">%</span>
-      </div>
-      </div>
+        <hr/>
+
+        <div className="row mt-3">
+          <div className="col-md-6">
+            You can filter out regressions that are so small that it's not worth fixing them even if they are "real"/statistically significant.
+          </div>
+          <div className="col-md-6">
+            For example, you might only care about regressions that are 5% or larger.
+          </div>
+        </div>
+
+        <div className="mt-2">
+          <label htmlFor="nyrkio-min-magnitude-slider" className="form-label d-flex justify-content-between">
+            Change magnitude:{" "}
+            <span>
+              <span id="nyrkio-min-magnitude-value" className="form-label">{slidersCurrentValue.min_magnitude}</span>
+              <span className="form-label">%</span>
+            </span>
+          </label>
+          <input
+            type="range"
+            id="nyrkio-min-magnitude-slider"
+            name="nyrkio-min-magnitude-slider"
+            className="nyrkio-min-magnitude-slider nyrkio-slider form-range"
+            style={{ width: "100%" }}
+            defaultValue={slidersCurrentValue.min_magnitude_raw}
+            min={0}
+            max={minMagnitudeSliderMax}
+            step={1}
+            precision={1}
+            tooltip="off"
+            onChange={(ev) => minMagnitudeUpdate(ev.target.value)}
+          />
+        </div>
       </div>
       </>
     );
@@ -478,19 +469,11 @@ export const HunterSettingsOrg = ({orgName, callback=noop}) => {
     });
   }, [NyrkioCpSliders]);
   return (
-    <div className="row pt-5 justify-content-center">
-      <div className="col-md-8">
-        <div className="card">
-          <div className="card-header ">Change Point Detection</div>
-          <div className="card-body">
-            <p className="card-text">
-              These settings apply for all {orgName} metrics.
-            </p>
-            <NyrkioCpSliders />
-          </div>
-        </div>
-      </div>
-    </div>
+    <HighlightLoginSection maxWidth="1000px">
+      <h2 className="h3 text-secondary mb-3">Change Point Detection</h2>
+      <p className="fw-semibold text-secondary">These settings apply for all {orgName} metrics.</p>
+      <NyrkioCpSliders />
+    </HighlightLoginSection>
   );
 };
 
@@ -552,78 +535,48 @@ const SlackSettings = ({orgName}) => {
   const slackBtnText =
     Object.keys(slackData).length > 0 ? "Re-connect to Slack" : "Add to Slack";
   return (
-    <div className="row pt-5 justify-content-center">
-      <div className="col-md-8">
-        <div className="card">
-          <div className="card-header ">Slack</div>
-          <div className="card-body">
-            {Object.keys(slackData).length > 0 ? (
-              <>
-                <form>
-                  <div className="mb-3 pt-3 col-md-7">
-                    <label htmlFor="slackChannel" className="form-label">
-                      Sending notifications to:
-                    </label>
-                    <div className="input-group">
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="slackName"
-                        value={slackData.team}
-                        disabled
-                      />
-                      <input
-                        type="text"
-                        className="form-control"
-                        id="slackChannel"
-                        value={slackData.channel}
-                        disabled
-                      />
-                    </div>
-                  </div>
-                </form>
-              </>
-            ) : (
-              <>
-                <p className="card-text">
-                  Nyrkiö can send notifications to Slack when a performance
-                  change is detected.
-                </p>
-              </>
-            )}
-            <a
-              href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fnyrkio.com%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
-              className="slack-btn"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 122.8 122.8"
-                height={20}
-                width={20}
-              >
-                <path
-                  d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z"
-                  fill="#e01e5a"
-                ></path>
-                <path
-                  d="M45.2 25.8c-7.1 0-12.9-5.8-12.9-12.9S38.1 0 45.2 0s12.9 5.8 12.9 12.9v12.9H45.2zm0 6.5c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H12.9C5.8 58.1 0 52.3 0 45.2s5.8-12.9 12.9-12.9h32.3z"
-                  fill="#36c5f0"
-                ></path>
-                <path
-                  d="M97 45.2c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9-5.8 12.9-12.9 12.9H97V45.2zm-6.5 0c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V12.9C64.7 5.8 70.5 0 77.6 0s12.9 5.8 12.9 12.9v32.3z"
-                  fill="#2eb67d"
-                ></path>
-                <path
-                  d="M77.6 97c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9V97h12.9zm0-6.5c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H77.6z"
-                  fill="#ecb22e"
-                ></path>
-              </svg>
-              {slackBtnText}
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+    <HighlightLoginSection maxWidth="1000px">
+      <h2 className="h3 text-secondary mb-3">Slack</h2>
+      {Object.keys(slackData).length > 0 ? (
+          <>
+            <form>
+              <div className="mb-3 pt-3 col-md-7">
+                <label htmlFor="slackChannel" className="form-label">
+                  Sending notifications to:
+                </label>
+                <div className="input-group">
+                  <input
+                      type="text"
+                      className="form-control"
+                      id="slackName"
+                      value={slackData.team}
+                      disabled
+                  />
+                  <input
+                      type="text"
+                      className="form-control"
+                      id="slackChannel"
+                      value={slackData.channel}
+                      disabled
+                  />
+                </div>
+              </div>
+            </form>
+          </>
+      ) : (
+          <>
+            <p className="card-text">
+              Nyrkiö can send notifications to Slack when a performance
+              change is detected.
+            </p>
+          </>
+      )}
+      <a href="https://slack.com/oauth/v2/authorize?scope=incoming-webhook&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fnyrkio.com%2Fuser%2Fsettings&amp;client_id=6044529706771.6587337889574"
+         className="btn btn-outline-primary d-inline-flex align-items-center gap-2 mt-4">
+        <Icon name="slack" size={20} />
+        {slackBtnText}
+      </a>
+    </HighlightLoginSection>
   );
 };
 
@@ -767,27 +720,22 @@ const NotificationSettings = ({orgName}) => {
     setNotifiersConfig(c);
   };
   return (
-    <div className="row pt-5 justify-content-center">
-    <div className="col-md-8">
-    <div className="card justify-content-left">
-    <div className="card-header">Notification settings</div>
-    <div className="card-body" style={{textAlign:"left"}}>
-    <form>
-    <p>
-    <input type="checkbox" id="notifiers_github_issues" name="notifiers_github_issues" checked={githubCheckbox} onChange={(e) => toggleGithub(e)}/>{" "}
-    Create a GitHub issue if a change point was found and the commit is at most
-    <br />
-    <input style={{width: "3em", textAlign: "right"}} type="text" id="notifiers_since_days" name="notifiers_since_days" value={daysSince} onChange={(e)=>changeDays(e)}/>{" "}
-    days old. (At most one issue per commit is created.)
-    </p>
-    <p>
-    <input type="checkbox" id="notifiers_github_pr" name="notifiers_github_pr" checked={githubPrCheckbox} onChange={(e) => toggleGithubPr(e)}/>{" "}
-    Post a comment on pull requests.
-    </p>
-    </form>
-    </div>
-    </div>
-    </div>
-    </div>
+    <HighlightLoginSection maxWidth="1000px">
+      <h2 className="h3 text-secondary mb-3">Notification settings</h2>
+      <form className="text-start">
+        <div className="form-check mb-3">
+          <input className="form-check-input" type="checkbox" id="notifiers_github_issues" name="notifiers_github_issues" checked={githubCheckbox} onChange={(e) => toggleGithub(e)}/>{" "}
+          <label className="form-check-label" htmlFor="notifiers_github_issues">
+            Create a GitHub issue if a change point was found and the commit is at most
+            <input className="form-control d-inline form-control-sm mx-2 text-center" style={{width:'46px'}} type="text" id="notifiers_since_days" name="notifiers_since_days" value={daysSince} onChange={(e)=>changeDays(e)}/>
+            days old. (At most one issue per commit is created.)
+          </label>
+        </div>
+        <div className="form-check">
+          <input className="form-check-input" type="checkbox" id="notifiers_github_pr" name="notifiers_github_pr" checked={githubPrCheckbox} onChange={(e) => toggleGithubPr(e)}/>{" "}
+          <label htmlFor="notifiers_github_pr" className="form-check-label">Post a comment on pull requests.</label>
+        </div>
+      </form>
+    </HighlightLoginSection>
   );
 };

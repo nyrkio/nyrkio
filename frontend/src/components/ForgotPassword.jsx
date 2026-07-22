@@ -101,9 +101,7 @@ export const ForgotPassword = ({loggedIn}) => {
       if (errorText2) {
         return (
           <>
-          <div className="alert alert-warning mt-3" role="alert">
-          {errorText2}
-          </div>
+          <div className="alert alert-warning mt-3" role="alert" dangerouslySetInnerHTML={{ __html: errorText2 }}/>
           </>
         );
       }
