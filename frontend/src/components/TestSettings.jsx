@@ -86,33 +86,27 @@ export const TestSettings = ({ dashboardType, testName, attributes }) => {
   };
 
   return (
-    <>
-      <div className="container mb-5">
-        <div className="row justify-content-center">
-          <div className="col-md-6 justify-content-center">
-            <div className="form-check form-switch justify-content-center text-center">
-              <input
-                className="form-check-input text-center justify-content-center align-items-center"
-                onChange={() => handleToggle(!publicTest)}
-                type="checkbox"
-                role="switch"
-                id="flexSwitchCheckUnChecked"
-                defaultChecked={publicTest}
-              ></input>
-              <label
-                className="form-check-label"
-                htmlFor="flexSwitchCheckUnChecked"
-              >
-                {publicTest ? (
-                  <b>These test results are public</b>
-                ) : (
-                  <i>These test results are private</i>
-                )}
-              </label>
-            </div>
-          </div>
-        </div>
+    <div className="d-flex justify-content-center">
+      <div className="form-check form-switch text-start">
+        <input
+            className="form-check-input justify-content-center align-items-center"
+            onChange={() => handleToggle(!publicTest)}
+            type="checkbox"
+            role="switch"
+            id="flexSwitchCheckUnChecked"
+            defaultChecked={publicTest}
+        ></input>
+        <label
+            className="form-check-label"
+            htmlFor="flexSwitchCheckUnChecked"
+        >
+          {publicTest ? (
+              <b>These test results are public</b>
+          ) : (
+              <i>These test results are private</i>
+          )}
+        </label>
       </div>
-    </>
+    </div>
   );
 };

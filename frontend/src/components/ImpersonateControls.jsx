@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Icon } from "./Icon.jsx";
 
 import Button from 'react-bootstrap/Button';
 
@@ -26,12 +27,12 @@ export const ImpersonateControls = () => {
     let titlemsg = "You are an administrator that has assumed the role of another user. Click here to return to your normal user account: " + admin_user;
   return (
     <>
-    <Button href="/admin" className="btn btn-danger" onClick={(event) => { event.preventDefault(); stopIt();}}
-    title={titlemsg}
-    >  &#x2716; </Button>
-    </>
-
-  );
+      <Button href="/admin" className="btn btn-danger" onClick={(event) => { event.preventDefault(); stopIt();}}
+      title={titlemsg}
+      >
+        <Icon name="close" size="18" />
+      </Button>
+    </>);
    }
    else {
      return "";

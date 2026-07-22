@@ -110,7 +110,7 @@ export const UserMenu = ({ loggedIn, setLoggedIn }) => {
         <span className="d-inline-block text-truncate" style={{maxWidth: '136px'}}>{username}</span>
       </Dropdown.Toggle>
 
-      <Dropdown.Menu>
+      <Dropdown.Menu className="w-100 w-md-auto">
         {isAdmin ? (
           <Dropdown.Item href="/admin">
             <span className="bi bi-box-arrow-up-right"></span> Admin

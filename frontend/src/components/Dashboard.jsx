@@ -22,6 +22,7 @@ import graph_2x1 from "../static/icons/graph-2x1.png";
 import graph_1x1 from "../static/icons/graph-1x1.png";
 import { Icon } from "./Icon.jsx";
 import { Loading } from "./Loading.jsx";
+import {HighlightLoginSection} from "./HighlightLoginSection.jsx";
 
 const isPublicDashboard = (dashboardType) => {
   return dashboardType === dashboardTypes.PUBLIC;
@@ -213,11 +214,9 @@ const MyDashboard = ({loggedIn, embed, path}) => {
     console.warn("Unhandled prefix in URI: " + prefix);
     return (<NoMatch />);
   }
-  return (<>
-      <div className="container">
+  return (<div className="container">
         <h1 className="text-center text-primary mb-4">Select Tests</h1>
 
-      </div>
       <TableOrResult data={unencodedTestNames}
                      singleTestName={testName}
                      prefix={prefix}
@@ -228,7 +227,7 @@ const MyDashboard = ({loggedIn, embed, path}) => {
                      dashboardType={dashboardTypes.USER}
                      baseUrls={baseUrls}
       />
-    </>)
+    </div>)
 };
 
 
@@ -350,44 +349,42 @@ export const OrigTestList = ({testNames, shortNames, displayNames, prefix, loadi
 
   return (
     <>
-      <div className="container">
-        <div className="text-center" id="showTestListCardBody">
-          <h2 className="h3 text-secondary">Select tests</h2>
-          <Loading loading={loading} />
-          <ul className="list-group mx-auto">
-            <TestList
-              testNames={testNames}
-              shortNames={shortNames}
-              prefix={prefix}
-              displayNames={displayNames}
-              loading={loading}
-              setLoading={setLoading}
-              baseUrls={baseUrls}
-              setSummaries={setSummaries}
-              summaries={summaries}
-            />
-          </ul>
-        </div>
-
-        <ShowGraphsCard
+    <div className="text-center" id="showTestListCardBody">
+      <h2 className="h3 text-secondary">Select tests</h2>
+      <Loading loading={loading} />
+      <ul className="list-group mx-auto">
+        <TestList
           testNames={testNames}
           shortNames={shortNames}
           prefix={prefix}
           displayNames={displayNames}
-          baseUrls={baseUrls}
-          breadcrumbName={prefix}
-          dashboardType={dashboardType}
-          embed={embed}
           loading={loading}
           setLoading={setLoading}
+          baseUrls={baseUrls}
           setSummaries={setSummaries}
           summaries={summaries}
-
         />
-        <div className="text-center mt-4">
-          <Link to="/docs/change-detection" className="btn btn-primary">+ Add test results</Link>
-        </div>
-      </div>
+      </ul>
+    </div>
+
+    <ShowGraphsCard
+      testNames={testNames}
+      shortNames={shortNames}
+      prefix={prefix}
+      displayNames={displayNames}
+      baseUrls={baseUrls}
+      breadcrumbName={prefix}
+      dashboardType={dashboardType}
+      embed={embed}
+      loading={loading}
+      setLoading={setLoading}
+      setSummaries={setSummaries}
+      summaries={summaries}
+
+    />
+    <div className="text-center mt-4">
+      <Link to="/docs/change-detection" className="btn btn-primary">+ Add test results</Link>
+    </div>
     </>
   );
 };
@@ -566,7 +563,7 @@ const ManyResultWithTestname = ({
 
             {!isPublicDashboard(dashboardType) && (
                 <>
-                <div className="row justify-content-center text-center hunter-settings">
+                <div className="row justify-content-center text-center hunter-settings my-4 my-md-7">
                 {dashboardType == dashboardTypes.ORG ?
                   <HunterSettingsOrg orgName={orgName} callback={loadData}/> :
                   <HunterSettings callback={loadData}/>
@@ -574,13 +571,15 @@ const ManyResultWithTestname = ({
                 </div>
                 <div className="row justify-content-center text-center">
                 {(displayData&&displayData[displayData.length-1])?
-                <div className="card col-md-8">
-                <div className="card-header justify-content-center text-center mb-3 mt-5">Publish test results</div>
-                <TestSettings
-                  dashboardType={dashboardType}
-                  testName={testName}
-                  attributes={displayData[displayData.length-1].attributes}
-                />              </div>
+                <HighlightLoginSection maxWidth="1000px">
+                    <h2 className="text-center h3 text-secondary mb-3">Publish test results</h2>
+                    <TestSettings
+                        dashboardType={dashboardType}
+                        testName={testName}
+                        attributes={displayData[displayData.length-1].attributes}
+                    />
+
+                </HighlightLoginSection>
                 :""}
               </div>
               </>
@@ -735,11 +734,10 @@ export const SingleResultWithTestname = ({
   const isPublicDash = isPublicDashboard(dashboardType);
   return (
     <>
-          <div className="d-flex justify-content-center mb-5">
+          <div className="d-flex justify-content-center my-3">
             <Breadcrumb testName={breadcrumbName} baseUrls={baseUrls} />
           </div>
-          <div className="container ">
-            <div className="row justify-content-center">
+            <div className="justify-content-center">
               <ChangePointSummaryTableMain changeData={changePointData} queryStringTextTimestamp={textTimestamp} loading={loading} title={title} metricsData={metricsData} baseUrls={baseUrls} isPublicDashboard={isPublicDash} redraw={redraw}/>
             </div>
 
@@ -761,7 +759,7 @@ export const SingleResultWithTestname = ({
             }
             <GraphNavWidgets layout="top" firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
 
-            <div className="row">
+
               {unique.map((metric, index) => {
                 if(index<firstGraphIndex || index > firstGraphIndex+maxGraphsPerPage/2){
                   return;
@@ -780,11 +778,11 @@ export const SingleResultWithTestname = ({
                   />
                 );
               })}
-            </div>
-            <div className="row">
+
+
             <GraphNavWidgets firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
-            </div>
-          </div>
+
+
     </>
   );
 };
@@ -833,19 +831,21 @@ const TestListEntry = ({ name, longName, baseUrls, testNames, summaries,setSumma
   }, [location]);
 
   return (<div className="d-flex align-items-center gap-3">
-      <Loading loading={loading}/>
 
-        { nameIsGitHubRepo(name) ?
-          <div className="ratio ratio-1x1 rounded-circle overflow-hidden" style={{width: '32px', backgroundColor: '#e5e5e7'}}>
-            {imageUrl ? <img className="img-fluid object-fit-cover" src={imageUrl} alt="GitHub repo avatar" width="32" height="32" title="GitHub repo avatar"/> : ''}
-          </div> : <></>}
+    { nameIsGitHubRepo(name) ?
+      <div className="ratio ratio-1x1 rounded-circle overflow-hidden" style={{width: '32px', backgroundColor: '#e5e5e7'}}>
+        {imageUrl ? <img className="img-fluid object-fit-cover" src={imageUrl} alt="GitHub repo avatar" width="32" height="32" title="GitHub repo avatar"/> : ''}
+      </div> : <></>}
 
       {nameIsGitHubRepo(name) ? name.replace("https://github.com/", "") : name }
+
+      <Loading loading={loading} small={true}/>
+
       <SummarizeChangePoints
         longName={longName}
         summaries={summaries} loading={loading}
       />
-    </div>)
+  </div>);
 };
 
 // Helper function to catch invalid urls that contain non-existent test names

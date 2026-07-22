@@ -153,7 +153,7 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
 
   if (rowData.length === 0) {
     if (loading) {
-      return (<div className="my-4"><Loading loading={loading} text="Loading results..."/></div>);
+      return (<div className="my-4 text-center"><Loading loading={loading} text="Loading results..."/></div>);
     }
 
     return (
@@ -336,8 +336,8 @@ export const ChangePointSummaryTableMain = ({ title, changeData, baseUrls, query
       </div>
       <div
         className="ag-main-cp-table ag-theme-quartz ag-theme-nyrkio pb-5 col-sm-12 col-lg-12 col-xl-12"
-        style={{ width: "100%", height: gridHeightPx, minHeight: "13em", maxHeight: "95vh" }}
-      >
+        style={{ width: "100%", height: gridHeightPx, minHeight: "13em", maxHeight: "95vh" }}>
+        
         <AgGridReact
           rowData={rowData}
           columnDefs={colDefs}
