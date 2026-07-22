@@ -153,7 +153,9 @@ class SsoNyrkioUserDatabase(NyrkioUserDatabase):
             o["repos_url"] = o.get(
                 "repos_url", f"https://api.github.com/orgs/{login}/repos"
             )
-            o["description"] = o.get("description", "Group is created and managed by Nyrkiö.")
+            o["description"] = o.get(
+                "description", "Group is created and managed by Nyrkiö."
+            )
             gh_like_organizations.append(o)
         return gh_like_organizations
 
@@ -2091,8 +2093,9 @@ def filter_out_pr_results(results, pr_commit):
     initial = len(results)
     filtered = list(
         filter(
-            lambda x: "pull_request" not in x
-            or x["attributes"]["git_commit"] == pr_commit,
+            lambda x: (
+                "pull_request" not in x or x["attributes"]["git_commit"] == pr_commit
+            ),
             results,
         )
     )
