@@ -183,6 +183,7 @@ jobs:
       - name: Update PR labels with deployment result
         uses: actions/github-script@v9
         with:
+          github-token: ${{ secrets.GH_DEPLOY_PAT }}
           script: |
             const issue_number = context.payload.pull_request.number;
             const owner = context.repo.owner;
@@ -202,13 +203,17 @@ jobs:
               try {
                 await github.rest.issues.removeLabel({ owner, repo, issue_number, name });
               } catch (e) {
-                if (e.status !== 404) throw e;
+                if (e.status !== 404 && e.status !== 403) throw e;
               }
             }
 
-            await github.rest.issues.addLabels({
-              owner,
-              repo,
-              issue_number,
-              labels: [target],
-            });
+            try {
+              await github.rest.issues.addLabels({
+                owner,
+                repo,
+                issue_number,
+                labels: [target],
+              });
+            } catch (e) {
+              if (e.status !== 403) throw e;
+            }
