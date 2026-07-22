@@ -21,6 +21,13 @@ services:
     hostname: api.nyrkio.local
     depends_on:
       - mongodb
+    develop:
+      watch:
+        - action: rebuild
+          path: backend
+          ignore:
+            - backend/.ruff_cache
+            - backend/.pytest_cache
 
   webhooks:
     build: backend
@@ -34,6 +41,13 @@ services:
     hostname: api.nyrkio.local
     depends_on:
       - mongodb
+    develop:
+      watch:
+        - action: rebuild
+          path: backend
+          ignore:
+            - backend/.ruff_cache
+            - backend/.pytest_cache
 
   worker01:
     build: backend
@@ -47,6 +61,13 @@ services:
     hostname: api.nyrkio.local
     depends_on:
      - mongodb
+    develop:
+      watch:
+        - action: rebuild
+          path: backend
+          ignore:
+            - backend/.ruff_cache
+            - backend/.pytest_cache
 
   nginx:
     build:
@@ -57,3 +78,7 @@ services:
     depends_on:
       - backend
     restart: always
+    develop:
+      watch:
+        - action: rebuild
+          path: nginx

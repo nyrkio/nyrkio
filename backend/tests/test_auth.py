@@ -3,8 +3,8 @@ from datetime import datetime
 import pytest
 
 from backend.auth import auth
-from backend.auth.common import get_user_manager
-from backend.db.db import get_user_db, DBStore, MockDBStrategy
+from backend.auth.common import get_sso_user_manager
+from backend.db.db import get_sso_user_db, DBStore, MockDBStrategy
 
 from fastapi import Depends
 from fastapi_users.exceptions import UserAlreadyExists
@@ -55,45 +55,17 @@ def unasync(ag):
 
 
 def test_sso_groups_created():
-    user_db_dep = Depends(get_user_db())
-    print(vars(user_db_dep))
-    user_db = undepend(user_db_dep)
-    print(user_db)
-    user_manager_dep = Depends(get_user_manager(user_db))
-    print(vars(user_manager_dep))
-    user_manager = undepend(user_manager_dep)
-    print(vars(user_manager))
-    print(user_manager.user_db)
-    print(vars(user_manager.user_db))
-    print(user_manager.user_db.store)
-    print(vars(user_manager.user_db.store))
-
+    # Initialize DBStore singleton BEFORE creating user_db, so that
+    # NyrkioUserDatabase.__init__() can access self.store.db.User
     store = DBStore()
     strategy = MockDBStrategy()
     store.setup(strategy)
-    print(vars(user_manager.user_db.store))
-    # store.strategy = strategy
-    # print(vars(user_manager.user_db.store))
     asyncio.run(store.startup())
-    print(vars(user_manager.user_db.store))
-    # store.strategy = strategy
-    # print(vars(user_manager.user_db.store))
 
-    user_manager.user_db.store = store
-    print(vars(user_manager.user_db.store))
-    print("-----------------------------")
-
-    # user_manager.user_db.store.setup( MockDBStrategy())
-    # user_manager.user_db.store.strategy = MockDBStrategy()
-    # print(vars(user_manager.user_db.store))
-    # user_manager.user_db.store.strategy.connect()
-    # print(vars(user_manager.user_db.store))
-    # asyncio.run(user_manager.user_db.store.startup())
-    # user_manager.user_db.store.setup( MockDBStrategy())
-    # user_manager.user_db.store.strategy = MockDBStrategy()
-    # # asyncio.run(user_manager.user_db.store.strategy.init_db())
-    # print(vars(user_manager.user_db.store))
-    #
+    user_db_dep = Depends(get_sso_user_db())
+    user_db = undepend(user_db_dep)
+    user_manager_dep = Depends(get_sso_user_manager(user_db))
+    user_manager = undepend(user_manager_dep)
 
     db = user_manager.user_db.store.db
     ssoprovider = {
@@ -134,10 +106,6 @@ def test_sso_groups_created():
     }
     asyncio.run(db.sso.insert_one(ssoprovider))
     asyncio.run(db.sso.insert_one(ssoprovider2))
-    sso_config = asyncio.run(
-        user_manager.user_db.store.db.sso.find().to_list()
-    )  # get_sso_config()#oauth_full_domain=oauth_name)
-    print(sso_config)
 
     exp = int(datetime.now().timestamp() + 100)
     fut = user_manager.oauth_callback(
@@ -150,9 +118,7 @@ def test_sso_groups_created():
         associate_by_email=False,
     )
     user = asyncio.run(fut)
-    print(vars(user))
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
-    print(u)
     # {
     #     'email': 'sso_user2@example.com',
     #     'hashed_password': '$2b$12$08Jb.V8vWWg/6jjepS8SW.BIlKoFzdbTYER41bZv7YuZoqPXc1CQe',
@@ -230,13 +196,11 @@ def test_sso_groups_created():
         associate_by_email=False,
     )
     user = asyncio.run(fut)
-    print(vars(user))
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
-    print(u)
     assert u["email"] == "sso_user2@example.com"
-    assert (
-        u["oauth_accounts"][0]["expires_at"] == exp
-    ), "The existing oauth_account entry was refreshed"
+    assert u["oauth_accounts"][0]["expires_at"] == exp, (
+        "The existing oauth_account entry was refreshed"
+    )
     assert (
         u["oauth_accounts"][0]["organizations"][0]["url"]
         == "https://test.example.com/orgs/test_gh_org"
@@ -267,13 +231,11 @@ def test_sso_groups_created():
         associate_by_email=False,
     )
     user = asyncio.run(fut)
-    print(vars(user))
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
-    print(u)
     assert u["email"] == "sso_user@example.com"
-    assert (
-        u["oauth_accounts"][0]["expires_at"] == exp
-    ), "The existing oauth_account entry was refreshed"
+    assert u["oauth_accounts"][0]["expires_at"] == exp, (
+        "The existing oauth_account entry was refreshed"
+    )
     assert (
         u["oauth_accounts"][0]["organizations"][2]["url"]
         == "https://test.example.com/orgs/test_gh_org"
@@ -321,9 +283,7 @@ def test_sso_groups_created():
         associate_by_email=False,
     )
     user = asyncio.run(fut)
-    print(vars(user))
     u = asyncio.run(store.get_user_without_any_fastapi_nonsense(user.id))
-    print(u)
     assert u["email"] == "sso_user2222@example.com"
     assert u["oauth_accounts"][0]["expires_at"] == exp
     assert (
