@@ -138,16 +138,19 @@ export const SignUpPage2 = () => {
   if (showForm === formState.Visible || showForm == formState.Registered) {
     return (
       <div id="signup">
-        <HighlightLoginSection title="Create new account">
-          <h2 className="h3 text-secondary mb-2">Recommended:</h2>
-          <p className="mb-3 mb-md-5">Create account &amp; Install Nyrkiö as a <a href="#github_note" id="github_note_text">GitHub&nbsp;app<sup>*</sup></a>:</p>
-          <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubInstall}>
-            <Icon name="github-circle"/>
-            Install Nyrkiö GitHub app &nbsp;
-          </button>
+        <div className="mb-6 mb-md-8" id="github_note_text">
+          <HighlightLoginSection title="Create new account">
+            <h2 className="h3 text-secondary mb-3 mb-md-5">Recommended:</h2>
+            <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubInstall}>
+              <Icon name="github-circle"/>
+              Install Nyrkiö GitHub app &nbsp;
+            </button>
+            <p className="mt-4 fw-normal">Create account &amp; Install Nyrkiö as a <a href="#github_note">GitHub&nbsp;app<sup>*</sup></a>:</p>
+          </HighlightLoginSection>
+        </div>
 
-          <hr className="my-4 my-md-5"/>
 
+        <HighlightLoginSection>
           <h2 className="h3 text-secondary mb-2">Create account without GitHub integration:</h2>
           <form onSubmit={e => nop()}>
             <div className="mb-3 text-start">

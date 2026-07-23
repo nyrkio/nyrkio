@@ -4,6 +4,7 @@ import posthog from "posthog-js";
 import { Icon } from './Icon.jsx';
 import { PasswordInput } from "./PasswordInput/PasswordInput.jsx";
 import { HighlightLoginSection } from "./HighlightLoginSection.jsx";
+import gh_permissions_img from "../static/github_permissions.png";
 
 export const Login = ({ loggedIn, setLoggedIn }) => {
   const [username, setUsername] = useState();
@@ -169,17 +170,22 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
   window.addEventListener("load", ssoAutoSubmit);
 
 
-  return (
-    <HighlightLoginSection title="Log in">
-      <h2 className="h3 text-secondary mb-3 mb-md-5">Recommended:</h2>
-      <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubSubmit}>
-        <Icon name="github-circle"/>
-        Install Nyrkio Github app
-      </button>
+  return (<>
+    <div className="mb-6 mb-md-8" id="github_note_text">
+      <HighlightLoginSection title="Log in">
+        <h2 className="h3 text-secondary mb-3 mb-md-5">Recommended:</h2>
+        <button className="btn btn-primary d-inline-flex align-items-center justify-content-center gap-2 w-100 w-md-auto" onClick={githubSubmit}>
+          <Icon name="github-circle"/>
+          Log in via Github
+        </button>
+        <p className="mt-4 fw-normal">
+          If this is your first time using Nyrkiö,<br/>the <a href="#github_note">GitHub App *</a> will be installed during this step.
+        </p>
+      </HighlightLoginSection>
+    </div>
 
-      <hr className="my-4 my-md-5"/>
-
-      <h2 className="h3 text-secondary mb-2">Log in</h2>
+    <HighlightLoginSection>
+      <h2 className="h3 text-secondary mb-2">More log in options:</h2>
       <div className="text-start mb-4 mb-md-5">
         <label htmlFor="oauth_my_domain" className="form-label">Domain</label>
         <div className="input-group">
@@ -234,7 +240,20 @@ export const Login = ({ loggedIn, setLoggedIn }) => {
       <p className="mb-1 fw-normal">Don't have an account? <a href="/signup">Create&nbsp;new&nbsp;account</a></p>
       <p className="mb-0 fw-normal">Have an account but forgot the password? <a href="/forgot-password">Reset&nbsp;password&nbsp;here</a></p>
     </HighlightLoginSection>
-  );
+
+    <div className="container">
+      <div id="github_note" className="text-center mt-5 mt-md-7 w-100 mx-auto" style={{maxWidth: "480px"}}>
+        <p className="text-secondary text-start">*) GitHub will ask to grant Nyrkiö the following permissions:</p>
+        <div className="p-3 border border-secondary rounded-2 shadow d-inline-block">
+          <img src={gh_permissions_img} alt="Github permissions dialog" className="img-fluid"/>
+        </div>
+
+        <p className="mt-4 fw-normal">You can choose to not grant any one of those permissions.
+          Nyrkiö&nbsp;will continue to work without the particular feature. <a href="#github_note_text">↩</a>
+        </p>
+      </div>
+    </div>
+  </>);
 };
 
 const logoutTasks = async ({setLoggedIn}) => {
