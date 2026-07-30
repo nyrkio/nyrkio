@@ -759,7 +759,7 @@ export const SingleResultWithTestname = ({
             }
             <GraphNavWidgets layout="top" firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
 
-
+            <div>
               {unique.map((metric, index) => {
                 if(index<firstGraphIndex || index > firstGraphIndex+maxGraphsPerPage/2){
                   return;
@@ -778,7 +778,7 @@ export const SingleResultWithTestname = ({
                   />
                 );
               })}
-
+              </div>
 
             <GraphNavWidgets firstGraphIndex={firstGraphIndex} setFirstGraphIndex={setFirstGraphIndex} maxGraphsPerPage={maxGraphsPerPage} numGraphs={unique.length} />
 
