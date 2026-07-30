@@ -72,11 +72,11 @@ export const DrawLineChart = ({
     return value_map;
   };
   const getLayout = (layout) => {
-    if(layout=="overview") return {width:"100%", maxWidth: "100%", outerWidth: "25%", height:"50%", maxHeight:"50%"};
+    if(layout=="overview") return {width:"100%", maxWidth: "100%", outerWidth: "25%", height:"50%", minHeight: "200px",maxHeight:"25vh"};
     if(layout=="sparklines") return {width:"100%", height:"100px", maxHeight:"100px"};
-    if(layout=="2x1") return {width: "100%", minWidth: "100%", height: "70%", maxHeight: "70%"};
-    if(layout=="1x1") return {width: "100%", height: "90%", maxHeight: "90%"};
-    return {width: "100%", height: "80%", maxHeight: "80%"};
+    if(layout=="2x1") return {width: "100%", minWidth: "100%", height: "70%", minHeight: "200px", maxHeight: "40vh"};
+    if(layout=="1x1") return {width: "100%", height: "90%", minHeight: "400px", maxHeight: "90vh"};
+    return {width: "100%", height: "80%", minHeight: "360px", maxHeight: "80vh"};
   };
   const layout = getLayout(graphSize);
 
@@ -512,7 +512,8 @@ export const DrawLineChart = ({
         timestamp={modalData}
         setTimestamp={setModalData}
       />
-      <div className="outer-chart-wrapper" id={metricName} style={{maxWidth:layout.outerWidth}}>
+    
+      <div className={"outer-chart-wrapper" + (graphSize === "overview" ? " d-inline-block" : "")} id={metricName} style={{maxWidth:layout.outerWidth}}>
 
       <div className="chart-wrapper mb-4" style={layout}>
         <div className="text-center">
