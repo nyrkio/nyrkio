@@ -514,7 +514,6 @@ export const DrawLineChart = ({
       />
     
       <div className={"outer-chart-wrapper" + (graphSize === "overview" ? " d-inline-block" : "")} id={metricName} style={{maxWidth:layout.outerWidth}}>
-
       <div className="chart-wrapper mb-4" style={layout}>
         <div className="text-center">
           <a href={metricNameWithHash}>{metricName}</a>{ " "}
