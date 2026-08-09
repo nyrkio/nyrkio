@@ -172,8 +172,22 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@staging.nyrkio.com"
           docker context use $ENV
 
+          # Check available disk space on remote host
+          df_pct=$(ssh staging.nyrkio.com "df / | awk 'NR==2 {print substr(\$5,1,length(\$5)-1)}'")
+          if [ "$df_pct" -gt 90 ]; then
+            echo "ERROR: disk usage ${df_pct}% exceeds 90% threshold"
+            exit 1
+          fi
+          echo "Disk OK: ${df_pct}% used"
+
+          # Pull all images to ensure we have fresh ones (fixes race with docker-images job)
+          docker --context $ENV compose -f compose.yml pull
+
           export RESTART_POLICY=unless-stopped
           docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+
+          # Prune old images to reclaim space for next deploy
+          docker --context $ENV system prune -af --volumes -f
 
   label-result:
     needs: [authorize, docker-images, deployment]
