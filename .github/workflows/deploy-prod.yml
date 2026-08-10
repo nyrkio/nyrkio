@@ -133,7 +133,7 @@ jobs:
           docker context use $ENV
 
           # Check available disk space on remote host
-          df_pct=$(ssh "$SSH_USERnyrkio.com" "df / | awk 'NR==2 {print substr(\$5,1,length(\$5)-1)}'")
+          df_pct=$(ssh "$SSH_USER@nyrkio.com" "df / | awk 'NR==2 {print substr(\$5,1,length(\$5)-1)}'")
           if [ "$df_pct" -gt 90 ]; then
             echo "ERROR: disk usage ${df_pct}% exceeds 90% threshold"
             exit 1
