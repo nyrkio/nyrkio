@@ -16,6 +16,7 @@ env:
   STAGING_DEPLOY_REQUEST_LABEL: deploy:staging
   STAGING_DEPLOY_SUCCESS_LABEL: deployed:staging
   STAGING_DEPLOY_FAILURE_LABEL: deploy-failed:staging
+  UI_DOMAIN: ui-staging.nyrkio.com
 
 jobs:
   authorize:
@@ -68,6 +69,13 @@ jobs:
           path: p
           token: ${{ secrets.CHECKOUTP }}
 
+      - name: Check out nyrkio-ui
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-ui
+          path: ui
+          token: ${{ secrets.CHECKOUTP }}
+
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
         with:
@@ -93,6 +101,8 @@ jobs:
           SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
           NYRKIO_GH_RUNNER_SSH: ${{ secrets.NYRKIO_GH_RUNNER_SSH }}
+          UI_SSL_CERT_CHAIN: ${{ secrets.UI_SSL_CERT_CHAIN }}
+          UI_SSL_SECRET_KEY: ${{ secrets.UI_SSL_SECRET_KEY }}
           ENV: staging
         run: |
           mv p/frontend/src/static/* p/
@@ -105,13 +115,19 @@ jobs:
           if [ -n "${NYRKIO_GH_RUNNER_SSH:-}" ]; then
             echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
           fi
+          # UI SSL certs
+          echo "$UI_SSL_CERT_CHAIN" > ui_fullchain.crt
+          echo "$UI_SSL_SECRET_KEY" > ui_privkey.key
           pwd
           ls -a
-
-          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com
+          echo "Build frontend images..."
+          docker compose -f ui/compose.yml -f ui/docker-compose.ui.yml build --progress=plain --no-cache --build-arg NYRKIO_API_URL=https://staging.nyrkio.com
+          echo "Build backend images..."
+          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com --build-arg UI_DOMAIN=$UI_DOMAIN
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/staging/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/staging/backend:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nyrkio/staging/ui:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:
@@ -130,6 +146,20 @@ jobs:
           git submodule sync --recursive
           git submodule update --init --recursive
           git submodule status --recursive
+
+      - name: Check out nyrkio-proprietary
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-proprietary
+          path: p
+          token: ${{ secrets.CHECKOUTP }}
+
+      - name: Check out nyrkio-ui
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-ui
+          path: ui
+          token: ${{ secrets.CHECKOUTP }}
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v6
@@ -180,11 +210,11 @@ jobs:
           fi
           echo "Disk OK: ${df_pct}% used"
 
-          # Pull all images to ensure we have fresh ones (fixes race with docker-images job)
-          docker --context $ENV compose -f compose.yml pull
+          # Pull all images (main + UI)
+          docker --context $ENV compose -f compose.yml -f ui/compose.yml -f ui/docker-compose.ui.yml pull
 
           export RESTART_POLICY=unless-stopped
-          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+          docker --context $ENV compose -f compose.yml -f ui/compose.yml -f ui/docker-compose.ui.yml up --no-build -d nginx backend webhooks worker01 ui
 
           # Prune old images to reclaim space for next deploy
           docker --context $ENV system prune -af --volumes -f
