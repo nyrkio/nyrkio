@@ -16,7 +16,7 @@
 
 .user-card__image {
   --bs-aspect-ratio: calc(1 / 1 * 100%);
-  background: #FFFDE5;
+  background: #b1b1b1;
 
   @include media-breakpoint-up(sm) {
     --bs-aspect-ratio: calc(3 / 4 * 100%);
