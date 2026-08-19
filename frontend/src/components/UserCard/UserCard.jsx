@@ -19,7 +19,11 @@ export const UserCard = ({ profile = {} }) => {
       <div className="user-card__image rounded-2 overflow-hidden ratio ratio-2x3">
         {image?.src ? (
           <img
-            className="img-fluid object-fit-cover"
+            className={
+              image.src.endsWith(".svg")
+                ? "img-fluid object-fit-contain p-4"
+                : "img-fluid object-fit-cover"
+            }
             src={image.src}
             alt={image.alt || (name ? `${name} photo` : "User image")}
             width={image.width}

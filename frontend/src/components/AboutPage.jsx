@@ -1,7 +1,5 @@
 import { HenrikCard } from "./people/Henrik.jsx";
-import { SannaCard } from "./people/Sanna.jsx";
-import { JoeCard } from "./people/Joe.jsx";
-import { MattCard } from "./people/Matt.jsx";
+import { GolemsCard } from "./people/Golems.jsx";
 import { YoutubeEmbed } from "./Youtube.jsx";
 import imgGHA from "../static/Nyrkio_GHA.png";
 
@@ -52,13 +50,7 @@ export const AboutPage = () => {
               <HenrikCard />
             </div>
             <div className="col-xxxl-6  mb-xxxl-6">
-              <SannaCard />
-            </div>
-            <div className="col-xxxl-6">
-              <JoeCard />
-            </div>
-            <div className="col-xxxl-6">
-              <MattCard/>
+              <GolemsCard />
             </div>
           </div>
         </div>
