@@ -354,6 +354,19 @@ rm -f etc/.backend.pid etc/.frontend.pid
 python3 etc/nyrkio_backend.py start
 ```
 
+## Extra tools
+
+## Installation
+
+pip install -r requirements.txt
+
+### add_user.py
+
+Adds a user to the MongoDB backend
+
+Usage: python add_user.py --email='foo@bar.com' --password='foobar'
+
+
 ## Development Notes
 
 ### Script Design Principles
