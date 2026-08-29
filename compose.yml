@@ -54,6 +54,7 @@ services:
       dockerfile: ./nginx/Dockerfile
       args:
         - DOMAIN
+        - UI_DOMAIN
     networks:
       vpcbr:
         ipv4_address: 10.18.0.5
