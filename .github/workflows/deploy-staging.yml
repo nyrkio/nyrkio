@@ -49,6 +49,8 @@ jobs:
     if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
     steps:
       - name: Checkout this repo (nyrkio)
         uses: actions/checkout@v6
@@ -134,6 +136,8 @@ jobs:
     if: github.event.action == 'labeled' && github.event.label.name == 'deploy:staging' && needs.authorize.outputs.allowed == 'true'
     runs-on: ubuntu-latest
     environment: staging
+    env:
+      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
     steps:
       - name: Checkout this repo (nyrkio)
         uses: actions/checkout@v6
