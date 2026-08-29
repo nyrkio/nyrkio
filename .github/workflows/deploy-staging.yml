@@ -16,7 +16,6 @@ env:
   STAGING_DEPLOY_REQUEST_LABEL: deploy:staging
   STAGING_DEPLOY_SUCCESS_LABEL: deployed:staging
   STAGING_DEPLOY_FAILURE_LABEL: deploy-failed:staging
-  UI_DOMAIN: ui-staging.nyrkio.com
 
 jobs:
   authorize:
