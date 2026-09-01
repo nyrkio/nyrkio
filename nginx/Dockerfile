@@ -25,6 +25,7 @@ ARG UI_DOMAIN
 ENV UI_DOMAIN=$UI_DOMAIN
 RUN envsubst '$DOMAIN $UI_DOMAIN' < /etc/nginx/conf.d/nginx.conf.template > /etc/nginx/conf.d/nginx.conf
 RUN cat /etc/nginx/conf.d/nginx.conf
+COPY nginx/.htpasswd /etc/nginx/.htpasswd
 
 RUN mkdir -p /etc/nginx/ssl/live/$DOMAIN/
 COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
