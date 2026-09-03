@@ -30,8 +30,3 @@ COPY nginx/.htpasswd /etc/nginx/.htpasswd
 RUN mkdir -p /etc/nginx/ssl/live/$DOMAIN/
 COPY nyrkio_com_chain.crt /etc/nginx/ssl/live/$DOMAIN/fullchain.crt
 COPY nyrkio.com.key       /etc/nginx/ssl/live/$DOMAIN/privkey.key
-
-# UI subdomain SSL certs
-RUN mkdir -p /etc/nginx/ssl/live/$UI_DOMAIN/
-COPY ui_fullchain.crt /etc/nginx/ssl/live/$UI_DOMAIN/fullchain.crt
-COPY ui_privkey.key /etc/nginx/ssl/live/$UI_DOMAIN/privkey.key

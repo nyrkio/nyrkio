@@ -102,8 +102,6 @@ jobs:
           SSL_CERT_CHAIN: ${{ secrets.SSL_CERT_CHAIN }}
           SSL_SECRET_KEY: ${{ secrets.SSL_SECRET_KEY }}
           NYRKIO_GH_RUNNER_SSH: ${{ secrets.NYRKIO_GH_RUNNER_SSH }}
-          UI_SSL_CERT_CHAIN: ${{ secrets.UI_SSL_CERT_CHAIN }}
-          UI_SSL_SECRET_KEY: ${{ secrets.UI_SSL_SECRET_KEY }}
           ENV: staging
         run: |
           mv p/frontend/src/static/* p/
@@ -116,13 +114,10 @@ jobs:
           if [ -n "${NYRKIO_GH_RUNNER_SSH:-}" ]; then
             echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
           fi
-          # UI SSL certs
-          echo "$UI_SSL_CERT_CHAIN" > ui_fullchain.crt
-          echo "$UI_SSL_SECRET_KEY" > ui_privkey.key
           pwd
           ls -a
           echo "Build frontend images..."
-          docker compose -f ui/compose.yml -f ui/docker-compose.ui.yml build --progress=plain --no-cache --build-arg NYRKIO_API_URL=https://staging.nyrkio.com
+          docker compose -f ui/compose.yml -f ui/docker-compose.ui.yml build --progress=plain --no-cache
           echo "Build backend images..."
           docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=staging.nyrkio.com --build-arg UI_DOMAIN=$UI_DOMAIN
           echo "Pushing image to ECR..."
