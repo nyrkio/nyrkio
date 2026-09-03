@@ -7,6 +7,8 @@ jobs:
   docker-images:
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
     if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     steps:
       - name: Checkout this repo (nyrkio)
@@ -25,6 +27,13 @@ jobs:
         with:
           repository: nyrkio/nyrkio-proprietary
           path: p
+          token: ${{ secrets.CHECKOUTP }}
+
+      - name: Check out nyrkio-ui
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-ui
+          path: ui
           token: ${{ secrets.CHECKOUTP }}
 
       - name: Configure AWS credentials
@@ -64,22 +73,34 @@ jobs:
           echo "$NYRKIO_GH_RUNNER_SSH" > backend/keys/nyrkio-gh-runner-user
           pwd
           ls -a
-
-          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=nyrkio.com
+          echo "Build frontend images..."
+          docker compose -f ui/compose.yml -f ui/docker-compose.ui.yml build --progress=plain --no-cache
+          echo "Build backend images..."
+          docker compose -f compose.yml build --progress=plain --no-cache --build-arg DOMAIN=nyrkio.com --build-arg UI_DOMAIN=$UI_DOMAIN
           echo "Pushing image to ECR..."
           docker push $ECR_REGISTRY/nyrkio/prod/nginx:$IMAGE_TAG
           docker push $ECR_REGISTRY/nyrkio/prod/backend:$IMAGE_TAG
+          docker push $ECR_REGISTRY/nyrkio/prod/ui:$IMAGE_TAG
           echo "image=$ECR_REGISTRY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
   deployment:
     needs: docker-images
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
     if: "!contains(github.event.head_commit.message, '[skip deploy]')"
     steps:
       - uses: actions/checkout@v6
         with:
           submodules: recursive
+
+      - name: Check out nyrkio-ui
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-ui
+          path: ui
+          token: ${{ secrets.CHECKOUTP }}
 
       - name: Sync submodules
         run: |
@@ -141,9 +162,9 @@ jobs:
           echo "Disk OK: ${df_pct}% used"
 
           # Pull all images to ensure we have fresh ones (fixes race with docker-images job)
-          docker --context $ENV compose -f compose.yml pull
+          docker --context $ENV compose -f compose.yml -f ui/compose.yml -f ui/docker-compose.ui.yml pull
 
-          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+          docker --context $ENV compose -f compose.yml -f ui/compose.yml -f ui/docker-compose.ui.yml up --no-build -d nginx backend webhooks worker01 ui
 
           # Prune old images to reclaim space for next deploy
           docker --context $ENV system prune -af --volumes -f
