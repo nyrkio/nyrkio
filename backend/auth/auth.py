@@ -80,16 +80,45 @@ COOKIE_SECURE = (
     else SERVER_HOSTNAME not in {"localhost", "127.0.0.1"}
 )
 
-_cookie_domain_env = os.environ.get("COOKIE_DOMAIN")
-COOKIE_DOMAIN = (
-    _cookie_domain_env
-    if _cookie_domain_env is not None
-    else None
-    if SERVER_HOSTNAME in {"localhost", "127.0.0.1"}
-    else SERVER_HOSTNAME
+# Host-only by default (no Domain attribute -> not shared with subdomains, e.g.
+# beta.staging.nyrkio.com no longer inherits a session from staging.nyrkio.com).
+# Set COOKIE_DOMAIN explicitly to opt back into cross-subdomain SSO for an environment.
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN") or None
+
+# ponytail: legacy cross-subdomain auth_cookie cleanup shim. Before the change above,
+# COOKIE_DOMAIN defaulted to SERVER_HOSTNAME (e.g. "nyrkio.com"), so browsers may still
+# hold an auth_cookie scoped to that wide domain. The new host-only COOKIE_DOMAIN can't
+# clear it via a single Set-Cookie (RFC 6265 domain-value must match exactly), so logout
+# below also clears the old wide-scoped cookie explicitly.
+# REMOVE: this constant + _DualDomainCookieTransport, and switch cookie_transport back
+# to plain CookieTransport(...), once no browsers still hold a
+# Domain=<LEGACY_COOKIE_DOMAIN> auth_cookie (e.g. after rotating SECRET_KEY, or after
+# enough time that all such old sessions are gone).
+LEGACY_COOKIE_DOMAIN = (
+    None if SERVER_HOSTNAME in {"localhost", "127.0.0.1"} else SERVER_HOSTNAME
 )
 
-cookie_transport = CookieTransport(
+
+class _DualDomainCookieTransport(CookieTransport):
+    """ponytail: see LEGACY_COOKIE_DOMAIN above for removal condition."""
+
+    async def get_logout_response(self):
+        response = await super().get_logout_response()
+        if LEGACY_COOKIE_DOMAIN:
+            response.set_cookie(
+                COOKIE_NAME,
+                "",
+                max_age=0,
+                path="/",
+                domain=LEGACY_COOKIE_DOMAIN,
+                secure=COOKIE_SECURE,
+                httponly=True,
+                samesite="lax",
+            )
+        return response
+
+
+cookie_transport = _DualDomainCookieTransport(
     cookie_name=COOKIE_NAME,
     cookie_domain=COOKIE_DOMAIN,
     cookie_secure=COOKIE_SECURE,
