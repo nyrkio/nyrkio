@@ -76,7 +76,7 @@ test.describe("Authentication Integration Tests", () => {
       await page.waitForURL("/", { timeout: 10000 });
 
       const cookies = await page.context().cookies();
-      expect(cookies.some((c) => c.name === "auth_cookie")).toBe(true);
+      expect(cookies.some((c) => c.name === "auth_session")).toBe(true);
 
       const authResponse = await page.request.get(
         `${BACKEND_BASE_URL}/api/v0/auth/authenticated-route`,

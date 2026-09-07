@@ -22,6 +22,38 @@ def test_invalid_user_cannot_login(unauthenticated_client):
     assert response.status_code == 400
 
 
+def test_cookie_login_uses_versioned_cookie_name(unauthenticated_client):
+    """The session cookie is "auth_session"; legacy "auth_cookie" entries
+    (which may be scoped to wide domains) must be ignored, even if valid."""
+    from backend.api.api import app
+    from starlette.testclient import TestClient
+
+    response = unauthenticated_client.post(
+        "/api/v0/auth/cookie/login",
+        data={"username": "john@foo.com", "password": "foo"},
+    )
+    assert response.status_code == 204
+    set_cookie_names = [
+        c.split(";")[0].split("=")[0] for c in response.headers.get_list("set-cookie")
+    ]
+    assert set_cookie_names == ["auth_session"]
+
+    # The new cookie authenticates...
+    assert (
+        unauthenticated_client.get("/api/v0/auth/authenticated-route").status_code
+        == 200
+    )
+
+    # ...and the legacy name does not, even carrying the same valid token.
+    token = unauthenticated_client.cookies["auth_session"]
+    with TestClient(app) as legacy_client:
+        response = legacy_client.get(
+            "/api/v0/auth/authenticated-route",
+            headers={"Cookie": f"auth_cookie={token}"},
+        )
+    assert response.status_code == 401
+
+
 def test_create_new_user(unauthenticated_client):
     email = "newuser@foo.com"
     password = "somepass"
