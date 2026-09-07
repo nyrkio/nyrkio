@@ -182,7 +182,7 @@ async def csrf_middleware(request: Request, call_next):
     if request.method in {"GET", "HEAD", "OPTIONS"}:
         return await call_next(request)
 
-    cookie_name = getattr(auth, "COOKIE_NAME", "auth_cookie")
+    cookie_name = getattr(auth, "COOKIE_NAME", "auth_session")
     if cookie_name in request.cookies:
         origin = request.headers.get("origin")
         referer = request.headers.get("referer")
