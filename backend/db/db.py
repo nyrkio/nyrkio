@@ -898,6 +898,39 @@ class DBStore(object):
         # print(results)
         return separate_meta(results)
 
+    async def get_results_bulk(
+        self, id: Any, test_names: List[str], limit: int = None
+    ) -> Dict[str, List[Dict]]:
+        """
+        New, additive helper: fetch full (or last `limit`) history for many
+        tests in a single aggregation, grouped by test_name. Does not touch
+        get_results/get_test_names — used only by the new bulk endpoints.
+        """
+        if isinstance(id, str):
+            id = ObjectId(id)
+        test_results = self.db.test_results
+        pipeline = [
+            {
+                "$match": {
+                    "user_id": id,
+                    "test_name": {"$in": test_names},
+                    "pull_request": {"$exists": False},
+                }
+            },
+            {"$project": {"_id": 0, "user_id": 0, "version": 0, "meta": 0}},
+            {"$sort": {"timestamp": 1}},
+            {"$group": {"_id": "$test_name", "docs": {"$push": "$$ROOT"}}},
+        ]
+        if limit:
+            pipeline.append({"$project": {"docs": {"$slice": ["$docs", -limit]}}})
+        rows = await test_results.aggregate(pipeline).to_list(None)
+        return {
+            row["_id"]: [
+                {k: v for k, v in d.items() if k != "test_name"} for d in row["docs"]
+            ]
+            for row in rows
+        }
+
     async def get_test_names(self, id: Any = None, test_name_prefix: str = None) -> Any:
         """
         Get a list of all test names for a given user. If id is None then

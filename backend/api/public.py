@@ -1,9 +1,10 @@
-from typing import Dict, List, Union, Tuple, Optional
+from typing import Any, Dict, List, Union, Tuple, Optional
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi_users import models, BaseUserManager
 from pydantic import BaseModel
 
 from backend.auth.common import get_user_manager
+from backend.api.model import BulkTestsRequest
 from backend.db.db import DBStore
 from backend.db.list_changes import change_points_per_commit
 from backend.api.pull_request import _get_pr_result, _get_pr_changes
@@ -162,6 +163,51 @@ async def get_result(test_name: str) -> List[Dict]:
 
     data, _ = await store.get_results(id, test_name)
     return data
+
+
+def _group_public_tests_by_owner(
+    by_public_name: Dict[str, Dict], public_names: List[str]
+) -> Dict[Any, Dict[str, str]]:
+    """user_id -> {internal_name: public_name}, for a list of public test names."""
+    groups: Dict[Any, Dict[str, str]] = {}
+    for public_name in public_names:
+        entry = by_public_name.get(public_name)
+        if entry:
+            groups.setdefault(entry["user_id"], {})[entry["test_name"]] = public_name
+    return groups
+
+
+@public_router.post("/results/bulk")
+async def get_results_bulk(body: BulkTestsRequest) -> Dict[str, List[Dict]]:
+    store = DBStore()
+    all_public, _ = await store.get_public_results()
+    by_public_name = {build_public_test_name(r): r for r in all_public}
+    groups = _group_public_tests_by_owner(by_public_name, body.tests)
+
+    out: Dict[str, List[Dict]] = {}
+    for user_id, name_map in groups.items():
+        bulk = await store.get_results_bulk(user_id, list(name_map), limit=body.limit)
+        for internal_name, docs in bulk.items():
+            out[name_map[internal_name]] = docs
+    return out
+
+
+@public_router.post("/results/changes/bulk")
+async def get_changes_bulk(body: BulkTestsRequest) -> Dict[str, Any]:
+    """Change points for many public tests in one request. See the own-test
+    variant in api.py for why this is POST+bulk instead of one GET per test."""
+    store = DBStore()
+    from backend.api.api import calc_changes
+
+    all_public, _ = await store.get_public_results()
+    by_public_name = {build_public_test_name(r): r for r in all_public}
+    groups = _group_public_tests_by_owner(by_public_name, body.tests)
+
+    out: Dict[str, Any] = {}
+    for user_id, name_map in groups.items():
+        for internal_name, public_name in name_map.items():
+            out[public_name] = await calc_changes(internal_name, user_id)
+    return out
 
 
 def _validate_cph_user(cph_token_tup, repo):
