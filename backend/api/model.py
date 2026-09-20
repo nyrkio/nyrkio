@@ -31,3 +31,14 @@ class TestResult(BaseModel):
 
 class TestResults(RootModel[Any]):
     root: List[TestResult]
+
+
+class BulkTestsRequest(BaseModel):
+    """
+    Body for the bulk results/changes endpoints. POST (not GET+query) because
+    a full tree selection can be hundreds of test names — too long for a
+    query string / request-line header limit.
+    """
+
+    tests: List[str]
+    limit: Optional[int] = None

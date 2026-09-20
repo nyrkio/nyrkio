@@ -1,10 +1,10 @@
 import logging
-from typing import Dict, List, Union
+from typing import Any, Dict, List, Union
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from backend.api.config import TestConfigList
-from backend.api.model import TestResults
+from backend.api.model import BulkTestsRequest, TestResults
 from backend.api.public import build_public_test_name
 from backend.api.user import UserConfig, validate_config
 from backend.auth import auth
@@ -177,6 +177,46 @@ async def results(
 
     results, _ = await store.get_results(org["id"], test_name)
     return results if results else []
+
+
+@org_router.post("/results/bulk")
+async def get_results_bulk(
+    body: BulkTestsRequest, user: User = Depends(auth.current_active_user)
+) -> Dict[str, List[Dict]]:
+    user_orgs = get_user_orgs(user)
+    store = DBStore()
+    by_org: Dict[str, List[str]] = {}
+    for test_name in body.tests:
+        by_org.setdefault(test_name.split("/")[0], []).append(test_name)
+
+    out: Dict[str, List[Dict]] = {}
+    for org_slug, org_test_names in by_org.items():
+        org = get_org_with_raise(user_orgs, org_slug)
+        out.update(
+            await store.get_results_bulk(org["id"], org_test_names, limit=body.limit)
+        )
+    return out
+
+
+@org_router.post("/results/changes/bulk")
+async def get_changes_bulk(
+    body: BulkTestsRequest, user: User = Depends(auth.current_active_user)
+) -> Dict[str, Any]:
+    """Change points for many org-visible tests in one request. See the own-test
+    variant in api.py for why this is POST+bulk instead of one GET per test."""
+    user_orgs = get_user_orgs(user)
+    from backend.api.api import calc_changes
+
+    by_org: Dict[str, List[str]] = {}
+    for test_name in body.tests:
+        by_org.setdefault(test_name.split("/")[0], []).append(test_name)
+
+    out: Dict[str, Any] = {}
+    for org_slug, org_test_names in by_org.items():
+        org = get_org_with_raise(user_orgs, org_slug)
+        for test_name in org_test_names:
+            out[test_name] = await calc_changes(test_name, org["id"])
+    return out
 
 
 @org_router.post("/result/{test_name:path}")

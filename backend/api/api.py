@@ -1,6 +1,6 @@
 # Copyright (c) 2024, Nyrkiö Oy
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Set, Union
+from typing import Any, Dict, List, Set, Union
 import logging
 import sys
 import os
@@ -17,7 +17,7 @@ from backend.api.admin import admin_router
 from backend.api.billing import billing_router
 from backend.api.changes import calc_changes
 from backend.api.config import config_router
-from backend.api.model import TestResults
+from backend.api.model import BulkTestsRequest, TestResults
 from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.pull_request import pr_router
@@ -396,6 +396,31 @@ async def get_result(
     results, _ = await store.get_results(user.id, test_name)
 
     return results
+
+
+@api_router.post("/results/bulk")
+async def get_results_bulk(
+    body: BulkTestsRequest, user: User = Depends(auth.current_active_user)
+) -> Dict[str, List[Dict]]:
+    store = DBStore()
+    return await store.get_results_bulk(user.id, body.tests, limit=body.limit)
+
+
+@api_router.post("/results/changes/bulk")
+async def get_changes_bulk(
+    body: BulkTestsRequest, user: User = Depends(auth.current_active_user)
+) -> Dict[str, Any]:
+    """
+    Change points for many tests in one request. Same calc_changes() as the
+    single-test /result/{test_name}/changes endpoint, just looped in-process
+    instead of one HTTP round-trip per test — avoids the client having to
+    fire off a request per selected test (hundreds, for a full tree selection).
+    Browse-only: no notifications (calc_changes defaults notifiers to None).
+    """
+    out: Dict[str, Any] = {}
+    for test_name in body.tests:
+        out[test_name] = await calc_changes(test_name, user.id)
+    return out
 
 
 @api_router.delete("/result/{test_name:path}")
