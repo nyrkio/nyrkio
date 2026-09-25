@@ -5,7 +5,7 @@ CI_DOCKERFILE ?= Dockerfile.ci
 EXTRA_INFO ?= /repo/extra_info.json
 PERF_COMPOSE_PROJECT ?= nyrkio-perf
 PERF_NETWORK ?= $(PERF_COMPOSE_PROJECT)_default
-TEST_HOST ?= http://nginx
+TEST_HOST ?= http://caddy
 
 CI_RUN = docker run --rm -v $(CURDIR):/repo -w /repo
 CI_RUN_PERF = docker run --rm --network $(PERF_NETWORK) -v $(CURDIR):/repo -w /repo

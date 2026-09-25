@@ -171,7 +171,7 @@ When started, the Docker stack runs:
 
 - **Backend API** - `http://localhost:8000`
 - **Webhooks** - `http://localhost:8080` (GitHub webhook handler)
-- **Nginx** - `http://localhost:80` (reverse proxy)
+- **Caddy** - `http://localhost:80` (reverse proxy)
 - **MongoDB** - `localhost:27017`
 
 ### Features
@@ -211,7 +211,7 @@ Uses `compose.dev.yml` in the repository root. This includes:
 - Backend service
 - Webhooks service (same image as backend, different entrypoint)
 - MongoDB service
-- Nginx reverse proxy
+- Caddy reverse proxy
 
 ## test_management_scripts.py
 

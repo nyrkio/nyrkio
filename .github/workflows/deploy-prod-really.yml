@@ -7,6 +7,10 @@ jobs:
   deployment:
     runs-on: ubuntu-latest
     environment: prod
+    env:
+      DOMAIN: nyrkio.com
+      UI_DOMAIN: ${{ vars.UI_DOMAIN }}
+      UI_BASIC_AUTH_HASH: ${{ secrets.UI_BASIC_AUTH_HASH }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -63,4 +67,4 @@ jobs:
           docker context create $ENV --docker "host=ssh://$SSH_USER@nyrkio.com"
           docker context use $ENV
 
-          docker --context $ENV compose -f compose.yml up --no-build -d nginx backend webhooks worker01
+          docker --context $ENV compose -f compose.yml up --no-build -d --remove-orphans caddy backend webhooks worker01

@@ -1,0 +1,52 @@
+# *.localhost names get certs from Caddy's local CA (no Let's Encrypt). Override with DOMAIN / UI_DOMAIN.
+
+(api_routes) {
+	@webhooks path /api/v0/github/webhook /api/v0/github/marketplace-events
+	handle @webhooks {
+		reverse_proxy webhooks:8080
+	}
+	handle /api/v0/results/precompute {
+		reverse_proxy worker01:8081
+	}
+	handle /api/* {
+		header Access-Control-Allow-Origin "{http.request.header.Origin}"
+		header Access-Control-Allow-Credentials true
+		header Access-Control-Allow-Methods "GET, POST, OPTIONS"
+		reverse_proxy backend:8000
+	}
+	handle /openapi {
+		rewrite * /docs
+		reverse_proxy backend:8000
+	}
+	handle /openapi.json {
+		reverse_proxy backend:8000
+	}
+}
+
+(dev_site) {
+	import api_routes
+	handle /p/* {
+		reverse_proxy https://nyrkio.com
+	}
+	handle {
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+{$DOMAIN:nyrkio.localhost} {
+	import dev_site
+}
+
+{$UI_DOMAIN:beta.nyrkio.localhost} {
+	import api_routes
+	handle {
+		reverse_proxy ui:3000
+	}
+}
+
+# Plain HTTP for any other Host (e.g. http://caddy from `make perf`, curl localhost).
+http:// {
+	import dev_site
+}

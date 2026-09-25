@@ -1,0 +1,68 @@
+{
+	email admin@nyrkio.com
+	servers {
+		protocols h1 h2
+	}
+}
+
+# Existing Sectigo cert (SANs: nyrkio.com, nyrk.io, xn--nyrki-nua.com). Sites without `tls` get Let's Encrypt.
+(existing_cert) {
+	tls /etc/caddy/ssl/fullchain.crt /etc/caddy/ssl/privkey.key
+}
+
+nyrk.io {
+	import existing_cert
+	@gh path_regexp gh ^/gh/(.*)$
+	redir @gh https://{$DOMAIN}/public/https%3A%2F%2Fgithub.com%2F{re.gh.1} 308
+	redir https://{$DOMAIN}{uri} 308
+}
+
+(api_routes) {
+	request_body {
+		max_size 10MB
+	}
+
+	@webhooks path /api/v0/github/webhook /api/v0/github/marketplace-events
+	handle @webhooks {
+		reverse_proxy webhooks:8080
+	}
+	handle /api/v0/results/precompute {
+		reverse_proxy worker01:8081
+	}
+	handle /api/* {
+		reverse_proxy backend:8000
+	}
+	handle /openapi {
+		rewrite * /docs
+		reverse_proxy backend:8000
+	}
+	handle /openapi.json {
+		reverse_proxy backend:8000
+	}
+}
+
+{$DOMAIN}, xn--nyrki-nua.com {
+	import existing_cert
+	import api_routes
+	handle /assets/* {
+		header Cache-Control "public, max-age=43200"
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+	handle {
+		root * /usr/share/caddy
+		try_files {path} /index.html
+		file_server
+	}
+}
+
+{$UI_DOMAIN} {
+	basic_auth {
+		v3 {$UI_BASIC_AUTH_HASH}
+	}
+	import api_routes
+	handle {
+		reverse_proxy ui:3000
+	}
+}

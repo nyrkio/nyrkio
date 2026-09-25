@@ -47,14 +47,18 @@ services:
       - "8081:8081"
     hostname: api.nyrkio.local
 
-  nginx:
-    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/nginx:${IMAGE_TAG}
+  caddy:
+    image: ${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/nyrkio/${ENV}/caddy:${IMAGE_TAG}
     build:
       context: ./
-      dockerfile: ./nginx/Dockerfile
-      args:
-        - DOMAIN
-        - UI_DOMAIN
+      dockerfile: ./caddy/Dockerfile
+    environment:
+      DOMAIN: ${DOMAIN:?DOMAIN is required}
+      UI_DOMAIN: ${UI_DOMAIN:?UI_DOMAIN is required}
+      UI_BASIC_AUTH_HASH: ${UI_BASIC_AUTH_HASH:?UI_BASIC_AUTH_HASH is required (bcrypt, see caddy hash-password)}
+    volumes:
+      - caddy_data:/data
+      - caddy_config:/config
     networks:
       vpcbr:
         ipv4_address: 10.18.0.5
@@ -67,6 +71,9 @@ services:
       - worker01
     restart: ${RESTART_POLICY:-always}
 
+volumes:
+  caddy_data:
+  caddy_config:
 
 networks:
   vpcbr:

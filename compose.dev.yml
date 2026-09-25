@@ -16,6 +16,8 @@ services:
     environment:
       - API_PORT=8000
       - GIT_SHA=${IMAGE_TAG}
+      # Overrides .env.backend. *.localhost = browsers via caddy, backend = the v3 UI server calling us directly
+      - CSRF_ALLOWED_HOSTS=${CSRF_ALLOWED_HOSTS:-localhost,127.0.0.1,backend,.localhost}
     ports:
       - "8000:8000"
     hostname: api.nyrkio.local
@@ -69,16 +71,25 @@ services:
             - backend/.ruff_cache
             - backend/.pytest_cache
 
-  nginx:
+  caddy:
     build:
       context: ./
-      dockerfile: ./nginx/Dockerfile.dev
+      dockerfile: ./caddy/Dockerfile.dev
+    environment:
+      - DOMAIN
+      - UI_DOMAIN
+    volumes:
+      - caddy_data:/data
     ports:
       - "80:80"
+      - "443:443"
     depends_on:
       - backend
     restart: always
     develop:
       watch:
         - action: rebuild
-          path: nginx
+          path: caddy
+
+volumes:
+  caddy_data:
