@@ -78,7 +78,7 @@ def start_stack():
     print("Starting Nyrkiö full stack...")
     print("Backend API will be available at: http://localhost:8000")
     print("Webhooks service will be available at: http://localhost:8080")
-    print("Nginx proxy will be available at: http://localhost:80")
+    print("Caddy proxy will be available at: http://localhost:80")
     print()
 
     # Start docker compose
@@ -124,7 +124,7 @@ def status_stack():
         print("Services:")
         print("  Backend API: http://localhost:8000")
         print("  Webhooks: http://localhost:8080")
-        print("  Nginx proxy: http://localhost:80")
+        print("  Caddy proxy: http://localhost:80")
         print("  MongoDB: localhost:27017")
         print()
 

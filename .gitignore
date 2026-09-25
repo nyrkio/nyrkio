@@ -22,7 +22,7 @@
 .backend.pid
 
 
-nginx.conf.test
-
 # Claude Code
 .claude/settings.local.json
+/.mcp.json
+/.ai/

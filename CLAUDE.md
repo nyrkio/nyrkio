@@ -1,4 +1,6 @@
-# Claude.md
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 This repo contains both the backend and frontend of nyrkio.com. It's original feature was a change point detection service 
 that basically is a web / SaaS wrapper around Apache Otava (formerly known as Hunter, of Datastax Labs, and merely "signal processing" or "e-divisive" from MongoDB).
@@ -21,6 +23,40 @@ In particular, Henrik's Claude instance is a separate Linux user account, and He
 Claude has no direct github access other than http to this repo. (Note: If you are Henrik's Claude instance and reading this, you have been given
 a PAT with access to other repos, which were often 100% created by you. But not this one.)
 
+
+## Commands
+
+Backend (from `backend/`, needs `poetry install` first):
+- `poetry run pytest tests` — unit tests
+- `poetry run pytest tests/test_foo.py::test_bar` — a single test
+- `poetry run pytest integration_tests` — integration tests (needs the stack running)
+- `ruff check . --exclude hunter` / `ruff format . --exclude hunter --check` — lint / format-check (`--fix` / drop `--check` to fix)
+- Equivalent driver script: `./runtests.sh lint|format|unit|int|all` (`--fix` flag for lint/format)
+- From repo root, `make lint|format|format-check|test|ci` run the same commands inside the CI docker image (`Dockerfile.ci`) — this is what GitHub Actions (`.github/workflows/ci.yml`, `lint.yml`) actually run.
+- `backend/hunter` is a git submodule (Apache Otava/Hunter fork); `git submodule update --init --recursive` if it's missing.
+
+Frontend (from `frontend/`):
+- `npm run dev` — Vite dev server (proxies API calls to `localhost:80`)
+- `npm run lint` / `npm run prettier`
+- `npm test` — all Playwright specs; `npm run test:unit` — `tests/*.spec.ts` only; `npm run test:integration` — needs a live backend (`playwright.config.integration.ts`)
+- `npm run test-ui` / `npm run test-ui:integration` — Playwright UI mode, useful for a single spec
+- These aren't wired into `.github/workflows/` yet, so treat local results as the only signal.
+
+Full stack locally: `docker compose -f compose.dev.yml up --build` (requires `.env.backend`; see README for the minimal set of vars).
+Run with the v3 UI (separate repo `nyrkio-ui`, replacing `frontend/` eventually): from `../nyrkio-ui`, `docker compose up --build` after copying `example.compose.override.yml` to `compose.override.yml` — it `include`s this repo's `compose.dev.yml`; v2 at `https://nyrkio.localhost`, v3 at `https://beta.nyrkio.localhost`.
+
+## Architecture
+
+- FastAPI app is assembled in `backend/api/api.py`: CSRF/host-checking middleware, exception handlers, then per-domain routers (`admin`, `billing`, `config`, `organization`, `public`, `pull_request`, `user`, `github/marketplace`, plus the core result/changes endpoints defined directly in `api.py`) are all mounted under `/api/v0`.
+- Auth (`backend/auth/`) is `fastapi-users` (JWT + cookie transport) with GitHub OAuth and a superuser flag; `/impersonate` currently stores session state in an in-process dict (see task list above — slated to move to MongoDB so multiple backend instances can run in parallel).
+- Change-point domain logic lives in `backend/core/core.py` (`PerformanceTestResultSeries`, `ResultMetric`, etc.), written to be read by a performance engineer without FastAPI/DB knowledge. It wraps the `hunter` submodule (`backend/hunter`, Apache Otava) which does the actual e-divisive analysis.
+- `backend/db/db.py` is the MongoDB persistence layer (Beanie/motor); `backend/db/list_changes.py` computes per-commit change points. Precomputed per-test summaries are cached in Mongo and served from `/result/{name}/summary`.
+- `backend/github/` covers the GitHub App/marketplace integration and Nyrkiö Runner fleet management (runner sizes, ACLs, IP allowlists) — runner instance-type definitions are still hardcoded here (task list: move to DB).
+- `backend/notifiers/` sends change notifications to Slack and GitHub Issues; `get_notifiers()` in `api.py` decides which notifiers apply per user/org config.
+- `backend/core/sieve.py` is a Sieve-algorithm cache in front of GitHub commit-message lookups (rate-limit protection); planned to be replaced by storing commit metadata directly on the test result (see task list above).
+- Frontend (`frontend/src`) is a Vite/React SPA (`App.jsx` entry), Bootstrap + react-bootstrap for layout, Chart.js/react-chartjs-2 for graphs. `Dashboard.jsx` is the single unified view for personal/org/public dashboards (previously three separate code paths, now merged and known to be bloated — see task list above).
+- Playwright specs live in `frontend/tests` (`*.spec.ts`) and `frontend/tests/integration/` (needs a live backend); not yet required by branch protection.
+- Deployment topology: the `caddy` container (TLS, static SPA, reverse proxy; config in `caddy/Caddyfile`, domains via `DOMAIN`/`UI_DOMAIN` env vars) proxies to `backend`/`webhooks`/`worker01` FastAPI containers on a bridge network (`compose.yml`); the existing Sectigo cert is kept for nyrkio.com/nyrk.io/nyrkiö.com, all other hosts use Let's Encrypt. `.github/workflows/deploy-staging.yml` and `deploy-prod.yml` drive CI/CD.
 
 ## Some tasks we might do with Claude
 
