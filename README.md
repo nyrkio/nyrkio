@@ -109,6 +109,21 @@ export IMAGE_TAG=$(git rev-parse HEAD)
 docker compose -f compose.dev.yml up --build
 ```
 
+### v3 UI (`nyrkio-ui`)
+
+The SvelteKit UI that will replace `frontend/` lives in a separate repo, and so does its compose file.
+To run it together with this stack, start from the `nyrkio-ui` checkout instead (see its README):
+
+```console
+cd ../nyrkio-ui
+cp example.compose.override.yml compose.override.yml   # once
+docker compose up --build
+```
+
+`frontend/` is served at `https://nyrkio.localhost`, the v3 UI at `https://beta.nyrkio.localhost`.
+Caddy's local CA root: `docker compose -f compose.dev.yml cp caddy:/data/caddy/pki/authorities/local/root.crt .`.
+Hostnames can be overridden with `DOMAIN` / `UI_DOMAIN`.
+
 ### Contributing
 
 Open a pull request against `main`. PRs run linters and tests automatically.
