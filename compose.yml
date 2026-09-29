@@ -7,6 +7,8 @@ services:
     environment:
       - API_PORT=8000
       - GIT_SHA=${IMAGE_TAG}
+      # The v3 UI server calls http://backend:8000 with the user's cookie and no Origin; browsers can't send Host: backend
+      - CSRF_ALLOWED_HOSTS=backend
     restart: ${RESTART_POLICY:-always}
     networks:
       vpcbr:

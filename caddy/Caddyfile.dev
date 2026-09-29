@@ -40,10 +40,7 @@
 }
 
 {$UI_DOMAIN:beta.nyrkio.localhost} {
-	import api_routes
-	handle {
-		reverse_proxy ui:3000
-	}
+	reverse_proxy ui:3000
 }
 
 # Plain HTTP for any other Host (e.g. http://caddy from `make perf`, curl localhost).
