@@ -61,8 +61,6 @@ nyrk.io {
 	basic_auth {
 		v3 {$UI_BASIC_AUTH_HASH}
 	}
-	import api_routes
-	handle {
-		reverse_proxy ui:3000
-	}
+	# Everything goes to the v3 UI server, which proxies to the backend itself; no direct backend routes here.
+	reverse_proxy ui:3000
 }
