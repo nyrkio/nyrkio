@@ -29,7 +29,7 @@ nyrk.io {
 	handle /api/v0/results/precompute {
 		reverse_proxy worker01:8081
 	}
-	handle /api/* {
+	handle /api/v0/* {
 		reverse_proxy backend:8000
 	}
 	handle /openapi {
