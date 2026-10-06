@@ -69,6 +69,9 @@ function MainApp({ loggedIn, setLoggedIn }) {
 
   return (
     <>
+      <div className="alert alert-info text-center rounded-0 mb-0" role="status">
+        A new Nyrkiö UI is coming soon. Want a sneak peek? <a href="/ui/v3">Try the new UI</a>
+      </div>
       <header className="page-header container">
         <NavHeader loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
       </header>
