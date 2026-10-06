@@ -1,4 +1,8 @@
 # Changelog
+## v2.1.1 - 2026-10-06
+
+### Features
+- frontend v3 soft launch (#1036) (a2bc44e)
 ## v2.1.0 - 2026-10-06
 
 ### Features
