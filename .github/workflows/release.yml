@@ -1,0 +1,86 @@
+name: Release
+
+# Computes the next version from conventional commits, updates CHANGELOG.md, backend/pyproject.toml
+# and frontend/package.json, then pushes a release commit and a vX.Y.Z tag. The tag push triggers build.yml.
+on:
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: Version bump (auto = from conventional commits)
+        type: choice
+        options: [auto, patch, minor, major]
+        default: auto
+      version:
+        description: Explicit version, e.g. 2.1.0 (overrides bump)
+        required: false
+      dry_run:
+        description: Only show the version and changelog
+        type: boolean
+        default: true
+
+concurrency: release
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Token of the nyrkio-ci GitHub App, not GITHUB_TOKEN: pushes made with GITHUB_TOKEN don't trigger
+      # other workflows (build.yml on the tag). The App must be allowed to bypass main's protection.
+      - id: app
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.NYRKIO_APP_ID }}
+          private-key: ${{ secrets.NYRKIO_APP_PRIVATE_KEY }}
+
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          token: ${{ steps.app.outputs.token }}
+
+      - name: Install git-cliff
+        run: pip install --quiet git-cliff==2.14.2
+
+      - name: Resolve version
+        id: version
+        env:
+          BUMP: ${{ inputs.bump }}
+          VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$VERSION" ]; then
+            next="v${VERSION#v}"
+          elif [ "$BUMP" = auto ]; then
+            next=$(git-cliff --bumped-version)
+          else
+            next=$(git-cliff --bumped-version --bump "$BUMP")
+          fi
+          echo "$next" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+$' || { echo "::error::Not a release version: $next"; exit 1; }
+          if git rev-parse -q --verify "refs/tags/$next" >/dev/null; then
+            echo "::error::$next already exists (no releasable commits since the last tag?)"; exit 1
+          fi
+          echo "next=$next" >> "$GITHUB_OUTPUT"
+
+      - name: Changelog
+        env:
+          NEXT: ${{ steps.version.outputs.next }}
+        run: |
+          git-cliff --unreleased --tag "$NEXT" --strip header > release-notes.md
+          { echo "## $NEXT"; echo; cat release-notes.md; } >> "$GITHUB_STEP_SUMMARY"
+          if [ -f CHANGELOG.md ]; then git-cliff --unreleased --tag "$NEXT" --prepend CHANGELOG.md; else git-cliff --tag "$NEXT" -o CHANGELOG.md; fi
+          sed -i -E "0,/^version = \"[^\"]*\"/s//version = \"${NEXT#v}\"/" backend/pyproject.toml
+          sed -i -E "0,/\"version\": \"[^\"]*\"/s//\"version\": \"${NEXT#v}\"/" frontend/package.json
+
+      - name: Commit, tag and push
+        if: ${{ !inputs.dry_run }}
+        env:
+          NEXT: ${{ steps.version.outputs.next }}
+        run: |
+          git config user.name "nyrkio-release"
+          git config user.email "nyrkio-release@users.noreply.github.com"
+          git add CHANGELOG.md backend/pyproject.toml frontend/package.json
+          git commit -m "chore(release): $NEXT"
+          git tag -a "$NEXT" -F release-notes.md
+          git push --atomic origin HEAD:main "refs/tags/$NEXT"

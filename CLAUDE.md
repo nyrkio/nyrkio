@@ -17,7 +17,7 @@ Most notably he/they implemented a battery of front end tests with playwright. H
 
 The backend is a python FastAPI application, with MongoDB as a database. The frontend is a react single page application.
 
-Claude does not / should not have permission to push to main (which triggers automatic deployment). 
+Claude does not / should not have permission to push to main or create release tags (a `vX.Y.Z` tag builds images and deploys them to staging). 
 
 In particular, Henrik's Claude instance is a separate Linux user account, and Henrik will manually sync git repositories and create pull requests even. 
 Claude has no direct github access other than http to this repo. (Note: If you are Henrik's Claude instance and reading this, you have been given
@@ -56,7 +56,8 @@ Run with the v3 UI (separate repo `nyrkio-ui`, replacing `frontend/` eventually)
 - `backend/core/sieve.py` is a Sieve-algorithm cache in front of GitHub commit-message lookups (rate-limit protection); planned to be replaced by storing commit metadata directly on the test result (see task list above).
 - Frontend (`frontend/src`) is a Vite/React SPA (`App.jsx` entry), Bootstrap + react-bootstrap for layout, Chart.js/react-chartjs-2 for graphs. `Dashboard.jsx` is the single unified view for personal/org/public dashboards (previously three separate code paths, now merged and known to be bloated — see task list above).
 - Playwright specs live in `frontend/tests` (`*.spec.ts`) and `frontend/tests/integration/` (needs a live backend); not yet required by branch protection.
-- Deployment topology: the `caddy` container (TLS, static SPA, reverse proxy; config in `caddy/Caddyfile`, domains via `DOMAIN`/`UI_DOMAIN` env vars) proxies to `backend`/`webhooks`/`worker01` FastAPI containers on a bridge network (`compose.yml`); `UI_DOMAIN` (v3 UI) is proxied only to the `ui` container, the browser never reaches the backend directly there — the UI server calls `http://backend:8000` itself (hence `CSRF_ALLOWED_HOSTS=backend`); the existing Sectigo cert is kept for nyrkio.com/nyrk.io/nyrkiö.com, all other hosts use Let's Encrypt. `.github/workflows/deploy-staging.yml` and `deploy-prod.yml` drive CI/CD.
+- Release and deploy: this repo only builds images, it deploys nothing. `.github/workflows/build.yml` builds `nyrkio/backend` (`backend/Dockerfile`; runs as `backend`, `webhooks` and `worker01`) and `nyrkio/frontend` (`frontend/Dockerfile`: the SPA, `caddy/static` and `p/` behind a plain-HTTP Caddy on `:80`), both with the same tag, on a `vX.Y.Z` tag or when a write-access user labels a PR `deploy:staging` (tagged with the head SHA). It then asks the private `nyrkio/nyrkio-saas` repo to deploy that version to staging. `release.yml` (manual, on `main`) picks the next version from conventional commits (`cliff.toml`), updates `CHANGELOG.md`, `backend/pyproject.toml` and `frontend/package.json`, and pushes the tag; PRs are squash-merged, so `pr-title.yml` checks the PR title. The edge Caddy (TLS, routing), the staging/prod compose stack, runtime secrets and prod deploys all live in `nyrkio-saas`. `p/` (nyrkio-proprietary) is checked out only at build time and must never be committed here; this repo is public.
+- Local development still uses `compose.dev.yml`, `caddy/Caddyfile.dev` and `caddy/Dockerfile.dev`.
 
 ## Some tasks we might do with Claude
 

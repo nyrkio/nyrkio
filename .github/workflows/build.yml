@@ -1,0 +1,102 @@
+name: Build
+
+# Builds nyrkio/backend and nyrkio/frontend once per release tag (or per PR head SHA for a
+# staging preview), pushes them to ECR and asks nyrkio-saas to deploy them to staging.
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+  pull_request:
+    types: [labeled]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    # Fork PRs get no secrets, so previews are only for branches in this repo.
+    if: >-
+      github.event_name == 'push' ||
+      (github.event.label.name == 'deploy:staging' && github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event_name == 'push' && github.ref_name || github.event.pull_request.head.sha }}
+      HAS_APP: ${{ vars.NYRKIO_APP_ID != '' }}
+    steps:
+      - name: Only write-access users may request a preview
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v9
+        with:
+          script: |
+            const { data } = await github.rest.repos.getCollaboratorPermissionLevel({
+              owner: context.repo.owner, repo: context.repo.repo, username: context.actor,
+            });
+            if (!['admin', 'maintain', 'write'].includes(data.permission)) {
+              core.setFailed(`${context.actor} (${data.permission}) may not request a staging preview`);
+            }
+
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.ref }}
+          submodules: recursive
+
+      - name: Check out nyrkio-proprietary
+        uses: actions/checkout@v6
+        with:
+          repository: nyrkio/nyrkio-proprietary
+          path: p
+          token: ${{ secrets.CHECKOUTP }}
+
+      - uses: aws-actions/configure-aws-credentials@v6
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: eu-north-1
+
+      - id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+        with:
+          mask-password: "true"
+
+      - name: Build and push nyrkio/backend and nyrkio/frontend
+        env:
+          REGISTRY: ${{ steps.ecr.outputs.registry }}
+        run: |
+          build() { # <image name> <docker build args...>
+            image="$REGISTRY/nyrkio/$1"; shift
+            # A release tag is built once; rebuilding would change what staging already tested.
+            if [ "$GITHUB_EVENT_NAME" = push ] && docker manifest inspect "$image:$TAG" >/dev/null 2>&1; then
+              echo "$image:$TAG already exists, not rebuilding"; return
+            fi
+            docker build \
+              --label org.opencontainers.image.version="$TAG" \
+              --label org.opencontainers.image.revision="$(git rev-parse HEAD)" \
+              --label org.opencontainers.image.source="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" \
+              -t "$image:$TAG" "$@"
+            docker push "$image:$TAG"
+          }
+          p_sha=$(git -C p rev-parse HEAD)
+          mv p/frontend/src/static/* p/
+          build backend backend
+          build frontend --label com.nyrkio.proprietary.revision="$p_sha" -f frontend/Dockerfile .
+
+      # nyrkio-ci GitHub App token for nyrkio-saas (needs actions: write there)
+      - id: app
+        if: env.HAS_APP == 'true'
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.NYRKIO_APP_ID }}
+          private-key: ${{ secrets.NYRKIO_APP_PRIVATE_KEY }}
+          repositories: nyrkio-saas
+
+      - name: Deploy to staging (nyrkio-saas)
+        if: env.HAS_APP == 'true'
+        env:
+          GH_TOKEN: ${{ steps.app.outputs.token }}
+          PR: ${{ github.event.pull_request.number }}
+        run: |
+          gh workflow run deploy-staging.yml -R nyrkio/nyrkio-saas --ref main \
+            -f v2="$TAG" -f source_repo="$GITHUB_REPOSITORY" -f pr="$PR"
