@@ -15,6 +15,9 @@
 
 .env.backend
 
+# nyrkio-proprietary, checked out only at image build time (build.yml); never commit it
+/p/
+
 # macOS
 .DS_Store
 

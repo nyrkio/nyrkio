@@ -48,9 +48,6 @@ COPY --from=builder /venv /venv
 
 COPY ./entrypoint.sh ./
 
-# Copy GitHub app private key
-COPY ./keys/ /usr/src/backend/keys/
-
 # copy project
 COPY --chown=app:app . ./
 

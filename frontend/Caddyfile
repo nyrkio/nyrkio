@@ -1,0 +1,7 @@
+# Inside the nyrkio/frontend image. TLS and API routing are done by the edge (nyrkio-saas).
+:80 {
+	root * /usr/share/caddy
+	header /assets/* Cache-Control "public, max-age=43200"
+	try_files {path} /index.html
+	file_server
+}

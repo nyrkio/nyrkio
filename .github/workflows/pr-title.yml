@@ -1,0 +1,19 @@
+name: PR title
+
+# PRs are squash-merged with the PR title as the commit message, which release.yml
+# reads to build the changelog and pick the version bump.
+on:
+  pull_request:
+    types: [opened, edited, synchronize, reopened]
+
+permissions: {}
+
+jobs:
+  conventional:
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: |
+          printf '%s\n' "$TITLE" | grep -Eq '^(feat|fix|perf|refactor|docs|test|build|ci|chore|style|revert)(\([a-z0-9._/-]+\))?!?: .+' \
+            || { echo "::error::PR title must follow Conventional Commits, e.g. 'feat(dashboard): add timeline' or 'fix!: ...'"; exit 1; }
