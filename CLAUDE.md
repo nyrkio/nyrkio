@@ -43,7 +43,7 @@ Frontend (from `frontend/`):
 - These aren't wired into `.github/workflows/` yet, so treat local results as the only signal.
 
 Full stack locally: `docker compose -f compose.dev.yml up --build` (requires `.env.backend`; see README for the minimal set of vars).
-Run with the v3 UI (separate repo `nyrkio-ui`, replacing `frontend/` eventually): from `../nyrkio-ui`, `docker compose up --build` after copying `example.compose.override.yml` to `compose.override.yml` — it `include`s this repo's `compose.dev.yml`; v2 at `https://nyrkio.localhost`, v3 at `https://beta.nyrkio.localhost`.
+Run with the v3 UI (separate repo `nyrkio-fe`, replacing `frontend/` eventually): from `../nyrkio-fe`, `docker compose up --build` after copying `example.compose.override.yml` to `compose.override.yml` — it `include`s this repo's `compose.dev.yml`; v2 at `https://nyrkio.localhost`, v3 at `https://beta.nyrkio.localhost`.
 
 ## Architecture
 
