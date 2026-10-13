@@ -109,13 +109,13 @@ export IMAGE_TAG=$(git rev-parse HEAD)
 docker compose -f compose.dev.yml up --build
 ```
 
-### v3 UI (`nyrkio-ui`)
+### v3 UI (`nyrkio-fe`)
 
 The SvelteKit UI that will replace `frontend/` lives in a separate repo, and so does its compose file.
-To run it together with this stack, start from the `nyrkio-ui` checkout instead (see its README):
+To run it together with this stack, start from the `nyrkio-fe` checkout instead (see its README; both repos are cloned side by side, e.g. under `nyrkio-saas/srv/`):
 
 ```console
-cd ../nyrkio-ui
+cd ../nyrkio-fe
 cp example.compose.override.yml compose.override.yml   # once
 docker compose up --build
 ```
