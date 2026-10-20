@@ -21,6 +21,7 @@ from backend.api.model import BulkTestsRequest, TestResults
 from backend.api.organization import org_router
 from backend.api.public import public_router
 from backend.api.pull_request import pr_router
+from backend.api.internal import internal_router
 from backend.api.user import user_router
 from backend.github.marketplace import github_router
 from backend.db.db import (
@@ -523,6 +524,7 @@ app.include_router(org_router, prefix="/api/v0")
 app.include_router(billing_router, prefix="/api/v0")
 app.include_router(pr_router, prefix="/api/v0")
 app.include_router(github_router, prefix="/api/v0")
+app.include_router(internal_router)
 
 
 @app.on_event("startup")
