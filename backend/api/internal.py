@@ -12,11 +12,15 @@ The caller must also present its own bearer token, and gets back only that accou
 
 import hmac
 import os
+import time
 from typing import Dict, Optional
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+import jwt
+from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from starlette.responses import JSONResponse
 
 from backend.auth import auth
+from backend.auth.common import SECRET
 from backend.db.db import DBStore, User
 
 
@@ -93,3 +97,58 @@ async def get_export(user: User = Depends(auth.current_active_user)) -> Dict:
         "pull_request_results": pull_request_results,
         "pull_requests": pull_requests,
     }
+
+
+# The write freeze closes the window at the end of a switch: v3 freezes the account's writes, copies
+# once more, and then serves the account itself. The freeze expires on its own, so a switch that dies
+# cannot lock an account out.
+FREEZE_SECONDS = 120
+
+
+@internal_router.post("/freeze")
+async def freeze(user: User = Depends(auth.current_active_user)) -> Dict:
+    until = time.time() + FREEZE_SECONDS
+    await DBStore().db.switch_freeze.update_one(
+        {"_id": str(user.id)}, {"$set": {"until": until}}, upsert=True
+    )
+    return {"until": until}
+
+
+@internal_router.delete("/freeze")
+async def unfreeze(user: User = Depends(auth.current_active_user)) -> Dict:
+    await DBStore().db.switch_freeze.delete_one({"_id": str(user.id)})
+    return {}
+
+
+def _token_subject(request: Request) -> Optional[str]:
+    token = None
+    authorization = request.headers.get("authorization", "")
+    if authorization.lower().startswith("bearer "):
+        token = authorization[len("bearer ") :].strip()
+    token = token or request.cookies.get("auth_session")
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(
+            token, SECRET, algorithms=["HS256"], audience="fastapi-users:auth"
+        )
+    except jwt.PyJWTError:
+        return None
+    return payload.get("sub")
+
+
+async def switch_freeze_middleware(request: Request, call_next):
+    """Writes of a frozen account answer 503 with Retry-After until the freeze ends."""
+    if request.method not in ("GET", "HEAD", "OPTIONS") and request.url.path.startswith(
+        "/api/v0/"
+    ):
+        subject = _token_subject(request)
+        if subject:
+            row = await DBStore().db.switch_freeze.find_one({"_id": subject})
+            if row and row["until"] > time.time():
+                return JSONResponse(
+                    {"detail": "This account is being moved, retry in a moment"},
+                    status_code=503,
+                    headers={"Retry-After": "5"},
+                )
+    return await call_next(request)

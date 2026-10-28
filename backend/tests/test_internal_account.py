@@ -83,3 +83,37 @@ def test_export_has_disabled_metrics_and_pull_requests(client, monkeypatch):
     ]
     for doc in export["pull_request_results"]:
         assert "user_id" not in doc and "meta" not in doc
+
+
+def test_freeze_blocks_writes_of_the_account_until_released(client, monkeypatch):
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    internal = {**client.get_headers(), "X-Internal-Token": SECRET}
+    assert (
+        client.request("POST", "/internal/v2/freeze", headers=internal).status_code
+        == 200
+    )
+
+    blocked = client.post("/api/v0/result/bench/frozen", json=[DOC])
+    assert blocked.status_code == 503
+    assert blocked.headers["retry-after"] == "5"
+    # reads still work
+    assert client.get("/api/v0/results").status_code == 200
+
+    assert (
+        client.request("DELETE", "/internal/v2/freeze", headers=internal).status_code
+        == 200
+    )
+    assert client.post("/api/v0/result/bench/frozen", json=[DOC]).status_code == 200
+
+
+def test_freeze_expires_by_itself(client, monkeypatch):
+    import time as _time
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    internal = {**client.get_headers(), "X-Internal-Token": SECRET}
+    client.request("POST", "/internal/v2/freeze", headers=internal)
+    real = _time.time
+    monkeypatch.setattr("backend.api.internal.time.time", lambda: real() + 600)
+    assert client.post("/api/v0/result/bench/late", json=[DOC]).status_code == 200
