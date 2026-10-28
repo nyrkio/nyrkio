@@ -17,7 +17,7 @@ from typing import Dict, Optional
 from fastapi import APIRouter, Depends, Header, HTTPException
 
 from backend.auth import auth
-from backend.db.db import User
+from backend.db.db import DBStore, User
 
 
 def require_internal_secret(x_internal_token: Optional[str] = Header(default=None)):
@@ -58,4 +58,38 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
             }
             for a in (user.oauth_accounts or [])
         ],
+    }
+
+
+@internal_router.get("/export")
+async def get_export(user: User = Depends(auth.current_active_user)) -> Dict:
+    """
+    What the public v0 API cannot return, for the switch: the caller's disabled metrics, the pull
+    request results and the pull request index (which test names each pull request has).
+    """
+    db = DBStore().db
+    disabled: Dict[str, list] = {}
+    async for row in db.metrics.find({"user_id": user.id}):
+        disabled.setdefault(row["test_name"], []).append(row["metric_name"])
+
+    keep_out = {"_id": 0, "user_id": 0, "version": 0, "meta": 0}
+    pull_request_results = [
+        doc
+        async for doc in db.test_results.find(
+            {"user_id": user.id, "pull_request": {"$exists": True}}, keep_out
+        )
+    ]
+    pull_requests = [
+        {
+            "git_repo": row["git_repo"],
+            "git_commit": row["git_commit"],
+            "pull_number": row["pull_number"],
+            "test_names": row.get("test_names", []),
+        }
+        async for row in db.pr_tests.find({"user_id": user.id})
+    ]
+    return {
+        "disabled_metrics": disabled,
+        "pull_request_results": pull_request_results,
+        "pull_requests": pull_requests,
     }
