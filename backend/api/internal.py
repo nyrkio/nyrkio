@@ -65,22 +65,36 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
     }
 
 
+def _admin_org_id(user: User, login: str):
+    """The id of the org `login` if the caller is an admin of it, else 403."""
+    for account in user.oauth_accounts or []:
+        for membership in account.organizations or []:
+            org = membership.get("organization") or {}
+            if org.get("login") == login and membership.get("role") == "admin":
+                return org["id"]
+    raise HTTPException(status_code=403, detail="Not an admin of this organization")
+
+
 @internal_router.get("/export")
-async def get_export(user: User = Depends(auth.current_active_user)) -> Dict:
+async def get_export(
+    org: Optional[str] = None, user: User = Depends(auth.current_active_user)
+) -> Dict:
     """
-    What the public v0 API cannot return, for the switch: the caller's disabled metrics, the pull
-    request results and the pull request index (which test names each pull request has).
+    What the public v0 API cannot return, for the switch: disabled metrics, the pull request
+    results and the pull request index (which test names each pull request has). Of the caller, or
+    with org=<login> of an organization the caller administers.
     """
+    owner = _admin_org_id(user, org) if org else user.id
     db = DBStore().db
     disabled: Dict[str, list] = {}
-    async for row in db.metrics.find({"user_id": user.id}):
+    async for row in db.metrics.find({"user_id": owner}):
         disabled.setdefault(row["test_name"], []).append(row["metric_name"])
 
     keep_out = {"_id": 0, "user_id": 0, "version": 0, "meta": 0}
     pull_request_results = [
         doc
         async for doc in db.test_results.find(
-            {"user_id": user.id, "pull_request": {"$exists": True}}, keep_out
+            {"user_id": owner, "pull_request": {"$exists": True}}, keep_out
         )
     ]
     pull_requests = [
@@ -90,7 +104,7 @@ async def get_export(user: User = Depends(auth.current_active_user)) -> Dict:
             "pull_number": row["pull_number"],
             "test_names": row.get("test_names", []),
         }
-        async for row in db.pr_tests.find({"user_id": user.id})
+        async for row in db.pr_tests.find({"user_id": owner})
     ]
     return {
         "disabled_metrics": disabled,
@@ -105,18 +119,29 @@ async def get_export(user: User = Depends(auth.current_active_user)) -> Dict:
 FREEZE_SECONDS = 120
 
 
+def _freeze_key(user: User, org: Optional[str]) -> str:
+    if org:
+        _admin_org_id(user, org)
+        return f"org:{org}"
+    return str(user.id)
+
+
 @internal_router.post("/freeze")
-async def freeze(user: User = Depends(auth.current_active_user)) -> Dict:
+async def freeze(
+    org: Optional[str] = None, user: User = Depends(auth.current_active_user)
+) -> Dict:
     until = time.time() + FREEZE_SECONDS
     await DBStore().db.switch_freeze.update_one(
-        {"_id": str(user.id)}, {"$set": {"until": until}}, upsert=True
+        {"_id": _freeze_key(user, org)}, {"$set": {"until": until}}, upsert=True
     )
     return {"until": until}
 
 
 @internal_router.delete("/freeze")
-async def unfreeze(user: User = Depends(auth.current_active_user)) -> Dict:
-    await DBStore().db.switch_freeze.delete_one({"_id": str(user.id)})
+async def unfreeze(
+    org: Optional[str] = None, user: User = Depends(auth.current_active_user)
+) -> Dict:
+    await DBStore().db.switch_freeze.delete_one({"_id": _freeze_key(user, org)})
     return {}
 
 
@@ -137,14 +162,29 @@ def _token_subject(request: Request) -> Optional[str]:
     return payload.get("sub")
 
 
+def _org_login_in_path(path: str) -> Optional[str]:
+    """The organization a write under /api/v0/orgs is about, from its path."""
+    rest = path[len("/api/v0/orgs") :].lstrip("/")
+    for prefix in ("result/", "config/", "org/", "pulls/"):
+        if rest.startswith(prefix):
+            return rest[len(prefix) :].split("/")[0]
+    return None
+
+
 async def switch_freeze_middleware(request: Request, call_next):
-    """Writes of a frozen account answer 503 with Retry-After until the freeze ends."""
-    if request.method not in ("GET", "HEAD", "OPTIONS") and request.url.path.startswith(
-        "/api/v0/"
-    ):
+    """Writes of a frozen account or organization answer 503 with Retry-After until the freeze ends."""
+    path = request.url.path
+    if request.method not in ("GET", "HEAD", "OPTIONS") and path.startswith("/api/v0/"):
+        keys = []
         subject = _token_subject(request)
         if subject:
-            row = await DBStore().db.switch_freeze.find_one({"_id": subject})
+            keys.append(subject)
+        if path.startswith("/api/v0/orgs/"):
+            login = _org_login_in_path(path)
+            if login:
+                keys.append(f"org:{login}")
+        for key in keys:
+            row = await DBStore().db.switch_freeze.find_one({"_id": key})
             if row and row["until"] > time.time():
                 return JSONResponse(
                     {"detail": "This account is being moved, retry in a moment"},

@@ -117,3 +117,59 @@ def test_freeze_expires_by_itself(client, monkeypatch):
     real = _time.time
     monkeypatch.setattr("backend.api.internal.time.time", lambda: real() + 600)
     assert client.post("/api/v0/result/bench/late", json=[DOC]).status_code == 200
+
+
+def _make_admin_of_nyrkio():
+    """The test GitHub user's memberships carry no role; give the first one admin."""
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    db = DBStore().db
+    asyncio.run(
+        db.User.update_one(
+            {"email": "gh@foo.com"},
+            {"$set": {"oauth_accounts.0.organizations.0.role": "admin"}},
+        )
+    )
+
+
+def test_org_export_and_freeze_need_an_org_admin(monkeypatch):
+    from conftest import GitHubClient
+
+    from backend.api.api import app
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    gh = GitHubClient(app)
+    gh.login()
+    internal = {**gh.get_headers(), "X-Internal-Token": SECRET}
+    export = "/internal/v2/export?org=nyrkio"
+    freeze = "/internal/v2/freeze?org=nyrkio"
+    assert gh.request("GET", export, headers=internal).status_code == 403
+    assert gh.request("POST", freeze, headers=internal).status_code == 403
+
+    _make_admin_of_nyrkio()
+    org_doc = [{**DOC}]
+    assert (
+        gh.post("/api/v0/orgs/result/nyrkio/repo/main/b", json=org_doc).status_code
+        == 200
+    )
+    data = gh.request("GET", export, headers=internal)
+    assert data.status_code == 200
+    assert data.json()["disabled_metrics"] == {}
+
+    # the freeze stops writes to that org for every member, and only that org
+    assert gh.request("POST", freeze, headers=internal).status_code == 200
+    blocked = gh.post(
+        "/api/v0/orgs/result/nyrkio/repo/main/b2", json=[{**DOC, "timestamp": 9}]
+    )
+    assert blocked.status_code == 503
+    other = gh.post(
+        "/api/v0/orgs/result/nyrkio2/repo/main/b", json=[{**DOC, "timestamp": 9}]
+    )
+    assert other.status_code == 200
+    assert gh.request("DELETE", freeze, headers=internal).status_code == 200
+    again = gh.post(
+        "/api/v0/orgs/result/nyrkio/repo/main/b2", json=[{**DOC, "timestamp": 9}]
+    )
+    assert again.status_code == 200
