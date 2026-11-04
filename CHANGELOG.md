@@ -1,4 +1,12 @@
 # Changelog
+## v2.2.0 - 2026-11-04
+
+### Features
+- **api:** preparation for the v3 soft launch  (#1038) (715ac02)
+
+### Maintenance
+- **docs:** update refs to frontend service (#1037) (149f107)
+- **ci:** update create-github-app-token to v3 (#1039) (d5d63eb)
 ## v2.1.1 - 2026-10-06
 
 ### Features
