@@ -86,7 +86,7 @@ jobs:
       # nyrkio-ci GitHub App token for nyrkio-saas (needs actions: write there)
       - id: app
         if: env.HAS_APP == 'true'
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.NYRKIO_APP_ID }}
           private-key: ${{ secrets.NYRKIO_APP_PRIVATE_KEY }}
