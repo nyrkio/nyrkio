@@ -31,7 +31,7 @@ jobs:
       # Token of the nyrkio-ci GitHub App, not GITHUB_TOKEN: pushes made with GITHUB_TOKEN don't trigger
       # other workflows (build.yml on the tag). The App must be allowed to bypass main's protection.
       - id: app
-        uses: actions/create-github-app-token@v2
+        uses: actions/create-github-app-token@v3
         with:
           app-id: ${{ vars.NYRKIO_APP_ID }}
           private-key: ${{ secrets.NYRKIO_APP_PRIVATE_KEY }}
