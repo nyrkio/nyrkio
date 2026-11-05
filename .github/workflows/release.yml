@@ -1,7 +1,7 @@
 name: Release
 
 # Computes the next version from conventional commits, updates CHANGELOG.md, backend/pyproject.toml
-# and frontend/package.json, then pushes a release commit and a vX.Y.Z tag. The tag push triggers build.yml.
+# and frontend/package.json with its package-lock.json, then pushes a release commit and a vX.Y.Z tag. The tag push triggers build.yml.
 on:
   workflow_dispatch:
     inputs:
@@ -71,7 +71,8 @@ jobs:
           { echo "## $NEXT"; echo; cat release-notes.md; } >> "$GITHUB_STEP_SUMMARY"
           if [ -f CHANGELOG.md ]; then git-cliff --unreleased --tag "$NEXT" --prepend CHANGELOG.md; else git-cliff --tag "$NEXT" -o CHANGELOG.md; fi
           sed -i -E "0,/^version = \"[^\"]*\"/s//version = \"${NEXT#v}\"/" backend/pyproject.toml
-          sed -i -E "0,/\"version\": \"[^\"]*\"/s//\"version\": \"${NEXT#v}\"/" frontend/package.json
+          # npm version also updates package-lock.json; it installs nothing.
+          (cd frontend && npm version "${NEXT#v}" --no-git-tag-version --allow-same-version)
 
       - name: Commit, tag and push
         if: ${{ !inputs.dry_run }}
@@ -80,7 +81,7 @@ jobs:
         run: |
           git config user.name "nyrkio-release"
           git config user.email "nyrkio-release@users.noreply.github.com"
-          git add CHANGELOG.md backend/pyproject.toml frontend/package.json
+          git add CHANGELOG.md backend/pyproject.toml frontend/package.json frontend/package-lock.json
           git commit -m "chore(release): $NEXT"
           git tag -a "$NEXT" -F release-notes.md
           git push --atomic origin HEAD:main "refs/tags/$NEXT"

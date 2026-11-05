@@ -781,7 +781,6 @@ class RunnerLauncher(object):
         aws_access_key_id = self.config.get("aws_access_key_id")
         aws_secret_access_key = self.config.get("aws_secret_access_key")
         logging.info(f"aws_access_key_id: {aws_access_key_id}")
-        logging.info(f"aws_secret_access_key: {aws_secret_access_key}")
         logging.info(f"region: {REGION}")
         logging.info(f"profile: {self.config.get('profile')}")
         logging.info(
