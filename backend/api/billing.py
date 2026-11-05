@@ -411,8 +411,7 @@ async def create_portal_session(user: User = Depends(auth.current_active_user)):
 
     ensure_stripe_is_configured()
 
-    logging.info("Starting billing/create-portal-session")
-    logging.info(user)
+    logging.info(f"Starting billing/create-portal-session for user {user.id}")
     logging.info(user.billing)
     logging.info(user.billing_runners)
     # session_id = user.billing["session_id"]

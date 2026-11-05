@@ -96,7 +96,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
             )
 
         if user_create.oauth_accounts:
-            logging.warning(user_create)
+            logging.warning(user_create.model_dump(exclude={"password"}))
             raise Exception(
                 "Someone tried to POST oauth credentials through the wrong door"
             )
@@ -107,8 +107,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(
             "Creating new user with billing, billing_runners and slack blocked even if the generated api would make you believe anyone can just set those..."
         )
-        logging.info(user_create)
-        logging.info(user_create.model_dump())
+        logging.info(user_create.model_dump(exclude={"password"}))
         return await super().create(user_create, *args, **kwargs)
 
     async def create_cph(
@@ -121,7 +120,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     ) -> models.UP:
         logging.info(f"Create new CPH user {user_create.github_username}")
         if user_create.oauth_accounts:
-            logging.warning(user_create)
+            logging.warning(user_create.model_dump(exclude={"password"}))
             raise Exception(
                 "Someone tried to POST oauth credentials through the wrong door"
             )
@@ -129,8 +128,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         user_create.billing = None
         user_create.billing_runners = None
         user_create.slack = None
-        logging.info(user_create)
-        logging.info(user_create.model_dump())
+        logging.info(user_create.model_dump(exclude={"password"}))
         return await super().create(user_create, *args, **kwargs)
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
@@ -144,7 +142,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     async def on_after_forgot_password(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        logging.info(f"User {user.id} has forgot their password. Reset token: {token}")
+        logging.info(f"User {user.id} has forgot their password.")
         reset_url = f"{SERVER_NAME}/forgot-password?token={token}"
         msg = read_template_file("forgot-password.html", reset_url=reset_url)
         await send_email(
@@ -154,9 +152,7 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
     async def on_after_request_verify(
         self, user: User, token: str, request: Optional[Request] = None
     ):
-        logging.info(
-            f"Verification requested for user {user.id} {user.email}. Verification token: {token}"
-        )
+        logging.info(f"Verification requested for user {user.id} {user.email}.")
         # Note this is unauthenticated web form. Before sending email, protect yourself.
         # No seriously, postmark will close the account immediately if you don't
         if request is None:
@@ -170,7 +166,6 @@ class UserManager(ObjectIDIDMixin, BaseUserManager[User, PydanticObjectId]):
         logging.info(data)
         logging.info(cfToken)
         logging.info(cfTokenGet)
-        logging.info(user)
         if not user.captcha_token == cfToken:
             raise HTTPException(
                 status_code=401,
