@@ -40,11 +40,30 @@ internal_router = APIRouter(
 )
 
 
+async def _installations(gh_ids) -> Dict[str, Dict]:
+    """The GitHub App installations of these GitHub account ids, by id. The notifiers of v3 read them
+    from its own table, so without them a switched account would stop getting GitHub issues."""
+    store = DBStore()
+    found = {}
+    for gh_id in gh_ids:
+        try:
+            installation = await store.get_github_installation(gh_id)
+        except (TypeError, ValueError):
+            continue
+        if installation:
+            found[str(gh_id)] = {k: v for k, v in installation.items() if k != "_id"}
+    return found
+
+
 @internal_router.get("/account")
 async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
     """The caller's account, for the switch to v3. No password hash and no OAuth tokens. What the user
     set up comes along, or it would stop working: the Slack connection (the webhook of the OAuth
-    install) and the GitHub token (PAT) that registers the user's runners."""
+    install), the GitHub token (PAT) that registers the user's runners and the GitHub App
+    installations of the user's GitHub account."""
+    github_ids = [
+        a.account_id for a in (user.oauth_accounts or []) if a.oauth_name == "github"
+    ]
     return {
         "id": str(user.id),
         "email": user.email,
@@ -58,6 +77,7 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
         "billing_runners": user.billing_runners,
         "slack": user.slack,
         "github_pat": await DBStore().get_pat(user.id),
+        "github_installations": await _installations(github_ids),
         "oauth_accounts": [
             {
                 "oauth_name": a.oauth_name,
@@ -122,6 +142,8 @@ async def get_export(
     export["test_names"] = sorted(
         n for n in names if not org or n.startswith(org + "/")
     )
+    if org:
+        export["github_installations"] = await _installations([owner])
     return export
 
 

@@ -90,6 +90,35 @@ def test_account_carries_the_github_token(client, monkeypatch):
     assert account["github_pat"] == "ghp_test_token"
 
 
+def test_account_carries_the_github_installations(monkeypatch):
+    # v3 reads them for the GitHub issue notifier; its table is empty after a switch otherwise
+    import asyncio
+
+    from conftest import GitHubClient
+
+    from backend.api.api import app
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    gh = GitHubClient(app)
+    gh.login()
+    headers = {**gh.get_headers(), "X-Internal-Token": SECRET}
+    assert gh.request("GET", PATH, headers=headers).json()["github_installations"] == {}
+
+    event = {"action": "created", "installation": {"id": 7, "account": {"id": 123}}}
+    other = {"action": "created", "installation": {"id": 8, "account": {"id": 999}}}
+    store = DBStore()
+    asyncio.run(store.set_github_installation(123, event))
+    asyncio.run(store.set_github_installation(999, other))
+    try:
+        account = gh.request("GET", PATH, headers=headers).json()
+        # the installation of the user's GitHub account id, not anybody else's, without the Mongo id
+        assert account["github_installations"] == {"123": event}
+    finally:
+        # the notifiers of the other tests read this collection
+        asyncio.run(store.db.github_installations.delete_many({}))
+
+
 EXPORT = "/internal/v2/export"
 DOC = {
     "timestamp": 1,
@@ -229,6 +258,19 @@ def test_org_export_and_freeze_need_an_org_admin(monkeypatch):
     assert data.json()["disabled_metrics"] == {}
     # only the names the organization API can serve: under "<login>/"
     assert data.json()["test_names"] == ["nyrkio/repo/main/b"]
+    # the installation of the organization (id 123 in the fixture) travels with it
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    event = {"action": "created", "installation": {"id": 9, "account": {"id": 123}}}
+    store = DBStore()
+    asyncio.run(store.set_github_installation(123, event))
+    try:
+        data = gh.request("GET", export, headers=internal)
+        assert data.json()["github_installations"] == {"123": event}
+    finally:
+        asyncio.run(store.db.github_installations.delete_many({}))
 
     # the freeze stops writes to that org for every member, and only that org
     assert gh.request("POST", freeze, headers=internal).status_code == 200
