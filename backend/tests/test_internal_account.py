@@ -46,6 +46,31 @@ def test_account_carries_the_superuser_flag(superuser_client, monkeypatch):
     assert account["is_superuser"] is True
 
 
+def test_account_carries_the_slack_connection(client, monkeypatch):
+    # v3 copies it, or alerts to Slack would stop working after the switch
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    slack = {
+        "team": {"name": "Acme"},
+        "incoming_webhook": {
+            "url": "https://hooks.slack.test/T0/B0/x",
+            "channel": "#c",
+        },
+    }
+    asyncio.run(
+        DBStore().db.User.update_one(
+            {"email": "john@foo.com"}, {"$set": {"slack": slack}}
+        )
+    )
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    account = client.request("GET", PATH, headers=headers).json()
+    assert account["slack"] == slack
+
+
 EXPORT = "/internal/v2/export"
 DOC = {
     "timestamp": 1,

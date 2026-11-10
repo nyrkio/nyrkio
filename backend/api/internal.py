@@ -42,7 +42,8 @@ internal_router = APIRouter(
 
 @internal_router.get("/account")
 async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
-    """The caller's account, for the switch to v3. No password hash, no OAuth tokens, no Slack data."""
+    """The caller's account, for the switch to v3. No password hash and no OAuth tokens. The Slack
+    connection (the webhook of the OAuth install) comes along, or alerts to Slack would stop."""
     return {
         "id": str(user.id),
         "email": user.email,
@@ -54,6 +55,7 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
         "is_repo_owner": user.is_repo_owner,
         "billing": user.billing,
         "billing_runners": user.billing_runners,
+        "slack": user.slack,
         "oauth_accounts": [
             {
                 "oauth_name": a.oauth_name,
