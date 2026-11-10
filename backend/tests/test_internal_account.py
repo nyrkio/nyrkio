@@ -71,6 +71,25 @@ def test_account_carries_the_slack_connection(client, monkeypatch):
     assert account["slack"] == slack
 
 
+def test_account_carries_the_github_token(client, monkeypatch):
+    # v3 copies it, or the user's runners could no longer be registered after the switch
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    assert client.request("GET", PATH, headers=headers).json()["github_pat"] is None
+    asyncio.run(
+        DBStore().db.User.update_one(
+            {"email": "john@foo.com"}, {"$set": {"github_pat": "ghp_test_token"}}
+        )
+    )
+    account = client.request("GET", PATH, headers=headers).json()
+    assert account["github_pat"] == "ghp_test_token"
+
+
 EXPORT = "/internal/v2/export"
 DOC = {
     "timestamp": 1,
