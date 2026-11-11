@@ -7,16 +7,19 @@ out of the OpenAPI schema.
 
 Every request must carry the shared secret in X-Internal-Token (INTERNAL_API_TOKEN, set
 on v2 and v3). Without a matching secret the path answers 404, as if it did not exist.
-The caller must also present its own bearer token, and gets back only that account.
+The caller must also present its own bearer token, and gets back only that account; except the
+stats, which a superuser asks for all accounts.
 """
 
 import hmac
 import os
 import time
-from typing import Dict, Optional
+from datetime import datetime
+from typing import Dict, List, Optional
 
 import jwt
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from bson import ObjectId
+from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
 from starlette.responses import JSONResponse
 
 from backend.auth import auth
@@ -145,6 +148,150 @@ async def get_export(
     if org:
         export["github_installations"] = await _installations([owner])
     return export
+
+
+async def _owner_names(db, ids: List) -> Dict[str, str]:
+    """The email of each user and the login of each org among the owner ids of results (an org's id is a GitHub id)."""
+    names = {}
+    users = [i for i in ids if isinstance(i, ObjectId)]
+    async for row in db.User.find({"_id": {"$in": users}}, {"email": 1}):
+        names[str(row["_id"])] = row["email"]
+    for org_id in (i for i in ids if isinstance(i, int)):
+        row = await db.User.find_one(
+            {"oauth_accounts.organizations.organization.id": org_id},
+            {"oauth_accounts.organizations": 1},
+        )
+        for account in (row or {}).get("oauth_accounts", []):
+            for member in account.get("organizations") or []:
+                org = member.get("organization") or {}
+                if org.get("id") == org_id:
+                    names[str(org_id)] = org.get("login")
+    return names
+
+
+@internal_router.get("/stats")
+async def get_stats(
+    since: datetime,
+    until: datetime,
+    limit: int = Query(20, ge=1, le=100),
+    user: User = Depends(auth.current_active_superuser),
+) -> Dict:
+    """
+    What was uploaded in [since, until), for the admin dashboard of v3: totals, uploads per day and the
+    busiest accounts. Counted by the time a result was stored (meta.last_modified), not the time of the
+    benchmark. Results from before meta existed are not counted. The scan wants an index on
+    test_results.meta.last_modified (see the rollout runbook).
+    """
+    db = DBStore().db
+    is_pr = {"$cond": [{"$ifNull": ["$pull_request", False]}, 1, 0]}
+    day = {"$dateToString": {"format": "%Y-%m-%d", "date": "$meta.last_modified"}}
+    pipeline = [
+        {"$match": {"meta.last_modified": {"$gte": since, "$lt": until}}},
+        {
+            "$facet": {
+                "accounts": [
+                    {
+                        "$group": {
+                            "_id": "$user_id",
+                            "uploads": {"$sum": 1},
+                            "pr_uploads": {"$sum": is_pr},
+                            "tests": {"$addToSet": "$test_name"},
+                            "last_upload": {"$max": "$meta.last_modified"},
+                        }
+                    }
+                ],
+                "days": [
+                    {
+                        "$group": {
+                            "_id": day,
+                            "uploads": {"$sum": 1},
+                            "pr_uploads": {"$sum": is_pr},
+                        }
+                    },
+                    {"$sort": {"_id": 1}},
+                ],
+            }
+        },
+    ]
+    found = (await db.test_results.aggregate(pipeline).to_list(1))[0]
+    accounts = sorted(found["accounts"], key=lambda a: -a["uploads"])
+    names = await _owner_names(db, [a["_id"] for a in accounts[:limit]])
+    top = []
+    for a in accounts[:limit]:
+        top.append(
+            {
+                "id": str(a["_id"]),
+                "name": names.get(str(a["_id"])),
+                "org": isinstance(a["_id"], int),
+                "uploads": a["uploads"],
+                "pr_uploads": a["pr_uploads"],
+                "tests": len(a["tests"]),
+                "last_upload": a["last_upload"],
+                "total_results": await db.test_results.count_documents(
+                    {"user_id": a["_id"]}
+                ),
+            }
+        )
+    return {
+        "uploads": sum(a["uploads"] for a in accounts),
+        "pr_uploads": sum(a["pr_uploads"] for a in accounts),
+        "active_accounts": [
+            str(a["_id"]) for a in accounts if not isinstance(a["_id"], int)
+        ],
+        "active_orgs": [str(a["_id"]) for a in accounts if isinstance(a["_id"], int)],
+        "tests": sum(len(a["tests"]) for a in accounts),
+        "accounts_total": await db.User.count_documents({}),
+        "new_accounts": await db.User.count_documents(
+            {
+                "_id": {
+                    "$gte": ObjectId.from_datetime(since),
+                    "$lt": ObjectId.from_datetime(until),
+                }
+            }
+        ),
+        "days": [
+            {"day": d["_id"], "uploads": d["uploads"], "pr_uploads": d["pr_uploads"]}
+            for d in found["days"]
+        ],
+        "top": top,
+    }
+
+
+@internal_router.get("/stats/recent")
+async def get_recent_uploads(
+    since: datetime,
+    limit: int = Query(50, ge=1, le=200),
+    user: User = Depends(auth.current_active_superuser),
+) -> List[Dict]:
+    """The latest uploads after `since`, newest first, for the live view of the admin dashboard."""
+    db = DBStore().db
+    keep = {
+        "user_id": 1,
+        "test_name": 1,
+        "pull_request": 1,
+        "meta.last_modified": 1,
+        "attributes.git_repo": 1,
+        "attributes.branch": 1,
+    }
+    rows = (
+        await db.test_results.find({"meta.last_modified": {"$gt": since}}, keep)
+        .sort("meta.last_modified", -1)
+        .limit(limit)
+        .to_list(None)
+    )
+    names = await _owner_names(db, list({r["user_id"] for r in rows}))
+    return [
+        {
+            "at": r["meta"]["last_modified"],
+            "account_id": str(r["user_id"]),
+            "account": names.get(str(r["user_id"])),
+            "test": r["test_name"],
+            "repo": r.get("attributes", {}).get("git_repo"),
+            "branch": r.get("attributes", {}).get("branch"),
+            "pull_request": r.get("pull_request"),
+        }
+        for r in rows
+    ]
 
 
 # The write freeze closes the window at the end of a switch: v3 freezes the account's writes, copies
