@@ -40,19 +40,44 @@ internal_router = APIRouter(
 )
 
 
+async def _installations(gh_ids) -> Dict[str, Dict]:
+    """The GitHub App installations of these GitHub account ids, by id. The notifiers of v3 read them
+    from its own table, so without them a switched account would stop getting GitHub issues."""
+    store = DBStore()
+    found = {}
+    for gh_id in gh_ids:
+        try:
+            installation = await store.get_github_installation(gh_id)
+        except (TypeError, ValueError):
+            continue
+        if installation:
+            found[str(gh_id)] = {k: v for k, v in installation.items() if k != "_id"}
+    return found
+
+
 @internal_router.get("/account")
 async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
-    """The caller's account, for the switch to v3. No password hash, no OAuth tokens, no Slack data."""
+    """The caller's account, for the switch to v3. No password hash and no OAuth tokens. What the user
+    set up comes along, or it would stop working: the Slack connection (the webhook of the OAuth
+    install), the GitHub token (PAT) that registers the user's runners and the GitHub App
+    installations of the user's GitHub account."""
+    github_ids = [
+        a.account_id for a in (user.oauth_accounts or []) if a.oauth_name == "github"
+    ]
     return {
         "id": str(user.id),
         "email": user.email,
         "is_active": user.is_active,
         "is_verified": user.is_verified,
+        "is_superuser": user.is_superuser,
         "github_username": user.github_username,
         "is_cph_user": user.is_cph_user,
         "is_repo_owner": user.is_repo_owner,
         "billing": user.billing,
         "billing_runners": user.billing_runners,
+        "slack": user.slack,
+        "github_pat": await DBStore().get_pat(user.id),
+        "github_installations": await _installations(github_ids),
         "oauth_accounts": [
             {
                 "oauth_name": a.oauth_name,
@@ -81,8 +106,8 @@ async def get_export(
 ) -> Dict:
     """
     What the public v0 API cannot return, for the switch: disabled metrics, the pull request
-    results and the pull request index (which test names each pull request has). Of the caller, or
-    with org=<login> of an organization the caller administers.
+    results, the pull request index (which test names each pull request has) and every test name.
+    Of the caller, or with org=<login> of an organization the caller administers.
     """
     owner = _admin_org_id(user, org) if org else user.id
     db = DBStore().db
@@ -106,11 +131,20 @@ async def get_export(
         }
         async for row in db.pr_tests.find({"user_id": owner})
     ]
-    return {
+    export = {
         "disabled_metrics": disabled,
         "pull_request_results": pull_request_results,
         "pull_requests": pull_requests,
     }
+    # Every test name. The public listing of the tests is a random sample, so it misses some. The
+    # organization API serves only the names under "<login>/", so only those are listed for an org.
+    names = await db.test_results.distinct("test_name", {"user_id": owner})
+    export["test_names"] = sorted(
+        n for n in names if not org or n.startswith(org + "/")
+    )
+    if org:
+        export["github_installations"] = await _installations([owner])
+    return export
 
 
 # The write freeze closes the window at the end of a switch: v3 freezes the account's writes, copies
@@ -171,10 +205,21 @@ def _org_login_in_path(path: str) -> Optional[str]:
     return None
 
 
+# POST endpoints that only read: the body names the tests to read. The switch job itself calls them
+# while the account is frozen.
+READ_ONLY_POSTS = ("/results/bulk", "/results/changes/bulk")
+
+
+def _is_write(request: Request) -> bool:
+    if request.method in ("GET", "HEAD", "OPTIONS"):
+        return False
+    return not request.url.path.endswith(READ_ONLY_POSTS)
+
+
 async def switch_freeze_middleware(request: Request, call_next):
     """Writes of a frozen account or organization answer 503 with Retry-After until the freeze ends."""
     path = request.url.path
-    if request.method not in ("GET", "HEAD", "OPTIONS") and path.startswith("/api/v0/"):
+    if _is_write(request) and path.startswith("/api/v0/"):
         keys = []
         subject = _token_subject(request)
         if subject:

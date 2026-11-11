@@ -30,10 +30,93 @@ def test_returns_own_account_without_secrets(client, monkeypatch):
     assert response.status_code == 200
     account = response.json()
     assert account["email"] == "john@foo.com"
+    assert account["is_superuser"] is False
     assert "hashed_password" not in account
     for oauth in account["oauth_accounts"]:
         assert "access_token" not in oauth
         assert "refresh_token" not in oauth
+
+
+def test_account_carries_the_superuser_flag(superuser_client, monkeypatch):
+    # v3 copies it, so a staff account keeps its admin rights after the switch
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    superuser_client.login()
+    headers = {**superuser_client.get_headers(), "X-Internal-Token": SECRET}
+    account = superuser_client.request("GET", PATH, headers=headers).json()
+    assert account["is_superuser"] is True
+
+
+def test_account_carries_the_slack_connection(client, monkeypatch):
+    # v3 copies it, or alerts to Slack would stop working after the switch
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    slack = {
+        "team": {"name": "Acme"},
+        "incoming_webhook": {
+            "url": "https://hooks.slack.test/T0/B0/x",
+            "channel": "#c",
+        },
+    }
+    asyncio.run(
+        DBStore().db.User.update_one(
+            {"email": "john@foo.com"}, {"$set": {"slack": slack}}
+        )
+    )
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    account = client.request("GET", PATH, headers=headers).json()
+    assert account["slack"] == slack
+
+
+def test_account_carries_the_github_token(client, monkeypatch):
+    # v3 copies it, or the user's runners could no longer be registered after the switch
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    assert client.request("GET", PATH, headers=headers).json()["github_pat"] is None
+    asyncio.run(
+        DBStore().db.User.update_one(
+            {"email": "john@foo.com"}, {"$set": {"github_pat": "ghp_test_token"}}
+        )
+    )
+    account = client.request("GET", PATH, headers=headers).json()
+    assert account["github_pat"] == "ghp_test_token"
+
+
+def test_account_carries_the_github_installations(monkeypatch):
+    # v3 reads them for the GitHub issue notifier; its table is empty after a switch otherwise
+    import asyncio
+
+    from conftest import GitHubClient
+
+    from backend.api.api import app
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    gh = GitHubClient(app)
+    gh.login()
+    headers = {**gh.get_headers(), "X-Internal-Token": SECRET}
+    assert gh.request("GET", PATH, headers=headers).json()["github_installations"] == {}
+
+    event = {"action": "created", "installation": {"id": 7, "account": {"id": 123}}}
+    other = {"action": "created", "installation": {"id": 8, "account": {"id": 999}}}
+    store = DBStore()
+    asyncio.run(store.set_github_installation(123, event))
+    asyncio.run(store.set_github_installation(999, other))
+    try:
+        account = gh.request("GET", PATH, headers=headers).json()
+        # the installation of the user's GitHub account id, not anybody else's, without the Mongo id
+        assert account["github_installations"] == {"123": event}
+    finally:
+        # the notifiers of the other tests read this collection
+        asyncio.run(store.db.github_installations.delete_many({}))
 
 
 EXPORT = "/internal/v2/export"
@@ -85,6 +168,17 @@ def test_export_has_disabled_metrics_and_pull_requests(client, monkeypatch):
         assert "user_id" not in doc and "meta" not in doc
 
 
+def test_export_lists_every_test_name_of_the_caller(client, monkeypatch):
+    # The public listing of the tests is a random sample; the switch needs all of them.
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    for name in ("bench/b", "bench/a", "other/rare"):
+        assert client.post(f"/api/v0/result/{name}", json=[DOC]).status_code == 200
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    export = client.request("GET", EXPORT, headers=headers).json()
+    assert export["test_names"] == ["bench/a", "bench/b", "other/rare"]
+
+
 def test_freeze_blocks_writes_of_the_account_until_released(client, monkeypatch):
     monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
     client.login()
@@ -97,8 +191,13 @@ def test_freeze_blocks_writes_of_the_account_until_released(client, monkeypatch)
     blocked = client.post("/api/v0/result/bench/frozen", json=[DOC])
     assert blocked.status_code == 503
     assert blocked.headers["retry-after"] == "5"
-    # reads still work
+    # reads still work, also the ones sent as POST (the switch job reads with them while frozen)
     assert client.get("/api/v0/results").status_code == 200
+    assert client.post("/api/v0/results/bulk", json={"tests": []}).status_code == 200
+    assert (
+        client.post("/api/v0/results/changes/bulk", json={"tests": []}).status_code
+        == 200
+    )
 
     assert (
         client.request("DELETE", "/internal/v2/freeze", headers=internal).status_code
@@ -157,6 +256,21 @@ def test_org_export_and_freeze_need_an_org_admin(monkeypatch):
     data = gh.request("GET", export, headers=internal)
     assert data.status_code == 200
     assert data.json()["disabled_metrics"] == {}
+    # only the names the organization API can serve: under "<login>/"
+    assert data.json()["test_names"] == ["nyrkio/repo/main/b"]
+    # the installation of the organization (id 123 in the fixture) travels with it
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    event = {"action": "created", "installation": {"id": 9, "account": {"id": 123}}}
+    store = DBStore()
+    asyncio.run(store.set_github_installation(123, event))
+    try:
+        data = gh.request("GET", export, headers=internal)
+        assert data.json()["github_installations"] == {"123": event}
+    finally:
+        asyncio.run(store.db.github_installations.delete_many({}))
 
     # the freeze stops writes to that org for every member, and only that org
     assert gh.request("POST", freeze, headers=internal).status_code == 200
