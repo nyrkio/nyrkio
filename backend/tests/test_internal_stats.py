@@ -1,8 +1,10 @@
 import asyncio
+import time
 from datetime import datetime, timedelta, timezone
 
 import pytest
 
+from backend.api import internal as internal_api
 from backend.db.db import DBStore
 
 SECRET = "test-internal-secret"
@@ -33,6 +35,13 @@ def _window(hours_before=1, hours_after=1):
         "since": (now - timedelta(hours=hours_before)).isoformat(),
         "until": (now + timedelta(hours=hours_after)).isoformat(),
     }
+
+
+@pytest.fixture
+def internal_headers(superuser_client, monkeypatch):
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    superuser_client.login()
+    return {**superuser_client.get_headers(), "X-Internal-Token": SECRET}
 
 
 @pytest.fixture
@@ -213,3 +222,131 @@ def test_stats_name_an_org_by_its_login(superuser_client, internal):
                 {"email": "admin@foo.com"}, {"$set": {"oauth_accounts": before}}
             )
         )
+
+
+REPORT = "/internal/v2/stats/accounts"
+ROW_KEYS = {"id", "verified", "active", "org_active", "own", "org_member", "org_admin"}
+
+
+@pytest.fixture
+def fresh_report():
+    reset = dict(at=None, since=None, accounts=None, task=None, error=None)
+    internal_api._report.update(reset)
+    yield
+    internal_api._report.update(reset)
+
+
+def _ask(client, headers, **params):
+    return client.request("GET", REPORT, headers=headers, params=params).json()
+
+
+def _built(client, headers, **params):
+    """The report builds in the background: ask until it is not computing."""
+    for _ in range(100):
+        body = _ask(client, headers, **params)
+        if body["status"] != "computing":
+            return body
+        params = {}
+        time.sleep(0.1)
+    raise AssertionError("still computing")
+
+
+def _account_id(email):
+    return str(asyncio.run(DBStore().db.User.find_one({"email": email}))["_id"])
+
+
+def test_account_report_is_for_superusers(client, monkeypatch, fresh_report):
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    assert client.request("GET", REPORT, headers=headers).status_code == 403
+
+
+def test_account_report_builds_in_the_background(
+    superuser_client, internal_headers, fresh_report
+):
+    superuser_client.login()
+    assert (
+        superuser_client.post("/api/v0/result/report/a", json=[DOC]).status_code == 200
+    )
+
+    first = _ask(superuser_client, internal_headers)
+    assert (first["status"], first["accounts"], first["computed_at"]) == (
+        "computing",
+        None,
+        None,
+    )
+    report = _built(superuser_client, internal_headers)
+    assert report["status"] == "ready" and report["computed_at"] and report["since"]
+
+    rows = {r["id"]: r for r in report["accounts"]}
+    assert all(set(r) == ROW_KEYS for r in rows.values())
+    # an upload of its own is a dashboard and activity; the demo data every account is given is neither
+    mine = rows[_account_id("admin@foo.com")]
+    assert (mine["own"], mine["active"], mine["verified"]) == (True, True, True)
+    other = rows[_account_id("john@foo.com")]
+    assert (other["own"], other["active"]) == (False, False)
+
+
+def test_account_report_is_kept_until_refreshed(
+    superuser_client, internal_headers, monkeypatch, fresh_report
+):
+    calls = []
+
+    async def rows(db, since):
+        calls.append(since)
+        return [{"id": "x"}]
+
+    monkeypatch.setattr(internal_api, "_account_rows", rows)
+    superuser_client.login()
+    assert _built(superuser_client, internal_headers)["accounts"] == [{"id": "x"}]
+    assert _built(superuser_client, internal_headers)["status"] == "ready"
+    assert len(calls) == 1
+    # a refresh answers with the previous report while it builds the next
+    again = _ask(superuser_client, internal_headers, refresh="true")
+    assert (again["status"], again["accounts"]) == ("computing", [{"id": "x"}])
+    assert _built(superuser_client, internal_headers)["status"] == "ready"
+    assert len(calls) == 2
+    # a report that is too old is built again
+    internal_api._report["at"] -= timedelta(seconds=internal_api.REPORT_TTL + 1)
+    assert _built(superuser_client, internal_headers)["status"] == "ready"
+    assert len(calls) == 3
+
+
+def test_a_failed_account_report_is_not_retried_until_asked(
+    superuser_client, internal_headers, monkeypatch, fresh_report
+):
+    outcome = {"fail": True}
+    calls = []
+
+    async def rows(db, since):
+        calls.append(1)
+        if outcome["fail"]:
+            raise RuntimeError("no database")
+        return []
+
+    monkeypatch.setattr(internal_api, "_account_rows", rows)
+    superuser_client.login()
+    report = _built(superuser_client, internal_headers)
+    assert (report["status"], report["error"]) == ("failed", "RuntimeError")
+    assert _ask(superuser_client, internal_headers)["status"] == "failed"
+    assert len(calls) == 1
+    outcome["fail"] = False
+    assert (
+        _built(superuser_client, internal_headers, refresh="true")["status"] == "ready"
+    )
+    assert len(calls) == 2
+
+
+def test_the_report_looks_back_whole_months():
+    at = datetime(2026, 11, 11, tzinfo=timezone.utc)
+    assert internal_api._months_ago(at, 3) == datetime(2026, 8, 11, tzinfo=timezone.utc)
+    assert internal_api._months_ago(
+        datetime(2026, 3, 31, tzinfo=timezone.utc), 1
+    ) == datetime(2026, 2, 28, tzinfo=timezone.utc)
+    assert internal_api._months_ago(
+        datetime(2026, 2, 15, tzinfo=timezone.utc), 3
+    ) == datetime(2025, 11, 15, tzinfo=timezone.utc)
+    assert internal_api._months_ago(
+        datetime(2026, 3, 15, tzinfo=timezone.utc), 3
+    ) == datetime(2025, 12, 15, tzinfo=timezone.utc)

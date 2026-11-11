@@ -11,10 +11,13 @@ The caller must also present its own bearer token, and gets back only that accou
 stats, which a superuser asks for all accounts.
 """
 
+import asyncio
+import calendar
 import hmac
+import logging
 import os
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, List, Optional
 
 import jwt
@@ -292,6 +295,159 @@ async def get_recent_uploads(
         }
         for r in rows
     ]
+
+
+# The accounts report reads the whole results collection, which takes minutes on prod, so it is built in
+# the background and kept for a few hours. The next call after that, or one with refresh, builds it again.
+ACTIVE_MONTHS = 3
+REPORT_TTL = 6 * 3600
+REPORT_CONCURRENCY = 4
+_report: Dict = {
+    "at": None,
+    "since": None,
+    "accounts": None,
+    "task": None,
+    "error": None,
+}
+
+
+def _months_ago(now: datetime, months: int) -> datetime:
+    month = now.month - months
+    year = now.year + (month - 1) // 12
+    month = (month - 1) % 12 + 1
+    return now.replace(
+        year=year, month=month, day=min(now.day, calendar.monthrange(year, month)[1])
+    )
+
+
+async def _account_rows(db, since: datetime) -> List[Dict]:
+    """
+    One row per account with what the report counts. Activity is an upload, a settings edit or runner usage
+    since `since`: v2 does not record logins. A dashboard is a result that is not the demo data every new
+    account is given, and is not a pull request result; an org's counts for its members.
+    """
+    demo = await db.default_data.distinct("test_name")
+    own_data = {"$nin": demo}
+    sem = asyncio.Semaphore(REPORT_CONCURRENCY)
+
+    async def has_history(owner) -> bool:
+        async with sem:
+            found = await db.test_results.find_one(
+                {
+                    "user_id": owner,
+                    "pull_request": {"$exists": False},
+                    "test_name": own_data,
+                },
+                {"_id": 1},
+            )
+            return found is not None
+
+    owners = await db.test_results.distinct("user_id")
+    with_history = {
+        str(o)
+        for o, has in zip(owners, await asyncio.gather(*map(has_history, owners)))
+        if has
+    }
+    since_iso = since.replace(tzinfo=None).isoformat()
+    uploaded = {
+        str(r["_id"])
+        async for r in db.test_results.aggregate(
+            [
+                {
+                    "$match": {
+                        "meta.last_modified": {"$gte": since},
+                        "test_name": own_data,
+                    }
+                },
+                {"$group": {"_id": "$user_id"}},
+            ],
+            allowDiskUse=True,
+        )
+    }
+    edited = {
+        str(r["user_id"])
+        async for r in db.user_config.find(
+            {
+                "$or": [
+                    {"meta.last_modified": {"$gte": since_iso}},
+                    {"meta.last_modified": {"$gte": since}},
+                ]
+            },
+            {"user_id": 1},
+        )
+    }
+    used_runners = {
+        str(v)
+        for v in await db.runner_usage_raw.distinct(
+            "plan_info.nyrkio_user_id", {"report_aws_timestamp": {"$gte": since_iso}}
+        )
+    }
+
+    rows = []
+    keep = {
+        "is_verified": 1,
+        "oauth_accounts.organizations.organization.id": 1,
+        "oauth_accounts.organizations.role": 1,
+    }
+    async for u in db.User.find({}, keep):
+        orgs = [
+            (str(m["organization"]["id"]), m.get("role"))
+            for a in u.get("oauth_accounts") or []
+            for m in a.get("organizations") or []
+            if (m.get("organization") or {}).get("id") is not None
+        ]
+        uid = str(u["_id"])
+        rows.append(
+            {
+                "id": uid,
+                "verified": bool(u.get("is_verified")),
+                "active": uid in uploaded or uid in edited or uid in used_runners,
+                "org_active": any(o in uploaded for o, _ in orgs),
+                "own": uid in with_history,
+                "org_member": any(o in with_history for o, _ in orgs),
+                "org_admin": any(r == "admin" and o in with_history for o, r in orgs),
+            }
+        )
+    return rows
+
+
+async def _build_report():
+    since = _months_ago(datetime.now(timezone.utc), ACTIVE_MONTHS)
+    try:
+        rows = await _account_rows(DBStore().db, since)
+    except Exception as e:
+        _report["error"] = type(e).__name__
+        logging.error(f"The accounts report failed: {e!r}")
+        return
+    _report.update(
+        at=datetime.now(timezone.utc), since=since, accounts=rows, error=None
+    )
+
+
+@internal_router.get("/stats/accounts")
+async def get_account_report(
+    refresh: bool = False, user: User = Depends(auth.current_active_superuser)
+) -> Dict:
+    """
+    The accounts for the admin dashboard of v3, one row each (no emails): verified, active in the last
+    three months, with a dashboard of their own or of an org. `status` is ready, computing (`accounts`
+    then holds the previous report, if any) or failed.
+    """
+    now = datetime.now(timezone.utc)
+    running = _report["task"] is not None and not _report["task"].done()
+    stale = _report["at"] is None or (now - _report["at"]).total_seconds() > REPORT_TTL
+    if not running and (refresh or (stale and not _report["error"])):
+        _report["error"] = None
+        _report["task"] = asyncio.create_task(_build_report())
+        running = True
+    status = "computing" if running else "failed" if _report["error"] else "ready"
+    return {
+        "status": status,
+        "error": _report["error"],
+        "computed_at": _report["at"],
+        "since": _report["since"],
+        "accounts": _report["accounts"],
+    }
 
 
 # The write freeze closes the window at the end of a switch: v3 freezes the account's writes, copies
