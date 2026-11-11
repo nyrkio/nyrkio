@@ -23,6 +23,7 @@ from typing import Dict, List, Optional
 import jwt
 from bson import ObjectId
 from fastapi import APIRouter, Depends, Header, HTTPException, Query, Request
+from fastapi_users import exceptions
 from starlette.responses import JSONResponse
 
 from backend.auth import auth
@@ -66,7 +67,8 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
     """The caller's account, for the switch to v3. No password hash and no OAuth tokens. What the user
     set up comes along, or it would stop working: the Slack connection (the webhook of the OAuth
     install), the GitHub token (PAT) that registers the user's runners and the GitHub App
-    installations of the user's GitHub account."""
+    installations of the user's GitHub account. The captcha token comes too: a request for a new
+    verification mail has to show the same one, and v3 checks it as v2 does."""
     github_ids = [
         a.account_id for a in (user.oauth_accounts or []) if a.oauth_name == "github"
     ]
@@ -76,6 +78,7 @@ async def get_account(user: User = Depends(auth.current_active_user)) -> Dict:
         "is_active": user.is_active,
         "is_verified": user.is_verified,
         "is_superuser": user.is_superuser,
+        "captcha_token": user.captcha_token,
         "github_username": user.github_username,
         "is_cph_user": user.is_cph_user,
         "is_repo_owner": user.is_repo_owner,
@@ -104,6 +107,20 @@ def _admin_org_id(user: User, login: str):
             if org.get("login") == login and membership.get("role") == "admin":
                 return org["id"]
     raise HTTPException(status_code=403, detail="Not an admin of this organization")
+
+
+@internal_router.get("/email-taken")
+async def email_taken(email: str) -> Dict:
+    """
+    Whether v2 has an account with this email. v3 asks before it registers a new user (NEW_USERS_HOME=v3): an
+    email that v2 already has has to stay a v2 registration, or the account would exist twice and its switch
+    would be refused. Only the secret is needed, because no account is read.
+    """
+    try:
+        await auth.get_user_by_email(email)
+    except exceptions.UserNotExists:
+        return {"taken": False}
+    return {"taken": True}
 
 
 @internal_router.get("/export")

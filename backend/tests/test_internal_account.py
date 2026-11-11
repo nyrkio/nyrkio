@@ -46,6 +46,25 @@ def test_account_carries_the_superuser_flag(superuser_client, monkeypatch):
     assert account["is_superuser"] is True
 
 
+def test_account_carries_the_captcha_token(client, monkeypatch):
+    # v3 copies it: a switched account that asks for a new verification mail has to show the same token,
+    # as in v2. Without it v3 would accept a request with no token at all.
+    import asyncio
+
+    from backend.db.db import DBStore
+
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()
+    asyncio.run(
+        DBStore().db.User.update_one(
+            {"email": "john@foo.com"}, {"$set": {"captcha_token": "turnstile-xyz"}}
+        )
+    )
+    headers = {**client.get_headers(), "X-Internal-Token": SECRET}
+    account = client.request("GET", PATH, headers=headers).json()
+    assert account["captcha_token"] == "turnstile-xyz"
+
+
 def test_account_carries_the_slack_connection(client, monkeypatch):
     # v3 copies it, or alerts to Slack would stop working after the switch
     import asyncio
@@ -287,3 +306,16 @@ def test_org_export_and_freeze_need_an_org_admin(monkeypatch):
         "/api/v0/orgs/result/nyrkio/repo/main/b2", json=[{**DOC, "timestamp": 9}]
     )
     assert again.status_code == 200
+
+
+def test_email_taken_tells_v3_whether_v2_has_the_account(client, monkeypatch):
+    monkeypatch.setenv("INTERNAL_API_TOKEN", SECRET)
+    client.login()  # john@foo.com exists
+    secret = {"X-Internal-Token": SECRET}
+    path = "/internal/v2/email-taken"
+    taken = client.request("GET", path + "?email=john@foo.com", headers=secret)
+    assert taken.status_code == 200 and taken.json() == {"taken": True}
+    free = client.request("GET", path + "?email=nobody@foo.com", headers=secret)
+    assert free.status_code == 200 and free.json() == {"taken": False}
+    # hidden without the secret, like every internal path
+    assert client.request("GET", path + "?email=john@foo.com").status_code == 404
