@@ -1,4 +1,13 @@
 # Changelog
+## v2.3.0 - 2026-11-12
+
+### Features
+- **internal:** stats, recent uploads and an accounts report for the admin dashboard of v3 (#1042) (2e2a8c7)
+- **internal:** the account export carries the captcha token, and v3 can ask whether an email is taken (#1043) (da3b8b8)
+
+### Fixes
+- **release:** keep frontend/package-lock.json in step with package.json (#1040) (90c8698)
+- freeze allows bulk reads (#1041) (cc42721)
 ## v2.2.0 - 2026-11-04
 
 ### Features
